@@ -159,14 +159,60 @@ window.rmShell = function () {
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", reveal); else reveal();
 
   // Kichik bildirishnoma (toast)
-  window.rmToast = function (text) {
+  // rmToast(matn, [tugma matni, tugma bosilganda])
+  window.rmToast = function (text, actionLabel, onAction) {
     var t = document.createElement("div");
     t.className = "toast"; t.setAttribute("role", "status");
     t.innerHTML = '<svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>';
     t.appendChild(document.createTextNode(text));
+    if (actionLabel) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = actionLabel;
+      b.addEventListener("click", function () { t.remove(); onAction(); });
+      t.appendChild(b);
+    }
     document.body.appendChild(t);
-    setTimeout(function () { t.remove(); }, 2400);
+    setTimeout(function () { t.remove(); }, actionLabel ? 6000 : 2400);
   };
+
+  // Dars: mundarijada joriy bo'limni belgilash va so'nggi o'qilgan joydan davom ettirish
+  function lessonNav() {
+    var art = document.querySelector("[data-resume]");
+    if (!art) return;
+    var key = "resume:" + art.dataset.resume;
+    var sections = Array.prototype.slice.call(art.querySelectorAll("[data-toc-section]"));
+    var links = {};
+    document.querySelectorAll("[data-toc-link]").forEach(function (a) { links[a.dataset.tocLink] = a; });
+    var restoring = false;
+    function setActive(id) {
+      if (restoring) return;
+      Object.keys(links).forEach(function (k) { links[k].classList.toggle("is-active", k === id); });
+      if (links[id]) { links[id].setAttribute("aria-current", "true"); links[id].scrollIntoView({ block: "nearest", inline: "nearest" }); }
+      try { if (id !== sections[0].id) localStorage.setItem(key, id); else localStorage.removeItem(key); } catch (e) {}
+    }
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) setActive(en.target.id); });
+      }, { rootMargin: "-30% 0px -60% 0px" });
+      sections.forEach(function (s) { io.observe(s); });
+    }
+    var saved = null;
+    try { saved = localStorage.getItem(key); } catch (e) {}
+    var target = saved && document.getElementById(saved);
+    if (target && !location.hash && saved !== sections[0].id) {
+      restoring = true; // tiklash tugaguncha birinchi bo'lim «faol» deb yozilib qolmasin
+      setTimeout(function () {
+        target.scrollIntoView({ behavior: "instant", block: "start" });
+        setTimeout(function () { restoring = false; setActive(saved); }, 400);
+        var name = links[saved] ? links[saved].textContent.trim().replace(/^\d+/, "") : "";
+        window.rmToast("So‘nggi o‘qigan joyingiz: " + name, "Boshidan", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          try { localStorage.removeItem(key); } catch (e) {}
+        });
+      }, 150);
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lessonNav); else lessonNav();
 
   // Darsda matnni belgilaganda: «Konspektga saqlash» va «AI’dan so‘rash»
   // Konspekt hozircha brauzer xotirasiga (rm-notes-inbox) yoziladi, «Shaxsiy konspekt» sahifasi uni o'qib oladi.

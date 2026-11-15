@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% block title %}Muhokama{% endblock %}
-{% block heading %}<span class="row row-sm"><a class="icon-btn" href="{{ url_for('user.discussions') }}" aria-label="Orqaga" style="margin-left:-10px">{{ icon("arrow-left") }}</a>Muhokama</span>{% endblock %}
+{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.discussions') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>Muhokama</span>{% endblock %}
 {% block content %}
 <div class="stack stack-lg">
   <div class="card card-pad stack">
@@ -21,9 +21,9 @@
   <div class="row between"><h2 class="eyebrow">4 ta fikr</h2><span class="xs muted">Faqat shu savolga javob berganlar ko‘radi</span></div>
   <div class="stack">
     {% for name, when, text in msgs %}
-    <div class="row" style="align-items:flex-start">
+    <div class="items-start row">
       <span class="avatar">{{ name.split()[0][0] }}{{ name.split()[1][0] }}</span>
-      <div class="grow stack" style="--gap:4px"><div class="row row-sm"><span class="strong small">{{ name }}</span><span class="xs muted">{{ when }}</span></div><p class="small" style="color:var(--text-2)">{{ text }}</p></div>
+      <div class="gap-4 grow stack"><div class="row row-sm"><span class="strong small">{{ name }}</span><span class="xs muted">{{ when }}</span></div><p class="c-text2 small">{{ text }}</p></div>
       <button class="icon-btn" aria-label="Shikoyat qilish">{{ icon("flag", "ico-sm") }}</button>
     </div>
     {% endfor %}

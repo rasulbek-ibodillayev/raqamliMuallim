@@ -11,10 +11,10 @@
 <div class="stack">
   <div class="alert alert-green" x-show="saved" x-cloak role="status">{{ icon("check-circle") }}<span x-text="saved"></span></div>
   <div class="row wrap row-sm">
-    <div class="input-group grow" style="min-width:220px"><span class="addon" style="background:var(--surface);border:0;padding-right:0">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Ism, telefon yoki email" aria-label="Qidirish"></div>
-    <select class="select" style="width:auto" aria-label="Viloyat"><option>Barcha viloyatlar</option><option>Toshkent sh.</option><option>Samarqand</option></select>
-    <select class="select" style="width:auto" aria-label="Attestatsiya sanasi"><option>Sana: barchasi</option><option>Sana kiritilmagan</option><option>Shu oyda</option></select>
-    <select class="select" style="width:auto" aria-label="Holat"><option>Barcha holatlar</option><option>Faol</option><option>Bloklangan</option></select>
+    <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Ism, telefon yoki email" aria-label="Qidirish"></div>
+    <select class="w-auto select" aria-label="Viloyat"><option>Barcha viloyatlar</option><option>Toshkent sh.</option><option>Samarqand</option></select>
+    <select class="w-auto select" aria-label="Attestatsiya sanasi"><option>Sana: barchasi</option><option>Sana kiritilmagan</option><option>Shu oyda</option></select>
+    <select class="w-auto select" aria-label="Holat"><option>Barcha holatlar</option><option>Faol</option><option>Bloklangan</option></select>
   </div>
   <div class="table-wrap">
     <table class="table">
@@ -25,13 +25,13 @@
           <td><div class="row row-sm"><span class="avatar" style="width:32px;height:32px;font-size:12px">{{ ini }}</span><div><div class="nowrap">{{ name }}</div><div class="xs muted nowrap">{{ last }}</div></div></div></td>
           <td class="nowrap muted num">{{ contact }}</td>
           <td class="nowrap">{{ region }}</td>
-          <td style="min-width:130px"><div class="stack" style="--gap:4px"><span class="xs num">{{ done }} / 42</span>{{ progress((done / 42 * 100)|round, cls="thin") }}</div></td>
+          <td style="min-width:130px"><div class="gap-4 stack"><span class="xs num">{{ done }} / 42</span>{{ progress((done / 42 * 100)|round, cls="thin") }}</div></td>
           <td class="nowrap">
             <button class="btn btn-ghost btn-sm" type="button" style="padding:0 8px" @click="edit = { name: '{{ name }}', date: '{{ exam or '' }}' }">
               {% if exam %}<span class="num">{{ exam[8:10] }}.{{ exam[5:7] }}.{{ exam[:4] }}</span>{% else %}<span class="t-yellow">Kiritilmagan</span>{% endif %}{{ icon("edit", "ico-sm faint") }}
             </button>
           </td>
-          <td>{{ badge("Faol", "green") if active else badge("Bloklangan", "red") }}</td>
+          <td>{{ status_dot("Faol", "green") if active else badge("Bloklangan", "red") }}</td>
           <td><button class="icon-btn" aria-label="Amallar">{{ icon("more") }}</button></td>
         </tr>
         {% endfor %}

@@ -8,7 +8,7 @@
 {% block content %}
 {% set pct = 62 if failed else 78 %}
 <div class="stack stack-xl" x-data>
-  <section class="stack stack-lg center" style="align-items:center">
+  <section class="items-center stack stack-lg center">
     {{ ring(pct, 148, "var(--red)" if failed else "var(--blue)", "umumiy ball") }}
     <div class="stack stack-sm">
       {% if failed %}
@@ -83,8 +83,8 @@
       <template x-if="!sent"><div class="stack stack-lg">
         <div class="row between"><h2 id="obj-title">E’tiroz bildirish</h2><button class="icon-btn" type="button" @click="open = false" aria-label="Yopish">{{ icon("x") }}</button></div>
         <p class="small muted">«Quyidagi kod natijasini aniqlang» savoli bo‘yicha</p>
-        <fieldset class="options" style="border:0;padding:0;margin:0">
-          <legend class="label" style="margin-bottom:10px">Sabab</legend>
+        <fieldset class="fieldset-reset options">
+          <legend class="mb-10 label">Sabab</legend>
           {% for s in ["To‘g‘ri javob noto‘g‘ri ko‘rsatilgan", "Mening javobim ham to‘g‘ri", "Savol tushunarsiz", "Boshqa"] %}
           <label class="option" style="min-height:48px;font-size:15px"><input type="radio" name="why" {{ 'checked' if loop.first }}><span class="key" style="border-radius:50%;width:20px;height:20px"></span>{{ s }}</label>
           {% endfor %}

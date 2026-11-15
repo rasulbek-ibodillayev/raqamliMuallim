@@ -1,7 +1,7 @@
 {% extends "layouts/app.html" %}
 {% block title %}Yana{% endblock %}
 {% block content %}
-<div class="stack stack-lg" style="padding-top:8px">
+<div class="pt-8 stack stack-lg">
   <a class="card card-link row" style="padding:16px" href="{{ url_for('user.profile') }}">
     <span class="avatar lg" style="width:48px;height:48px;font-size:16px">{{ me.initials }}</span>
     <div class="grow"><div class="strong">{{ me.first }} {{ me.last }}</div><div class="small muted">Profil va sozlamalar</div></div>{{ icon("chevron-right", "ico-sm chev") }}

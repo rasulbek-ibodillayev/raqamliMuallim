@@ -1,12 +1,12 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ t.name }}{% endblock %}
-{% block heading %}<span class="row row-sm"><a class="icon-btn" href="{{ url_for('user.knowledge') }}" aria-label="Orqaga" style="margin-left:-10px">{{ icon("arrow-left") }}</a>Bilim darajasi</span>{% endblock %}
+{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.knowledge') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>Bilim darajasi</span>{% endblock %}
 {% block content %}
 <div class="stack stack-lg">
-  <div class="stack stack-sm" style="padding-top:8px">
+  <div class="pt-8 stack stack-sm">
     <span class="xs muted">{{ t.section }}</span>
     <h1>{{ t.name }}</h1>
-    <div class="row row-sm wrap">{{ status_badge(t.status, status) }}<span class="small muted">Oxirgi natija: {{ t.last }}</span></div>
+    <div class="row row-sm wrap">{{ status_dot(status[t.status][0], status[t.status][1]) }}<span class="small muted">Oxirgi natija: {{ t.last }}</span></div>
   </div>
 
   <div class="card">
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class="ai-card row" style="align-items:flex-start">
+  <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
     <p class="grow">«elif zanjiri» bo‘yicha 40%. Avval shu qismni sxema orqali qayta ko‘rib chiqing, keyin takrorlash testini topshiring.</p>
   </div>

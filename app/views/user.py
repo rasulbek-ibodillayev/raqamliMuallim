@@ -7,7 +7,10 @@ bp = Blueprint("user", __name__, url_prefix="/app")
 
 @bp.get("/")
 def home():
-    return render_template("user/home.html", sections=m.SECTIONS)
+    new_user = bool(request.args.get("yangi"))
+    done_steps = int(request.args.get("qadam", 0))  # namunada: nechta qadam bajarilgan
+    return render_template("user/home.html", sections=m.SECTIONS, r=m.READINESS, rstate=m.READINESS_STATE,
+                           today=m.TODAY, onboarding=m.ONBOARDING, new_user=new_user, done_steps=done_steps)
 
 
 @bp.get("/diagnostika")

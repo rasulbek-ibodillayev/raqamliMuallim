@@ -8,7 +8,7 @@
 {% endcall %}
 <div class="split">
   <aside class="card" style="padding:12px">
-    <div class="input-group" style="margin-bottom:10px"><span class="addon" style="background:var(--surface);border:0;padding-right:0">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Mavzu qidirish" aria-label="Mavzu qidirish" style="min-height:40px"></div>
+    <div class="mb-10 input-group"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Mavzu qidirish" aria-label="Mavzu qidirish" style="min-height:40px"></div>
     {% for sec, topics in tree %}
     <details {{ 'open' if loop.first }}>
       <summary class="tree-item strong" style="cursor:pointer;list-style:none">{{ icon("chevron-down", "ico-sm faint") }}{{ sec }}</summary>
@@ -27,7 +27,7 @@
     </div>
 
     {% for kind, ic, title, body in [("Matn", "note", "if operatori", "Shart operatori mantiqiy ifodaning rost yoki yolg‘on ekaniga qarab dasturni turli yo‘nalishga buradi…"), ("Kod", "code", "Misol", "yosh = 18\nif yosh >= 18:\n    print(\"Ruxsat\")"), ("Sxema", "graph", "Blok-sxema (Mermaid)", "flowchart TD; A[Boshlash] --> B{yosh ≥ 18?}"), ("Jadval", "table", "Mantiqiy ifodalar", "3 qator × 3 ustun")] %}
-    <div class="card" style="padding:14px 16px">
+    <div class="p-14 card">
       <div class="row">
         <span class="faint" style="cursor:grab">{{ icon("drag", "ico-sm") }}</span>
         <span class="list-ico" style="width:32px;height:32px">{{ icon(ic, "ico-sm") }}</span>
@@ -39,7 +39,7 @@
     </div>
     {% endfor %}
 
-    <div class="block-edit row wrap" style="justify-content:center">
+    <div class="justify-center block-edit row wrap">
       <span class="small muted">Blok qo‘shish:</span>
       {% for ic, l in [("note","Matn"),("code","Kod"),("table","Jadval"),("graph","Sxema"),("sigma","Formula"),("image","Rasm"),("play","Video")] %}<button class="chip" type="button">{{ icon(ic) }}{{ l }}</button>{% endfor %}
       <button class="btn btn-ai btn-sm" type="button">{{ icon("sparkle", "ico-sm") }}AI bilan qoralama</button>

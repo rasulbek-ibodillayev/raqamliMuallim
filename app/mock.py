@@ -95,11 +95,11 @@ TOPIC = {
 PLAN = [
     {"name": "Kompyuter arxitekturasi va mantiqiy asoslar", "state": "done", "note": "100%"},
     {"name": "Algoritmlash asoslari va blok-sxemalar", "state": "done", "note": "95%"},
-    {"name": "Python: shart operatorlari", "state": "current", "note": "3/4 kichik mavzu · 60% o‘qilgan"},
-    {"name": "Python: sikllar (for, while)", "state": "confirm", "note": "Tasdiqlash mumkin — darsni o‘tkazib, testni topshiring"},
-    {"name": "Nazorat: oxirgi 3 ta mavzu", "state": "control", "note": "Majburiy oraliq nazorat"},
-    {"name": "Funksiyalar va modullar", "state": "locked", "note": "Avvalgi mavzulardan keyin ochiladi"},
-    {"name": "Massivlar va ro‘yxatlar", "state": "locked", "note": "Avvalgi mavzulardan keyin ochiladi"},
+    {"name": "Python: shart operatorlari", "state": "current", "note": "3/4 kichik mavzu · 60% o‘qilgan", "min": 12},
+    {"name": "Python: sikllar (for, while)", "state": "confirm", "note": "Tasdiqlash mumkin — darsni o‘tkazib, testni topshiring", "min": 15},
+    {"name": "Nazorat: oxirgi 3 ta mavzu", "state": "control", "note": "Majburiy oraliq nazorat", "min": 35},
+    {"name": "Funksiyalar va modullar", "state": "locked", "note": "Avvalgi mavzulardan keyin ochiladi", "min": 45},
+    {"name": "Massivlar va ro‘yxatlar", "state": "locked", "note": "Avvalgi mavzulardan keyin ochiladi", "min": 40},
 ]
 
 RESULTS = [
@@ -159,6 +159,37 @@ CERT_TOPICS = [
     ("Axborot nazariyasi va sanoq sistemalari", 92), ("Mantiq asoslari va rostlik jadvallari", 88),
     ("Dasturlash asoslari va algoritmlar", 85), ("Ma’lumotlar tuzilmasi", 80), ("Funksiyalar va rekursiya", 78),
     ("Kompyuter tarmoqlari va xavfsizlik", 90), ("Ma’lumotlar bazasi asoslari", 86), ("Ofis dasturlari", 94),
+]
+
+# Yagona tayyorlik ko'rsatkichi va prognoz.
+# Backendda: tayyorlik = mavzular og'irligi bo'yicha o'zlashtirish; prognoz = so'nggi 14 kundagi sur'atdan.
+READINESS = {
+    "pct": 68,
+    "forecast": "19-dekabr",
+    "exam": "23-dekabr",
+    "days_left": 38,
+    "margin_days": 4,          # attestatsiyadan necha kun oldin tayyor bo'ladi (manfiy — kechikadi)
+    "pace": "Kuniga ≈ 1 mavzu",
+    "state": "ok",             # ok | risk | late
+}
+READINESS_STATE = {
+    "ok":   ("Reja bo‘yicha", "green", "Hozirgi sur’atda attestatsiyadan {m} kun oldin tayyor bo‘lasiz."),
+    "risk": ("Biroz ortda", "yellow", "Sur’at sekinlashdi: attestatsiyaga zo‘rg‘a ulgurasiz. Kuniga 15 daqiqa qo‘shing."),
+    "late": ("Ortda qolmoqda", "red", "Hozirgi sur’atda attestatsiyaga ulgurmaysiz. Rejani tezlashtiring."),
+}
+
+# «Bugun» rejasi: har vazifa uchun taxminiy vaqt (daqiqa)
+TODAY = [
+    {"title": "Darsni davom ettirish", "sub": "Shart operatorlari · elif zanjiri", "min": 12, "done": False, "endpoint": "user.lesson", "icon": "book"},
+    {"title": "Mavzu testi", "sub": "1-bosqich · 10 savol", "min": 8, "done": False, "endpoint": "test.question", "icon": "clipboard"},
+    {"title": "Kunlik 5 ta savol", "sub": "Takrorlash", "min": 3, "done": True, "endpoint": "test.question", "icon": "zap"},
+]
+
+# Yangi foydalanuvchi uchun 3 qadam (TZ 1.3: diagnostikani yakunlaganlar ≥ 60%)
+ONBOARDING = [
+    {"title": "Diagnostikadan o‘ting", "sub": "≈ 40 daqiqa · bilgan mavzularingizni aniqlaymiz", "endpoint": "user.diagnostic"},
+    {"title": "Birinchi darsni o‘qing", "sub": "≈ 12 daqiqa · rejangizdagi birinchi mavzu", "endpoint": "user.lesson"},
+    {"title": "Birinchi mavzu testini topshiring", "sub": "≈ 8 daqiqa · 3 bosqich", "endpoint": "test.question"},
 ]
 
 NOTIFICATIONS = [

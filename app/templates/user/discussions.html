@@ -9,12 +9,12 @@
   </div>
   <div class="card list">
     {% for d in items %}
-    <a class="list-item" href="{{ url_for('user.discussion') }}" {% if not d.mine %}x-show="f === 'all'"{% endif %} style="align-items:flex-start">
+    <a class="items-start list-item" href="{{ url_for('user.discussion') }}" {% if not d.mine %}x-show="f === 'all'"{% endif %}>
       <span class="list-ico">{{ icon("message") }}</span>
-      <div class="grow stack" style="--gap:4px">
+      <div class="gap-4 grow stack">
         <span class="xs muted">{{ d.n }}-savol · {{ d.topic }}</span>
-        <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.q }}</span>
-        <span class="row row-sm wrap xs muted">{{ d.count }} ta fikr · {{ d.last }}{% if d.expert %} {{ badge("Ekspert javob bergan", "blue", "shield") }}{% endif %}</span>
+        <span class="clamp-2">{{ d.q }}</span>
+        <span class="row row-sm wrap xs muted">{{ d.count }} ta fikr · {{ d.last }}{% if d.expert %} <span class="row g-6 t-blue">{{ icon("shield", "ico-sm") }}Ekspert javob bergan</span>{% endif %}</span>
       </div>
       {{ icon("chevron-right", "ico-sm chev") }}
     </a>

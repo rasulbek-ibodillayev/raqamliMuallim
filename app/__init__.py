@@ -19,7 +19,7 @@ def create_app() -> Flask:
 
     from flask import get_template_attribute
 
-    ui_macros = ("icon", "badge", "status_badge", "progress", "pct_color", "ring",
+    ui_macros = ("icon", "badge", "status_dot", "status_badge", "progress", "pct_color", "ring",
                  "code", "spark", "page_head", "back", "composer")
 
     @app.context_processor

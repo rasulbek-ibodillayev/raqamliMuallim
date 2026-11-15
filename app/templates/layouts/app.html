@@ -31,7 +31,7 @@
     <div class="sidebar-foot">
       <a class="me" href="{{ url_for('user.profile') }}">
         <span class="avatar">{{ me.initials }}</span>
-        <span class="grow"><span class="strong small" style="display:block">{{ me.first }} {{ me.last }}</span><span class="xs muted">Attestatsiyagacha {{ me.days_left }} kun</span></span>
+        <span class="grow"><span class="d-block strong small">{{ me.first }} {{ me.last }}</span><span class="xs muted">Attestatsiyagacha {{ me.days_left }} kun</span></span>
         {{ icon("settings", "ico-sm faint") }}
       </a>
     </div>
@@ -51,7 +51,7 @@
     </header>
     {% endblock %}
 
-    <main class="page {% block page_class %}{% endblock %}">
+    <main id="main" tabindex="-1" class="page {% block page_class %}{% endblock %}">
       {% block content %}{% endblock %}
     </main>
   </div>
@@ -74,8 +74,8 @@
     {% for n in notifications %}
     <a class="notif {{ 'unread' if n.unread }}" :class="seen && 'read'" href="{{ url_for(n.endpoint) }}">
       <span class="list-ico">{{ icon(n.icon, "ico-sm") }}</span>
-      <span class="grow"><span class="strong small" style="display:block">{{ n.title }}</span><span class="small muted" style="display:block">{{ n.text }}</span><span class="when">{{ n.when }}</span></span>
-      {% if n.unread %}<span class="dot dot-blue" x-show="!seen" style="margin-top:6px"></span>{% endif %}
+      <span class="grow"><span class="d-block strong small">{{ n.title }}</span><span class="d-block small muted">{{ n.text }}</span><span class="when">{{ n.when }}</span></span>
+      {% if n.unread %}<span class="mt-6 dot dot-blue" x-show="!seen"></span>{% endif %}
     </a>
     {% endfor %}
     <div class="xs muted center" style="padding:12px;border-top:1px solid var(--border)">Telegram orqali ham yuboriladi · <a class="link" href="{{ url_for('user.profile') }}">Sozlash</a></div>
@@ -96,7 +96,7 @@
             <div class="palette-group eyebrow" x-show="r.h" x-text="r.g"></div>
             <a class="palette-item" :class="i === pos && 'on'" :href="r.u" @mouseenter="pos = i" role="option" :aria-selected="i === pos">
               <svg class="ico ico-sm"><use :href="'#i-' + r.i"/></svg>
-              <span class="grow"><span x-text="r.t" style="display:block" class="truncate"></span><span class="sub" x-show="r.s" x-text="r.s"></span></span>
+              <span class="grow"><span x-text="r.t" class="d-block truncate"></span><span class="sub" x-show="r.s" x-text="r.s"></span></span>
             </a>
           </div>
         </template>

@@ -8,7 +8,7 @@
     <div class="card card-pad stack">
       <div class="row between wrap">
         <div><div class="strong">Nazorat testi · 3 ta mavzu</div><div class="small muted">2-bosqich · 6 / 12 savol · javoblar saqlangan</div></div>
-        <span class="badge badge-yellow">{{ icon("pause") }}To‘xtatilgan</span>
+        {{ status_dot("To‘xtatilgan", "yellow") }}
       </div>
       {{ progress(50) }}
       <a class="btn btn-primary btn-block" href="{{ url_for('test.question') }}">Davom ettirish</a>

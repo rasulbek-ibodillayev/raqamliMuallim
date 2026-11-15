@@ -1,15 +1,17 @@
 {% extends "layouts/app.html" %}
 {% block title %}Bosh sahifa{% endblock %}
 {#
-  Bosh sahifada faqat bitta asosiy harakat — «Keyingi qadam» (TZ 9.1: ustuvorlik tartibi).
-  AI tavsiyasi shu kartaning ichida, qolgan ma'lumotlar ixcham bitta qatorda.
+  Bosh sahifa tartibi:
+  1) salomlashuv + AI so'rov maydoni
+  2) yangi foydalanuvchi: 3 qadamli yo'riqnoma
+     faol foydalanuvchi: tayyorlik va prognoz → keyingi qadam → bugungi reja (vaqt bahosi bilan)
 #}
 {% block content %}
 <div class="stack stack-xl">
-  <section class="stack stack-lg" style="padding-top:24px">
+  <section class="stack stack-lg pt-24">
     <div class="stack stack-sm">
-      <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}Attestatsiyagacha {{ me.days_left }} kun</p>
-      <h1 style="font-size:30px">Salom, {{ me.first }}. <span class="muted" style="font-weight:500">Bugun nimani o‘rganamiz?</span></h1>
+      <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}Attestatsiya {{ r.exam }} · {{ r.days_left }} kun qoldi</p>
+      <h1 class="text-display">Salom, {{ me.first }}. <span class="muted fw-500">Bugun nimani o‘rganamiz?</span></h1>
     </div>
     {{ composer("AI tutorga savol bering…", note=False) }}
     <div class="chips scroll">
@@ -19,18 +21,55 @@
     </div>
   </section>
 
-  <section class="card next-step" aria-labelledby="next-title">
+  {% if new_user %}
+  {# ---------- Yangi foydalanuvchi: 3 qadam ---------- #}
+  <section class="card card-pad stack" aria-labelledby="ob-title">
+    <div class="row between wrap items-start">
+      <div><span class="eyebrow">Boshlash</span><h2 id="ob-title" class="mt-6">3 qadamda tayyorgarlikni boshlang</h2></div>
+      <span class="small muted num">{{ done_steps }} / 3</span>
+    </div>
+    {{ progress((done_steps / 3 * 100)|round, "green", "thin") }}
+    <ol class="list-reset stack stack-sm">
+      {% for s in onboarding %}
+      {% set st = "done" if loop.index0 < done_steps else ("current" if loop.index0 == done_steps else "next") %}
+      <li class="ob-step {{ st }}">
+        <span class="ob-mark">{% if st == "done" %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>
+        <div class="grow"><div class="ob-title">{{ s.title }}</div><div class="small muted">{{ s.sub }}</div></div>
+        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for(s.endpoint) }}">Boshlash</a>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="xs muted">Uchala qadam bajarilgach, bu yerda shaxsiy rejangiz va tayyorlik ko‘rsatkichi chiqadi.</p>
+  </section>
+
+  {% else %}
+  {# ---------- Tayyorlik va prognoz ---------- #}
+  {% set label, color, text = rstate[r.state] %}
+  <section class="card readiness" aria-labelledby="rd-title">
+    {{ ring(r.pct, 88, "var(--" ~ color ~ ")") }}
+    <div class="grow stack stack-sm">
+      <div class="row row-sm wrap"><h2 id="rd-title" class="text-h3">Attestatsiyaga tayyorlik</h2>{{ status_dot(label, color) }}</div>
+      <p class="small c-text2">{{ text.format(m=r.margin_days) }}</p>
+      <div class="forecast" role="img" aria-label="Prognoz: {{ r.forecast }}da tayyor bo‘lasiz, attestatsiya {{ r.exam }}">
+        <div class="forecast-bar"><span style="--v: {{ r.pct }}%"></span><i class="forecast-ready"></i></div>
+        <div class="row between xs muted"><span>Bugun</span><span>Tayyor: <b class="c-text">{{ r.forecast }}</b></span><span>Attestatsiya: <b class="c-text">{{ r.exam }}</b></span></div>
+      </div>
+    </div>
+  </section>
+
+  {# ---------- Keyingi qadam ---------- #}
+  <section class="card" aria-labelledby="next-title">
     <div class="card-pad stack">
       <div class="row between wrap">
         <span class="eyebrow">Keyingi qadam</span>
-        <span class="badge badge-yellow">O‘rganilmoqda · 60%</span>
+        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}≈ 12 daqiqa</span>
       </div>
       <div class="stack stack-sm">
-        <h2 id="next-title" style="font-size:22px">Python: shart operatorlari</h2>
-        <p class="muted small">Dasturlash · 3 / 4 kichik mavzu o‘rganildi</p>
+        <h2 id="next-title" class="text-h2l">Python: shart operatorlari</h2>
+        <p class="muted small">Dasturlash · 3 / 4 kichik mavzu · 60% o‘qilgan</p>
       </div>
       {{ progress(60) }}
-      <div class="next-ai row" style="align-items:flex-start">
+      <div class="next-ai row items-start">
         <span class="ai-mark">{{ icon("sparkle") }}</span>
         <p class="small grow">Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring.</p>
       </div>
@@ -38,19 +77,25 @@
     </div>
   </section>
 
-  <section class="quick-row" aria-label="Qisqa ma’lumot">
-    <a class="quick" href="{{ url_for('test.question') }}">
-      <span class="list-ico">{{ icon("zap") }}</span>
-      <span class="grow"><span class="quick-t">Kunlik 5 ta savol</span><span class="quick-s">3 daqiqa</span></span>
-    </a>
-    <a class="quick" href="{{ url_for('user.knowledge') }}">
-      <span class="list-ico">{{ icon("layers") }}</span>
-      <span class="grow"><span class="quick-t num">14 / 42 mavzu</span><span class="quick-s">33% o‘zlashtirildi</span></span>
-    </a>
-    <a class="quick" href="{{ url_for('user.plan') }}">
-      <span class="list-ico">{{ icon("flag") }}</span>
-      <span class="grow"><span class="quick-t">Nazoratgacha 2 mavzu</span><span class="quick-s">O‘quv reja</span></span>
-    </a>
+  {# ---------- Bugungi reja ---------- #}
+  {% set total = today | sum(attribute="min") %}
+  {% set done_min = today | selectattr("done") | sum(attribute="min") %}
+  <section class="card" aria-labelledby="today-title">
+    <div class="card-head">
+      <div><h2 id="today-title" class="text-h3">Bugun · {{ total }} daqiqa</h2><div class="xs muted">Darslar orasidagi qisqa vaqtga mo‘ljallangan</div></div>
+      <span class="small muted num">{{ done_min }} / {{ total }} daq</span>
+    </div>
+    <div class="today-progress">{{ progress((done_min / total * 100)|round, "green", "thin") }}</div>
+    <div class="list">
+      {% for t in today %}
+      <a class="list-item today-item {{ 'is-done' if t.done }}" href="{{ url_for(t.endpoint) }}">
+        <span class="list-ico">{% if t.done %}{{ icon("check", "ico-sm") }}{% else %}{{ icon(t.icon, "ico-sm") }}{% endif %}</span>
+        <div class="grow"><div class="today-title">{{ t.title }}</div><div class="sub">{{ t.sub }}</div></div>
+        <span class="time-chip num">{{ t.min }} daq</span>
+      </a>
+      {% endfor %}
+    </div>
   </section>
+  {% endif %}
 </div>
 {% endblock %}

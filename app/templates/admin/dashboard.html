@@ -23,7 +23,7 @@
     <div class="card">
       <div class="card-head"><span class="strong">Eng qiyin mavzular</span><span class="xs muted">xato javoblar %</span></div>
       <div class="list">
-        {% for n, p in hard %}<div class="list-item" style="min-height:52px"><div class="grow stack" style="--gap:6px"><div class="row between small"><span>{{ n }}</span><span class="num">{{ p }}%</span></div>{{ progress(p, "red", "thin") }}</div></div>{% endfor %}
+        {% for n, p in hard %}<div class="list-item" style="min-height:52px"><div class="gap-6 grow stack"><div class="row between small"><span>{{ n }}</span><span class="num">{{ p }}%</span></div>{{ progress(p, "red", "thin") }}</div></div>{% endfor %}
       </div>
     </div>
   </div>

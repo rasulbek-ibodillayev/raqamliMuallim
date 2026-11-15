@@ -29,7 +29,7 @@
   </header>
 
   <div class="ex-grid">
-    <section class="ex-main">
+    <section id="main" tabindex="-1" class="ex-main">
       <div class="ex-card">
         <div class="ex-card-head">
           <h1>Informatika</h1>
@@ -119,7 +119,7 @@
       <div class="ex-big-ico">{{ icon("pause", "ico-lg") }}</div>
       <h2 id="ps-t">Test to‘xtatildi</h2>
       <p class="ex-muted">Javoblaringiz saqlandi. Mashq rejimida vaqt to‘xtatib turiladi.</p>
-      <div class="ex-dialog-foot" style="justify-content:center"><a class="ex-nav-btn" href="{{ url_for('user.tests') }}" data-safe-leave>Chiqish</a><button class="ex-primary" type="button" @click="paused = false">Davom ettirish</button></div>
+      <div class="justify-center ex-dialog-foot"><a class="ex-nav-btn" href="{{ url_for('user.tests') }}" data-safe-leave>Chiqish</a><button class="ex-primary" type="button" @click="paused = false">Davom ettirish</button></div>
     </div>
   </div>
 

@@ -19,8 +19,9 @@
     {% for c in ["Hammasi", "Mavzu testi", "Nazorat", "Diagnostika", "Sinov"] %}<button class="chip {{ 'active' if loop.first }}" type="button">{{ c }}</button>{% endfor %}
   </div>
   <div class="card card-pad stack stack-sm">
-    <div class="row between"><span class="strong">Natijalar dinamikasi</span><span class="small muted">O‘rtacha: <b class="num" style="color:var(--text)">76%</b></span></div>
-    {{ spark(trend) }}
+    <div class="row between"><span class="strong">Natijalar dinamikasi</span><span class="small muted">O‘rtacha: <b class="c-text num">76%</b></span></div>
+    {{ spark(trend, targets=[(70, "O‘tish"), (90, "A’lo")], labels=["1-noy", "5-noy", "8-noy", "12-noy", "Kecha", "Bugun"]) }}
+    <p class="xs muted">Maqsad chiziqlari: 70% — mavzudan o‘tish, 90% — to‘liq o‘zlashtirish.</p>
   </div>
   <div class="card list">
     {% for r in results %}
@@ -28,7 +29,7 @@
     <a class="list-item" href="{{ url_for('test.result', holat='qaytarildi' if r.decision == 'fail') }}">
       <span class="num strong t-{{ color if color != 'yellow' else 'yellow' }}" style="width:44px">{{ r.pct }}%</span>
       <div class="grow"><div class="truncate">{{ r.name }}</div><div class="sub">{{ r.kind }} · {{ r.when }}</div></div>
-      {{ badge(label, color) }}
+      {% if color == 'red' %}{{ badge(label, color) }}{% else %}{{ status_dot(label, color) }}{% endif %}
       {{ icon("chevron-right", "ico-sm chev") }}
     </a>
     {% endfor %}

@@ -8,6 +8,11 @@
 <span class="badge badge-{{ color }}">{% if ico %}{{ icon(ico) }}{% endif %}{{ text }}</span>
 {%- endmacro %}
 
+{# Tinch holat ko'rsatkichi: rangli nuqta + matn. Rangli nishon faqat e'tibor talab qiladigan joyda. #}
+{% macro status_dot(text, color="gray") -%}
+<span class="status-dot"><span class="dot dot-{{ color }}"></span>{{ text }}</span>
+{%- endmacro %}
+
 {% macro status_badge(key, status) -%}
 {% set label, color = status[key] %}{{ badge(label, color) }}
 {%- endmacro %}
@@ -35,13 +40,20 @@
 </div>
 {%- endmacro %}
 
-{% macro spark(values, w=600, h=120) -%}
+{# Natijalar dinamikasi. targets — maqsad chiziqlari: [(qiymat, yorliq), ...] #}
+{% macro spark(values, w=600, h=120, targets=[], labels=[]) -%}
 {% set mx = 100 %}{% set n = values|length %}{% set step = w / (n - 1) %}
+{% macro yof(v) %}{{ (h - 12 - (v / mx) * (h - 24))|round(1) }}{% endmacro %}
 {% set pts = [] %}{% for v in values %}{% set _ = pts.append(((loop.index0 * step)|round(1), (h - 12 - (v / mx) * (h - 24))|round(1))) %}{% endfor %}
-<svg class="spark" viewBox="0 0 {{ w }} {{ h }}" preserveAspectRatio="none" aria-hidden="true">
-  <path class="area" d="M0 {{ h }} {% for x, y in pts %}L{{ x }} {{ y }} {% endfor %}L{{ w }} {{ h }}Z"/>
-  <path class="line" d="{% for x, y in pts %}{{ 'M' if loop.first else 'L' }}{{ x }} {{ y }} {% endfor %}" vector-effect="non-scaling-stroke"/>
-</svg>
+<div class="spark-wrap" role="img" aria-label="Natijalar: {{ values|join('%, ') }}%{% for t, l in targets %}. {{ l }}: {{ t }}%{% endfor %}">
+  <svg class="spark" viewBox="0 0 {{ w }} {{ h }}" preserveAspectRatio="none" aria-hidden="true">
+    {% for t, l in targets %}<line class="target target-{{ loop.index }}" x1="0" x2="{{ w }}" y1="{{ yof(t) }}" y2="{{ yof(t) }}" vector-effect="non-scaling-stroke"/>{% endfor %}
+    <path class="area" d="M0 {{ h }} {% for x, y in pts %}L{{ x }} {{ y }} {% endfor %}L{{ w }} {{ h }}Z"/>
+    <path class="line" d="{% for x, y in pts %}{{ 'M' if loop.first else 'L' }}{{ x }} {{ y }} {% endfor %}" vector-effect="non-scaling-stroke"/>
+  </svg>
+  {% for t, l in targets %}<span class="target-label target-{{ loop.index }}" style="top: {{ (yof(t)|float / h * 100)|round(1) }}%">{{ l }} · {{ t }}%</span>{% endfor %}
+  {% if labels %}<div class="spark-x">{% for l in labels %}<span>{{ l }}</span>{% endfor %}</div>{% endif %}
+</div>
 {%- endmacro %}
 
 {% macro page_head(title, lead=None) -%}

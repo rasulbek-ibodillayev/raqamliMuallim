@@ -6,12 +6,12 @@
   {% for o in items %}
   {% set label, color = state[o.state] %}
   <article class="card card-pad stack stack-sm">
-    <div class="row between"><span class="xs muted">{{ o.when }}</span>{{ badge(label, color) }}</div>
+    <div class="row between"><span class="xs muted">{{ o.when }}</span>{{ status_dot(label, color) }}</div>
     <p class="strong">{{ o.q }}</p>
     {% if o.verdict %}
-    <div class="card card-flat stack stack-sm" style="padding:14px 16px">
+    <div class="p-14 card card-flat stack stack-sm">
       <div class="row row-sm small strong">{{ icon("shield", "ico-sm") }}Ekspert xulosasi</div>
-      <p class="small" style="color:var(--text-2)">{{ o.verdict }}</p>
+      <p class="c-text2 small">{{ o.verdict }}</p>
       {% if o.recalc %}<div class="row row-sm small"><span class="muted">Natijangiz qayta hisoblandi:</span><span class="num">{{ o.recalc[0] }}</span>{{ icon("arrow-right", "ico-sm faint") }}<b class="num t-green">{{ o.recalc[1] }}</b></div>{% endif %}
     </div>
     {% endif %}

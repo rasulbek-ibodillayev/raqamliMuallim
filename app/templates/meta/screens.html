@@ -2,7 +2,7 @@
 {% from "_ui.html" import icon %}
 {% block title %}Barcha ekranlar{% endblock %}
 {% block body %}
-<main class="page page-wide" style="padding-bottom:64px">
+<main id="main" tabindex="-1" class="pb-64 page page-wide">
   <div class="page-head">
     <div class="row"><span class="ai-mark lg">{{ icon("sparkle") }}</span>
       <div><h1>raqamliMuallim — ekranlar</h1><p class="lead">Frontend prototipi. Har bir ekran mobil va desktop uchun moslashuvchan.</p></div></div>
@@ -14,7 +14,7 @@
       <h2 class="eyebrow">{{ title }}</h2>
       <div class="screens-grid">
         {% for ep, label, args in items %}
-        <a class="card card-link row" style="padding:14px 16px" href="{{ url_for(ep, **args) }}">
+        <a class="p-14 card card-link row" href="{{ url_for(ep, **args) }}">
           <span class="grow">{{ label }}</span>{{ icon("arrow-right", "ico-sm faint") }}
         </a>
         {% endfor %}

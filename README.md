@@ -33,6 +33,7 @@ app/
     css/app.css        dizayn tizimi (tokenlar, komponentlar, yorug‘/qorong‘i rejim)
     js/app.js          kichik yordamchilar (taymer, OTP, kod ranglash, nusxa olish)
 design/stitch-reference/   Google Stitch eksporti: 82 ekran bo‘limlarga ajratilgan + DESIGN.md
+docs/usability-test-plan.md  5 nafar o‘qituvchi bilan sinov rejasi (vazifalar, kuzatuv varag‘i, SUS)
 ```
 
 ## Dizayn tamoyillari

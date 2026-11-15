@@ -15,7 +15,7 @@
     <span class="hint">Bu raqam ro‘yxatdan o‘tgan bo‘lsa, kirish yoki parolni tiklashni taklif qilamiz.</span>
   </div>
   <button class="btn btn-primary btn-lg btn-block" type="submit">{{ icon("telegram") }}Telegram orqali davom etish</button>
-  <div class="row" style="gap:12px"><hr class="grow"><span class="xs faint">yoki</span><hr class="grow"></div>
+  <div class="g-12 row"><hr class="grow"><span class="xs faint">yoki</span><hr class="grow"></div>
   <a class="btn btn-outline btn-block" href="{{ url_for('auth.verify_email') }}">{{ icon("mail") }}Email orqali ro‘yxatdan o‘tish</a>
   <p class="center small muted">Akkauntingiz bormi? <a class="link" href="{{ url_for('auth.login') }}">Kirish</a></p>
 </form>

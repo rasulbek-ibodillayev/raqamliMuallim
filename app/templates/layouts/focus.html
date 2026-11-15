@@ -8,7 +8,7 @@
     {% block bar_progress %}{% endblock %}
   </header>
   {% block before_body %}{% endblock %}
-  <main class="focus-body">{% block content %}{% endblock %}</main>
+  <main id="main" tabindex="-1" class="focus-body">{% block content %}{% endblock %}</main>
   {% block foot %}{% endblock %}
 </div>
 {% block overlay %}{% endblock %}

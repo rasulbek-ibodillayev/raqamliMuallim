@@ -10,9 +10,9 @@
 <div class="stack">
   <div class="alert alert-red">{{ icon("alert") }}<span class="grow"><b>3 ta mavzuda savollar yetarli emas.</b> Har kichik mavzu va daraja bo‘yicha testdagidan kamida 4 baravar ko‘p savol bo‘lishi kerak.</span><a class="link nowrap" href="#">Ko‘rish</a></div>
   <div class="row wrap row-sm">
-    <div class="input-group grow" style="min-width:220px"><span class="addon" style="background:var(--surface);border:0;padding-right:0">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Savol qidirish" aria-label="Savol qidirish"></div>
+    <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Savol qidirish" aria-label="Savol qidirish"></div>
     {% for l, opts in [("Mavzu", ["Barcha mavzular", "Sanoq sistemalari", "Tarmoqlar"]), ("Daraja", ["Barcha darajalar", "Oson", "O‘rta", "Qiyin"]), ("Turi", ["Barcha turlar", "Yopiq", "Ko‘p javobli", "Moslashtirish", "Ochiq"]), ("Holat", ["Barcha holatlar", "Tasdiqlangan", "Tekshiruvda", "Qoralama", "Arxivlangan"])] %}
-    <select class="select" style="width:auto" aria-label="{{ l }}">{% for o in opts %}<option>{{ o }}</option>{% endfor %}</select>
+    <select class="w-auto select" aria-label="{{ l }}">{% for o in opts %}<option>{{ o }}</option>{% endfor %}</select>
     {% endfor %}
   </div>
   <div class="table-wrap">
@@ -22,11 +22,11 @@
         {% for q, topic, lvl, kind, st, pct, doubt in items %}
         {% set label, color = state[st] %}
         <tr>
-          <td class="q"><div class="truncate" style="max-width:360px">{{ q }}</div>{% if doubt %}<span class="xs t-yellow row row-sm" style="margin-top:2px">{{ icon("alert", "ico-sm") }}Daraja shubhali</span>{% endif %}</td>
+          <td class="q"><div class="maxw-360 truncate">{{ q }}</div>{% if doubt %}<span class="xs t-yellow row row-sm" style="margin-top:2px">{{ icon("alert", "ico-sm") }}Daraja shubhali</span>{% endif %}</td>
           <td class="nowrap">{{ topic }}</td>
           <td class="nowrap">{{ lvl }}</td>
           <td class="nowrap muted">{{ kind }}</td>
-          <td>{{ badge(label, color) }}</td>
+          <td>{{ status_dot(label, color) }}</td>
           <td class="num">{{ pct ~ "%" if pct is not none else "—" }}</td>
           <td><a class="icon-btn" href="{{ url_for('expert.editor') }}" aria-label="Tahrirlash">{{ icon("edit", "ico-sm") }}</a></td>
         </tr>

@@ -26,18 +26,18 @@
     <section class="card" x-show="tab === 'limits'">
       <div class="card-head"><div class="strong">Nazoratlar</div></div>
       <div class="list">
-        <div class="list-item"><div class="grow"><div>Oraliq nazorat chastotasi</div><div class="sub">Har N ta birinchi marta o‘tilgan mavzudan keyin</div></div><input class="input num" value="3" style="width:80px;text-align:right;min-height:40px" aria-label="Chastota"></div>
-        <div class="list-item"><div class="grow"><div>Xatolar bo‘yicha nazorat</div><div class="sub">Har N ta muvaffaqiyatli oraliq nazoratdan keyin</div></div><input class="input num" value="2" style="width:80px;text-align:right;min-height:40px" aria-label="Xatolar nazorati"></div>
-        <label class="list-item" style="cursor:pointer"><div class="grow"><div>Diagnostikadan keyin tasdiqlash testi</div><div class="sub">Qiyin bosqichdan o‘tgan mavzu uchun to‘liq test majburiy</div></div><span class="switch"><input type="checkbox" checked><span></span></span></label>
+        <div class="list-item"><div class="grow"><div>Oraliq nazorat chastotasi</div><div class="sub">Har N ta birinchi marta o‘tilgan mavzudan keyin</div></div><input class="input-num input num" value="3" aria-label="Chastota"></div>
+        <div class="list-item"><div class="grow"><div>Xatolar bo‘yicha nazorat</div><div class="sub">Har N ta muvaffaqiyatli oraliq nazoratdan keyin</div></div><input class="input-num input num" value="2" aria-label="Xatolar nazorati"></div>
+        <label class="pointer list-item"><div class="grow"><div>Diagnostikadan keyin tasdiqlash testi</div><div class="sub">Qiyin bosqichdan o‘tgan mavzu uchun to‘liq test majburiy</div></div><span class="switch"><input type="checkbox" checked><span></span></span></label>
       </div>
     </section>
 
     <section class="card" x-show="tab === 'count'" x-cloak>
       <div class="card-head"><div class="strong">Savollar soni</div></div>
       <div class="list">
-        <div class="list-item"><div class="grow"><div>Bosqichdagi minimal savollar</div><div class="sub">Kam bo‘lsa, kichik mavzular orasida navbat bilan to‘ldiriladi</div></div><input class="input num" value="10" style="width:80px;text-align:right;min-height:40px" aria-label="Minimal savollar"></div>
-        <div class="list-item"><div class="grow"><div>Diagnostikada har mavzudan</div><div class="sub">1-bosqich, oson savollar</div></div><input class="input num" value="2" style="width:80px;text-align:right;min-height:40px" aria-label="Diagnostika savollari"></div>
-        <div class="list-item"><div class="grow"><div>Attestatsiya sinovi</div><div class="sub">Savollar soni va vaqt (daqiqa)</div></div><div class="row row-sm"><input class="input num" value="35" style="width:70px;text-align:right;min-height:40px" aria-label="Savollar"><input class="input num" value="105" style="width:80px;text-align:right;min-height:40px" aria-label="Daqiqa"></div></div>
+        <div class="list-item"><div class="grow"><div>Bosqichdagi minimal savollar</div><div class="sub">Kam bo‘lsa, kichik mavzular orasida navbat bilan to‘ldiriladi</div></div><input class="input-num input num" value="10" aria-label="Minimal savollar"></div>
+        <div class="list-item"><div class="grow"><div>Diagnostikada har mavzudan</div><div class="sub">1-bosqich, oson savollar</div></div><input class="input-num input num" value="2" aria-label="Diagnostika savollari"></div>
+        <div class="list-item"><div class="grow"><div>Attestatsiya sinovi</div><div class="sub">Savollar soni va vaqt (daqiqa)</div></div><div class="row row-sm"><input class="input num" value="35" style="width:70px;text-align:right;min-height:40px" aria-label="Savollar"><input class="input-num input num" value="105" aria-label="Daqiqa"></div></div>
       </div>
     </section>
 
@@ -47,7 +47,7 @@
         {{ progress(42) }}
         <div class="field"><label class="label" for="budget">Oylik AI byudjeti ($)</label><input class="input num" id="budget" value="500"><span class="hint">Byudjet tugasa, AI tutor faqat keshdan javob beradi.</span></div>
         <div class="field"><span class="label">Zaxira zanjiri</span>
-          <div class="card list">{% for n, s in [("Gemini · bepul tarif", "Asosiy"), ("Pullik API kalit", "Limitga yetganda"), ("Keshdagi javob", "Oxirgi zaxira")] %}<div class="list-item" style="min-height:48px"><span class="list-ico strong" style="width:28px;height:28px">{{ loop.index }}</span><span class="grow">{{ n }}</span><span class="xs muted">{{ s }}</span></div>{% endfor %}</div></div>
+          <div class="card list">{% for n, s in [("Gemini · bepul tarif", "Asosiy"), ("Pullik API kalit", "Limitga yetganda"), ("Keshdagi javob", "Oxirgi zaxira")] %}<div class="minh-48 list-item"><span class="list-ico strong" style="width:28px;height:28px">{{ loop.index }}</span><span class="grow">{{ n }}</span><span class="xs muted">{{ s }}</span></div>{% endfor %}</div></div>
       </div>
     </section>
 

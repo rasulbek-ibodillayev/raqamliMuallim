@@ -17,6 +17,7 @@ SCREENS = [
     ]),
     ("Asosiy", [
         ("user.home", "Bosh sahifa", {}),
+        ("user.home", "Bosh sahifa — yangi foydalanuvchi", {"yangi": 1, "qadam": 1}),
         ("user.diagnostic", "Diagnostika taklifi", {}),
         ("user.offline", "Oflayn holat", {}),
     ]),
