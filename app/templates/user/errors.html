@@ -1,0 +1,42 @@
+{% extends "layouts/app.html" %}
+{% block title %}Xatolar analitikasi{% endblock %}
+{% block content %}
+{% call page_head("Xatolar analitikasi", "Qayerda ko‘p xato qilayotganingiz va ularni tuzatish yo‘li") %}{% endcall %}
+<div class="stack stack-xl">
+  <section class="ai-card row wrap">
+    <span class="ai-mark">{{ icon("sparkle") }}</span>
+    <div class="grow"><div class="strong">Bugungi mashq</div><div class="small muted">Xatolaringizga o‘xshash 5 ta yangi savol</div></div>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('test.question') }}">Boshlash</a>
+  </section>
+
+  <section class="stack">
+    <div class="row between"><h2 class="eyebrow">Eng zaif qismlar</h2><span class="xs muted">Oxirgi 30 kun</span></div>
+    <div class="card list">
+      {% set mx = weak[0][2] %}
+      {% for name, sec, n in weak %}
+      <div class="list-item">
+        <div class="grow stack stack-sm"><div class="row between"><span>{{ name }}</span><span class="small num t-red">{{ n }} ta xato</span></div>
+          <div class="progress thin progress-red"><span style="--v: {{ (n / mx * 100)|round }}%"></span></div>
+          <span class="xs muted">{{ sec }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="stack" x-data="{ f: 'all' }">
+    <div class="row between wrap">
+      <h2 class="eyebrow">Xato qilingan savollar · 21</h2>
+      <div class="seg"><button type="button" :class="f === 'all' && 'active'" @click="f = 'all'">Hammasi</button><button type="button" :class="f === 'rep' && 'active'" @click="f = 'rep'">Qayta xato</button></div>
+    </div>
+    <div class="card list">
+      {% for q, sec, meta, rep in items %}
+      <a class="list-item" href="{{ url_for('test.result') }}" {% if not rep %}x-show="f === 'all'"{% endif %}>
+        <span class="t-red">{{ icon("x-circle") }}</span>
+        <div class="grow"><div class="truncate">{{ q }}</div><div class="sub">{{ sec }} · <span class="{{ 't-red' if rep }}">{{ meta }}</span></div></div>
+        {{ icon("chevron-right", "ico-sm chev") }}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

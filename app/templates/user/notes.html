@@ -1,0 +1,127 @@
+{% extends "layouts/app.html" %}
+{% block title %}Shaxsiy konspekt{% endblock %}
+{% block content %}
+{#
+  Konspektlar hozircha brauzer xotirasida saqlanadi (localStorage).
+  Backend qo'shilganda save()/remove() funksiyalari API'ga so'rov yuboradigan bo'ladi.
+#}
+<script>window.RM_NOTES = {{ notes|tojson }}; window.RM_TOPICS = {{ topics|tojson }};</script>
+<div x-data="notesApp(window.RM_NOTES, window.RM_TOPICS)" x-init="init()">
+  {% call page_head("Shaxsiy konspekt", "Darslardagi muhim qaydlaringiz. Oflayn ham ochiladi.") %}
+  <a class="btn btn-outline btn-sm" href="#">{{ icon("download", "ico-sm") }}PDF</a>
+  <button class="btn btn-primary btn-sm" type="button" @click="openNew()">{{ icon("plus", "ico-sm") }}Konspekt yaratish</button>
+  {% endcall %}
+
+  <div class="stack stack-lg">
+    <div class="row wrap row-sm">
+      <div class="input-group grow" style="min-width:200px">
+        <span class="addon" style="background:var(--surface);border:0;padding-right:0">{{ icon("search", "ico-sm") }}</span>
+        <input class="input" x-model="q" placeholder="Konspektdan qidirish" aria-label="Konspektdan qidirish">
+      </div>
+      <select class="select" style="width:auto" x-model="topic" aria-label="Mavzu bo‘yicha saralash">
+        <option value="">Barcha mavzular</option>
+        <template x-for="t in topics" :key="t"><option :value="t" x-text="t"></option></template>
+      </select>
+    </div>
+
+    <template x-for="group in grouped()" :key="group.topic">
+      <section class="stack stack-sm">
+        <h2 class="eyebrow" x-text="group.topic"></h2>
+        <template x-for="n in group.items" :key="n.id">
+          <article class="card card-pad stack stack-sm">
+            <h3 x-show="n.title" x-text="n.title"></h3>
+            <p style="white-space:pre-line" x-text="n.text"></p>
+            <div class="code" x-show="n.code"><div class="code-head"><span>Python</span></div><pre data-lang="plain"><code x-text="n.code"></code></pre></div>
+            <div class="row between">
+              <span class="xs muted" x-text="n.when"></span>
+              <div class="msg-tools">
+                <button class="icon-btn" type="button" @click="edit(n)" aria-label="Tahrirlash">{{ icon("edit", "ico-sm") }}</button>
+                <button class="icon-btn" type="button" @click="remove(n)" aria-label="O‘chirish">{{ icon("trash", "ico-sm") }}</button>
+              </div>
+            </div>
+          </article>
+        </template>
+      </section>
+    </template>
+
+    <div class="card empty" x-show="grouped().length === 0" x-cloak>
+      <span class="empty-ico">{{ icon("note", "ico-lg") }}</span>
+      <h2 x-text="notes.length ? 'Hech narsa topilmadi' : 'Hali konspekt yo‘q'"></h2>
+      <p class="muted">Darsdagi muhim joylarni saqlang yoki o‘zingiz yangi qayd yarating.</p>
+      <button class="btn btn-primary mt-16" type="button" @click="openNew()" x-show="!notes.length">Konspekt yaratish</button>
+    </div>
+  </div>
+
+  <!-- Konspekt yaratish / tahrirlash oynasi -->
+  <div class="sheet-backdrop" x-show="open" x-cloak @click.self="open = false" @keydown.escape.window="open = false">
+    <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="note-title" @submit.prevent="save()">
+      <div class="sheet-grip"></div>
+      <div class="row between"><h2 id="note-title" x-text="form.id ? 'Konspektni tahrirlash' : 'Yangi konspekt'"></h2>
+        <button class="icon-btn" type="button" @click="open = false" aria-label="Yopish">{{ icon("x") }}</button></div>
+      <div class="field">
+        <label class="label" for="n-topic">Mavzu</label>
+        <select class="select" id="n-topic" x-model="form.topic" required>
+          <template x-for="t in topics" :key="t"><option :value="t" x-text="t"></option></template>
+        </select>
+      </div>
+      <div class="field"><label class="label" for="n-title">Sarlavha (ixtiyoriy)</label><input class="input" id="n-title" x-model="form.title" placeholder="Masalan: elif qoidasi"></div>
+      <div class="field"><label class="label" for="n-text">Qayd</label><textarea class="textarea" id="n-text" x-model="form.text" required placeholder="Eslab qolmoqchi bo‘lgan narsangizni yozing…"></textarea></div>
+      <div class="field">
+        <button class="btn btn-ghost btn-sm" type="button" style="align-self:flex-start;padding-left:0" @click="form.withCode = !form.withCode">{{ icon("code", "ico-sm") }}<span x-text="form.withCode ? 'Kod blokini olib tashlash' : 'Kod bloki qo‘shish'"></span></button>
+        <textarea class="textarea" x-show="form.withCode" x-model="form.code" aria-label="Kod" spellcheck="false" style="font-family:var(--mono);font-size:14px;background:var(--surface-2)" placeholder="print('Salom')"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn btn-ghost" type="button" @click="open = false">Bekor qilish</button>
+        <button class="btn btn-primary grow" type="submit">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function notesApp(seed, topics) {
+  var KEY = "rm-notes";
+  return {
+    notes: [], topics: topics, q: "", topic: "", open: false, form: {},
+    init: function () {
+      try { var s = JSON.parse(localStorage.getItem(KEY)); this.notes = Array.isArray(s) ? s : seed; }
+      catch (e) { this.notes = seed; }
+      // Darsda belgilab saqlangan qaydlar
+      try {
+        var inbox = JSON.parse(localStorage.getItem("rm-notes-inbox") || "[]");
+        if (inbox.length) {
+          var self = this;
+          inbox.forEach(function (n) { if (self.topics.indexOf(n.topic) === -1) self.topics.unshift(n.topic); });
+          this.notes = inbox.reverse().concat(this.notes);
+          localStorage.removeItem("rm-notes-inbox");
+          this.persist();
+        }
+      } catch (e) {}
+    },
+    persist: function () { try { localStorage.setItem(KEY, JSON.stringify(this.notes)); } catch (e) {} },
+    grouped: function () {
+      var q = this.q.toLowerCase(), t = this.topic, out = {};
+      this.notes.forEach(function (n) {
+        if (t && n.topic !== t) return;
+        if (q && (n.title + " " + n.text + " " + (n.code || "")).toLowerCase().indexOf(q) === -1) return;
+        (out[n.topic] = out[n.topic] || []).push(n);
+      });
+      return Object.keys(out).map(function (k) { return { topic: k, items: out[k] }; });
+    },
+    openNew: function () { this.form = { id: null, topic: this.topic || this.topics[0], title: "", text: "", code: "", withCode: false }; this.open = true; },
+    edit: function (n) { this.form = Object.assign({ withCode: !!n.code }, n); this.open = true; },
+    save: function () {
+      var f = this.form, rec = { id: f.id || Date.now(), topic: f.topic, title: f.title.trim(), text: f.text.trim(), code: f.withCode ? f.code : "", when: "Bugun" };
+      if (!rec.text) return;
+      var i = this.notes.findIndex(function (n) { return n.id === rec.id; });
+      if (i >= 0) this.notes.splice(i, 1, rec); else this.notes.unshift(rec);
+      this.persist(); this.open = false;
+    },
+    remove: function (n) {
+      if (!confirm("Konspekt o‘chirilsinmi?")) return;
+      this.notes = this.notes.filter(function (x) { return x.id !== n.id; }); this.persist();
+    }
+  };
+}
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "layouts/app.html" %}
+{% block title %}Oflayn{% endblock %}
+{% block content %}
+<div class="card empty" style="margin-top:32px">
+  <span class="empty-ico">{{ icon("wifi-off", "ico-lg") }}</span>
+  <h2>Internet yo‘q</h2>
+  <p class="muted" style="max-width:360px">Boshlangan test va oxirgi darslaringiz oflayn ochiladi. Javoblaringiz qurilmada saqlanadi va internet tiklanganda yuboriladi.</p>
+  <div class="row wrap mt-16" style="justify-content:center">
+    <a class="btn btn-primary" href="{{ url_for('test.question', oflayn=1) }}">Testni davom ettirish</a>
+    <a class="btn btn-outline" href="{{ url_for('user.notes') }}">Konspektni ochish</a>
+  </div>
+</div>
+{% endblock %}

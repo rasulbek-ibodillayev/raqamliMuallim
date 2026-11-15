@@ -1,0 +1,43 @@
+{% extends "layouts/app.html" %}
+{% block title %}O‘quv reja{% endblock %}
+{% block content %}
+{% call page_head("O‘quv reja", "Reja holatlaringizga qarab o‘zgaradi, joriy mavzu esa o‘z joyida qoladi.") %}{% endcall %}
+
+<div class="grid-3" style="margin-bottom:28px">
+  <div class="card stat"><div class="xs muted">Bajarildi</div><div class="stat-value num">14 / 42</div></div>
+  <div class="card stat"><div class="xs muted">Nazoratgacha</div><div class="stat-value num">2 mavzu</div></div>
+  <div class="card stat"><div class="xs muted">Kuniga kerak</div><div class="stat-value num">≈ 1 mavzu</div><div class="stat-sub">23-dekabrgacha tugatish uchun</div></div>
+</div>
+
+<ol class="timeline" style="list-style:none;padding:0;margin:0">
+  {% for p in plan %}
+  {% set state = p.state %}
+  <li class="tl-item {{ state }}">
+    <span class="tl-mark">
+      {% if state == "done" %}{{ icon("check", "ico-sm") }}
+      {% elif state == "locked" %}{{ icon("lock", "ico-sm") }}
+      {% elif state == "control" %}{{ icon("flag", "ico-sm") }}
+      {% else %}{{ loop.index }}{% endif %}
+    </span>
+    {% if state == "current" %}
+    <div class="card card-primary card-pad stack stack-sm">
+      <span class="eyebrow t-blue">Hozirgi mavzu</span>
+      <h3>{{ p.name }}</h3>
+      <p class="small muted">{{ p.note }}</p>
+      {{ progress(60, cls="thin") }}
+      <a class="btn btn-primary btn-sm mt-8" href="{{ url_for('user.lesson') }}" style="align-self:flex-start">Davom ettirish{{ icon("arrow-right", "ico-sm") }}</a>
+    </div>
+    {% else %}
+    <div class="card" style="padding:14px 18px">
+      <div class="row between wrap">
+        <div class="grow"><div class="{{ 'strong' if state in ['confirm', 'control'] }}">{{ p.name }}</div><div class="small muted">{{ p.note }}</div></div>
+        {% if state == "done" %}<span class="num small t-green">{{ p.note }}</span>
+        {% elif state == "confirm" %}<a class="btn btn-outline btn-sm" href="{{ url_for('test.question') }}">Testni topshirish</a>
+        {% elif state == "control" %}<a class="btn btn-outline btn-sm" href="{{ url_for('user.control') }}">Ko‘rish</a>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% endblock %}

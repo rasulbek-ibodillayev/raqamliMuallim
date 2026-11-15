@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="uz"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#faf8ff;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-surface-variant": "#434655", "on-secondary-fixed-variant": "#38485d", "error": "#ba1a1a", "tertiary-fixed": "#ffdbcd", "on-tertiary-fixed": "#360f00", "surface-container-lowest": "#ffffff", "surface-dim": "#d2d9f4", "on-secondary": "#ffffff", "outline": "#737686", "surface-variant": "#dae2fd", "inverse-surface": "#283044", "on-primary-container": "#eeefff", "surface-container-high": "#e2e7ff", "primary": "#004ac6", "on-secondary-container": "#54647a", "primary-container": "#2563eb", "inverse-on-surface": "#eef0ff", "surface-bright": "#faf8ff", "background": "#faf8ff", "on-tertiary-fixed-variant": "#7d2d00", "on-tertiary": "#ffffff", "on-error-container": "#93000a", "on-secondary-fixed": "#0b1c30", "on-error": "#ffffff", "surface-tint": "#0053db", "surface-container-highest": "#dae2fd", "surface": "#faf8ff", "secondary-container": "#d0e1fb", "on-background": "#131b2e", "tertiary-fixed-dim": "#ffb596", "outline-variant": "#c3c6d7", "secondary-fixed-dim": "#b7c8e1", "on-tertiary-container": "#ffede6", "secondary": "#505f76", "surface-container": "#eaedff", "primary-fixed": "#dbe1ff", "primary-fixed-dim": "#b4c5ff", "on-primary": "#ffffff", "secondary-fixed": "#d3e4fe", "error-container": "#ffdad6", "tertiary-container": "#bc4800", "on-primary-fixed": "#00174b", "on-primary-fixed-variant": "#003ea8", "on-surface": "#131b2e", "surface-container-low": "#f2f3ff", "tertiary": "#943700", "inverse-primary": "#b4c5ff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "space-xl": "1.5rem", "space-md": "0.75rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "margin": "1rem", "space-lg": "1rem" }, "fontFamily": { "label-md": ["Inter"], "headline-lg": ["Inter"], "label-lg": ["Inter"], "headline-sm": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "code-inline": ["Inter"], "label-sm": ["Inter"], "body-md": ["Inter"], "headline-md": ["Inter"] }, "fontSize": { "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["14px", { "lineHeight": "21px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "code-inline": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface min-h-screen flex flex-col text-on-surface antialiased"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl"><div class="h-14 px-margin flex items-center justify-between"><span class="font-headline-sm text-headline-sm text-on-surface truncate">Bilim</span><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-14 pb-20 bg-surface"><div class="flex flex-col w-full px-margin pb-6 text-on-surface">
+<!-- Top Header with Toggle -->
+<div class="flex items-center justify-between py-space-md mb-space-sm">
+<h1 class="font-headline-md text-headline-md text-on-surface">Bilim darajasi</h1>
+<!-- Segmented Toggle -->
+<div class="flex items-center p-0.5 rounded-lg bg-surface-container-high" role="tablist">
+<button aria-selected="true" class="px-space-sm py-1 rounded-[6px] bg-surface-container-lowest text-on-surface font-label-sm text-label-sm transition-all" id="toggle-list" onclick="switchView('list')" type="button">
+        Ro‘yxat
+      </button>
+<button aria-selected="false" class="px-space-sm py-1 rounded-[6px] text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-all" id="toggle-map" onclick="switchView('map')" type="button">
+        Xarita
+      </button>
+</div>
+</div>
+<!-- Overall Knowledge Distribution Card -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-lg mb-space-lg">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-md text-label-md text-on-surface">Umumiy taqsimot</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">42 mavzu</span>
+</div>
+<!-- Slim Stacked Horizontal Progress Bar -->
+<div class="h-2 w-full rounded-full overflow-hidden flex bg-surface-container">
+<div style="width: 15%; background-color: #94A3B8;" title="O'zlashtirilmagan: 15%"></div>
+<div style="width: 25%; background-color: #F59E0B;" title="O'rganilmoqda: 25%"></div>
+<div style="width: 10%; background-color: #EF4444;" title="Qayta o'zlashtirish kerak: 10%"></div>
+<div style="width: 30%; background-color: #2563EB;" title="O'zlashtirilgan: 30%"></div>
+<div style="width: 20%; background-color: #10B981;" title="Mustahkam: 20%"></div>
+</div>
+<!-- Legend -->
+<div class="flex flex-wrap gap-x-space-md gap-y-space-sm pt-space-md font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full inline-block" style="background-color: #94A3B8;"></span>
+<span>O‘zlashtirilmagan (15%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full inline-block" style="background-color: #F59E0B;"></span>
+<span>O‘rganilmoqda (25%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full inline-block" style="background-color: #EF4444;"></span>
+<span>Qayta o‘zlashtirish kerak (10%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full inline-block" style="background-color: #2563EB;"></span>
+<span>O‘zlashtirilgan (30%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full inline-block" style="background-color: #10B981;"></span>
+<span>Mustahkam (20%)</span>
+</div>
+</div>
+</div>
+<!-- Collapsible Section Container -->
+<div class="flex flex-col gap-space-md">
+<!-- Section 1: Dasturlash (Expanded) -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden" id="section-1">
+<button class="w-full p-space-lg flex items-center justify-between text-left active:bg-surface-container-low transition-colors" onclick="toggleSection('section-1-content', 'section-1-icon')" type="button">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Dasturlash</span>
+<span class="px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-surface-variant">5 ta mavzu</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform transform rotate-180" id="section-1-icon">expand_more</span>
+</button>
+<!-- Topic Rows -->
+<div class="flex flex-col" id="section-1-content">
+<!-- Row 1 -->
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low active:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0 pr-space-sm">
+<span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #10B981;"></span>
+<span class="font-body-md text-body-md text-on-surface truncate">Python: shart operatorlari</span>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="font-label-md text-label-md text-on-surface-variant">92%</span>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low active:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0 pr-space-sm">
+<span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #F59E0B;"></span>
+<span class="font-body-md text-body-md text-on-surface truncate">Sikllar</span>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="font-label-md text-label-md text-on-surface-variant">68%</span>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Row 3 (Needs Review) -->
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low active:bg-surface-container transition-colors">
+<div class="flex flex-col gap-1 min-w-0 pr-space-sm">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #EF4444;"></span>
+<span class="font-body-md text-body-md text-on-surface truncate">Funksiyalar</span>
+</div>
+<div class="pl-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium leading-4 bg-error-container text-on-error-container">
+                Takrorlash tavsiya etiladi
+              </span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="font-label-md text-label-md text-on-surface-variant">45%</span>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low active:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0 pr-space-sm">
+<span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #2563EB;"></span>
+<span class="font-body-md text-body-md text-on-surface truncate">Massivlar</span>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="font-label-md text-label-md text-on-surface-variant">85%</span>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Row 5 -->
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low active:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0 pr-space-sm">
+<span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #94A3B8;"></span>
+<span class="font-body-md text-body-md text-on-surface truncate">Obyektga yo‘naltirilgan dasturlash</span>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="font-label-md text-label-md text-on-surface-variant">—</span>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2: Axborot va kodlash (Collapsed) -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden" id="section-2">
+<button class="w-full p-space-lg flex items-center justify-between text-left active:bg-surface-container-low transition-colors" onclick="toggleSection('section-2-content', 'section-2-icon')" type="button">
+<span class="font-label-lg text-label-lg text-on-surface">Axborot va kodlash</span>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">6 ta mavzu · 74%</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform" id="section-2-icon">expand_more</span>
+</div>
+</button>
+<div class="hidden flex-col" id="section-2-content">
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full" style="background-color: #2563EB;"></span>
+<span class="font-body-md text-body-md text-on-surface">Sanoq sistemalari</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">88%</span>
+</div>
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full" style="background-color: #F59E0B;"></span>
+<span class="font-body-md text-body-md text-on-surface">Matnli axborotni kodlash</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">60%</span>
+</div>
+</div>
+</div>
+<!-- Section 3: Tarmoq texnologiyalari (Collapsed) -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden" id="section-3">
+<button class="w-full p-space-lg flex items-center justify-between text-left active:bg-surface-container-low transition-colors" onclick="toggleSection('section-3-content', 'section-3-icon')" type="button">
+<span class="font-label-lg text-label-lg text-on-surface">Tarmoq texnologiyalari</span>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">5 ta mavzu · 80%</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform" id="section-3-icon">expand_more</span>
+</div>
+</button>
+<div class="hidden flex-col" id="section-3-content">
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full" style="background-color: #10B981;"></span>
+<span class="font-body-md text-body-md text-on-surface">IP-manzillash va maskalar</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">95%</span>
+</div>
+</div>
+</div>
+<!-- Section 4: Ofis dasturlari (Collapsed) -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden" id="section-4">
+<button class="w-full p-space-lg flex items-center justify-between text-left active:bg-surface-container-low transition-colors" onclick="toggleSection('section-4-content', 'section-4-icon')" type="button">
+<span class="font-label-lg text-label-lg text-on-surface">Ofis dasturlari</span>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">4 ta mavzu · 95%</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform" id="section-4-icon">expand_more</span>
+</div>
+</button>
+<div class="hidden flex-col" id="section-4-content">
+<div class="flex items-center justify-between p-space-lg bg-surface-container-lowest hover:bg-surface-container-low">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full" style="background-color: #10B981;"></span>
+<span class="font-body-md text-body-md text-on-surface">Elektron jadvallar: formulalar</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">98%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchView(mode) {
+    const listBtn = document.getElementById('toggle-list');
+    const mapBtn = document.getElementById('toggle-map');
+    if (mode === 'list') {
+      listBtn.className = "px-space-sm py-1 rounded-[6px] bg-surface-container-lowest text-on-surface font-label-sm text-label-sm transition-all";
+      listBtn.setAttribute('aria-selected', 'true');
+      mapBtn.className = "px-space-sm py-1 rounded-[6px] text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-all";
+      mapBtn.setAttribute('aria-selected', 'false');
+    } else {
+      mapBtn.className = "px-space-sm py-1 rounded-[6px] bg-surface-container-lowest text-on-surface font-label-sm text-label-sm transition-all";
+      mapBtn.setAttribute('aria-selected', 'true');
+      listBtn.className = "px-space-sm py-1 rounded-[6px] text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-all";
+      listBtn.setAttribute('aria-selected', 'false');
+    }
+  }
+
+  function toggleSection(contentId, iconId) {
+    const content = document.getElementById(contentId);
+    const icon = document.getElementById(iconId);
+    if (!content || !icon) return;
+    
+    if (content.classList.contains('hidden')) {
+      content.classList.remove('hidden');
+      content.classList.add('flex');
+      icon.classList.add('rotate-180');
+    } else {
+      content.classList.remove('flex');
+      content.classList.add('hidden');
+      icon.classList.remove('rotate-180');
+    }
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary-container font-semibold"><div class="h-16 px-gutter flex items-center justify-around"><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="bosh-sahifa" href="#"><span class="material-symbols-outlined text-[24px]">home</span><span class="font-label-sm text-label-sm mt-space-xs">Bosh sahifa</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] transition-colors text-primary-container font-semibold" data-path="bilim" href="#"><span class="material-symbols-outlined text-[24px]">menu_book</span><span class="font-label-sm text-label-sm mt-space-xs">Bilim</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="natijalar" href="#"><span class="material-symbols-outlined text-[24px]">bar_chart</span><span class="font-label-sm text-label-sm mt-space-xs">Natijalar</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="yana" href="#"><span class="material-symbols-outlined text-[24px]">grid_view</span><span class="font-label-sm text-label-sm mt-space-xs">Yana</span></a></div></nav></body></html>

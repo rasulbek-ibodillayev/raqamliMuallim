@@ -1,0 +1,27 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Email orqali tasdiqlash{% endblock %}
+{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.register') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>{% endblock %}
+{% block content %}
+<form class="stack stack-lg" action="{{ url_for('auth.details') }}" method="get" x-data="{ sent: false }">
+  <div class="stack stack-sm">
+    <h1>Email orqali tasdiqlash</h1>
+    <p class="lead">Kodni emailingizga yuboramiz. Keyin shu email bilan tizimga kirasiz.</p>
+  </div>
+  <div class="field">
+    <label class="label" for="email">Email manzil</label>
+    <div class="row row-sm">
+      <input class="input grow" id="email" type="email" autocomplete="email" placeholder="namuna@maktab.uz">
+      <button class="btn btn-outline" type="button" @click="sent = true">Kod yuborish</button>
+    </div>
+  </div>
+  <div class="field" x-show="sent" x-cloak>
+    <label class="label" for="e1">Tasdiqlash kodi</label>
+    <div class="otp" role="group" aria-label="6 xonali kod">
+      {% for i in range(6) %}<input id="e{{ loop.index }}" inputmode="numeric" maxlength="1" aria-label="{{ loop.index }}-raqam">{% endfor %}
+    </div>
+    <span class="hint">Kod 15 daqiqa amal qiladi. Xat kelmasa, «Spam» papkasini tekshiring.</span>
+  </div>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="!sent">Tasdiqlash</button>
+  <button class="btn btn-ghost btn-block" type="button" x-show="sent" x-cloak disabled>Kodni qayta yuborish · 0:48</button>
+</form>
+{% endblock %}

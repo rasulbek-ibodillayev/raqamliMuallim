@@ -1,0 +1,60 @@
+{% extends "layouts/panel.html" %}
+{% block title %}Foydalanuvchilar{% endblock %}
+{% block heading %}Foydalanuvchilar{% endblock %}
+{% block content %}
+<div x-data="{ edit: null, saved: '' }">
+{% call page_head("Foydalanuvchilar", "1 248 nafar · faol 1 184 · bloklangan 64") %}
+<button class="btn btn-outline btn-sm" type="button">{{ icon("upload", "ico-sm") }}Sanalarni Excel’dan yuklash</button>
+<button class="btn btn-outline btn-sm" type="button">{{ icon("download", "ico-sm") }}CSV</button>
+<button class="btn btn-primary btn-sm" type="button">{{ icon("plus", "ico-sm") }}Ekspert qo‘shish</button>
+{% endcall %}
+<div class="stack">
+  <div class="alert alert-green" x-show="saved" x-cloak role="status">{{ icon("check-circle") }}<span x-text="saved"></span></div>
+  <div class="row wrap row-sm">
+    <div class="input-group grow" style="min-width:220px"><span class="addon" style="background:var(--surface);border:0;padding-right:0">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Ism, telefon yoki email" aria-label="Qidirish"></div>
+    <select class="select" style="width:auto" aria-label="Viloyat"><option>Barcha viloyatlar</option><option>Toshkent sh.</option><option>Samarqand</option></select>
+    <select class="select" style="width:auto" aria-label="Attestatsiya sanasi"><option>Sana: barchasi</option><option>Sana kiritilmagan</option><option>Shu oyda</option></select>
+    <select class="select" style="width:auto" aria-label="Holat"><option>Barcha holatlar</option><option>Faol</option><option>Bloklangan</option></select>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Foydalanuvchi</th><th>Telefon / email</th><th>Viloyat</th><th>Tayyorgarlik</th><th>Attestatsiya sanasi</th><th>Holat</th><th></th></tr></thead>
+      <tbody>
+        {% for name, ini, contact, region, done, last, active, exam in users %}
+        <tr>
+          <td><div class="row row-sm"><span class="avatar" style="width:32px;height:32px;font-size:12px">{{ ini }}</span><div><div class="nowrap">{{ name }}</div><div class="xs muted nowrap">{{ last }}</div></div></div></td>
+          <td class="nowrap muted num">{{ contact }}</td>
+          <td class="nowrap">{{ region }}</td>
+          <td style="min-width:130px"><div class="stack" style="--gap:4px"><span class="xs num">{{ done }} / 42</span>{{ progress((done / 42 * 100)|round, cls="thin") }}</div></td>
+          <td class="nowrap">
+            <button class="btn btn-ghost btn-sm" type="button" style="padding:0 8px" @click="edit = { name: '{{ name }}', date: '{{ exam or '' }}' }">
+              {% if exam %}<span class="num">{{ exam[8:10] }}.{{ exam[5:7] }}.{{ exam[:4] }}</span>{% else %}<span class="t-yellow">Kiritilmagan</span>{% endif %}{{ icon("edit", "ico-sm faint") }}
+            </button>
+          </td>
+          <td>{{ badge("Faol", "green") if active else badge("Bloklangan", "red") }}</td>
+          <td><button class="icon-btn" aria-label="Amallar">{{ icon("more") }}</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="row between small muted"><span>1–5 / 1 248</span><div class="row row-sm"><button class="btn btn-outline btn-sm" disabled>Oldingi</button><button class="btn btn-outline btn-sm">Keyingi</button></div></div>
+</div>
+
+<!-- Attestatsiya sanasini kiritish -->
+<div class="sheet-backdrop" x-show="edit" x-cloak @click.self="edit = null" @keydown.escape.window="edit = null">
+  <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="ex-title" @submit.prevent="saved = edit.name + ' uchun attestatsiya sanasi saqlandi'; edit = null">
+    <div class="sheet-grip"></div>
+    <div class="row between"><h2 id="ex-title">Attestatsiya sanasi</h2><button class="icon-btn" type="button" @click="edit = null" aria-label="Yopish">{{ icon("x") }}</button></div>
+    <p class="muted" x-text="edit && edit.name"></p>
+    <div class="field">
+      <label class="label" for="ex-date">Sana</label>
+      <input class="input" id="ex-date" type="date" :value="edit && edit.date" required>
+      <span class="hint">O‘qituvchi bu sanani o‘zgartira olmaydi. Reja tezligi va «Attestatsiyagacha N kun» hisobi shu sanadan olinadi.</span>
+    </div>
+    <label class="check"><input type="checkbox" checked><span>O‘qituvchiga Telegram orqali xabar yuborish</span></label>
+    <div class="row"><button class="btn btn-ghost" type="button" @click="edit = null">Bekor qilish</button><button class="btn btn-primary grow" type="submit">Saqlash</button></div>
+  </form>
+</div>
+</div>
+{% endblock %}

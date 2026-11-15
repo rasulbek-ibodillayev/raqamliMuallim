@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_ui.html" import icon %}
+{% block title %}Barcha ekranlar{% endblock %}
+{% block body %}
+<main class="page page-wide" style="padding-bottom:64px">
+  <div class="page-head">
+    <div class="row"><span class="ai-mark lg">{{ icon("sparkle") }}</span>
+      <div><h1>raqamliMuallim — ekranlar</h1><p class="lead">Frontend prototipi. Har bir ekran mobil va desktop uchun moslashuvchan.</p></div></div>
+    <button class="btn btn-outline btn-sm" type="button" data-theme-toggle>{{ icon("moon", "ico-sm") }}Mavzu</button>
+  </div>
+  <div class="stack stack-xl">
+  {% for title, items in groups %}
+    <section class="stack stack-sm">
+      <h2 class="eyebrow">{{ title }}</h2>
+      <div class="screens-grid">
+        {% for ep, label, args in items %}
+        <a class="card card-link row" style="padding:14px 16px" href="{{ url_for(ep, **args) }}">
+          <span class="grow">{{ label }}</span>{{ icon("arrow-right", "ico-sm faint") }}
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,69 @@
+{# Qayta ishlatiladigan UI makroslari #}
+
+{% macro icon(name, cls="") -%}
+<svg class="ico {{ cls }}" aria-hidden="true"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
+
+{% macro badge(text, color="gray", ico=None) -%}
+<span class="badge badge-{{ color }}">{% if ico %}{{ icon(ico) }}{% endif %}{{ text }}</span>
+{%- endmacro %}
+
+{% macro status_badge(key, status) -%}
+{% set label, color = status[key] %}{{ badge(label, color) }}
+{%- endmacro %}
+
+{% macro progress(v, color="", cls="") -%}
+<div class="progress {{ 'progress-' ~ color if color }} {{ cls }}" role="progressbar" aria-valuenow="{{ v }}" aria-valuemin="0" aria-valuemax="100"><span style="--v: {{ v }}%"></span></div>
+{%- endmacro %}
+
+{% macro pct_color(v) -%}
+{%- if v is none -%}gray{%- elif v >= 90 -%}green{%- elif v >= 70 -%}blue{%- elif v >= 50 -%}yellow{%- else -%}red{%- endif -%}
+{%- endmacro %}
+
+{% macro ring(v, size=132, color="var(--primary)", label=None) -%}
+{% set r = (size - 10) / 2 %}{% set c = 2 * 3.14159 * r %}
+<div class="ring" style="--size: {{ size }}px; --rc: {{ color }}">
+  <svg viewBox="0 0 {{ size }} {{ size }}"><circle class="track" cx="{{ size/2 }}" cy="{{ size/2 }}" r="{{ r }}"/><circle class="bar" cx="{{ size/2 }}" cy="{{ size/2 }}" r="{{ r }}" stroke-dasharray="{{ c }}" stroke-dashoffset="{{ c * (1 - v/100) }}"/></svg>
+  <div class="center"><div class="ring-value num">{{ v }}%</div>{% if label %}<div class="xs muted">{{ label }}</div>{% endif %}</div>
+</div>
+{%- endmacro %}
+
+{% macro code(src, lang="Python", copy=True) -%}
+<div class="code">
+  <div class="code-head"><span>{{ lang }}</span>{% if copy %}<button type="button" data-copy>{{ icon("copy", "ico-sm") }}Nusxa</button>{% endif %}</div>
+  <pre data-lang="{{ lang|lower }}"><code>{{ src }}</code></pre>
+</div>
+{%- endmacro %}
+
+{% macro spark(values, w=600, h=120) -%}
+{% set mx = 100 %}{% set n = values|length %}{% set step = w / (n - 1) %}
+{% set pts = [] %}{% for v in values %}{% set _ = pts.append(((loop.index0 * step)|round(1), (h - 12 - (v / mx) * (h - 24))|round(1))) %}{% endfor %}
+<svg class="spark" viewBox="0 0 {{ w }} {{ h }}" preserveAspectRatio="none" aria-hidden="true">
+  <path class="area" d="M0 {{ h }} {% for x, y in pts %}L{{ x }} {{ y }} {% endfor %}L{{ w }} {{ h }}Z"/>
+  <path class="line" d="{% for x, y in pts %}{{ 'M' if loop.first else 'L' }}{{ x }} {{ y }} {% endfor %}" vector-effect="non-scaling-stroke"/>
+</svg>
+{%- endmacro %}
+
+{% macro page_head(title, lead=None) -%}
+<div class="page-head">
+  <div><h1>{{ title }}</h1>{% if lead %}<p class="lead">{{ lead }}</p>{% endif %}</div>
+  {% if caller %}<div class="row wrap">{{ caller() }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro back(href, label="Orqaga") -%}
+<a class="icon-btn" href="{{ href }}" aria-label="{{ label }}">{{ icon("arrow-left") }}</a>
+{%- endmacro %}
+
+{% macro composer(placeholder="AI tutorga savol bering…", action=None, note=True) -%}
+<form class="composer" action="{{ action or url_for('user.tutor') }}" method="get">
+  <label class="sr-only" for="q">{{ placeholder }}</label>
+  <textarea id="q" name="q" rows="1" placeholder="{{ placeholder }}" data-autosize></textarea>
+  <div class="composer-actions">
+    <button class="icon-btn" type="button" aria-label="Fayl yoki rasm qo‘shish">{{ icon("plus") }}</button>
+    <button class="icon-btn" type="button" aria-label="Ovozli savol">{{ icon("mic") }}</button>
+    <button class="send" type="submit" aria-label="Yuborish">{{ icon("arrow-up") }}</button>
+  </div>
+</form>
+{% if note %}<p class="composer-note">AI javobini darslik bilan tekshiring. Shaxsiy ma’lumotlaringizni yozmang.</p>{% endif %}
+{%- endmacro %}

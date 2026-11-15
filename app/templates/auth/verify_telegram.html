@@ -1,0 +1,32 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Raqamni tasdiqlash{% endblock %}
+{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.register') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>{% endblock %}
+{% block content %}
+<form class="stack stack-lg" action="{{ url_for('auth.details') }}" method="get">
+  <div class="stack stack-sm">
+    <h1>Raqamni tasdiqlang</h1>
+    <p class="lead">+998 90 123 45 67 raqami uchun uch qadam:</p>
+  </div>
+
+  <ol class="card list" style="list-style:none;padding:0;margin:0">
+    <li class="list-item"><span class="list-ico strong">1</span><span class="grow">Telegram botni oching</span></li>
+    <li class="list-item"><span class="list-ico strong">2</span><span class="grow">«Telefon raqamni ulashish» tugmasini bosing</span></li>
+    <li class="list-item"><span class="list-ico strong">3</span><span class="grow">Bot yuborgan 6 xonali kodni kiriting</span></li>
+  </ol>
+
+  <a class="btn btn-outline btn-block" href="#" target="_blank" rel="noopener">{{ icon("telegram") }}Telegram botni ochish</a>
+
+  <div class="field">
+    <label class="label" for="otp1">Tasdiqlash kodi</label>
+    <div class="otp" role="group" aria-label="6 xonali kod">
+      {% for i in range(6) %}<input id="otp{{ loop.index }}" inputmode="numeric" maxlength="1" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}
+    </div>
+    <span class="hint">Kod 5 daqiqa amal qiladi. 5 ta urinish bor.</span>
+  </div>
+
+  <div class="alert alert-yellow">{{ icon("info") }}<span>Telegram boshqa raqamga ulanganmi? Bot sizga <b>Telegram’dagi raqam bilan davom etish</b>ni taklif qiladi.</span></div>
+
+  <button class="btn btn-primary btn-lg btn-block" type="submit">Tasdiqlash</button>
+  <button class="btn btn-ghost btn-block" type="button" disabled>Kodni qayta yuborish · 0:48</button>
+</form>
+{% endblock %}

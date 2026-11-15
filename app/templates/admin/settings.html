@@ -1,0 +1,59 @@
+{% extends "layouts/panel.html" %}
+{% block title %}Sozlamalar{% endblock %}
+{% block heading %}Sozlamalar{% endblock %}
+{% block content %}
+{% call page_head("Sozlamalar", "O‘zgarishlar faqat yangi boshlangan testlarga ta’sir qiladi.") %}
+<button class="btn btn-primary btn-sm" type="button">Saqlash</button>
+{% endcall %}
+<div class="split" x-data="{ tab: 'limits' }">
+  <nav class="card" style="padding:8px">
+    {% for k, ic, l in [("limits", "target", "Test chegaralari"), ("count", "list", "Savollar soni"), ("ai", "sparkle", "AI va byudjet"), ("notify", "bell", "Bildirishnomalar"), ("roles", "shield", "Rollar va huquqlar")] %}
+    <button class="nav-item" type="button" style="width:100%;border:0;background:none;cursor:pointer" :class="tab === '{{ k }}' && 'active'" @click="tab = '{{ k }}'">{{ icon(ic) }}{{ l }}</button>
+    {% endfor %}
+  </nav>
+
+  <div class="stack stack-lg">
+    <section class="card" x-show="tab === 'limits'">
+      <div class="card-head"><div><div class="strong">Mavzu testi</div><div class="xs muted">Bosqichdan o‘tish chegaralari</div></div></div>
+      <div class="list">
+        {% for l, sub, v in [("1-bosqich (oson)", "2-bosqichga o‘tish", 90), ("2-bosqich (o‘rta)", "3-bosqichga o‘tish", 80), ("3-bosqich: to‘liq o‘tish", "«O‘zlashtirilgan» holati", 90), ("3-bosqich: tavsiya bilan o‘tish", "Keyingi mavzuga ruxsat + takrorlash belgisi", 70)] %}
+        <div class="list-item"><div class="grow"><div>{{ l }}</div><div class="sub">{{ sub }}</div></div>
+          <div class="input-group" style="width:110px"><input class="input num" value="{{ v }}" aria-label="{{ l }}" style="text-align:right;min-height:40px"><span class="addon" style="border-right:0;border-left:1px solid var(--border)">%</span></div></div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card" x-show="tab === 'limits'">
+      <div class="card-head"><div class="strong">Nazoratlar</div></div>
+      <div class="list">
+        <div class="list-item"><div class="grow"><div>Oraliq nazorat chastotasi</div><div class="sub">Har N ta birinchi marta o‘tilgan mavzudan keyin</div></div><input class="input num" value="3" style="width:80px;text-align:right;min-height:40px" aria-label="Chastota"></div>
+        <div class="list-item"><div class="grow"><div>Xatolar bo‘yicha nazorat</div><div class="sub">Har N ta muvaffaqiyatli oraliq nazoratdan keyin</div></div><input class="input num" value="2" style="width:80px;text-align:right;min-height:40px" aria-label="Xatolar nazorati"></div>
+        <label class="list-item" style="cursor:pointer"><div class="grow"><div>Diagnostikadan keyin tasdiqlash testi</div><div class="sub">Qiyin bosqichdan o‘tgan mavzu uchun to‘liq test majburiy</div></div><span class="switch"><input type="checkbox" checked><span></span></span></label>
+      </div>
+    </section>
+
+    <section class="card" x-show="tab === 'count'" x-cloak>
+      <div class="card-head"><div class="strong">Savollar soni</div></div>
+      <div class="list">
+        <div class="list-item"><div class="grow"><div>Bosqichdagi minimal savollar</div><div class="sub">Kam bo‘lsa, kichik mavzular orasida navbat bilan to‘ldiriladi</div></div><input class="input num" value="10" style="width:80px;text-align:right;min-height:40px" aria-label="Minimal savollar"></div>
+        <div class="list-item"><div class="grow"><div>Diagnostikada har mavzudan</div><div class="sub">1-bosqich, oson savollar</div></div><input class="input num" value="2" style="width:80px;text-align:right;min-height:40px" aria-label="Diagnostika savollari"></div>
+        <div class="list-item"><div class="grow"><div>Attestatsiya sinovi</div><div class="sub">Savollar soni va vaqt (daqiqa)</div></div><div class="row row-sm"><input class="input num" value="35" style="width:70px;text-align:right;min-height:40px" aria-label="Savollar"><input class="input num" value="105" style="width:80px;text-align:right;min-height:40px" aria-label="Daqiqa"></div></div>
+      </div>
+    </section>
+
+    <section class="card" x-show="tab === 'ai'" x-cloak>
+      <div class="card-head"><div class="strong">AI va byudjet</div><span class="small muted">Shu oy: $210 / $500</span></div>
+      <div class="card-pad stack">
+        {{ progress(42) }}
+        <div class="field"><label class="label" for="budget">Oylik AI byudjeti ($)</label><input class="input num" id="budget" value="500"><span class="hint">Byudjet tugasa, AI tutor faqat keshdan javob beradi.</span></div>
+        <div class="field"><span class="label">Zaxira zanjiri</span>
+          <div class="card list">{% for n, s in [("Gemini · bepul tarif", "Asosiy"), ("Pullik API kalit", "Limitga yetganda"), ("Keshdagi javob", "Oxirgi zaxira")] %}<div class="list-item" style="min-height:48px"><span class="list-ico strong" style="width:28px;height:28px">{{ loop.index }}</span><span class="grow">{{ n }}</span><span class="xs muted">{{ s }}</span></div>{% endfor %}</div></div>
+      </div>
+    </section>
+
+    <section class="card card-pad" x-show="tab === 'notify' || tab === 'roles'" x-cloak>
+      <p class="muted">Bu bo‘lim backend bilan birga to‘ldiriladi.</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

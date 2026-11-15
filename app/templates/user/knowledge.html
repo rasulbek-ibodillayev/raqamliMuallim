@@ -1,0 +1,60 @@
+{% extends "layouts/app.html" %}
+{% block title %}Bilim darajasi{% endblock %}
+{% block content %}
+{% call page_head("Bilim darajasi", "42 mavzu · 74% tayyorgarlik") %}
+<div class="seg" role="tablist">
+  <a class="{{ 'active' if view != 'xarita' }}" href="{{ url_for('user.knowledge') }}">{{ icon("list", "ico-sm") }}Ro‘yxat</a>
+  <a class="{{ 'active' if view == 'xarita' }}" href="{{ url_for('user.knowledge', view='xarita') }}">{{ icon("graph", "ico-sm") }}Xarita</a>
+</div>
+{% endcall %}
+
+{% set colors = {"none": "var(--border-strong)", "learn": "#f59e0b", "relearn": "var(--red)", "done": "var(--blue)", "solid": "var(--green)"} %}
+<div class="card card-pad stack" style="margin-bottom:24px">
+  <div class="stacked-bar" aria-hidden="true">{% for k, v in dist %}<span style="--v: {{ v }}%; --d: {{ colors[k] }}"></span>{% endfor %}</div>
+  <div class="row wrap small" style="gap:8px 18px">
+    {% for k, v in dist %}<span class="row row-sm"><span class="dot" style="--d: {{ colors[k] }}"></span>{{ status[k][0] }} <span class="muted num">{{ v }}%</span></span>{% endfor %}
+  </div>
+</div>
+
+{% if view == "xarita" %}
+<div class="card" style="overflow:hidden">
+  <div class="card-head"><span class="strong">Dasturlash</span><span class="xs muted">Strelka — o‘rganish tartibi</span></div>
+  <div class="map">
+    <svg class="edges" viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M50 45 C 50 80, 150 70, 150 105"/><path d="M150 45 L150 105"/><path d="M250 45 C 250 80, 150 70, 150 105"/>
+      <path d="M150 140 C 150 170, 50 165, 50 195"/><path d="M150 140 L150 195"/><path d="M150 140 C 150 170, 250 165, 250 195"/>
+      <path d="M50 230 C 50 260, 150 250, 150 270"/>
+    </svg>
+    {% set nodes = [("Python asoslari",100,"green"),("Shartlar",92,"blue"),("Satrlar",90,"blue"),(None,None,None),("Sikllar",68,"yellow"),(None,None,None),("Funksiyalar",45,"red"),("Massivlar",85,"blue"),("Algoritmlar",None,"gray"),(None,None,None),("Rekursiya",None,"gray"),(None,None,None)] %}
+    {% for n, p, c in nodes %}
+      {% if n %}<a class="map-node n-{{ c }}" href="{{ url_for('user.topic', topic_id=1) }}">{% if c == "gray" %}{{ icon("lock", "ico-sm") }}{% endif %}{{ n }}<span class="pct num">{{ p ~ "%" if p is not none else "—" }}</span></a>{% else %}<span></span>{% endif %}
+    {% endfor %}
+  </div>
+  <div class="card-head" style="border-top:1px solid var(--border);border-bottom:0">
+    <div class="row"><span class="dot dot-red"></span><div><div class="strong small">Funksiyalar · 45%</div><div class="xs muted">Qayta o‘zlashtirish kerak</div></div></div>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('user.lesson', holat='qayta') }}">Mashq qilish</a>
+  </div>
+</div>
+{% else %}
+<div class="stack">
+  {% for s in sections %}
+  <details class="card" {{ 'open' if loop.first }}>
+    <summary class="card-head" style="cursor:pointer;list-style:none;border-bottom-color:var(--border)">
+      <div><div class="strong">{{ s.name }}</div><div class="xs muted">{{ s.topics|length }} ta mavzu · {{ s.pct }}%</div></div>
+      {{ icon("chevron-down", "faint") }}
+    </summary>
+    <div class="list">
+      {% for t in s.topics %}
+      <a class="list-item" href="{{ url_for('user.topic', topic_id=t.id) }}">
+        <span class="dot dot-{{ status[t.status][1] }}"></span>
+        <div class="grow"><div>{{ t.name }}</div>{% if t.flag %}<div class="sub t-yellow">{{ t.flag }}</div>{% else %}<div class="sub">{{ status[t.status][0] }}</div>{% endif %}</div>
+        <span class="num small {{ 't-' ~ pct_color(t.pct) if t.pct is not none }} {{ 'faint' if t.pct is none }}">{{ t.pct ~ "%" if t.pct is not none else "—" }}</span>
+        {{ icon("chevron-right", "ico-sm chev") }}
+      </a>
+      {% endfor %}
+    </div>
+  </details>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

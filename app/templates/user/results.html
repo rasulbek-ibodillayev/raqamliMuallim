@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+{% block title %}Natijalarim{% endblock %}
+{% block content %}
+{% call page_head("Natijalarim", "Barcha testlar natijalari va dinamikasi") %}{% endcall %}
+{% if not results %}
+<div class="card empty">
+  <span class="empty-ico">{{ icon("chart", "ico-lg") }}</span>
+  <h2>Hali natijalar yo‘q</h2>
+  <p class="muted" style="max-width:340px">Birinchi testni topshirganingizdan keyin natijalar shu yerda ko‘rinadi.</p>
+  <a class="btn btn-primary mt-16" href="{{ url_for('user.plan') }}">O‘quv rejaga o‘tish</a>
+</div>
+<div class="card list mt-24" aria-hidden="true">
+  {% for i in range(3) %}<div class="list-item"><div class="skeleton" style="width:36px;height:36px"></div><div class="grow stack stack-sm"><div class="skeleton" style="height:12px;width:60%"></div><div class="skeleton" style="height:10px;width:35%"></div></div></div>{% endfor %}
+</div>
+<p class="xs faint center mt-8">Yuklanish holati namunasi</p>
+{% else %}
+<div class="stack stack-lg">
+  <div class="chips scroll">
+    {% for c in ["Hammasi", "Mavzu testi", "Nazorat", "Diagnostika", "Sinov"] %}<button class="chip {{ 'active' if loop.first }}" type="button">{{ c }}</button>{% endfor %}
+  </div>
+  <div class="card card-pad stack stack-sm">
+    <div class="row between"><span class="strong">Natijalar dinamikasi</span><span class="small muted">O‘rtacha: <b class="num" style="color:var(--text)">76%</b></span></div>
+    {{ spark(trend) }}
+  </div>
+  <div class="card list">
+    {% for r in results %}
+    {% set label, color = decision[r.decision] %}
+    <a class="list-item" href="{{ url_for('test.result', holat='qaytarildi' if r.decision == 'fail') }}">
+      <span class="num strong t-{{ color if color != 'yellow' else 'yellow' }}" style="width:44px">{{ r.pct }}%</span>
+      <div class="grow"><div class="truncate">{{ r.name }}</div><div class="sub">{{ r.kind }} · {{ r.when }}</div></div>
+      {{ badge(label, color) }}
+      {{ icon("chevron-right", "ico-sm chev") }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

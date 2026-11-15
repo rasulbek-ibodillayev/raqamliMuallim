@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Sertifikat № INF-2026-000123{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/certificate.css') }}">
+{% endblock %}
+{#
+  Sertifikat: 1-sahifa — asosiy sertifikat, 2-sahifa — mavzular bo'yicha natijalar ilovasi.
+  QR-kod hozircha namunaviy; backendda haqiqiy tekshiruv havolasidan yaratiladi.
+#}
+{% set cert_no = "INF-2026-000123" %}
+{% macro qr(size=25) -%}
+<svg class="cert-qr" viewBox="0 0 {{ size }} {{ size }}" shape-rendering="crispEdges" aria-label="Sertifikatni tekshirish uchun QR-kod">
+  <rect width="{{ size }}" height="{{ size }}" fill="#fff"/>
+  {% for y in range(size) %}{% for x in range(size) %}
+    {% set finder = (x < 7 and y < 7) or (x >= size - 7 and y < 7) or (x < 7 and y >= size - 7) %}
+    {% if not finder and ((x * 7 + y * 13 + x * y) % 5 < 2) %}<rect x="{{ x }}" y="{{ y }}" width="1" height="1" fill="#0f172a"/>{% endif %}
+  {% endfor %}{% endfor %}
+  {% for fx, fy in [(0, 0), (size - 7, 0), (0, size - 7)] %}
+    <rect x="{{ fx }}" y="{{ fy }}" width="7" height="7" fill="#0f172a"/><rect x="{{ fx + 1 }}" y="{{ fy + 1 }}" width="5" height="5" fill="#fff"/><rect x="{{ fx + 2 }}" y="{{ fy + 2 }}" width="3" height="3" fill="#0f172a"/>
+  {% endfor %}
+</svg>
+{%- endmacro %}
+
+{% macro frame() -%}
+<svg class="cert-frame" viewBox="0 0 297 210" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <pattern id="guilloche" width="6" height="6" patternUnits="userSpaceOnUse">
+      <path d="M0 3 Q1.5 0 3 3 T6 3" fill="none" stroke="#1e3a8a" stroke-width=".35" opacity=".55"/>
+      <path d="M0 3 Q1.5 6 3 3 T6 3" fill="none" stroke="#b08d3c" stroke-width=".35" opacity=".6"/>
+    </pattern>
+  </defs>
+  <rect x="4" y="4" width="289" height="202" fill="url(#guilloche)"/>
+  <rect x="11" y="11" width="275" height="188" fill="#fffdf8"/>
+  <rect x="4" y="4" width="289" height="202" fill="none" stroke="#1e3a8a" stroke-width=".8"/>
+  <rect x="11" y="11" width="275" height="188" fill="none" stroke="#b08d3c" stroke-width=".6"/>
+  <rect x="13.5" y="13.5" width="270" height="183" fill="none" stroke="#b08d3c" stroke-width=".25"/>
+  {% for cx, cy, r in [(13.5, 13.5, 0), (283.5, 13.5, 90), (283.5, 196.5, 180), (13.5, 196.5, 270)] %}
+  <g transform="translate({{ cx }} {{ cy }}) rotate({{ r }})"><path d="M0 0h14M0 0v14M3 3h7M3 3v7" stroke="#b08d3c" stroke-width=".5" fill="none"/><circle cx="3" cy="3" r="1.2" fill="#b08d3c"/></g>
+  {% endfor %}
+</svg>
+{%- endmacro %}
+
+{% block body %}
+<div class="cert-toolbar no-print">
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('user.certificates') }}">{{ icon("arrow-left", "ico-sm") }}Sertifikatlarim</a>
+  <span class="grow"></span>
+  <button class="btn btn-outline btn-sm" type="button" onclick="window.print()">{{ icon("printer", "ico-sm") }}<span class="hide-sm">Chop etish</span></button>
+  <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">{{ icon("download", "ico-sm") }}PDF yuklab olish</button>
+</div>
+
+<main class="cert-stage">
+  <!-- 1-sahifa: sertifikat -->
+  <article class="cert-page" aria-label="Sertifikat">
+    {{ frame() }}
+    <div class="cert-inner">
+      <header class="cert-top">
+        <div class="cert-emblem">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="em" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#em)"/><path d="M29 14l5 13.5L47.5 32 34 37 29 50.5 24 37 10.5 32 24 27.5z" fill="#fff"/></svg>
+          <span>raqamliMuallim</span>
+        </div>
+        <div class="cert-no">№ <b>{{ cert_no }}</b></div>
+      </header>
+
+      <div class="cert-center">
+        <div class="cert-kicker">Malaka oshirish tayyorlov kursi</div>
+        <h1 class="cert-title">Sertifikat</h1>
+        <div class="cert-rule"><span></span>{{ icon("award") }}<span></span></div>
+        <p class="cert-lead">Ushbu sertifikat</p>
+        <p class="cert-name">{{ me.last }} {{ me.first }}</p>
+        <p class="cert-text">Informatika va axborot texnologiyalari fani o‘qituvchilarini attestatsiyaga tayyorlash kursini
+          to‘liq o‘zlashtirib, yakuniy diagnostikadan muvaffaqiyatli o‘tganini tasdiqlaydi.</p>
+
+        <div class="cert-facts">
+          <div><span>Umumiy natija</span><b>87%</b></div>
+          <div><span>Mavzular</span><b>42 / 42</b></div>
+          <div><span>Berilgan sana</span><b>20.12.2026</b></div>
+        </div>
+      </div>
+
+      <footer class="cert-bottom">
+        <div class="cert-sign">
+          <svg viewBox="0 0 160 40" aria-hidden="true"><path d="M8 30c12-18 20-22 24-14s-6 18 2 10 14-24 20-16-4 16 6 10 10-14 16-8 4 10 14 4 18-10 30-6" fill="none" stroke="#1e3a8a" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <div class="cert-line"></div>
+          <div class="cert-role">[F.I.Sh.]<br><span>Platforma rahbari</span></div>
+        </div>
+
+        <svg class="cert-seal" viewBox="0 0 120 120" aria-label="Muhr">
+          <defs><path id="sealpath" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"/></defs>
+          <circle cx="60" cy="60" r="56" fill="none" stroke="#1d4ed8" stroke-width="2.5"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1d4ed8" stroke-width="1"/>
+          <circle cx="60" cy="60" r="32" fill="none" stroke="#1d4ed8" stroke-width="1"/>
+          <text font-family="Inter, Arial, sans-serif" font-size="8.6" font-weight="600" letter-spacing="1.6" fill="#1d4ed8"><textPath href="#sealpath">RAQAMLIMUALLIM • ONLINE TAYYORLOV PLATFORMASI •</textPath></text>
+          <path d="M57 42l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#1d4ed8"/>
+          <text x="60" y="86" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="7" font-weight="600" fill="#1d4ed8">2026</text>
+        </svg>
+
+        <div class="cert-verify">
+          {{ qr() }}
+          <div><b>Haqiqiyligini tekshirish</b><span>raqamlimuallim.uz/s/{{ cert_no }}</span></div>
+        </div>
+      </footer>
+      <p class="cert-note">Ushbu sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. Mavzular bo‘yicha natijalar ilovada keltirilgan.</p>
+    </div>
+  </article>
+
+  <!-- 2-sahifa: ilova -->
+  <article class="cert-page" aria-label="Sertifikatga ilova">
+    {{ frame() }}
+    <div class="cert-inner">
+      <header class="cert-top">
+        <div class="cert-emblem"><span>Sertifikatga ilova</span></div>
+        <div class="cert-no">№ <b>{{ cert_no }}</b></div>
+      </header>
+      <div class="cert-annex">
+        <h2 class="cert-annex-title">Mavzular bo‘yicha o‘zlashtirish natijalari</h2>
+        <p class="cert-annex-name">{{ me.last }} {{ me.first }}</p>
+        <table class="cert-table">
+          <thead><tr><th>№</th><th>Mavzular bloki</th><th>O‘zlashtirish</th></tr></thead>
+          <tbody>
+            {% for n, p in topics %}
+            <tr><td>{{ loop.index }}</td><td>{{ n }}</td><td><span class="cert-bar"><i style="width: {{ p }}%"></i></span><b>{{ p }}%</b></td></tr>
+            {% endfor %}
+          </tbody>
+          <tfoot><tr><td></td><td>Umumiy natija</td><td><b>87%</b></td></tr></tfoot>
+        </table>
+      </div>
+      <p class="cert-note">Sertifikat yakuniy diagnostika natijalari asosida avtomatik shakllantirilgan. Tekshirish: raqamlimuallim.uz/s/{{ cert_no }}</p>
+    </div>
+  </article>
+</main>
+{% endblock %}

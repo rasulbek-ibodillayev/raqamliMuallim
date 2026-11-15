@@ -1,0 +1,49 @@
+{% extends "layouts/panel.html" %}
+{% block title %}Mavzular va darslar{% endblock %}
+{% block heading %}Mavzular va darslar{% endblock %}
+{% block content %}
+{% call page_head("Mavzular va dars muharriri", "Informatika kursi · 42 mavzu") %}
+<button class="btn btn-outline btn-sm" type="button">{{ icon("eye", "ico-sm") }}Ko‘rish</button>
+<button class="btn btn-primary btn-sm" type="button">Saqlash</button>
+{% endcall %}
+<div class="split">
+  <aside class="card" style="padding:12px">
+    <div class="input-group" style="margin-bottom:10px"><span class="addon" style="background:var(--surface);border:0;padding-right:0">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Mavzu qidirish" aria-label="Mavzu qidirish" style="min-height:40px"></div>
+    {% for sec, topics in tree %}
+    <details {{ 'open' if loop.first }}>
+      <summary class="tree-item strong" style="cursor:pointer;list-style:none">{{ icon("chevron-down", "ico-sm faint") }}{{ sec }}</summary>
+      <div style="padding-left:18px">
+        {% for t, n in topics %}<a class="tree-item {{ 'active' if t == 'Python: shart operatorlari' }}" href="#"><span class="grow">{{ t }}</span><span class="xs {{ 't-red' if n < 10 else 'muted' }} num">{{ n }}</span></a>{% endfor %}
+      </div>
+    </details>
+    {% endfor %}
+    <button class="btn btn-ghost btn-sm btn-block mt-8" type="button">{{ icon("plus", "ico-sm") }}Mavzu qo‘shish</button>
+  </aside>
+
+  <section class="stack">
+    <div class="card card-pad stack stack-sm">
+      <div class="row between wrap"><h2>Python: shart operatorlari</h2>{{ badge("Tahrirlanmoqda", "yellow") }}</div>
+      <p class="small muted">4 ta kichik mavzu · 6 ta blok · bog‘liqlik: Python asoslari · 14 ta tasdiqlangan savol</p>
+    </div>
+
+    {% for kind, ic, title, body in [("Matn", "note", "if operatori", "Shart operatori mantiqiy ifodaning rost yoki yolg‘on ekaniga qarab dasturni turli yo‘nalishga buradi…"), ("Kod", "code", "Misol", "yosh = 18\nif yosh >= 18:\n    print(\"Ruxsat\")"), ("Sxema", "graph", "Blok-sxema (Mermaid)", "flowchart TD; A[Boshlash] --> B{yosh ≥ 18?}"), ("Jadval", "table", "Mantiqiy ifodalar", "3 qator × 3 ustun")] %}
+    <div class="card" style="padding:14px 16px">
+      <div class="row">
+        <span class="faint" style="cursor:grab">{{ icon("drag", "ico-sm") }}</span>
+        <span class="list-ico" style="width:32px;height:32px">{{ icon(ic, "ico-sm") }}</span>
+        <div class="grow"><div class="xs muted">{{ kind }} bloki · kichik mavzu: if operatori</div><div class="strong small">{{ title }}</div></div>
+        <button class="icon-btn" aria-label="Tahrirlash">{{ icon("edit", "ico-sm") }}</button>
+        <button class="icon-btn" aria-label="O‘chirish">{{ icon("trash", "ico-sm") }}</button>
+      </div>
+      {% if kind == "Kod" %}<div class="mt-8">{{ code(body, copy=False) }}</div>{% else %}<p class="small muted mt-8" style="padding-left:84px">{{ body }}</p>{% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="block-edit row wrap" style="justify-content:center">
+      <span class="small muted">Blok qo‘shish:</span>
+      {% for ic, l in [("note","Matn"),("code","Kod"),("table","Jadval"),("graph","Sxema"),("sigma","Formula"),("image","Rasm"),("play","Video")] %}<button class="chip" type="button">{{ icon(ic) }}{{ l }}</button>{% endfor %}
+      <button class="btn btn-ai btn-sm" type="button">{{ icon("sparkle", "ico-sm") }}AI bilan qoralama</button>
+    </div>
+  </section>
+</div>
+{% endblock %}

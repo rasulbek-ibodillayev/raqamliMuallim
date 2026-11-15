@@ -1,0 +1,112 @@
+{% extends "layouts/focus.html" %}
+{% block title %}Shart operatorlari{% endblock %}
+{% block bar %}
+<a class="icon-btn" href="{{ url_for('user.plan') }}" aria-label="Rejaga qaytish">{{ icon("x") }}</a>
+<div class="grow"><div class="strong truncate">Python: shart operatorlari</div><div class="xs muted">Mavzu 3 · 2 / 4 kichik mavzu</div></div>
+<button class="icon-btn" type="button" data-fs-cycle aria-label="Matn o‘lchamini o‘zgartirish" title="Matn o‘lchami" style="font-weight:600;font-size:15px">Aa</button>
+<a class="icon-btn" href="{{ url_for('user.lesson', audio=1) }}" aria-label="Ovozli tinglash">{{ icon("volume") }}</a>
+<a class="icon-btn" href="{{ url_for('user.notes') }}" aria-label="Konspektga saqlash">{{ icon("bookmark") }}</a>
+{% endblock %}
+{% block bar_progress %}<div class="progress thin" style="border-radius:0"><span style="--v: 50%"></span></div>{% endblock %}
+
+{% block content %}
+<article class="stack stack-xl" data-select-menu data-topic="Shart operatorlari" data-notes-url="{{ url_for('user.notes') }}" data-tutor-url="{{ url_for('user.tutor') }}">
+  <p class="hint row row-sm no-print">{{ icon("info", "ico-sm") }}Matnni belgilang — konspektga saqlash yoki AI’dan so‘rash mumkin.</p>
+  {% if retry %}
+  <section class="alert alert-yellow" style="flex-direction:column;gap:12px">
+    <div class="row row-sm strong" style="color:var(--text)">{{ icon("refresh") }}Oxirgi testda xato qilgan qismlaringiz</div>
+    <div class="chips"><a class="chip" href="#elif">elif zanjiri</a><a class="chip" href="#nested">Ichma-ich shartlar</a></div>
+    <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}" style="align-self:flex-start">{{ icon("sparkle", "ico-sm") }}Boshqa usulda tushuntir</a>
+  </section>
+  {% endif %}
+
+  <div class="prose">
+    <span class="eyebrow">Kichik mavzu 1</span>
+    <h1 style="font-size:28px;margin-top:6px">if operatori</h1>
+    <p class="{{ 'reading' if audio }}">Shart operatori mantiqiy ifodaning rost (<code>True</code>) yoki yolg‘on (<code>False</code>) ekaniga qarab dasturni turli yo‘nalishga buradi.</p>
+    <p>Shart bajarilsa, unga tegishli kod bloki ishga tushadi. Aks holda bu blok tashlab ketiladi yoki <code>else</code> qismi bajariladi.</p>
+  </div>
+
+  {{ code('yosh = 18\nif yosh >= 18:\n    print("Kirishga ruxsat berildi")\nelse:\n    print("Kirish taqiqlanadi")') }}
+
+  <figure class="card card-pad stack" style="margin:0">
+    <figcaption class="eyebrow">Blok-sxema</figcaption>
+    <svg viewBox="0 0 320 210" style="width:100%;max-width:420px;margin:0 auto;color:var(--text)" role="img" aria-label="Shart blok-sxemasi: yosh 18 dan katta yoki teng bo‘lsa ruxsat, aks holda taqiq">
+      <g fill="none" stroke="var(--border-strong)" stroke-width="1.5">
+        <rect x="110" y="6" width="100" height="32" rx="16" fill="var(--surface-2)"/>
+        <path d="M160 38v16"/><path d="M160 54 220 84 160 114 100 84z" fill="var(--primary-soft)" stroke="var(--primary)"/>
+        <path d="M100 84H50v40M220 84h50v40"/>
+        <rect x="6" y="124" width="92" height="36" rx="8" fill="var(--green-soft)" stroke="var(--green)"/>
+        <rect x="222" y="124" width="92" height="36" rx="8" fill="var(--red-soft)" stroke="var(--red)"/>
+        <path d="M52 160v26h216v-26M160 186v14"/>
+      </g>
+      <g font-family="Inter, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">
+        <text x="160" y="26">Boshlash</text><text x="160" y="88">yosh ≥ 18 ?</text>
+        <text x="70" y="78" fill="var(--green)">ha</text><text x="250" y="78" fill="var(--red)">yo‘q</text>
+        <text x="52" y="146">Ruxsat</text><text x="268" y="146">Taqiq</text>
+      </g>
+    </svg>
+  </figure>
+
+  <div class="stack stack-sm">
+    <h3>Mantiqiy ifodalar natijasi</h3>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Shart</th><th>Qiymat</th><th>Natija</th></tr></thead>
+      <tbody>
+        <tr><td><code>a &gt; b</code></td><td class="num">5 &gt; 3</td><td><span class="badge badge-green">True</span></td></tr>
+        <tr><td><code>a == b</code></td><td class="num">5 == 3</td><td><span class="badge badge-red">False</span></td></tr>
+        <tr><td><code>a &lt; b</code></td><td class="num">5 &lt; 3</td><td><span class="badge badge-red">False</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="prose" id="elif">
+    <h2>elif zanjiri</h2>
+    <p>Bir nechta shartni ketma-ket tekshirish kerak bo‘lsa, <code>elif</code> ishlatiladi. Python shartlarni yuqoridan pastga tekshiradi va birinchi rost chiqqan blokni bajaradi.</p>
+  </div>
+  {{ code('ball = 85\nif ball >= 90:\n    print("A’lo")\nelif ball >= 70:\n    print("Yaxshi")\nelse:\n    print("Qoniqarsiz")') }}
+
+  <details class="card" x-data>
+    <summary class="card-head" style="cursor:pointer;list-style:none;border-bottom:0">
+      <div><div class="eyebrow">Yechimli masala</div><div class="strong">Haroratni tekshirish</div></div>
+      <span class="btn btn-outline btn-sm">Yechimni ko‘rish</span>
+    </summary>
+    <div class="card-pad stack" style="padding-top:0">
+      <p>Harorat 0 dan yuqori bo‘lsa «Iliq», aks holda «Sovuq» deb chiqaring.</p>
+      {{ code('harorat = 15\nif harorat > 0:\n    print("Iliq")\nelse:\n    print("Sovuq")') }}
+    </div>
+  </details>
+
+  <div class="ai-card row" style="align-items:flex-start">
+    <span class="ai-mark">{{ icon("sparkle") }}</span>
+    <div class="grow stack stack-sm">
+      <p>Tushunmagan joyingiz bormi? Shu mavzu bo‘yicha AI tutordan so‘rang.</p>
+      <div class="chips"><a class="chip" href="{{ url_for('user.tutor') }}">elif va else farqi?</a><a class="chip" href="{{ url_for('user.tutor') }}">Yana misol ber</a></div>
+    </div>
+  </div>
+</article>
+{% endblock %}
+
+{% block foot %}
+{% if audio %}
+<div class="player" x-data="{ on: true, speed: '1x' }">
+  <div class="player-inner">
+    <button class="play" type="button" @click="on = !on" :aria-label="on ? 'Pauza' : 'Ijro'" aria-label="Pauza">
+      <svg class="ico" x-show="on"><use href="#i-pause"/></svg><svg class="ico" x-show="!on" x-cloak><use href="#i-play"/></svg>
+    </button>
+    <div class="grow stack" style="--gap:6px">
+      <div class="row between xs muted"><span>if operatori · o‘qilmoqda</span><span class="num">02:14 / 08:30</span></div>
+      {{ progress(26, cls="thin") }}
+    </div>
+    <button class="btn btn-outline btn-sm" type="button" @click="speed = {'0.75x':'1x','1x':'1.25x','1.25x':'1.5x','1.5x':'2x','2x':'0.75x'}[speed]" x-text="speed">1x</button>
+  </div>
+</div>
+{% else %}
+<footer class="focus-foot">
+  <div class="focus-foot-inner">
+    <a class="btn btn-outline" href="{{ url_for('user.tutor') }}">{{ icon("sparkle") }}<span>AI tutor</span></a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question') }}">Mavzu testini boshlash</a>
+  </div>
+</footer>
+{% endif %}
+{% endblock %}

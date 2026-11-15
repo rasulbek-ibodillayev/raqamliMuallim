@@ -1,0 +1,34 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Ma’lumotlaringiz{% endblock %}
+{% block content %}
+<form class="stack stack-lg" action="{{ url_for('user.diagnostic') }}" method="get" x-data="{ show: false, more: false }">
+  <div class="stack stack-sm">
+    <h1>Oxirgi qadam</h1>
+    <p class="lead">Ismingiz sertifikatda shunday yoziladi.</p>
+  </div>
+  <div class="grid-2" style="gap:16px">
+    <div class="field"><label class="label" for="fn">Ism</label><input class="input" id="fn" autocomplete="given-name" placeholder="Dilnoza"></div>
+    <div class="field"><label class="label" for="ln">Familiya</label><input class="input" id="ln" autocomplete="family-name" placeholder="Karimova"></div>
+  </div>
+  <div class="field">
+    <label class="label" for="np">Parol</label>
+    <div class="input-group">
+      <input class="input" id="np" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="Kamida 8 ta belgi">
+      <button class="icon-btn" type="button" @click="show = !show" aria-label="Parolni ko‘rsatish">{{ icon("eye") }}</button>
+    </div>
+  </div>
+  <div class="field"><label class="label" for="np2">Parolni takrorlang</label><input class="input" id="np2" type="password" autocomplete="new-password"></div>
+
+  <div>
+    <button class="btn btn-ghost btn-sm" type="button" @click="more = !more" style="padding-left:0">{{ icon("chevron-down", "ico-sm") }}Hudud (ixtiyoriy)</button>
+    <div class="grid-2 mt-8" x-show="more" x-cloak>
+      <div class="field"><label class="label" for="reg">Viloyat</label>
+        <select class="select" id="reg"><option>Tanlang</option>{% for v in ["Toshkent shahri","Toshkent viloyati","Andijon","Buxoro","Farg‘ona","Jizzax","Xorazm","Namangan","Navoiy","Qashqadaryo","Samarqand","Sirdaryo","Surxondaryo","Qoraqalpog‘iston Respublikasi"] %}<option>{{ v }}</option>{% endfor %}</select></div>
+      <div class="field"><label class="label" for="dist">Tuman</label><select class="select" id="dist"><option>Tanlang</option></select></div>
+    </div>
+  </div>
+
+  <label class="check"><input type="checkbox" required><span>Shaxsiy ma’lumotlarimni qayta ishlashga roziman va <a class="link" href="{{ url_for('auth.privacy') }}" target="_blank">maxfiylik siyosati</a>ni qabul qilaman.</span></label>
+  <button class="btn btn-primary btn-lg btn-block" type="submit">Ro‘yxatdan o‘tish</button>
+</form>
+{% endblock %}

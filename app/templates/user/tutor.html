@@ -1,0 +1,63 @@
+{% extends "layouts/app.html" %}
+{% block title %}AI tutor{% endblock %}
+{% block heading %}AI tutor{% endblock %}
+{% block topbar_actions %}<span class="badge badge-plain hide-sm">{{ icon("book", "ico-sm") }}Mavzu: Shart operatorlari</span>{% endblock %}
+{% block content %}
+<div class="stack" style="min-height:calc(100dvh - 60px - var(--tabbar-h) - 40px)">
+  <div class="thread grow" style="padding-top:16px">
+    <div class="msg-user">elif bilan else farqi nima?</div>
+
+    <div class="msg-ai">
+      <span class="ai-mark">{{ icon("sparkle") }}</span>
+      <div class="body">
+        <p><code>elif</code> (else if) <b>yangi shartni</b> tekshiradi va faqat oldingi shartlar yolg‘on bo‘lganda ishlaydi. <code>else</code> esa <b>shartsiz</b> yakuniy blok: yuqoridagi shartlarning hech biri bajarilmasa ishga tushadi.</p>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th></th><th><code>elif</code></th><th><code>else</code></th></tr></thead>
+          <tbody>
+            <tr><td class="muted">Shart kerakmi</td><td>Ha, yangi shart</td><td>Yo‘q</td></tr>
+            <tr><td class="muted">Nechta bo‘ladi</td><td>Bir nechta</td><td>Ko‘pi bilan bitta</td></tr>
+            <tr><td class="muted">Joylashuvi</td><td><code>if</code> dan keyin</td><td>Eng oxirida</td></tr>
+          </tbody>
+        </table></div>
+        <div class="row between wrap" style="gap:8px">
+          <span class="source">{{ icon("book", "ico-sm") }}Manba: 9-sinf darsligi, 4-bob</span>
+          <div class="msg-tools">
+            <button class="icon-btn" type="button" aria-label="Nusxa olish">{{ icon("copy", "ico-sm") }}</button>
+            <button class="icon-btn" type="button" aria-label="Konspektga saqlash">{{ icon("bookmark", "ico-sm") }}</button>
+            <button class="icon-btn" type="button" aria-label="Foydali">{{ icon("thumb", "ico-sm") }}</button>
+            <button class="icon-btn" type="button" aria-label="Qayta javob">{{ icon("refresh", "ico-sm") }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="msg-user">Misol keltir</div>
+
+    <div class="msg-ai">
+      <span class="ai-mark">{{ icon("sparkle") }}</span>
+      <div class="body">
+        <p>Baho hisoblash misolida ko‘ring: shartlar yuqoridan pastga tekshiriladi, birinchi rost chiqqani bajariladi.</p>
+        {{ code('ball = 85\nif ball >= 90:\n    print("A’lo")\nelif ball >= 70:\n    print("Yaxshi")   # shu bajariladi\nelse:\n    print("Qoniqarsiz")') }}
+        <p>O‘zingiz sinab ko‘ring: <code>ball = 65</code> bo‘lsa nima chiqadi?</p>
+      </div>
+    </div>
+
+    {% if request.args.q %}<div class="msg-user" id="last-q">{{ request.args.q }}</div>{% endif %}
+
+    <div class="msg-ai" aria-live="polite">
+      <span class="ai-mark">{{ icon("sparkle") }}</span>
+      <div class="body"><div class="typing" aria-label="AI javob yozmoqda"><span></span><span></span><span></span></div></div>
+    </div>
+  </div>
+
+  <div style="position:sticky;bottom:calc(var(--tabbar-h) + 8px);background:var(--bg);padding-top:12px" class="stack stack-sm">
+    <div class="chips scroll">
+      <button class="chip" type="button">{{ icon("bulb") }}Soddaroq tushuntir</button>
+      <button class="chip" type="button">{{ icon("code") }}Masala ber</button>
+      <button class="chip" type="button">{{ icon("graph") }}Sxema bilan ko‘rsat</button>
+      <button class="chip" type="button">{{ icon("alert") }}Ko‘p uchraydigan xatolar</button>
+    </div>
+    {{ composer("Savolingizni yozing…") }}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Attestatsiya sinovi{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/exam.css') }}">
+{% endblock %}
+{#
+  Real attestatsiya test tizimi interfeysiga o'xshash sinov oynasi:
+  yuqorida logotip, til va foydalanuvchi; chapda fan nomi, E'tiroz, taymer va savol;
+  o'ngda To'xtatish / Yakunlash, test tili va savollar raqamlari.
+  Rasmiy logotip va nomlar ishlatilmaydi.
+#}
+{% block body %}
+<script>
+  window.RM_EXAM = {{ questions|tojson }};
+  window.RM_EXAM_STATE = { cur: {{ start }}, ans: {{ answered|tojson }}, confirm: {{ 'true' if confirm else 'false' }} };
+</script>
+<div class="ex" x-data="exam()" x-init="init()" @keydown.window="key($event)" data-leave-guard>
+  <header class="ex-top">
+    <a class="ex-logo" href="{{ url_for('user.tests') }}" aria-label="Testlarimga qaytish">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5 18.3 12.7 24.5 15 18.3 17.3 16 23.5 13.7 17.3 7.5 15 13.7 12.7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><rect x="2.5" y="2.5" width="27" height="27" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    </a>
+    <span class="grow"></span>
+    <button class="ex-pill ex-flag" type="button" @click="lang = lang === 'uz' ? 'ru' : 'uz'" :aria-label="lang === 'uz' ? 'Til: o‘zbekcha' : 'Язык: русский'">
+      <svg viewBox="0 0 20 20" aria-hidden="true" x-show="lang === 'uz'"><clipPath id="fc"><circle cx="10" cy="10" r="9"/></clipPath><g clip-path="url(#fc)"><rect width="20" height="7" fill="#1eb3e6"/><rect y="7" width="20" height="6" fill="#fff"/><rect y="13" width="20" height="7" fill="#1eb53a"/><rect y="6.6" width="20" height=".8" fill="#ce1126"/><rect y="12.6" width="20" height=".8" fill="#ce1126"/></g></svg>
+      <svg viewBox="0 0 20 20" aria-hidden="true" x-show="lang === 'ru'" x-cloak><clipPath id="fr"><circle cx="10" cy="10" r="9"/></clipPath><g clip-path="url(#fr)"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="6" fill="#0039a6"/><rect y="13" width="20" height="7" fill="#d52b1e"/></g></svg>
+    </button>
+    <div class="ex-pill ex-user"><span class="truncate">{{ me.first }}</span><span class="ex-avatar">{{ icon("user", "ico-sm") }}</span></div>
+  </header>
+
+  <div class="ex-grid">
+    <section class="ex-main">
+      <div class="ex-card">
+        <div class="ex-card-head">
+          <h1>Informatika</h1>
+          <span class="grow"></span>
+          <button class="ex-objection" type="button" @click="objection = true">{{ icon("info", "ico-sm") }}E’tiroz</button>
+          <div class="ex-timer" role="timer" aria-label="Qolgan vaqt">
+            <div class="ex-time" :class="left < 600 && 'warn'">{{ icon("clock") }}<span x-text="fmt(left)">01:59:39</span></div>
+            <div class="ex-time-label">Qolgan vaqt</div>
+          </div>
+        </div>
+
+        <div class="ex-q" aria-live="polite">
+          <span class="ex-qn" x-text="(cur + 1) + '.'"></span>
+          <div class="ex-q-body">
+            <p class="ex-q-text" x-text="q().text"></p>
+            <template x-if="q().code"><pre class="ex-code" x-text="q().code"></pre></template>
+            <template x-if="q().image"><figure class="ex-figure"><img :src="q().image.src" :alt="q().image.alt"></figure></template>
+            <template x-if="q().table">
+              <table class="ex-table">
+                <thead><tr><template x-for="h in q().table.head"><th x-text="h"></th></template></tr></thead>
+                <tbody><template x-for="row in q().table.rows"><tr><template x-for="(c, i) in row"><td :class="{ 'ex-rowhead': i === 0, 'ex-ask': c === '?' }" x-text="c"></td></template></tr></template></tbody>
+              </table>
+            </template>
+          </div>
+        </div>
+
+        <fieldset class="ex-options">
+          <legend class="sr-only">Javobni tanlang</legend>
+          <template x-for="(o, i) in q().options" :key="cur + '-' + i">
+            <label class="ex-opt" :class="ans[cur] === i && 'is-checked'">
+              <input type="radio" :name="'q' + cur" :value="i" :checked="ans[cur] === i" @change="ans[cur] = i; mark()">
+              <span x-text="o"></span>
+            </label>
+          </template>
+        </fieldset>
+      </div>
+
+      <div class="ex-pager">
+        <button class="ex-nav-btn" type="button" @click="go(cur - 1)" :disabled="cur === 0">{{ icon("chevron-right", "ico-sm ex-flip") }}Ortga</button>
+        <button class="ex-nav-btn" type="button" @click="go(cur + 1)" :disabled="cur === qs.length - 1">Keyingi{{ icon("chevron-right", "ico-sm") }}</button>
+      </div>
+    </section>
+
+    <aside class="ex-side" aria-label="Savollar paneli">
+      <div class="ex-side-actions">
+        <button class="ex-side-btn" type="button" @click="paused = true">{{ icon("pause", "ico-sm") }}To‘xtatish</button>
+        <button class="ex-side-btn" :class="answered() === qs.length && 'ready'" type="button" @click="confirm = true">{{ icon("flag", "ico-sm") }}Yakunlash</button>
+      </div>
+      <div class="ex-saved" role="status" aria-live="polite">
+        <span x-show="st === 'saving'">Saqlanmoqda…</span>
+        <span x-show="st === 'saved'"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-check-circle"/></svg>Javoblar saqlandi</span>
+      </div>
+      <label class="sr-only" for="ex-lang">Test tili</label>
+      <select class="ex-select" id="ex-lang" x-model="lang">
+        <option value="uz">O‘zbekcha</option>
+        <option value="ru">Русский</option>
+      </select>
+      <div class="ex-subject">Informatika</div>
+      <div class="ex-nums">
+        <template x-for="(_, i) in qs" :key="i">
+          <button type="button" @click="go(i)" :class="{ current: i === cur, answered: ans[i] !== undefined && i !== cur }"
+            :aria-label="(i + 1) + '-savol' + (ans[i] !== undefined ? ', javob berilgan' : '')" :aria-current="i === cur ? 'step' : null" x-text="i + 1"></button>
+        </template>
+      </div>
+      <div class="ex-legend"><span><i class="answered"></i>Javob berilgan: <b x-text="answered()"></b></span><span><i></i>Qolgan: <b x-text="qs.length - answered()"></b></span></div>
+    </aside>
+  </div>
+
+  <!-- E'tiroz -->
+  <div class="ex-modal" x-show="objection" x-cloak @click.self="objection = false" @keydown.escape.window="objection = false">
+    <form class="ex-dialog" role="dialog" aria-modal="true" aria-labelledby="ob-t" @submit.prevent="objection = false; toast = 'E’tirozingiz qabul qilindi'">
+      <div class="ex-dialog-head"><h2 id="ob-t">E’tiroz bildirish</h2><button class="icon-btn" type="button" @click="objection = false" aria-label="Yopish">{{ icon("x") }}</button></div>
+      <p class="ex-muted" x-text="(cur + 1) + '-savol bo‘yicha'"></p>
+      <div class="ex-radio-list">
+        {% for s in ["Savol matnida xato bor", "To‘g‘ri javob variantlar orasida yo‘q", "Bir nechta to‘g‘ri javob bor", "Rasm yoki jadval ko‘rinmayapti", "Boshqa"] %}
+        <label class="ex-opt"><input type="radio" name="ob" {{ 'checked' if loop.first }}><span>{{ s }}</span></label>
+        {% endfor %}
+      </div>
+      <textarea class="ex-textarea" placeholder="Izoh (ixtiyoriy)" aria-label="Izoh"></textarea>
+      <div class="ex-dialog-foot"><button class="ex-nav-btn" type="button" @click="objection = false">Bekor qilish</button><button class="ex-primary" type="submit">Yuborish</button></div>
+    </form>
+  </div>
+
+  <!-- To'xtatish -->
+  <div class="ex-modal" x-show="paused" x-cloak>
+    <div class="ex-dialog" role="dialog" aria-modal="true" aria-labelledby="ps-t" style="text-align:center">
+      <div class="ex-big-ico">{{ icon("pause", "ico-lg") }}</div>
+      <h2 id="ps-t">Test to‘xtatildi</h2>
+      <p class="ex-muted">Javoblaringiz saqlandi. Mashq rejimida vaqt to‘xtatib turiladi.</p>
+      <div class="ex-dialog-foot" style="justify-content:center"><a class="ex-nav-btn" href="{{ url_for('user.tests') }}" data-safe-leave>Chiqish</a><button class="ex-primary" type="button" @click="paused = false">Davom ettirish</button></div>
+    </div>
+  </div>
+
+  <!-- Yakunlash -->
+  <div class="ex-modal" x-show="confirm" x-cloak @click.self="confirm = false" @keydown.escape.window="confirm = false">
+    <div class="ex-dialog" role="alertdialog" aria-modal="true" aria-labelledby="fn-t">
+      <div class="ex-dialog-head"><h2 id="fn-t">Testni yakunlaysizmi?</h2><button class="icon-btn" type="button" @click="confirm = false" aria-label="Yopish">{{ icon("x") }}</button></div>
+      <div class="ex-stats">
+        <div><span>Javob berilgan</span><b x-text="answered()"></b></div>
+        <div><span>Javobsiz</span><b class="red" x-text="qs.length - answered()"></b></div>
+      </div>
+      <p class="ex-muted" x-show="qs.length - answered() > 0">Javob berilmagan savollar 0 ball hisoblanadi. Yakunlagandan keyin javoblarni o‘zgartirib bo‘lmaydi.</p>
+      <div class="ex-dialog-foot"><button class="ex-nav-btn" type="button" @click="confirm = false">Savollarga qaytish</button><a class="ex-primary" href="{{ url_for('test.result') }}" data-safe-leave>Yakunlash</a></div>
+    </div>
+  </div>
+
+  <div class="ex-toast" x-show="toast" x-cloak x-transition x-text="toast" x-init="$watch('toast', v => v && setTimeout(() => toast = '', 2500))" role="status"></div>
+</div>
+
+<script>
+function exam() {
+  var S = window.RM_EXAM_STATE;
+  return {
+    qs: window.RM_EXAM, st: "saved", stT: null, cur: S.cur, ans: {}, confirm: S.confirm, paused: false, objection: false, toast: "",
+    lang: "uz", left: 2 * 3600 - 21,
+    init: function () {
+      var self = this;
+      Object.keys(S.ans).forEach(function (k) { self.ans[+k] = S.ans[k]; });
+      setInterval(function () { if (!self.paused && self.left > 0) self.left--; }, 1000);
+    },
+    q: function () { return this.qs[this.cur]; },
+    mark: function () { var self = this; this.st = "saving"; clearTimeout(this.stT); this.stT = setTimeout(function () { self.st = "saved"; }, 700); },
+    go: function (i) { if (i >= 0 && i < this.qs.length) { this.cur = i; window.scrollTo({ top: 0 }); } },
+    answered: function () { return Object.keys(this.ans).length; },
+    fmt: function (s) { var p = function (n) { return String(n).padStart(2, "0"); }; return p(Math.floor(s / 3600)) + ":" + p(Math.floor(s % 3600 / 60)) + ":" + p(s % 60); },
+    key: function (e) {
+      if (this.confirm || this.paused || this.objection) return;
+      if (/textarea|select/i.test(e.target.tagName)) return;
+      if (e.key === "ArrowRight") this.go(this.cur + 1);
+      else if (e.key === "ArrowLeft") this.go(this.cur - 1);
+      else if (/^[1-4]$/.test(e.key) && this.q().options[+e.key - 1]) { this.ans[this.cur] = +e.key - 1; this.mark(); }
+    }
+  };
+}
+</script>
+{% endblock %}

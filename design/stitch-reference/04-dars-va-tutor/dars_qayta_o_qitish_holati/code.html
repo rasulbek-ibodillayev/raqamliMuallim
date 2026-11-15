@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="uz"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        background: "#F8FAFC",
+        surface: "#FFFFFF",
+        primary: "#2563EB",
+        border: "#E2E8F0",
+        "text-main": "#0F172A",
+        "text-muted": "#64748B"
+      },
+      borderRadius: {
+        'xl': '12px',
+      },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      }
+    }
+  }
+};</script><style>@layer base {
+  html, body {
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Inter', sans-serif;
+  }
+  body {
+    overscroll-behavior-y: none;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+::-webkit-scrollbar {
+  display: none;
+}</style><style>
+  body {
+    min-height: max(884px, 100dvh);
+  }
+</style>
+</head><body class="bg-[#F8FAFC] text-[#0F172A] antialiased flex flex-col min-h-screen"><main class="flex-1 flex flex-col relative w-full bg-[#F8FAFC] pt-safe pb-safe"><div class="flex flex-col w-full">
+<!-- Top Navigation & Reading Progress -->
+<header class="sticky top-0 z-30 bg-white border-b border-[#E2E8F0]">
+<div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
+<button aria-label="Orqaga qaytish" class="w-10 h-10 flex items-center justify-center -ml-2 rounded-xl text-[#0F172A] hover:bg-slate-100 transition-colors" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<span class="text-[16px] font-semibold tracking-tight text-[#0F172A] truncate max-w-[200px]">
+      Shart operatorlari
+    </span>
+<div class="flex items-center space-x-1">
+<button aria-label="Audio darsni tinglash" class="w-10 h-10 flex items-center justify-center rounded-xl text-[#64748B] hover:bg-slate-100 transition-colors" id="btn-audio" type="button">
+<span class="material-symbols-outlined text-[22px]">headphones</span>
+</button>
+<button aria-label="Xatcho‘p qo‘shish" class="w-10 h-10 flex items-center justify-center rounded-xl text-[#64748B] hover:bg-slate-100 transition-colors" id="btn-bookmark" type="button">
+<span class="material-symbols-outlined text-[22px]" id="bookmark-icon">bookmark_border</span>
+</button>
+</div>
+</div>
+<!-- Reading Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-[2px]">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="60" class="bg-[#2563EB] h-[2px] w-[60%]" role="progressbar"></div>
+</div>
+</header>
+<!-- Main Article Body -->
+<main class="w-full max-w-md mx-auto px-5 pt-4 pb-36 flex flex-col space-y-6">
+<!-- Re-study Alert Card & Alternative Explanation Button -->
+<section class="flex flex-col">
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-3">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-amber-600 text-[20px]">info</span>
+<h2 class="text-[14px] font-semibold text-amber-900 leading-tight">
+          Oxirgi testda xato qilgan qismlaringiz
+        </h2>
+</div>
+<div class="flex flex-col divide-y divide-amber-200/80 bg-white/60 rounded-lg border border-amber-200/70 overflow-hidden">
+<a class="flex items-center justify-between px-3 py-2.5 hover:bg-amber-100/50 transition-colors cursor-pointer" href="#elif-section">
+<span class="text-[14px] font-medium text-amber-950">elif zanjiri</span>
+<span class="material-symbols-outlined text-[18px] text-amber-700">chevron_right</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2.5 hover:bg-amber-100/50 transition-colors cursor-pointer" href="#ichma-ich-section">
+<span class="text-[14px] font-medium text-amber-950">Ichma-ich shartlar</span>
+<span class="material-symbols-outlined text-[18px] text-amber-700">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Quiet Outlined Button -->
+<button class="w-full h-11 bg-white border border-[#E2E8F0] hover:bg-slate-50 text-[#0F172A] font-medium text-[14px] rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.99]" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#2563EB]">schema</span>
+<span>Boshqa usulda tushuntirish</span>
+</button>
+</section>
+<!-- Initial Section: if operatori -->
+<section class="flex flex-col space-y-3">
+<div class="flex flex-col space-y-1">
+<span class="text-[12px] text-[#64748B] font-medium uppercase tracking-wider">
+        Mavzu 3.1
+      </span>
+<h1 class="text-[24px] text-[#0F172A] font-bold tracking-tight">
+        if operatori
+      </h1>
+</div>
+<p class="text-[16px] text-[#0F172A] leading-relaxed">
+      Python dasturlash tilida shart operatorlari ma‘lum bir mantiqiy ifodaning rost (<code class="text-[14px] font-mono text-[#2563EB] bg-slate-100 px-1 py-0.5 rounded">True</code>) yoki yolg‘on (<code class="text-[14px] font-mono text-[#2563EB] bg-slate-100 px-1 py-0.5 rounded">False</code>) ekanligiga qarab dastur oqimini turli yo‘nalishlarga yo‘naltirish uchun ishlatiladi.
+    </p>
+<p class="text-[16px] text-[#0F172A] leading-relaxed">
+      Agar tekshirilayotgan shart qanoatlantirilsa, unga tegishli kod bloki ishga tushadi. Aks holda, kod bloki tashlab ketiladi yoki muqobil qism bajariladi.
+    </p>
+<!-- Code Block: if -->
+<div aria-label="Python kod namunasi" class="bg-white border border-[#E2E8F0] rounded-xl p-4 overflow-hidden mt-1">
+<div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] text-[#64748B]">
+<span class="text-[12px] font-semibold tracking-wider uppercase text-[#64748B]">Python</span>
+<button class="flex items-center gap-1 text-[12px] text-[#64748B] hover:text-[#0F172A] transition-colors" onclick="copySnippet('copy-text-1')" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span id="copy-text-1">Nusxa</span>
+</button>
+</div>
+<pre class="pt-3 font-mono text-[14px] leading-6 text-[#0F172A] overflow-x-auto"><code><span class="text-[#64748B]">yosh</span> = <span class="text-amber-700">18</span>
+<span class="text-[#2563EB] font-semibold">if</span> yosh &gt;= <span class="text-amber-700">18</span>:
+    <span class="text-[#2563EB] font-semibold">print</span>(<span class="text-emerald-700">"Kirishga ruxsat berildi"</span>)
+<span class="text-[#2563EB] font-semibold">else</span>:
+    <span class="text-[#2563EB] font-semibold">print</span>(<span class="text-rose-700">"Kirish taqiqlanadi"</span>)</code></pre>
+</div>
+</section>
+<!-- Re-study Focus Section: elif zanjiri -->
+<section class="flex flex-col space-y-3 pt-2" id="elif-section">
+<div class="border-l-4 border-amber-500 pl-3 py-0.5">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="text-[11px] font-semibold uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Qayta ko‘rish</span>
+</div>
+<h2 class="text-[20px] text-[#0F172A] font-bold tracking-tight">
+        elif zanjiri
+      </h2>
+</div>
+<p class="text-[16px] text-[#0F172A] leading-relaxed">
+      Agar bir nechta shartlarni ketma-ket tekshirish zarur bo‘lsa, <code class="text-[14px] font-mono text-[#2563EB] bg-slate-100 px-1 py-0.5 rounded">elif</code> (else if qisqartmasi) kalit so‘zidan foydalaniladi. Python shartlarni yuqoridan pastga qarab tekshiradi va birinchi to‘g‘ri kelgan blokni bajarib, qolganlarini tashlab ketadi.
+    </p>
+<!-- Code Block: elif -->
+<div aria-label="elif kod namunasi" class="bg-white border border-[#E2E8F0] rounded-xl p-4 overflow-hidden">
+<div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] text-[#64748B]">
+<span class="text-[12px] font-semibold tracking-wider uppercase text-[#64748B]">Python (elif)</span>
+<button class="flex items-center gap-1 text-[12px] text-[#64748B] hover:text-[#0F172A] transition-colors" onclick="copySnippet('copy-text-2')" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span id="copy-text-2">Nusxa</span>
+</button>
+</div>
+<pre class="pt-3 font-mono text-[14px] leading-6 text-[#0F172A] overflow-x-auto"><code><span class="text-[#64748B]">ball</span> = <span class="text-amber-700">85</span>
+<span class="text-[#2563EB] font-semibold">if</span> ball &gt;= <span class="text-amber-700">90</span>:
+    <span class="text-[#2563EB] font-semibold">print</span>(<span class="text-emerald-700">"A'lo baho"</span>)
+<span class="text-[#2563EB] font-semibold">elif</span> ball &gt;= <span class="text-amber-700">70</span>:
+    <span class="text-[#2563EB] font-semibold">print</span>(<span class="text-[#2563EB]">"Yaxshi baho"</span>)
+<span class="text-[#2563EB] font-semibold">else</span>:
+    <span class="text-[#2563EB] font-semibold">print</span>(<span class="text-rose-700">"Qoniqarsiz"</span>)</code></pre>
+</div>
+</section>
+<!-- Flowchart Diagram / Theoretical Diagram -->
+<section class="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col">
+<div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+<span class="text-[14px] font-semibold text-[#0F172A]">Mantiqiy oqim sxemasi</span>
+<span class="text-[12px] text-[#64748B]">Nazariy asos</span>
+</div>
+<div class="w-full flex justify-center py-4 overflow-x-auto">
+<svg aria-label="Blok-sxema: Shart strukturasi" class="w-full max-w-[300px] h-auto" viewbox="0 0 320 370" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="arrow" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="6" refy="5" viewbox="0 0 10 10">
+<path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"></path>
+</marker>
+</defs>
+<!-- 1. Start Node -->
+<rect fill="#F1F5F9" height="34" rx="17" stroke="#CBD5E1" stroke-width="1.5" width="120" x="100" y="8"></rect>
+<text fill="#0F172A" font-family="Inter, sans-serif" font-size="12" font-weight="500" text-anchor="middle" x="160" y="29">Boshlanish</text>
+<!-- Arrow from Start to Diamond -->
+<line marker-end="url(#arrow)" stroke="#94A3B8" stroke-width="1.5" x1="160" x2="160" y1="42" y2="76"></line>
+<!-- 2. Decision Diamond -->
+<polygon fill="#FFFFFF" points="160,80 230,122 160,164 90,122" stroke="#2563EB" stroke-width="1.5"></polygon>
+<text fill="#0F172A" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="160" y="126">yosh &gt;= 18?</text>
+<!-- Branch Labels -->
+<text fill="#DC2626" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="end" x="70" y="116">Yo‘q</text>
+<text fill="#2563EB" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="start" x="250" y="116">Ha</text>
+<!-- Left Branch Lines (Yo'q) -->
+<line stroke="#94A3B8" stroke-width="1.5" x1="90" x2="48" y1="122" y2="122"></line>
+<line marker-end="url(#arrow)" stroke="#94A3B8" stroke-width="1.5" x1="48" x2="48" y1="122" y2="192"></line>
+<!-- Right Branch Lines (Ha) -->
+<line stroke="#94A3B8" stroke-width="1.5" x1="230" x2="272" y1="122" y2="122"></line>
+<line marker-end="url(#arrow)" stroke="#94A3B8" stroke-width="1.5" x1="272" x2="272" y1="122" y2="192"></line>
+<!-- 3. Left Action Rectangle (Taqiqlandi) -->
+<rect fill="#FFFFFF" height="42" rx="6" stroke="#E2E8F0" stroke-width="1.5" width="90" x="8" y="196"></rect>
+<text fill="#0F172A" font-family="Inter, sans-serif" font-size="10" font-weight="500" text-anchor="middle" x="53" y="214">Kirish</text>
+<text fill="#DC2626" font-family="Inter, sans-serif" font-size="10" font-weight="600" text-anchor="middle" x="53" y="228">Taqiqlandi</text>
+<!-- 4. Right Action Rectangle (Ruxsat berildi) -->
+<rect fill="#FFFFFF" height="42" rx="6" stroke="#E2E8F0" stroke-width="1.5" width="94" x="222" y="196"></rect>
+<text fill="#0F172A" font-family="Inter, sans-serif" font-size="10" font-weight="500" text-anchor="middle" x="269" y="214">Ruxsat</text>
+<text fill="#2563EB" font-family="Inter, sans-serif" font-size="10" font-weight="600" text-anchor="middle" x="269" y="228">berildi</text>
+<!-- Merge Lines to End -->
+<line stroke="#94A3B8" stroke-width="1.5" x1="53" x2="53" y1="238" y2="286"></line>
+<line stroke="#94A3B8" stroke-width="1.5" x1="53" x2="152" y1="286" y2="286"></line>
+<line stroke="#94A3B8" stroke-width="1.5" x1="269" x2="269" y1="238" y2="286"></line>
+<line stroke="#94A3B8" stroke-width="1.5" x1="269" x2="168" y1="286" y2="286"></line>
+<!-- Center connector into End Node -->
+<line marker-end="url(#arrow)" stroke="#94A3B8" stroke-width="1.5" x1="160" x2="160" y1="286" y2="314"></line>
+<!-- 5. End Node -->
+<rect fill="#F1F5F9" height="34" rx="17" stroke="#CBD5E1" stroke-width="1.5" width="120" x="100" y="318"></rect>
+<text fill="#0F172A" font-family="Inter, sans-serif" font-size="12" font-weight="500" text-anchor="middle" x="160" y="339">Tugatish</text>
+</svg>
+</div>
+<p class="text-[12px] text-[#64748B] text-center pt-2 border-t border-[#E2E8F0]">
+      Blok-sxema: Shart strukturasi
+    </p>
+</section>
+<!-- Truth-Style Table -->
+<section class="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
+<div class="px-4 py-3 bg-slate-50 border-b border-[#E2E8F0]">
+<span class="text-[12px] font-semibold uppercase text-[#64748B] tracking-wider">
+        Mantiqiy amallar jadvali
+      </span>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-[#E2E8F0] bg-white text-[#64748B] text-[12px] uppercase">
+<th class="px-4 py-2.5 font-medium">Shart</th>
+<th class="px-4 py-2.5 font-medium">Qiymat</th>
+<th class="px-4 py-2.5 font-medium text-right">Natija</th>
+</tr>
+</thead>
+<tbody class="text-[14px]">
+<tr class="border-b border-[#E2E8F0]">
+<td class="px-4 py-3 font-mono text-[#0F172A]">a &gt; b</td>
+<td class="px-4 py-3 font-mono text-[#64748B]">5 &gt; 3</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-emerald-50 text-emerald-700">True</span>
+</td>
+</tr>
+<tr class="border-b border-[#E2E8F0]">
+<td class="px-4 py-3 font-mono text-[#0F172A]">a == b</td>
+<td class="px-4 py-3 font-mono text-[#64748B]">5 == 3</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-rose-50 text-rose-700">False</span>
+</td>
+</tr>
+<tr>
+<td class="px-4 py-3 font-mono text-[#0F172A]">a &lt; b</td>
+<td class="px-4 py-3 font-mono text-[#64748B]">5 &lt; 3</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-rose-50 text-rose-700">False</span>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<!-- Collapsible Exercise Card: Masala 1 -->
+<section class="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden transition-all duration-200">
+<button aria-expanded="false" class="w-full p-4 flex items-center justify-between text-left focus:outline-none" id="accordion-toggle" onclick="toggleSolution()" type="button">
+<div class="pr-3 min-w-0">
+<div class="text-[14px] font-semibold text-[#0F172A] truncate">
+          Masala 1: Haroratni tekshirish
+        </div>
+<div class="text-[13px] text-[#64748B] truncate mt-0.5">
+          Havo harorati 0 dan yuqori bo‘lsa...
+        </div>
+</div>
+<div class="flex items-center gap-1 text-[13px] font-medium text-[#2563EB] shrink-0">
+<span id="solution-label">Yechimni ko‘rish</span>
+<span class="material-symbols-outlined text-[18px] transition-transform duration-200" id="accordion-icon">expand_more</span>
+</div>
+</button>
+<div class="hidden px-4 pb-4 pt-2 border-t border-[#E2E8F0] bg-slate-50 text-[#0F172A]" id="solution-content">
+<p class="text-[13px] text-[#64748B] mb-2">
+        Agar harorat noldan baland bo‘lsa "Iliq", aks holda "Sovuq" degan yozuv chiqaring:
+      </p>
+<pre class="bg-white border border-[#E2E8F0] rounded-lg p-3 font-mono text-[13px] text-[#0F172A] overflow-x-auto"><code>harorat = 15
+if harorat &gt; 0:
+    print("Iliq ob-havo")
+else:
+    print("Muzlash harorati")</code></pre>
+</div>
+</section>
+<!-- Ichma-ich shartlar Anchor Placeholder for smooth navigation -->
+<div class="h-1" id="ichma-ich-section"></div>
+</main>
+<!-- Floating Action Button (AI Tutor) -->
+<div class="fixed bottom-24 right-5 z-20">
+<button aria-label="AI ustozdan so'rash" class="h-10 px-3.5 bg-white border border-[#E2E8F0] rounded-full text-[#0F172A] text-[13px] font-medium flex items-center gap-2 hover:bg-slate-50 transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#2563EB]">chat</span>
+<span>AI tutor</span>
+</button>
+</div>
+<!-- Sticky Bottom Bar with Re-take Test Button -->
+<footer class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-sm border-t border-[#E2E8F0] p-4">
+<div class="max-w-md mx-auto w-full">
+<button class="w-full h-12 bg-[#2563EB] hover:bg-blue-700 transition-colors text-white text-[16px] font-medium rounded-xl flex items-center justify-center gap-2 active:scale-[0.99]" type="button">
+<span>Testni qayta topshirish</span>
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+</div>
+</footer>
+</div>
+<script>
+  function toggleSolution() {
+    const content = document.getElementById('solution-content');
+    const icon = document.getElementById('accordion-icon');
+    const label = document.getElementById('solution-label');
+    const toggle = document.getElementById('accordion-toggle');
+    const isExpanded = content.classList.contains('hidden');
+
+    if (isExpanded) {
+      content.classList.remove('hidden');
+      icon.classList.add('rotate-180');
+      label.textContent = "Yashirish";
+      toggle.setAttribute('aria-expanded', 'true');
+    } else {
+      content.classList.add('hidden');
+      icon.classList.remove('rotate-180');
+      label.textContent = "Yechimni ko‘rish";
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function copySnippet(elementId) {
+    const copyText = document.getElementById(elementId);
+    if (!copyText) return;
+    const prev = copyText.textContent;
+    copyText.textContent = "Nusxalandi!";
+    setTimeout(() => {
+      copyText.textContent = prev;
+    }, 2000);
+  }
+
+  document.getElementById('btn-bookmark')?.addEventListener('click', function() {
+    const icon = document.getElementById('bookmark-icon');
+    if (icon.textContent === 'bookmark_border') {
+      icon.textContent = 'bookmark';
+      this.classList.add('text-[#2563EB]');
+      this.classList.remove('text-[#64748B]');
+    } else {
+      icon.textContent = 'bookmark_border';
+      this.classList.remove('text-[#2563EB]');
+      this.classList.add('text-[#64748B]');
+    }
+  });
+
+  document.getElementById('btn-audio')?.addEventListener('click', function() {
+    this.classList.toggle('text-[#2563EB]');
+  });
+</script>
+</main></body></html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html lang="uz"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "tertiary": "#943700", "surface-tint": "#0053db", "error-container": "#ffdad6", "background": "#faf8ff", "on-background": "#131b2e", "surface-variant": "#dae2fd", "inverse-surface": "#283044", "on-surface-variant": "#434655", "secondary-fixed": "#d3e4fe", "outline-variant": "#c3c6d7", "on-tertiary": "#ffffff", "tertiary-fixed-dim": "#ffb596", "on-tertiary-fixed-variant": "#7d2d00", "on-tertiary-fixed": "#360f00", "secondary": "#505f76", "on-secondary-fixed": "#0b1c30", "inverse-on-surface": "#eef0ff", "surface-container": "#eaedff", "surface": "#faf8ff", "outline": "#737686", "primary-container": "#2563eb", "on-primary-fixed": "#00174b", "surface-bright": "#faf8ff", "secondary-fixed-dim": "#b7c8e1", "on-tertiary-container": "#ffede6", "tertiary-container": "#bc4800", "surface-container-low": "#f2f3ff", "on-primary-container": "#eeefff", "on-error": "#ffffff", "on-secondary": "#ffffff", "on-error-container": "#93000a", "tertiary-fixed": "#ffdbcd", "surface-container-lowest": "#ffffff", "on-primary-fixed-variant": "#003ea8", "on-surface": "#131b2e", "primary-fixed": "#dbe1ff", "error": "#ba1a1a", "primary-fixed-dim": "#b4c5ff", "surface-container-high": "#e2e7ff", "on-secondary-container": "#54647a", "surface-container-highest": "#dae2fd", "surface-dim": "#d2d9f4", "secondary-container": "#d0e1fb", "inverse-primary": "#b4c5ff", "primary": "#004ac6", "on-secondary-fixed-variant": "#38485d", "on-primary": "#ffffff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "1rem", "gutter": "1rem", "space-xs": "0.25rem", "space-lg": "1rem", "space-xl": "1.5rem", "space-md": "0.75rem", "space-sm": "0.5rem" }, "fontFamily": { "label-md": ["Inter"], "headline-sm": ["Inter"], "body-sm": ["Inter"], "body-md": ["Inter"], "label-sm": ["Inter"], "body-lg": ["Inter"], "code-inline": ["Inter"], "headline-lg": ["Inter"], "label-lg": ["Inter"], "headline-md": ["Inter"] }, "fontSize": { "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["14px", { "lineHeight": "21px", "fontWeight": "400" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "code-inline": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }] } } } }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm border-b border-surface-container"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[20px]">school</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-semibold tracking-tight text-on-surface">Attestatsiya</span><span class="font-label-sm text-label-sm text-on-surface-variant">Ta'lim portali</span></div></div><div class="p-space-md"><div class="px-space-sm pb-space-xs"><span class="font-label-sm text-label-sm font-medium uppercase tracking-wider text-outline">Asosiy Menyu</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-medium rounded-xl shadow-sm"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bosh-sahifa" href="#"><span class="material-symbols-outlined text-[20px]">home</span><span>Bosh sahifa</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="dars-sahifasi-(desktop)" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>O'quv reja</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bilim-darajasi" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span>Bilim darajasi</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="natijalarim" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Natijalarim</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="shaxsiy-konspekt-(desktop)" href="#"><span class="material-symbols-outlined text-[20px]">edit_note</span><span>Shaxsiy konspekt</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="ai-tutor-(desktop)" href="#"><span class="material-symbols-outlined text-[20px]">psychology</span><span>AI tutor</span></a></nav></div></div><div class="p-space-md flex flex-col gap-space-sm border-t border-surface-container"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="sozlamalar" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Sozlamalar</span></a><div class="flex items-center justify-between px-space-md py-space-sm bg-surface-container-low rounded-xl"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-sm text-label-sm font-medium text-on-surface">O'qituvchi portali</span></div><span class="font-label-sm text-label-sm text-outline">2025</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-sm"><nav class="flex items-center gap-space-xs font-label-md text-label-md"><span class="text-outline hover:text-on-surface cursor-pointer">Portal</span><span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span><span class="text-outline hover:text-on-surface cursor-pointer">O'quv reja</span><span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span><span class="text-on-surface font-medium">Informatika kursi</span></nav></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container-low border border-surface-container"><span class="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface font-medium">Sessiya: Faol</span></div><div class="h-5 w-px bg-surface-container"></div><button aria-label="Bildirishnomalar" class="relative p-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-space-md pl-space-xs"><div class="flex flex-col text-right"><span class="font-label-md text-label-md font-medium text-on-surface leading-tight">Dilnoza Karimova</span><span class="font-label-sm text-label-sm text-outline leading-tight">Informatika fani o'qituvchisi</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="px-space-xl py-space-lg flex flex-col gap-space-xl max-w-7xl mx-auto w-full">
+<!-- Breadcrumb Context & Status Badge -->
+<div class="flex items-center justify-between flex-wrap gap-space-md">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-outline">
+<span>Portal</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span>O'quv reja</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-tertiary-container font-medium">Qayta o'qitish</span>
+</div>
+<div class="flex items-center gap-space-sm bg-tertiary-fixed text-on-tertiary-fixed px-space-md py-1 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary">history_edu</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-wide uppercase">Diagnostik korreksiya</span>
+</div>
+</div>
+<!-- Alert / Remediation Hero Banner -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-tertiary-fixed/40 via-surface-container-high to-surface-container-lowest p-space-xl shadow-md">
+<div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-space-sm max-w-3xl">
+<div class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-md bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-medium w-fit shadow-sm">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+<span>Xatolar ustida ishlash rejimi</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Oxirgi testda 3 ta xato aniqlandi <span class="text-tertiary font-bold">(To'plash ko'rsatkichi: 60%)</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+            Rekursiyaning to'xtash sharti (base condition) va global/lokal o'zgaruvchilar ko'rinish doirasi bo'yicha javoblaringizda noaniqlik kuzatildi. Ushbu darsda sariq hoshiyali ajratilgan bo'limlarga alohida e'tibor qarating.
+          </p>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch md:items-center gap-space-md shrink-0 w-full md:w-auto">
+<button class="h-12 px-space-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md rounded-xl shadow-sm transition-all flex items-center justify-center gap-space-xs" id="toggle-analysis-btn" onclick="document.getElementById('archive-card').scrollIntoView({behavior: 'smooth'})">
+<span class="material-symbols-outlined text-[20px] text-tertiary">troubleshoot</span>
+<span>Xatolar tahlilini ko'rish</span>
+</button>
+</div>
+</div>
+<!-- Background subtle decorative chart ring -->
+<div class="absolute -right-12 -bottom-12 opacity-10 pointer-events-none">
+<svg class="text-tertiary" fill="currentColor" height="220" viewbox="0 0 100 100" width="220">
+<path d="M50 0 A50 50 0 1 0 100 50 L80 50 A30 30 0 1 1 50 20 Z"></path>
+</svg>
+</div>
+</div>
+<!-- Main Content 2-Column Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Left Column: Lesson Content & High-Priority Mistakes (8 Cols) -->
+<main class="lg:col-span-8 flex flex-col gap-space-xl">
+<!-- Lesson Header Card -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between border-b border-surface-container pb-space-md">
+<div>
+<span class="font-label-sm text-label-sm font-semibold text-primary uppercase tracking-wider">1-Modul • 1.3-mavzu</span>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-1">Funksiyalar va rekursiya: Chuqurlashtirilgan tahlil</h2>
+</div>
+<div class="flex items-center gap-space-xs text-outline font-label-sm text-label-sm bg-surface-container-low px-space-md py-1 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+<span>15 daqiqa qayta o'qish</span>
+</div>
+</div>
+<div class="font-body-lg text-body-lg text-on-surface space-y-space-md leading-relaxed">
+<p>
+              Informatika fanida rekursiya — bu funksiyaning o'z-o'ziga to'g'ridan-to'g'ri yoki bilvosita murojaat qilish jarayonidir. Har qanday rekursiv algoritm ikkita majburiy asosiy komponentdan iborat bo'lishi shart:
+            </p>
+<ol class="list-decimal pl-space-xl space-y-space-xs font-body-md text-body-md text-on-surface-variant">
+<li><strong>Bazaviy to'xtash sharti (Base Case):</strong> Hisoblash to'xtashi va funksiya zanjiri teskari qaytishi lozim bo'lgan minimal chegara.</li>
+<li><strong>Rekursiv qadam (Recursive Step):</strong> Masalani o'ziga o'xshash, ammo hajmi kichikroq bo'lakka keltirib, funksiyani yana chaqirish.</li>
+</ol>
+</div>
+<!-- Highlighted Mistake Remediation Section -->
+<div class="relative bg-tertiary-fixed/30 rounded-xl p-space-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between flex-wrap gap-space-sm">
+<span class="inline-flex items-center gap-space-xs bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-semibold px-space-md py-1 rounded-md shadow-sm">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+                Xatolik kuzatilgan qism
+              </span>
+<span class="font-label-sm text-label-sm text-tertiary font-medium">Testdagi 4-savolga bevosita bog'liq</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              Rekursiyada bazaviy shartni unutish oqibatlari (RecursionError)
+            </h3>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+              Agar rekursiv funksiyada bazaviy to'xtash sharti qo'yilmasa yoki hech qachon bajarilmaydigan mantiq yozilsa, dastur har bir chaqiruvni kompyuter xotirasidagi <em>Chaqiruvlar steki (Call Stack)</em>ga qo'shib ketaveradi. Python interpretatori ushbu xatolikning oldini olish maqsadida sukut bo'yicha cheklov (odatda 1000 ta qatlam) o'rnatgan bo'lib, me'yor buzilganda quyidagi tizim xatoligini chiqaradi:
+            </p>
+<div class="bg-inverse-surface text-inverse-on-surface p-space-md rounded-xl font-code-inline text-code-inline shadow-inner overflow-x-auto">
+<span class="text-error-container font-semibold">RecursionError:</span> maximum recursion depth exceeded in comparison
+            </div>
+<!-- Side-by-side Visual Stack Architecture vs Solution -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<!-- Flawed Code -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-container">
+<span class="font-label-sm text-label-sm font-semibold text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">cancel</span> Xato yondashuv
+                    </span>
+<span class="font-label-sm text-label-sm text-outline">Stek to'lishi</span>
+</div>
+<pre class="font-code-inline text-[13px] leading-5 text-on-surface overflow-x-auto"><code><span class="text-outline"># To'xtash sharti yo'q</span>
+def faktorial(n):
+    <span class="text-error font-medium"># XATO: if sharti qolib ketgan</span>
+    return n * faktorial(n - 1)
+
+faktorial(5) <span class="text-error font-medium"># Halokat!</span></code></pre>
+</div>
+<div class="mt-space-md bg-error-container/40 p-space-sm rounded-lg flex items-center gap-space-xs text-error font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]">layers_clear</span>
+<span>Stek xotirasi to'lib, dastur to'xtaydi</span>
+</div>
+</div>
+<!-- Correct Base Condition -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between pb-space-xs mb-space-sm border-b border-surface-container">
+<span class="font-label-sm text-label-sm font-semibold text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> To'g'ri yondashuv
+                    </span>
+<span class="font-label-sm text-label-sm text-outline">Xavfsiz hisoblash</span>
+</div>
+<pre class="font-code-inline text-[13px] leading-5 text-on-surface overflow-x-auto"><code><span class="text-outline"># Bazaviy chegara mavjud</span>
+def faktorial(n):
+    <span class="text-primary font-medium">if n <= 1:</span>
+        <span class="text-primary font-medium">return 1  # Base Case</span>
+    return n * faktorial(n - 1)
+
+faktorial(5) <span class="text-primary font-medium"># 120 qaytadi</span></code></pre>
+</div>
+<div class="mt-space-md bg-secondary-container/50 p-space-sm rounded-lg flex items-center gap-space-xs text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span><code class="font-code-inline">n <= 1</code> sharti stekni o'z vaqtida bo'shatadi</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Second Remediation: Scope -->
+<div class="bg-surface-container-low rounded-xl p-space-xl flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs text-outline font-label-sm text-label-sm uppercase font-semibold">
+<span class="material-symbols-outlined text-[18px] text-tertiary">memory</span>
+<span>2-mustahkamlash: O'zgaruvchilar ko'lami (Scope LEGB)</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Lokal va Global o'zgaruvchilar chalkashligi</h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Funksiya ichida e'lon qilingan o'zgaruvchi faqat o'sha funksiyaning lokal xotirasida yashaydi. Tashqi muhitdan lokal o'zgaruvchiga murojaat qilish <code class="font-code-inline text-error bg-surface-container px-1 rounded">NameError</code> xatoligini vujudga keltiradi. Global o'zgaruvchini funksiya ichida yangilash uchun esa albatta <code class="font-code-inline text-primary bg-surface-container px-1 rounded">global</code> kalit so'zi ko'rsatilishi shart.
+            </p>
+</div>
+<!-- Interactive Self-Check Card -->
+<div class="bg-surface-container-high rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[22px]">quiz</span>
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">O'z-o'zini tekshirish mini-savoli</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface font-medium">
+              Agar rekursiv funksiyada bazaviy to'xtash sharti qo'yilmasa, Python muhitida qanday hodisa ro'y beradi va qaysi xatolik qaytariladi?
+            </p>
+<div class="flex flex-col gap-space-sm" id="quiz-options-group">
+<button class="quiz-option text-left p-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container transition-all flex items-center justify-between text-body-md font-body-md text-on-surface" onclick="handleCheck(this, false, 'Dastur xotirani tozalab, nol qiymatini qaytarmaydi.')">
+<span>A) Dastur avtomatik to'xtaydi va qiymat 0 ga teng bo'ladi</span>
+<span class="material-symbols-outlined text-[20px] text-outline opacity-0 status-icon">radio_button_unchecked</span>
+</button>
+<button class="quiz-option text-left p-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container transition-all flex items-center justify-between text-body-md font-body-md text-on-surface" onclick="handleCheck(this, true, 'To‘g‘ri! Stek chegarasi oshib ketadi va RecursionError yuzaga keladi.')">
+<span>B) RecursionError yuzaga keladi (Chaqiruvlar steki to'lishi hisobiga)</span>
+<span class="material-symbols-outlined text-[20px] text-outline opacity-0 status-icon">radio_button_unchecked</span>
+</button>
+<button class="quiz-option text-left p-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container transition-all flex items-center justify-between text-body-md font-body-md text-on-surface" onclick="handleCheck(this, false, 'SyntaxError kompilyatsiya/sintaksis vaqtida tekshiriladi, bu esa ishlash vaqtidagi xato.')">
+<span>C) SyntaxError: invalid recursive statement</span>
+<span class="material-symbols-outlined text-[20px] text-outline opacity-0 status-icon">radio_button_unchecked</span>
+</button>
+</div>
+<!-- Dynamic Feedback Box -->
+<div class="hidden p-space-md rounded-xl text-body-md font-body-md transition-all items-center gap-space-sm" id="quiz-feedback">
+<span class="material-symbols-outlined text-[22px]" id="quiz-icon"></span>
+<span id="quiz-msg"></span>
+</div>
+</div>
+</article>
+<!-- Bottom Action Bar (Fixed feel within stream) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[20px] text-primary">verified_user</span>
+<span>Mavzuni to'liq tushunganingizga ishonch hosil qiling</span>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto">
+<button class="h-12 px-space-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-xl transition-all flex items-center justify-center gap-space-xs w-full sm:w-auto" onclick="window.location.reload()">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+<span>AI Tutor bilan tahlil qilish</span>
+</button>
+<button class="h-12 px-space-xl bg-primary text-on-primary hover:bg-surface-tint font-label-md text-label-md rounded-xl shadow-md transition-all flex items-center justify-center gap-space-xs font-semibold w-full sm:w-auto">
+<span>Testni qayta topshirish</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Right Column: Mistake Archive & AI Tutor Advice (4 Cols) -->
+<aside class="lg:col-span-4 flex flex-col gap-space-lg sticky top-20">
+<!-- Error Breakdown Archive Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-md" id="archive-card">
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary text-[22px]">cancel_presentation</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Xato qilingan savollar</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-bold px-2 py-0.5 rounded-full">3 ta xato</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Question 1 Breakdown -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col gap-space-xs transition-all hover:bg-surface-container">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-outline">1-SAVOL</span>
+<span class="text-error font-label-sm text-label-sm font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">close</span> Xato
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium line-clamp-2">
+                "Rekursiv chaqiruvda stek to'lishi va dastur to'xtashining asosiy sababi nima?"
+              </p>
+<div class="grid grid-cols-2 gap-2 mt-space-xs pt-space-xs border-t border-surface-container text-label-sm font-label-sm">
+<div class="text-error">Siz: <span class="font-bold">Variant B</span></div>
+<div class="text-primary">To'g'ri: <span class="font-bold">Variant D</span></div>
+</div>
+</div>
+<!-- Question 2 Breakdown -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col gap-space-xs transition-all hover:bg-surface-container">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-outline">2-SAVOL</span>
+<span class="text-error font-label-sm text-label-sm font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">close</span> Xato
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium line-clamp-2">
+                "Lokal o'zgaruvchi ko'rinish doirasi va funksiya steki xotirasi qachon tozalanadi?"
+              </p>
+<div class="grid grid-cols-2 gap-2 mt-space-xs pt-space-xs border-t border-surface-container text-label-sm font-label-sm">
+<div class="text-error">Siz: <span class="font-bold">Variant A</span></div>
+<div class="text-primary">To'g'ri: <span class="font-bold">Variant C</span></div>
+</div>
+</div>
+<!-- Question 3 Breakdown -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col gap-space-xs transition-all hover:bg-surface-container">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-outline">3-SAVOL</span>
+<span class="text-error font-label-sm text-label-sm font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">close</span> Xato
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium line-clamp-2">
+                "Python tilida rekursiyaning maksimal chuqurligini tekshirish uchun qaysi modul ishlatiladi?"
+              </p>
+<div class="grid grid-cols-2 gap-2 mt-space-xs pt-space-xs border-t border-surface-container text-label-sm font-label-sm">
+<div class="text-error">Siz: <span class="font-bold">Variant D</span></div>
+<div class="text-primary">To'g'ri: <span class="font-bold">Variant B</span> (sys)</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-space-xs py-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md rounded-xl transition-all flex items-center justify-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Har bir savol izohini ochish</span>
+</button>
+</section>
+<!-- AI Tutor Recommendation Card -->
+<section class="bg-gradient-to-br from-primary-fixed/40 via-surface-container-lowest to-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">AI Tutor tavsiyasi</h4>
+<span class="font-label-sm text-label-sm text-outline">Shaxsiy metodik yordamchi</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest/80 p-space-md rounded-xl shadow-xs">
+<p class="font-body-md text-body-md text-on-surface italic leading-relaxed">
+              "Dilnoza opa, rekursiya bo'yicha 2 ta asosiy qoidani eslab qolsangiz, testdan 100% o'tish imkoningiz bor. Xohlasangiz birgalikda kodni satrma-satr tahlil qilamiz."
+            </p>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">done_all</span>
+<span>Bazaviy shart formulalarini tekshirish</span>
+</div>
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">done_all</span>
+<span>Python <code class="font-code-inline font-bold">sys.getrecursionlimit()</code> sinovi</span>
+</div>
+</div>
+<button class="w-full h-11 bg-primary text-on-primary hover:bg-surface-tint font-label-md text-label-md rounded-xl shadow-sm transition-all flex items-center justify-center gap-space-xs mt-space-xs font-semibold">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+<span>AI Tutor bilan boshlash</span>
+</button>
+</section>
+<!-- Performance Stat Card -->
+<div class="bg-surface-container-low rounded-2xl p-space-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Mavzuviy o'zlashtirish</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface mt-1">60% → 85% kutilmoqda</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">trending_up</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<script>
+  function handleCheck(btnElement, isCorrect, feedbackMsg) {
+    const parent = document.getElementById('quiz-options-group');
+    const allButtons = parent.querySelectorAll('.quiz-option');
+    const feedbackBox = document.getElementById('quiz-feedback');
+    const feedbackIcon = document.getElementById('quiz-icon');
+    const feedbackText = document.getElementById('quiz-msg');
+
+    allButtons.forEach(btn => {
+      btn.classList.remove('bg-secondary-container', 'bg-error-container', 'border', 'font-medium');
+      btn.querySelector('.status-icon').classList.add('opacity-0');
+    });
+
+    const icon = btnElement.querySelector('.status-icon');
+    icon.classList.remove('opacity-0');
+
+    feedbackBox.classList.remove('hidden', 'bg-secondary-container', 'text-on-secondary-container', 'bg-error-container', 'text-on-error-container');
+    feedbackBox.classList.add('flex');
+
+    if (isCorrect) {
+      btnElement.classList.add('bg-secondary-container', 'font-medium');
+      icon.innerText = 'check_circle';
+      icon.classList.add('text-primary');
+      feedbackBox.classList.add('bg-secondary-container', 'text-on-secondary-container');
+      feedbackIcon.innerText = 'task_alt';
+      feedbackText.innerText = feedbackMsg;
+    } else {
+      btnElement.classList.add('bg-error-container', 'font-medium');
+      icon.innerText = 'cancel';
+      icon.classList.add('text-error');
+      feedbackBox.classList.add('bg-error-container', 'text-on-error-container');
+      feedbackIcon.innerText = 'error';
+      feedbackText.innerText = feedbackMsg;
+    }
+  }
+</script></main></div></body></html>

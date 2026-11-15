@@ -1,0 +1,28 @@
+{# Savol ichidagi qo'shimcha materiallar: kod, rasm, jadval. Har qanday savol turida ishlatiladi. #}
+{% if q.code %}{{ code(q.code, copy=False) }}{% endif %}
+
+{% if q.image %}
+<figure class="q-figure" x-data="{ zoom: false }">
+  <button type="button" class="q-figure-btn" @click="zoom = true" aria-label="Rasmni kattalashtirish">
+    <img src="{{ url_for('static', filename=q.image.src) }}" alt="{{ q.image.alt }}" loading="lazy">
+    <span class="q-zoom">{{ icon("search", "ico-sm") }}</span>
+  </button>
+  {% if q.image.caption %}<figcaption>{{ q.image.caption }}</figcaption>{% endif %}
+  <div class="sheet-backdrop" x-show="zoom" x-cloak @click="zoom = false" @keydown.escape.window="zoom = false" style="align-items:center;padding:16px">
+    <img src="{{ url_for('static', filename=q.image.src) }}" alt="{{ q.image.alt }}" style="max-width:100%;max-height:90dvh;border-radius:12px;background:#fff">
+  </div>
+</figure>
+{% endif %}
+
+{% if q.table %}
+<div class="table-wrap q-table">
+  <table class="table">
+    <thead><tr>{% for h in q.table.head %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for row in q.table.rows %}
+      <tr>{% for c in row %}{% if loop.first %}<th scope="row">{{ c }}</th>{% else %}<td class="num {{ 'q-cell-ask' if c == '?' }}">{{ c }}</td>{% endif %}{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}

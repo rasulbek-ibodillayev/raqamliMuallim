@@ -1,0 +1,255 @@
+/* raqamliMuallim — kichik yordamchi skriptlar (Alpine.js bilan birga ishlaydi) */
+
+/* Ilova qobig'i: chap menyu, tezkor qidiruv (Ctrl+K) va bildirishnomalar */
+window.rmShell = function () {
+  function norm(s) { return (s || "").toLowerCase().replace(/[‘’ʻʼ'`]/g, "").trim(); }
+  return {
+    menu: false, search: false, notif: false, seen: false, q: "", pos: 0,
+    openSearch: function () {
+      var self = this;
+      this.menu = false; this.notif = false; this.search = true; this.q = ""; this.pos = 0;
+      // x-show animatsiyasi elementni ko'rsatgandan keyin fokus beramiz
+      setTimeout(function () { self.$refs.q.focus(); }, 60);
+    },
+    index: function () {
+      var items = (window.RM_SEARCH || []).slice();
+      try {
+        (JSON.parse(localStorage.getItem("rm-notes")) || []).forEach(function (n) {
+          items.push({ g: "Konspekt", t: n.title || n.text.slice(0, 70), s: n.topic, u: "/app/konspekt", i: "note" });
+        });
+      } catch (e) {}
+      return items;
+    },
+    results: function () {
+      var q = norm(this.q), all = this.index(), out;
+      if (!q) out = all.filter(function (r) { return r.g === "Bo‘limlar"; }).slice(0, 8);
+      else out = all.filter(function (r) { return norm(r.t + " " + (r.s || "")).indexOf(q) !== -1; }).slice(0, 12);
+      // h — guruh sarlavhasini ko'rsatish kerakmi (guruhdagi birinchi element)
+      return out.map(function (r, i) { return Object.assign({}, r, { h: i === 0 || out[i - 1].g !== r.g }); });
+    },
+    move: function (d) { var n = this.results().length; if (n) this.pos = (this.pos + d + n) % n; },
+    open: function () { var r = this.results()[this.pos]; if (r) location.href = r.u; },
+    keys: function (e) {
+      var typing = /input|textarea|select/i.test(e.target.tagName) || e.target.isContentEditable;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); this.openSearch(); }
+      else if (e.key === "/" && !typing) { e.preventDefault(); this.openSearch(); }
+      else if (e.key === "Escape") { this.search = false; this.menu = false; this.notif = false; }
+    }
+  };
+};
+
+(function () {
+  "use strict";
+
+  // Yorug'/qorong'i mavzu
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-theme-toggle]");
+    if (!t) return;
+    var root = document.documentElement;
+    var dark = root.dataset.theme
+      ? root.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("theme", root.dataset.theme); } catch (err) {}
+  });
+
+  // Kodni nusxalash
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]");
+    if (!b) return;
+    var pre = b.closest(".code").querySelector("pre");
+    if (navigator.clipboard) navigator.clipboard.writeText(pre.innerText).catch(function () {});
+    var old = b.innerHTML;
+    b.textContent = "Nusxalandi";
+    setTimeout(function () { b.innerHTML = old; }, 1400);
+  });
+
+  // Matn maydoni balandligini avtomatik moslash; Enter — yuborish, Shift+Enter — yangi qator
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t.matches("[data-autosize]")) return;
+    t.style.height = "auto";
+    t.style.height = Math.min(t.scrollHeight, 200) + "px";
+  });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (t.matches && t.matches(".composer textarea") && e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (t.value.trim()) t.form.requestSubmit();
+    }
+  });
+
+  // OTP: keyingi katakka avtomatik o'tish
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t.closest || !t.closest(".otp")) return;
+    t.value = t.value.replace(/\D/g, "").slice(0, 1);
+    if (t.value && t.nextElementSibling) t.nextElementSibling.focus();
+  });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (t.closest && t.closest(".otp") && e.key === "Backspace" && !t.value && t.previousElementSibling) {
+      t.previousElementSibling.focus();
+    }
+  });
+
+  // Python kodini sodda ranglash
+  var KW = /\b(if|elif|else|for|while|in|def|return|import|from|as|and|or|not|True|False|None|class|try|except|with|lambda|break|continue|pass)\b/g;
+  function highlight(src) {
+    var esc = src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return esc
+      .replace(/(#.*)$/gm, "\u0001c$1\u0002")
+      .replace(/("[^"\n]*"|'[^'\n]*')/g, "\u0001s$1\u0002")
+      .replace(KW, "\u0001k$1\u0002")
+      .replace(/\b(print|range|len|input|int|str|float|list)\b(?=\()/g, "\u0001f$1\u0002")
+      .replace(/\b(\d+(?:\.\d+)?)\b/g, "\u0001n$1\u0002")
+      .replace(/\u0001([cskfn])/g, '<span class="tok-$1">')
+      .replace(/\u0002/g, "</span>");
+  }
+  function run() {
+    document.querySelectorAll('pre[data-lang="python"] code').forEach(function (c) {
+      if (c.dataset.hl) return;
+      c.innerHTML = highlight(c.textContent);
+      c.dataset.hl = "1";
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run();
+
+  // Scroll paytida kartalar va bo'limlarni silliq ko'rsatish
+  var REVEAL = [
+    ".page .card", ".page .ai-card", ".page .alert", ".page .table-wrap", ".page .chips",
+    ".page .timeline > li", ".page .page-head", ".page .composer", ".page .empty",
+    ".focus-body .card", ".focus-body .code", ".focus-body .prose", ".focus-body figure", ".focus-body .ai-card",
+    ".cert-page", "[data-reveal]"
+  ].join(",");
+  function reveal() {
+    if (!("IntersectionObserver" in window)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var els = Array.prototype.filter.call(document.querySelectorAll(REVEAL), function (el) {
+      // ichma-ich animatsiya bo'lmasin; modal oynalar ichidagilarga tegmaymiz
+      return !el.parentElement.closest(".reveal") && !el.closest(".sheet-backdrop, .sidebar, [x-cloak]");
+    });
+    var fired = false;
+    // Zaxira: kuzatuvchi umuman ishlamasa (masalan, sahifa fon rejimida), kontent yashirin qolmasin
+    setTimeout(function () {
+      if (fired) return;
+      els.forEach(function (el) { el.classList.remove("reveal"); });
+      io.disconnect();
+    }, 1500);
+    var io = new IntersectionObserver(function (entries) {
+      fired = true;
+      var i = 0;
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.style.setProperty("--rd", Math.min(i++ * 60, 300) + "ms");
+        en.target.classList.add("in");
+        io.unobserve(en.target);
+        // animatsiya tugagach transform'ni olib tashlaymiz (fixed elementlar to'g'ri ishlashi uchun)
+        var el = en.target;
+        el.addEventListener("transitionend", function done(e) {
+          if (e.target !== el || e.propertyName !== "transform") return;
+          el.removeEventListener("transitionend", done);
+          el.classList.remove("reveal", "in");
+          el.style.removeProperty("--rd");
+        });
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+    els.forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", reveal); else reveal();
+
+  // Kichik bildirishnoma (toast)
+  window.rmToast = function (text) {
+    var t = document.createElement("div");
+    t.className = "toast"; t.setAttribute("role", "status");
+    t.innerHTML = '<svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>';
+    t.appendChild(document.createTextNode(text));
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 2400);
+  };
+
+  // Darsda matnni belgilaganda: «Konspektga saqlash» va «AI’dan so‘rash»
+  // Konspekt hozircha brauzer xotirasiga (rm-notes-inbox) yoziladi, «Shaxsiy konspekt» sahifasi uni o'qib oladi.
+  var selMenu = null;
+  function hideSel() { if (selMenu) { selMenu.remove(); selMenu = null; } }
+  function showSel() {
+    var s = window.getSelection();
+    var text = s ? s.toString().trim() : "";
+    var box = s && s.rangeCount ? s.anchorNode && (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement).closest("[data-select-menu]") : null;
+    hideSel();
+    if (!box || text.length < 3) return;
+    var r = s.getRangeAt(0).getBoundingClientRect();
+    selMenu = document.createElement("div");
+    selMenu.className = "sel-menu"; selMenu.setAttribute("role", "toolbar"); selMenu.setAttribute("aria-label", "Belgilangan matn");
+    selMenu.style.left = (r.left + r.width / 2 + window.scrollX) + "px";
+    selMenu.style.top = (r.top + window.scrollY) + "px";
+    selMenu.innerHTML =
+      '<button type="button" data-act="note"><svg class="ico ico-sm"><use href="#i-bookmark"/></svg>Konspektga saqlash</button>' +
+      '<button type="button" data-act="ai"><svg class="ico ico-sm"><use href="#i-sparkle"/></svg>AI’dan so‘rash</button>';
+    selMenu.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    selMenu.addEventListener("click", function (e) {
+      var act = e.target.closest("button") && e.target.closest("button").dataset.act;
+      if (act === "note") {
+        try {
+          var inbox = JSON.parse(localStorage.getItem("rm-notes-inbox") || "[]");
+          inbox.push({ id: Date.now(), topic: box.dataset.topic || "Umumiy", title: "", text: text, code: "", when: "Bugun" });
+          localStorage.setItem("rm-notes-inbox", JSON.stringify(inbox));
+        } catch (err) {}
+        window.rmToast("Konspektga saqlandi");
+      } else if (act === "ai") {
+        location.href = box.dataset.tutorUrl + "?q=" + encodeURIComponent("Tushuntirib bering: «" + text.slice(0, 300) + "»");
+      }
+      hideSel(); s.removeAllRanges();
+    });
+    document.body.appendChild(selMenu);
+  }
+  document.addEventListener("mouseup", function (e) { if (!(e.target.closest && e.target.closest(".sel-menu"))) setTimeout(showSel, 0); });
+  document.addEventListener("touchend", function () { setTimeout(showSel, 250); });
+  document.addEventListener("keyup", function (e) { if (e.shiftKey) showSel(); if (e.key === "Escape") hideSel(); });
+  window.addEventListener("scroll", hideSel, { passive: true });
+
+  // PWA: Service Worker (oflayn rejim)
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
+  }
+
+  // Matn o'lchami: data-fs = md (standart) | lg | xl
+  window.rmSetFontSize = function (v) {
+    var d = document.documentElement;
+    if (v === "md") delete d.dataset.fs; else d.dataset.fs = v;
+    try { if (v === "md") localStorage.removeItem("fs"); else localStorage.setItem("fs", v); } catch (e) {}
+    document.dispatchEvent(new CustomEvent("rm-fs", { detail: v }));
+  };
+  window.rmFontSize = function () { return document.documentElement.dataset.fs || "md"; };
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-fs-cycle]");
+    if (!b) return;
+    var order = ["md", "lg", "xl"], cur = window.rmFontSize();
+    window.rmSetFontSize(order[(order.indexOf(cur) + 1) % order.length]);
+  });
+
+  // Sahifadan chiqib ketishdan ogohlantirish (test va sinov sahifalari)
+  var safeLeave = false;
+  document.addEventListener("click", function (e) { if (e.target.closest("[data-safe-leave]")) safeLeave = true; });
+  document.addEventListener("submit", function () { safeLeave = true; });
+  window.addEventListener("beforeunload", function (e) {
+    if (safeLeave || !document.querySelector("[data-leave-guard]")) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
+
+  // Taymer: data-countdown="soniyalar"
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function fmt(s) {
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+    return (h ? h + ":" + pad(m) : pad(m)) + ":" + pad(x);
+  }
+  function timers() {
+    document.querySelectorAll("[data-countdown]").forEach(function (el) {
+      var s = parseInt(el.dataset.countdown, 10);
+      el.textContent = fmt(s);
+      setInterval(function () { if (s > 0) { s--; el.textContent = fmt(s); } }, 1000);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", timers); else timers();
+})();

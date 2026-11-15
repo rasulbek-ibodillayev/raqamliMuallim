@@ -1,0 +1,105 @@
+{% extends "layouts/focus.html" %}
+{% block title %}Natija{% endblock %}
+{% block bar %}
+<a class="icon-btn" href="{{ url_for('user.home') }}" aria-label="Bosh sahifa">{{ icon("x") }}</a>
+<div class="grow strong">Natija</div>
+{% endblock %}
+
+{% block content %}
+{% set pct = 62 if failed else 78 %}
+<div class="stack stack-xl" x-data>
+  <section class="stack stack-lg center" style="align-items:center">
+    {{ ring(pct, 148, "var(--red)" if failed else "var(--blue)", "umumiy ball") }}
+    <div class="stack stack-sm">
+      {% if failed %}
+      <h1>Bu mavzuni yana bir bor o‘rganamiz</h1>
+      <p class="lead">2-bosqichdan o‘tish uchun 80% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.</p>
+      {% else %}
+      <h1>Keyingi mavzuga o‘tishingiz mumkin</h1>
+      <p class="lead">Natija 70–89% oralig‘ida, shuning uchun mavzuni keyinroq takrorlashni tavsiya qilamiz.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if failed %}
+  <section class="card card-pad stack stack-sm">
+    <span class="eyebrow">Xato qilingan qismlar</span>
+    <div class="chips"><span class="chip">Kiritish va chiqarish qurilmalari</span><span class="chip">Tarmoq protokollari</span></div>
+  </section>
+  {% else %}
+  <section class="card">
+    <div class="card-head"><span class="strong">Mavzular bo‘yicha</span></div>
+    <div class="list">
+      {% for n, p in [("Shart operatorlari", 78), ("Sanoq sistemalari", 85), ("Kompyuter qurilmalari", 65)] %}
+      <div class="list-item"><div class="grow stack stack-sm"><div class="row between"><span>{{ n }}</span><span class="num small">{{ p }}%</span></div>{{ progress(p, "green" if p >= 70 else "red", "thin") }}</div></div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="stack">
+    <div class="row between"><h2 class="eyebrow">Savollar</h2><span class="xs muted">{{ review|length }} ta</span></div>
+    {% for r in review %}
+    {% set ok = r.ok and not (failed and r.n == 1) %}
+    <article class="card card-pad stack stack-sm" style="border-left:3px solid var(--{{ 'green' if ok else 'red' }})">
+      <div class="row between"><span class="small muted">{{ r.n }}-savol</span>
+        {% if ok %}{{ badge("To‘g‘ri", "green", "check") }}{% else %}{{ badge("Xato", "red", "x") }}{% endif %}</div>
+      <p>{{ r.q }}</p>
+      {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
+      <div class="small"><span class="muted">Sizning javobingiz:</span> <b class="{{ 't-green' if ok else 't-red' }}">{{ '42' if failed and r.n == 1 else r.mine }}</b>
+        {% if not ok %} · <span class="muted">To‘g‘ri javob:</span> <b class="t-green">{{ r.right or '45' }}</b>{% endif %}</div>
+      {% if not ok %}
+      <div class="card card-flat small" style="padding:12px 14px;color:var(--text-2)"><b>Izoh.</b> {{ r.why or '101101₂ = 32 + 8 + 4 + 1 = 45.' }}</div>
+      <div class="row wrap row-sm">
+        <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}">{{ icon("sparkle", "ico-sm") }}Xatoimni tushuntir</a>
+        <button class="btn btn-ghost btn-sm" type="button" @click="$dispatch('objection')">{{ icon("flag", "ico-sm") }}E’tiroz bildirish</button>
+      </div>
+      {% endif %}
+      <span class="xs muted">(Mavzu: {{ r.topic }})</span>
+    </article>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}
+
+{% block foot %}
+<footer class="focus-foot">
+  <div class="focus-foot-inner">
+    <a class="btn btn-outline" href="{{ url_for('user.home') }}">Bosh sahifa</a>
+    {% if failed %}
+    <a class="btn btn-primary grow" href="{{ url_for('user.lesson', holat='qayta') }}">Darsga qaytish</a>
+    {% else %}
+    <a class="btn btn-primary grow" href="{{ url_for('user.plan') }}">Keyingi mavzu{{ icon("arrow-right") }}</a>
+    {% endif %}
+  </div>
+</footer>
+{% endblock %}
+
+{% block overlay %}
+<div x-data="{ open: false, sent: false }" @objection.window="open = true; sent = false" @keydown.escape.window="open = false">
+  <div class="sheet-backdrop" x-show="open" x-cloak @click.self="open = false">
+    <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="obj-title" @submit.prevent="sent = true">
+      <div class="sheet-grip"></div>
+      <template x-if="!sent"><div class="stack stack-lg">
+        <div class="row between"><h2 id="obj-title">E’tiroz bildirish</h2><button class="icon-btn" type="button" @click="open = false" aria-label="Yopish">{{ icon("x") }}</button></div>
+        <p class="small muted">«Quyidagi kod natijasini aniqlang» savoli bo‘yicha</p>
+        <fieldset class="options" style="border:0;padding:0;margin:0">
+          <legend class="label" style="margin-bottom:10px">Sabab</legend>
+          {% for s in ["To‘g‘ri javob noto‘g‘ri ko‘rsatilgan", "Mening javobim ham to‘g‘ri", "Savol tushunarsiz", "Boshqa"] %}
+          <label class="option" style="min-height:48px;font-size:15px"><input type="radio" name="why" {{ 'checked' if loop.first }}><span class="key" style="border-radius:50%;width:20px;height:20px"></span>{{ s }}</label>
+          {% endfor %}
+        </fieldset>
+        <div class="field"><label class="label" for="obj-note">Izoh (ixtiyoriy)</label><textarea class="textarea" id="obj-note" placeholder="Nima uchun shunday deb hisoblaysiz?"></textarea></div>
+        <label class="check"><input type="checkbox"><span>Shoshilinch: xato yaqqol ko‘rinib turibdi</span></label>
+        <button class="btn btn-primary btn-block" type="submit">Yuborish</button>
+      </div></template>
+      <template x-if="sent"><div class="empty" style="padding:24px 0">
+        <span class="empty-ico" style="background:var(--green-soft);color:var(--green)">{{ icon("check", "ico-lg") }}</span>
+        <h2>E’tirozingiz qabul qilindi</h2>
+        <p class="muted small">Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi.</p>
+        <button class="btn btn-outline mt-16" type="button" @click="open = false">Yopish</button>
+      </div></template>
+    </form>
+  </div>
+</div>
+{% endblock %}

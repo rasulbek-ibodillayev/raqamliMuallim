@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html lang="uz"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_blank" name="shell-type"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}@media print{@page{size:A4 landscape;margin:0;}body{background:#ffffff!important;margin:0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"outline":"#737686","on-background":"#131b2e","error":"#ba1a1a","tertiary":"#943700","tertiary-fixed":"#ffdbcd","tertiary-container":"#bc4800","background":"#faf8ff","outline-variant":"#c3c6d7","on-tertiary":"#ffffff","surface-dim":"#d2d9f4","on-tertiary-fixed-variant":"#7d2d00","on-secondary-container":"#54647a","surface-container-high":"#e2e7ff","on-primary":"#ffffff","secondary-container":"#d0e1fb","on-tertiary-container":"#ffede6","surface-container-lowest":"#ffffff","on-primary-fixed-variant":"#003ea8","error-container":"#ffdad6","surface-container-highest":"#dae2fd","primary-fixed-dim":"#b4c5ff","primary-container":"#2563eb","secondary-fixed":"#d3e4fe","primary":"#004ac6","on-surface-variant":"#434655","inverse-surface":"#283044","surface-container-low":"#f2f3ff","on-tertiary-fixed":"#360f00","surface-variant":"#dae2fd","secondary":"#505f76","on-secondary-fixed":"#0b1c30","inverse-primary":"#b4c5ff","on-secondary-fixed-variant":"#38485d","on-surface":"#131b2e","on-primary-container":"#eeefff","surface-bright":"#faf8ff","surface-container":"#eaedff","on-secondary":"#ffffff","on-primary-fixed":"#00174b","on-error":"#ffffff","on-error-container":"#93000a","surface-tint":"#0053db","surface":"#faf8ff","inverse-on-surface":"#eef0ff","tertiary-fixed-dim":"#ffb596","primary-fixed":"#dbe1ff","secondary-fixed-dim":"#b7c8e1"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter":"1rem","space-sm":"0.5rem","margin":"1rem","space-lg":"1rem","space-xl":"1.5rem","space-xs":"0.25rem","space-md":"0.75rem"},fontFamily:{"body-md":["Inter"],"body-lg":["Inter"],"label-lg":["Inter"],"headline-md":["Inter"],"headline-lg":["Inter"],"code-inline":["Inter"],"label-sm":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"label-md":["Inter"]},fontSize:{"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"26px","fontWeight":"400"}],"label-lg":["16px",{"lineHeight":"24px","fontWeight":"500"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"code-inline":["14px",{"lineHeight":"20px","fontWeight":"500"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"500"}],"headline-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],"body-sm":["14px",{"lineHeight":"21px","fontWeight":"400"}],"label-md":["14px",{"lineHeight":"20px","fontWeight":"500"}]}}}};</script><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-surface-container-lowest font-body-md text-on-surface antialiased min-h-screen"><main class="w-full min-h-screen bg-surface-container-lowest flex items-center justify-center p-0 print:p-0"><div class="flex flex-col w-full items-center justify-center p-gutter md:p-space-xl">
+<!-- Interactive Action Bar (Hidden during print) -->
+<div class="print:hidden w-full max-w-[1040px] flex items-center justify-between pb-space-lg mb-space-md">
+<a class="inline-flex items-center gap-space-xs text-secondary hover:text-on-surface font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+<span>Kursga qaytish</span>
+</a>
+<div class="flex items-center gap-space-md">
+<button class="h-[48px] px-space-xl bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low rounded-xl font-label-md text-label-md inline-flex items-center gap-space-xs transition-colors" onclick="window.print()">
+<span class="material-symbols-outlined text-[20px]">print</span>
+<span>Chop etish</span>
+</button>
+<button class="h-[48px] px-space-xl bg-primary-container text-on-primary rounded-xl font-label-md text-label-md inline-flex items-center gap-space-xs hover:bg-primary transition-colors" onclick="window.print()">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>PDF yuklab olish</span>
+</button>
+</div>
+</div>
+<!-- A4 Landscape Sheet Preview Container -->
+<div class="w-full max-w-[1040px] bg-surface-container-lowest border border-outline-variant rounded-xl print:rounded-none print:border-none p-space-md md:p-space-lg shadow-sm print:shadow-none print:p-0 print:w-full">
+<!-- Double Border Outer Box (Aspect ratio 297/210 for A4 landscape) -->
+<div class="relative w-full aspect-[297/210] min-h-[660px] bg-surface-container-lowest border-[2px] border-primary-container p-space-xs flex flex-col justify-between box-border">
+<!-- Inner Thin Border -->
+<div class="w-full h-full border border-primary-container p-space-lg md:p-space-xl flex flex-col justify-between box-border">
+<!-- Header & Title Segment -->
+<div class="text-center space-y-space-xs pt-space-xs">
+<p class="font-headline-lg text-headline-lg tracking-[0.25em] text-primary-container uppercase font-semibold">
+            SERTIFIKAT
+          </p>
+<p class="font-body-sm text-body-sm text-secondary">
+            Ushbu sertifikat
+          </p>
+<h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface tracking-tight py-space-xs">
+            Dilnoza Karimova
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[620px] mx-auto leading-relaxed">
+            Informatika fani bo'yicha tayyorlov kursini muvaffaqiyatli tugatganini tasdiqlaydi
+          </p>
+</div>
+<!-- Metric Badges Row -->
+<div class="flex items-center justify-center gap-space-md my-space-xs">
+<div class="px-space-lg py-1.5 bg-surface-container-low border border-outline-variant rounded-lg flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary">Umumiy natija:</span>
+<span class="font-label-md text-label-md text-primary font-semibold">87%</span>
+</div>
+<div class="px-space-lg py-1.5 bg-surface-container-low border border-outline-variant rounded-lg flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary">Sana:</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">20.12.2026</span>
+</div>
+</div>
+<!-- Main Body: Two Columns (Topics Table & Verification Area) -->
+<div class="grid grid-cols-12 gap-space-lg items-start my-auto">
+<!-- Left Column: Topic breakdown table (7 cols) -->
+<div class="col-span-8 flex flex-col">
+<div class="flex items-center justify-between pb-space-xs mb-space-xs border-b border-outline-variant">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Mavzular bo'yicha natijalar</span>
+<span class="font-label-sm text-label-sm text-secondary">O'zlashtirish</span>
+</div>
+<div class="grid grid-cols-1 divide-y divide-outline-variant text-body-sm">
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">1. Axborot nazariyasi va sanoq sistemalari</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">92%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">2. Mantiq asoslari va rostlik jadvallari</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">88%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">3. Dasturlash asoslari va algoritmlar</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">85%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">4. Ma'lumotlar tuzilmasi (massivlar)</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">80%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">5. Funksiyalar va rekursiya</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">78%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">6. Kompyuter tarmoqlari va xavfsizlik</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">90%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">7. Ma'lumotlar bazasi asoslari</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">86%</span>
+</div>
+<div class="py-1 flex items-center justify-between">
+<span class="text-on-surface-variant truncate pr-2">8. AKT va pedagogik texnologiyalar</span>
+<span class="font-code-inline text-code-inline text-on-surface font-medium">94%</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Verification & QR (4 cols) -->
+<div class="col-span-4 flex flex-col items-center justify-center p-space-md border border-outline-variant rounded-xl bg-surface-container-low text-center">
+<!-- Vector QR Code representation -->
+<div class="w-28 h-28 bg-surface-container-lowest p-2 rounded-lg border border-outline-variant flex items-center justify-center">
+<svg class="w-full h-full text-on-surface" fill="currentColor" viewbox="0 0 100 100">
+<!-- Outer position markers -->
+<rect fill="none" height="30" stroke="currentColor" stroke-width="6" width="30" x="0" y="0"></rect>
+<rect height="14" width="14" x="8" y="8"></rect>
+<rect fill="none" height="30" stroke="currentColor" stroke-width="6" width="30" x="70" y="0"></rect>
+<rect height="14" width="14" x="78" y="8"></rect>
+<rect fill="none" height="30" stroke="currentColor" stroke-width="6" width="30" x="0" y="70"></rect>
+<rect height="14" width="14" x="8" y="78"></rect>
+<!-- Alignment marker -->
+<rect fill="none" height="16" stroke="currentColor" stroke-width="4" width="16" x="72" y="72"></rect>
+<rect height="6" width="6" x="77" y="77"></rect>
+<!-- Matrix dots -->
+<rect height="6" width="6" x="36" y="6"></rect>
+<rect height="6" width="6" x="48" y="6"></rect>
+<rect height="6" width="6" x="42" y="18"></rect>
+<rect height="6" width="6" x="54" y="18"></rect>
+<rect height="6" width="6" x="6" y="38"></rect>
+<rect height="6" width="6" x="18" y="44"></rect>
+<rect height="6" width="6" x="6" y="52"></rect>
+<rect height="8" width="8" x="36" y="36"></rect>
+<rect height="6" width="6" x="48" y="36"></rect>
+<rect height="6" width="6" x="36" y="48"></rect>
+<rect height="8" width="8" x="46" y="48"></rect>
+<rect height="6" width="6" x="58" y="44"></rect>
+<rect height="6" width="6" x="38" y="62"></rect>
+<rect height="6" width="6" x="50" y="60"></rect>
+<rect height="6" width="6" x="42" y="74"></rect>
+<rect height="6" width="6" x="54" y="76"></rect>
+<rect height="6" width="6" x="44" y="86"></rect>
+<rect height="6" width="6" x="54" y="88"></rect>
+<rect height="6" width="8" x="70" y="40"></rect>
+<rect height="6" width="6" x="84" y="44"></rect>
+<rect height="6" width="6" x="76" y="54"></rect>
+<rect height="6" width="6" x="88" y="56"></rect>
+</svg>
+</div>
+<p class="font-label-sm text-label-sm text-secondary mt-space-xs">
+              Haqiqiyligini tekshirish
+            </p>
+<p class="font-code-inline text-code-inline text-on-surface font-semibold tracking-wider mt-0.5">
+              № INF-2026-000123
+            </p>
+<!-- Verification Seal / Badge -->
+<div class="mt-space-sm pt-space-xs border-t border-outline-variant w-full flex items-center justify-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="font-label-sm text-[11px] font-medium tracking-tight uppercase">Tasdiqlangan natija</span>
+</div>
+</div>
+</div>
+<!-- Footer Segment -->
+<div class="text-center pt-space-xs border-t border-outline-variant/60">
+<p class="font-label-sm text-[11px] text-secondary tracking-normal">
+            Ushbu sertifikat davlat attestatsiyasi hujjati hisoblanmaydi
+          </p>
+</div>
+</div>
+</div>
+</div>
+</div></main></body></html>

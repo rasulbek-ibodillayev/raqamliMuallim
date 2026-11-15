@@ -1,0 +1,68 @@
+{% extends "layouts/panel.html" %}
+{% block title %}Savol muharriri{% endblock %}
+{% block heading %}Savol muharriri{% endblock %}
+{% block content %}
+{% call page_head("Savolni tekshirish", "ID #Q-84920 · AI generatsiyasi · versiya 1") %}
+<span class="badge badge-yellow">Tekshiruvda</span>
+{% endcall %}
+<div class="split" style="grid-template-columns:1fr" x-data="{ lvl: 'O‘rta', right: 1 }">
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));align-items:start">
+    <div class="stack stack-lg">
+      <div class="card card-pad stack">
+        <div class="grid-2">
+          <div class="field"><label class="label" for="t">Mavzu</label><select class="select" id="t"><option>Sanoq sistemalari</option><option>Mantiq asoslari</option></select></div>
+          <div class="field"><label class="label" for="st">Kichik mavzu</label><select class="select" id="st"><option>Ikkilik va o‘nlik</option><option>O‘n oltilik</option></select></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><span class="label">Daraja</span>
+            <div class="seg">{% for l in ["Oson", "O‘rta", "Qiyin"] %}<button type="button" :class="lvl === '{{ l }}' && 'active'" @click="lvl = '{{ l }}'">{{ l }}</button>{% endfor %}</div></div>
+          <div class="field"><label class="label" for="kind">Savol turi</label><select class="select" id="kind"><option>Yopiq test</option><option>Bir nechta javob</option><option>Moslashtirish</option><option>Ochiq javob</option></select></div>
+        </div>
+      </div>
+
+      <div class="card card-pad stack">
+        <div class="row between"><span class="label">Savol matni</span>
+          <div class="row" style="gap:2px">{% for i, l in [("bold","Qalin"),("code","Kod"),("table","Jadval"),("graph","Sxema"),("sigma","Formula"),("image","Rasm")] %}<button class="icon-btn" type="button" style="width:34px;height:34px" aria-label="{{ l }}">{{ icon(i, "ico-sm") }}</button>{% endfor %}</div></div>
+        <textarea class="textarea" aria-label="Savol matni">101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?</textarea>
+        <span class="label">Javob variantlari · to‘g‘risini belgilang</span>
+        <div class="stack stack-sm">
+          {% for v in ["43", "45", "47", "53"] %}
+          <div class="row row-sm">
+            <button type="button" class="icon-btn" @click="right = {{ loop.index0 }}" :class="right === {{ loop.index0 }} && 't-green'" aria-label="To‘g‘ri javob sifatida belgilash">
+              <svg class="ico" x-show="right === {{ loop.index0 }}"><use href="#i-check-circle"/></svg><svg class="ico" x-show="right !== {{ loop.index0 }}"><use href="#i-target"/></svg></button>
+            <span class="strong small" style="width:16px">{{ "ABCD"[loop.index0] }}</span>
+            <input class="input grow" value="{{ v }}" aria-label="{{ 'ABCD'[loop.index0] }} variant">
+          </div>
+          {% endfor %}
+          <button class="btn btn-ghost btn-sm" type="button" style="align-self:flex-start">{{ icon("plus", "ico-sm") }}Variant qo‘shish</button>
+        </div>
+        <div class="field"><label class="label" for="why">Izoh</label><textarea class="textarea" id="why" style="min-height:80px">1·2⁵ + 0·2⁴ + 1·2³ + 1·2² + 0·2¹ + 1·2⁰ = 32 + 8 + 4 + 1 = 45.</textarea></div>
+        <div class="grid-2">
+          <div class="field"><label class="label" for="time">Vaqt (soniya)</label><input class="input num" id="time" value="60"></div>
+          <div class="field"><label class="label" for="tags">Teglar</label><input class="input" id="tags" value="ikkilik→o‘nlik, daraja yoyish"></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="stack stack-lg" style="position:sticky;top:76px">
+      <div class="card card-pad stack stack-sm">
+        <span class="eyebrow">Oldindan ko‘rish</span>
+        <p class="strong">101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?</p>
+        <div class="options">{% for v in ["43", "45", "47", "53"] %}<div class="option" style="min-height:44px;font-size:15px" :class="right === {{ loop.index0 }} && 'correct'"><span class="key">{{ "ABCD"[loop.index0] }}</span>{{ v }}</div>{% endfor %}</div>
+      </div>
+      <div class="ai-card stack stack-sm">
+        <div class="row row-sm strong"><span class="ai-mark" style="width:22px;height:22px;border-radius:7px">{{ icon("sparkle", "ico-sm") }}</span>AI tekshiruvi</div>
+        <ul class="small stack stack-sm" style="margin:0;padding-left:18px;color:var(--text-2)">
+          <li>To‘g‘ri javob hisob bilan mos keladi.</li>
+          <li>Bankda o‘xshash savol bor: #Q-81102 (87% o‘xshash).</li>
+        </ul>
+      </div>
+      <div class="card card-pad stack stack-sm">
+        <button class="btn btn-primary btn-block" type="button">{{ icon("check") }}Tasdiqlash</button>
+        <button class="btn btn-outline btn-block" type="button">Qoralama sifatida saqlash</button>
+        <button class="btn btn-ghost btn-block t-red" type="button">Rad etish</button>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

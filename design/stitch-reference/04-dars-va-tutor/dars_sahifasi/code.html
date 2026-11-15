@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html lang="uz"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-fixed": "#dbe1ff", "on-secondary-fixed-variant": "#38485d", "on-surface": "#131b2e", "surface-container-low": "#f2f3ff", "tertiary-container": "#bc4800", "on-tertiary-fixed": "#360f00", "surface-bright": "#faf8ff", "tertiary": "#943700", "on-tertiary": "#ffffff", "surface-dim": "#d2d9f4", "primary-fixed-dim": "#b4c5ff", "primary-container": "#2563eb", "secondary": "#505f76", "secondary-fixed-dim": "#b7c8e1", "surface-container-highest": "#dae2fd", "on-primary-fixed": "#00174b", "outline": "#737686", "outline-variant": "#c3c6d7", "surface-container": "#eaedff", "on-primary-fixed-variant": "#003ea8", "surface-container-lowest": "#ffffff", "surface-container-high": "#e2e7ff", "on-secondary-container": "#54647a", "on-tertiary-fixed-variant": "#7d2d00", "on-primary": "#ffffff", "on-surface-variant": "#434655", "error": "#ba1a1a", "surface": "#faf8ff", "on-secondary-fixed": "#0b1c30", "primary": "#004ac6", "inverse-surface": "#283044", "tertiary-fixed": "#ffdbcd", "on-primary-container": "#eeefff", "background": "#faf8ff", "on-tertiary-container": "#ffede6", "inverse-primary": "#b4c5ff", "surface-tint": "#0053db", "surface-variant": "#dae2fd", "secondary-container": "#d0e1fb", "on-secondary": "#ffffff", "error-container": "#ffdad6", "on-error-container": "#93000a", "inverse-on-surface": "#eef0ff", "tertiary-fixed-dim": "#ffb596", "on-background": "#131b2e", "secondary-fixed": "#d3e4fe", "on-error": "#ffffff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-sm": "0.5rem", "gutter": "1rem", "space-lg": "1rem", "space-xs": "0.25rem", "space-xl": "1.5rem", "margin": "1rem", "space-md": "0.75rem" }, fontFamily: { "headline-md": ["Inter"], "code-inline": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Inter"], "body-sm": ["Inter"], "label-lg": ["Inter"] }, fontSize: { "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "code-inline": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }], "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["14px", { "lineHeight": "21px", "fontWeight": "400" }], "label-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; min-height: 100%; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md antialiased flex flex-col min-h-screen"><main class="flex-1 flex flex-col relative w-full bg-surface pt-safe pb-safe"><div class="flex flex-col w-full text-on-surface">
+<!-- Top Navigation & Reading Progress -->
+<header class="sticky top-0 z-30 bg-surface-container-lowest border-b border-outline-variant">
+<div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
+<button aria-label="Orqaga qaytish" class="w-10 h-10 flex items-center justify-center -ml-2 rounded-lg text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold tracking-tight truncate max-w-[200px]">
+        Shart operatorlari
+      </span>
+<div class="flex items-center space-x-1">
+<button aria-label="Audio darsni tinglash" class="w-10 h-10 flex items-center justify-center rounded-lg text-secondary hover:bg-surface-container transition-colors" id="btn-audio" type="button">
+<span class="material-symbols-outlined text-[22px]">headphones</span>
+</button>
+<button aria-label="Xatcho‘p qo‘shish" class="w-10 h-10 flex items-center justify-center rounded-lg text-secondary hover:bg-surface-container transition-colors" id="btn-bookmark" type="button">
+<span class="material-symbols-outlined text-[22px]" id="bookmark-icon">bookmark_border</span>
+</button>
+</div>
+</div>
+<!-- Reading Progress Bar (45%) -->
+<div class="w-full bg-surface-container-highest h-[3px]">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="45" class="bg-primary-container h-[3px] w-[45%]" role="progressbar"></div>
+</div>
+</header>
+<!-- Main Article Body -->
+<main class="w-full max-w-md mx-auto px-5 pt-6 pb-36 flex flex-col space-y-6">
+<!-- Header Block -->
+<section class="flex flex-col space-y-2">
+<span class="font-label-sm text-label-sm text-secondary font-medium tracking-wide uppercase">
+        Mavzu 3.1
+      </span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
+        if operatori
+      </h1>
+</section>
+<!-- Paragraph 1 -->
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+      Python dasturlash tilida shart operatorlari ma‘lum bir mantiqiy ifodaning rost (<code class="font-code-inline text-code-inline text-primary-container bg-surface-container px-1 py-0.5 rounded">True</code>) yoki yolg‘on (<code class="font-code-inline text-code-inline text-primary-container bg-surface-container px-1 py-0.5 rounded">False</code>) ekanligiga qarab dastur oqimini turli yo‘nalishlarga yo‘naltirish uchun ishlatiladi.
+    </p>
+<!-- Paragraph 2 -->
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+      Agar tekshirilayotgan shart qanoatlantirilsa, unga tegishli kod bloki ishga tushadi. Aks holda, kod bloki tashlab ketiladi yoki muqobil qism bajariladi.
+    </p>
+<!-- Code Block -->
+<section aria-label="Python kod namunasi" class="bg-surface-container border border-outline-variant rounded-xl p-4 overflow-hidden">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant text-secondary">
+<span class="font-label-sm text-label-sm font-semibold tracking-wider uppercase text-on-surface-variant">Python</span>
+<button class="flex items-center gap-1 font-label-sm text-label-sm text-secondary hover:text-on-surface transition-colors" id="copy-btn" onclick="copySnippet()" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span id="copy-text">Nusxa</span>
+</button>
+</div>
+<pre class="pt-3 font-code-inline text-code-inline leading-6 text-on-surface overflow-x-auto"><code><span class="text-secondary font-medium">yosh</span> = <span class="text-tertiary">18</span>
+<span class="text-primary-container font-semibold">if</span> yosh >= <span class="text-tertiary">18</span>:
+    <span class="text-primary-container font-semibold">print</span>(<span class="text-on-tertiary-fixed-variant">"Kirishga ruxsat berildi"</span>)
+<span class="text-primary-container font-semibold">else</span>:
+    <span class="text-primary-container font-semibold">print</span>(<span class="text-on-tertiary-fixed-variant">"Kirish taqiqlanadi"</span>)</code></pre>
+</section>
+<!-- Simple Flowchart Diagram -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col">
+<div class="flex items-center justify-between pb-3">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Mantiqiy oqim sxemasi</span>
+<span class="font-label-sm text-label-sm text-secondary">Nazariy asos</span>
+</div>
+<div class="w-full flex justify-center py-2 overflow-x-auto">
+<svg aria-label="Blok-sxema: Shart strukturasi" class="w-full max-w-[300px] h-auto" viewbox="0 0 320 370" xmlns="http://www.w3.org/2000/svg">
+<!-- Definitions: Arrows -->
+<defs>
+<marker id="arrow" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="6" refy="5" viewbox="0 0 10 10">
+<path d="M 0 1 L 8 5 L 0 9 z" fill="#737686"></path>
+</marker>
+</defs>
+<!-- 1. Start Node -->
+<rect fill="#eaedff" height="34" rx="17" stroke="#737686" stroke-width="1.5" width="120" x="100" y="8"></rect>
+<text fill="#131b2e" font-family="Inter, sans-serif" font-size="12" font-weight="500" text-anchor="middle" x="160" y="29">Boshlanish</text>
+<!-- Arrow from Start to Diamond -->
+<line marker-end="url(#arrow)" stroke="#737686" stroke-width="1.5" x1="160" x2="160" y1="42" y2="76"></line>
+<!-- 2. Decision Diamond -->
+<polygon fill="#ffffff" points="160,80 230,122 160,164 90,122" stroke="#737686" stroke-width="1.5"></polygon>
+<text fill="#131b2e" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="160" y="126">yosh >= 18?</text>
+<!-- Branch Labels -->
+<text fill="#ba1a1a" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="end" x="70" y="116">Yo‘q</text>
+<text fill="#004ac6" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="start" x="250" y="116">Ha</text>
+<!-- Left Branch Lines (Yo'q) -->
+<line stroke="#737686" stroke-width="1.5" x1="90" x2="48" y1="122" y2="122"></line>
+<line marker-end="url(#arrow)" stroke="#737686" stroke-width="1.5" x1="48" x2="48" y1="122" y2="192"></line>
+<!-- Right Branch Lines (Ha) -->
+<line stroke="#737686" stroke-width="1.5" x1="230" x2="272" y1="122" y2="122"></line>
+<line marker-end="url(#arrow)" stroke="#737686" stroke-width="1.5" x1="272" x2="272" y1="122" y2="192"></line>
+<!-- 3. Left Action Rectangle (Taqiqlandi) -->
+<rect fill="#ffffff" height="42" rx="6" stroke="#737686" stroke-width="1.5" width="90" x="8" y="196"></rect>
+<text fill="#131b2e" font-family="Inter, sans-serif" font-size="10" font-weight="500" text-anchor="middle" x="53" y="214">Kirish</text>
+<text fill="#ba1a1a" font-family="Inter, sans-serif" font-size="10" font-weight="600" text-anchor="middle" x="53" y="228">Taqiqlandi</text>
+<!-- 4. Right Action Rectangle (Ruxsat berildi) -->
+<rect fill="#ffffff" height="42" rx="6" stroke="#737686" stroke-width="1.5" width="94" x="222" y="196"></rect>
+<text fill="#131b2e" font-family="Inter, sans-serif" font-size="10" font-weight="500" text-anchor="middle" x="269" y="214">Ruxsat</text>
+<text fill="#004ac6" font-family="Inter, sans-serif" font-size="10" font-weight="600" text-anchor="middle" x="269" y="228">berildi</text>
+<!-- Merge Lines to End -->
+<line stroke="#737686" stroke-width="1.5" x1="53" x2="53" y1="238" y2="286"></line>
+<line stroke="#737686" stroke-width="1.5" x1="53" x2="152" y1="286" y2="286"></line>
+<line stroke="#737686" stroke-width="1.5" x1="269" x2="269" y1="238" y2="286"></line>
+<line stroke="#737686" stroke-width="1.5" x1="269" x2="168" y1="286" y2="286"></line>
+<!-- Center connector into End Node -->
+<line marker-end="url(#arrow)" stroke="#737686" stroke-width="1.5" x1="160" x2="160" y1="286" y2="314"></line>
+<!-- 5. End Node -->
+<rect fill="#eaedff" height="34" rx="17" stroke="#737686" stroke-width="1.5" width="120" x="100" y="318"></rect>
+<text fill="#131b2e" font-family="Inter, sans-serif" font-size="12" font-weight="500" text-anchor="middle" x="160" y="339">Tugatish</text>
+</svg>
+</div>
+<p class="font-label-sm text-label-sm text-secondary text-center pt-2 border-t border-outline-variant">
+        Blok-sxema: Shart strukturasi
+      </p>
+</section>
+<!-- Truth-Style Table -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="px-4 py-3 bg-surface-container border-b border-outline-variant">
+<span class="font-label-sm text-label-sm font-semibold uppercase text-secondary">
+          Mantiqiy amallar jadvali
+        </span>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase">
+<th class="px-4 py-2 font-medium">Shart</th>
+<th class="px-4 py-2 font-medium">Qiymat</th>
+<th class="px-4 py-2 font-medium text-right">Natija</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm">
+<tr class="border-b border-outline-variant">
+<td class="px-4 py-3 font-code-inline text-code-inline text-on-surface">a > b</td>
+<td class="px-4 py-3 font-code-inline text-code-inline text-on-surface-variant">5 > 3</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700">True</span>
+</td>
+</tr>
+<tr class="border-b border-outline-variant">
+<td class="px-4 py-3 font-code-inline text-code-inline text-on-surface">a == b</td>
+<td class="px-4 py-3 font-code-inline text-code-inline text-on-surface-variant">5 == 3</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700">False</span>
+</td>
+</tr>
+<tr>
+<td class="px-4 py-3 font-code-inline text-code-inline text-on-surface">a < b</td>
+<td class="px-4 py-3 font-code-inline text-code-inline text-on-surface-variant">5 < 3</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700">False</span>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<!-- Collapsible Exercise Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden transition-all duration-200">
+<button aria-expanded="false" class="w-full p-4 flex items-center justify-between text-left focus:outline-none" id="accordion-toggle" onclick="toggleSolution()" type="button">
+<div class="pr-3 min-w-0">
+<div class="font-label-md text-label-md font-semibold text-on-surface truncate">
+            Masala 1: Haroratni tekshirish
+          </div>
+<div class="font-body-sm text-body-sm text-secondary truncate mt-0.5">
+            Havo harorati 0 dan yuqori bo‘lsa...
+          </div>
+</div>
+<div class="flex items-center gap-1 font-label-md text-label-md font-medium text-primary-container shrink-0">
+<span id="solution-label">Yechimni ko‘rish</span>
+<span class="material-symbols-outlined text-[20px] transition-transform duration-200" id="accordion-icon">expand_more</span>
+</div>
+</button>
+<div class="hidden px-4 pb-4 pt-2 border-t border-outline-variant bg-surface-container-low text-on-surface" id="solution-content">
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">
+          Agar harorat noldan baland bo‘lsa "Iliq", aks holda "Sovuq" degan yozuv chiqaring:
+        </p>
+<pre class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 font-code-inline text-code-inline text-on-surface overflow-x-auto"><code>harorat = 15
+if harorat > 0:
+    print("Iliq ob-havo")
+else:
+    print("Muzlash harorati")</code></pre>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (AI Tutor) -->
+<div class="fixed bottom-24 right-5 z-20">
+<button aria-label="AI ustozdan so'rash" class="h-10 px-3.5 bg-surface-container-lowest border border-outline-variant rounded-full text-on-surface font-label-md text-label-md font-medium flex items-center gap-2 hover:bg-surface-container transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary-container">psychology</span>
+<span>AI tutor</span>
+</button>
+</div>
+<!-- Sticky Bottom Bar with Single Primary Button -->
+<footer class="fixed bottom-0 inset-x-0 z-30 bg-surface-container-lowest/95 backdrop-blur-sm border-t border-outline-variant p-4">
+<div class="max-w-md mx-auto w-full">
+<button class="w-full h-12 bg-primary-container hover:bg-primary transition-colors text-on-primary font-label-lg text-label-lg font-medium rounded-xl flex items-center justify-center gap-2 active:scale-[0.99]" type="button">
+<span>Testni boshlash</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</footer>
+</div>
+<script>
+  function toggleSolution() {
+    const content = document.getElementById('solution-content');
+    const icon = document.getElementById('accordion-icon');
+    const label = document.getElementById('solution-label');
+    const toggle = document.getElementById('accordion-toggle');
+    const isExpanded = content.classList.contains('hidden');
+
+    if (isExpanded) {
+      content.classList.remove('hidden');
+      icon.classList.add('rotate-180');
+      label.textContent = "Yashirish";
+      toggle.setAttribute('aria-expanded', 'true');
+    } else {
+      content.classList.add('hidden');
+      icon.classList.remove('rotate-180');
+      label.textContent = "Yechimni ko‘rish";
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function copySnippet() {
+    const copyText = document.getElementById('copy-text');
+    copyText.textContent = "Nusxalandi!";
+    setTimeout(() => {
+      copyText.textContent = "Nusxa";
+    }, 2000);
+  }
+
+  document.getElementById('btn-bookmark')?.addEventListener('click', function() {
+    const icon = document.getElementById('bookmark-icon');
+    if (icon.textContent === 'bookmark_border') {
+      icon.textContent = 'bookmark';
+      icon.style.fontVariationSettings = "'FILL' 1";
+      this.classList.add('text-primary-container');
+    } else {
+      icon.textContent = 'bookmark_border';
+      icon.style.fontVariationSettings = "'FILL' 0";
+      this.classList.remove('text-primary-container');
+    }
+  });
+
+  document.getElementById('btn-audio')?.addEventListener('click', function() {
+    this.classList.toggle('text-primary-container');
+  });
+</script></main></body></html>

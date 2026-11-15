@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "_ui.html" import icon %}
+{# Test va dars uchun chalg'itmaydigan qobiq: menyusiz, bitta asosiy harakat pastda #}
+{% block body %}
+<div class="focus">
+  <header class="focus-bar">
+    <div class="focus-bar-inner">{% block bar %}{% endblock %}</div>
+    {% block bar_progress %}{% endblock %}
+  </header>
+  {% block before_body %}{% endblock %}
+  <main class="focus-body">{% block content %}{% endblock %}</main>
+  {% block foot %}{% endblock %}
+</div>
+{% block overlay %}{% endblock %}
+{% endblock %}

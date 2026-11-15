@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Maxfiylik siyosati{% endblock %}
+{#
+  TAHRIRLASH UCHUN: matndagi [kvadrat qavs] ichidagi joylarni o'z ma'lumotlaringiz bilan almashtiring.
+  Yakuniy matnni huquqshunos bilan kelishib oling.
+#}
+{% block body %}
+<header class="topbar bordered no-print">
+  <a class="btn btn-ghost btn-sm" href="javascript:history.back()">{{ icon("arrow-left", "ico-sm") }}Orqaga</a>
+  <span class="grow"></span>
+  <button class="icon-btn" type="button" data-theme-toggle aria-label="Mavzu rangini almashtirish">{{ icon("moon") }}</button>
+</header>
+<main class="page" style="padding-bottom:64px">
+  <article class="card card-pad prose" style="margin-top:16px">
+    <span class="eyebrow">Hujjat</span>
+    <h1 style="margin-top:6px">Maxfiylik siyosati</h1>
+    <p class="muted small">Kuchga kirgan sana: [01.01.2027] · Versiya: [1.0]</p>
+
+    <p>Ushbu siyosat raqamliMuallim platformasi (keyingi o‘rinlarda — «Platforma») foydalanuvchilarning shaxsga doir ma’lumotlarini qanday yig‘ishi, saqlashi va himoya qilishini tushuntiradi. Platformani ishlatish orqali siz ushbu siyosat shartlariga rozilik bildirasiz.</p>
+
+    <h2>1. Ma’lumotlar operatori</h2>
+    <p>[Tashkilot yoki YaTT nomi], manzil: [manzil], STIR: [raqam], email: [email], telefon: [telefon].</p>
+
+    <h2>2. Qanday ma’lumotlarni yig‘amiz</h2>
+    <ul>
+      <li><b>Ro‘yxatdan o‘tishda:</b> ism, familiya, telefon raqam va/yoki email, parol (faqat shifrlangan xesh ko‘rinishida).</li>
+      <li><b>Telegram orqali tasdiqlashda:</b> Telegram foydalanuvchi identifikatori va unga ulangan telefon raqam.</li>
+      <li><b>Ixtiyoriy:</b> viloyat va tuman, attestatsiya sanasi.</li>
+      <li><b>O‘qish jarayonida:</b> test javoblari, natijalar, dars progressi, shaxsiy konspekt, e’tirozlar va muhokamalardagi xabarlar, AI tutorga berilgan savollar.</li>
+      <li><b>Texnik:</b> qurilma turi, brauzer, IP-manzil, kirish vaqtlari (xavfsizlik va xatolarni aniqlash uchun).</li>
+    </ul>
+
+    <h2>3. Ma’lumotlardan nima uchun foydalanamiz</h2>
+    <ul>
+      <li>Akkauntni yaratish, kirishni ta’minlash va akkauntni himoya qilish;</li>
+      <li>bilim darajangizni aniqlash, shaxsiy o‘quv reja tuzish va natijalarni ko‘rsatish;</li>
+      <li>sertifikat berish va uning haqiqiyligini tekshirish imkonini yaratish;</li>
+      <li>siz yoqqan eslatmalarni Telegram yoki email orqali yuborish;</li>
+      <li>platforma sifatini yaxshilash uchun umumlashtirilgan (shaxsni aniqlab bo‘lmaydigan) statistika.</li>
+    </ul>
+
+    <h2>4. Sun’iy intellekt (AI) xizmatlari</h2>
+    <p>AI tutorga yuborilgan savollar uchinchi tomon AI xizmatlariga uzatilishi mumkin. Bunda ismingiz, telefon raqamingiz va boshqa shaxsiy ma’lumotlaringiz yuborilmaydi; xabardagi telefon raqamlar avtomatik niqoblanadi. Iltimos, AI tutorga shaxsiy ma’lumot yozmang.</p>
+
+    <h2>5. Saqlash joyi va muddati</h2>
+    <p>Ma’lumotlar O‘zbekiston Respublikasi hududidagi serverlarda saqlanadi. Akkaunt faol bo‘lgan davrda saqlanadi; akkaunt o‘chirilgandan so‘ng [30] kun ichida o‘chiriladi, qonun talab qiladigan ma’lumotlar bundan mustasno. Bir yildan eski test tafsilotlari arxivlanadi, umumiy natijalar saqlanadi.</p>
+
+    <h2>6. Uchinchi shaxslarga berish</h2>
+    <p>Ma’lumotlaringizni sotmaymiz. Ular faqat xizmat ko‘rsatish uchun zarur bo‘lgan hamkorlarga (xosting, email va Telegram xizmatlari) va qonunda nazarda tutilgan hollarda vakolatli organlarga beriladi.</p>
+
+    <h2>7. Himoya choralari</h2>
+    <p>Parollar shifrlangan xesh ko‘rinishida saqlanadi, ulanish HTTPS orqali amalga oshiriladi, zaxira nusxalar shifrlanadi, xodimlarning ma’lumotlarga kirishi cheklanadi va jurnalga yoziladi.</p>
+
+    <h2>8. Sizning huquqlaringiz</h2>
+    <ul>
+      <li>o‘z ma’lumotlaringizni ko‘rish va «Profil» bo‘limida tahrirlash;</li>
+      <li>bildirishnomalarni o‘chirish;</li>
+      <li>akkauntni va ma’lumotlarni o‘chirishni talab qilish («Profil» → «Akkauntni o‘chirish»);</li>
+      <li>rozilikni qaytarib olish va [email] orqali murojaat qilish.</li>
+    </ul>
+
+    <h2>9. Cookie fayllar</h2>
+    <p>Platforma faqat tizimga kirishni saqlash va sozlamalarni (masalan, yorug‘/qorong‘i mavzu) eslab qolish uchun zarur cookie va brauzer xotirasidan foydalanadi.</p>
+
+    <h2>10. O‘zgartirishlar</h2>
+    <p>Siyosat o‘zgarsa, yangi versiya shu sahifada e’lon qilinadi va muhim o‘zgarishlar haqida sizga xabar beramiz.</p>
+
+    <p class="small muted">Ushbu siyosat O‘zbekiston Respublikasining «Shaxsga doir ma’lumotlar to‘g‘risida»gi Qonuni talablariga muvofiq tuzilgan. Savollar bo‘yicha: [email].</p>
+  </article>
+</main>
+{% endblock %}

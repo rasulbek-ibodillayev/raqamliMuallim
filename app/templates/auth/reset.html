@@ -1,0 +1,28 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Parolni tiklash{% endblock %}
+{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.login') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>{% endblock %}
+{% block content %}
+<form class="stack stack-lg" action="{{ url_for('auth.login') }}" method="get" x-data="{ step: 1 }">
+  <div class="stack stack-sm">
+    <h1>Parolni tiklash</h1>
+    <p class="lead" x-show="step === 1">Telefon raqam yoki emailingizni kiriting, kodni Telegram yoki email orqali yuboramiz.</p>
+    <p class="lead" x-show="step === 2" x-cloak>Kodni va yangi parolni kiriting.</p>
+  </div>
+
+  <div class="stack stack-lg" x-show="step === 1">
+    <div class="field"><label class="label" for="who">Telefon raqam yoki email</label><input class="input" id="who" placeholder="+998 90 123 45 67 yoki email@maktab.uz"></div>
+    <button class="btn btn-primary btn-lg btn-block" type="button" @click="step = 2">Kod yuborish</button>
+  </div>
+
+  <div class="stack stack-lg" x-show="step === 2" x-cloak>
+    <div class="field">
+      <label class="label" for="r1">Tasdiqlash kodi</label>
+      <div class="otp">{% for i in range(6) %}<input id="r{{ loop.index }}" inputmode="numeric" maxlength="1" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
+      <span class="hint">Kod kelmadimi? <button class="link" type="button" style="background:none;border:0;padding:0;cursor:pointer" disabled>Qayta yuborish · 1:45</button></span>
+    </div>
+    <div class="field"><label class="label" for="p1">Yangi parol</label><input class="input" id="p1" type="password" autocomplete="new-password" placeholder="Kamida 8 ta belgi"></div>
+    <div class="field"><label class="label" for="p2">Parolni takrorlang</label><input class="input" id="p2" type="password" autocomplete="new-password"></div>
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Parolni saqlash</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Kirish{% endblock %}
+{% block content %}
+<form class="stack stack-lg" action="{{ url_for('user.home') }}" method="get" x-data="{ show: false }">
+  <div class="stack stack-sm">
+    <h1>Qaytganingizdan xursandmiz</h1>
+    <p class="lead">Telefon raqam yoki email va parolingizni kiriting.</p>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-red" role="alert">{{ icon("alert") }}<span>Telefon raqam yoki parol noto‘g‘ri. Yana <b>2 ta</b> urinish qoldi, keyin akkaunt 15 daqiqaga bloklanadi.</span></div>
+  {% endif %}
+
+  <div class="field">
+    <label class="label" for="login">Telefon raqam yoki email</label>
+    <input class="input {{ 'invalid' if error }}" id="login" name="login" autocomplete="username" placeholder="+998 90 123 45 67" inputmode="email">
+  </div>
+  <div class="field">
+    <div class="row between"><label class="label" for="pw">Parol</label><a class="link small" href="{{ url_for('auth.reset') }}">Parolni unutdingizmi?</a></div>
+    <div class="input-group">
+      <input class="input" id="pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" placeholder="Parolingiz">
+      <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? 'Parolni yashirish' : 'Parolni ko‘rsatish'" aria-label="Parolni ko‘rsatish">{{ icon("eye") }}</button>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-lg btn-block" type="submit">Kirish</button>
+  <p class="center small muted">Akkauntingiz yo‘qmi? <a class="link" href="{{ url_for('auth.register') }}">Ro‘yxatdan o‘tish</a></p>
+</form>
+{% endblock %}

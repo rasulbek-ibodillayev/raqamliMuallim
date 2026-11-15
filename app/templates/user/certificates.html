@@ -1,0 +1,29 @@
+{% extends "layouts/app.html" %}
+{% block title %}Sertifikatlarim{% endblock %}
+{% block content %}
+{% call page_head("Sertifikatlarim") %}{% endcall %}
+<div class="stack stack-xl">
+  <article class="card" style="overflow:hidden">
+    <a href="{{ url_for('user.certificate_print') }}" class="card-pad stack stack-sm" style="background:linear-gradient(135deg, var(--ai-soft), var(--surface));border-bottom:1px solid var(--border)">
+      <div class="row between"><span class="ai-mark">{{ icon("award") }}</span><span class="badge badge-green">{{ icon("check", "ico-sm") }}Amalda</span></div>
+      <h2 class="mt-8">Informatika kursi sertifikati</h2>
+      <p class="small muted num">№ INF-2026-000123 · 20-dekabr, 2026</p>
+      <div class="row row-sm" style="align-items:baseline"><span class="stat-value num">87%</span><span class="small muted">umumiy natija</span></div>
+    </a>
+    <div class="list">
+      {% for name, p in topics[:4] %}<div class="list-item" style="min-height:48px"><span class="grow small">{{ name }}</span><span class="num small">{{ p }}%</span></div>{% endfor %}
+    </div>
+    <div class="card-pad row wrap" style="border-top:1px solid var(--border);padding-top:16px;padding-bottom:16px">
+      <a class="btn btn-primary btn-sm" href="{{ url_for('user.certificate_print') }}">{{ icon("download", "ico-sm") }}PDF yuklab olish</a>
+      <button class="btn btn-outline btn-sm" type="button">{{ icon("share", "ico-sm") }}Havolani ulashish</button>
+    </div>
+  </article>
+
+  <section class="card card-pad stack stack-sm" style="border-style:dashed">
+    <span class="eyebrow">Keyingi sertifikat</span>
+    <h3>Pedagogika va metodika kursi</h3>
+    <p class="small muted">Kurs keyinroq qo‘shiladi. Sertifikat yakuniy diagnostikadan so‘ng beriladi.</p>
+  </section>
+  <p class="xs muted center">Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. Haqiqiyligi QR-kod orqali tekshiriladi.</p>
+</div>
+{% endblock %}

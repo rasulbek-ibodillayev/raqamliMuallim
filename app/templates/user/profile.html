@@ -1,0 +1,120 @@
+{% extends "layouts/app.html" %}
+{% block title %}Profil{% endblock %}
+{% set regions = ["Toshkent shahri","Toshkent viloyati","Andijon viloyati","Buxoro viloyati","Farg‘ona viloyati","Jizzax viloyati","Xorazm viloyati","Namangan viloyati","Navoiy viloyati","Qashqadaryo viloyati","Samarqand viloyati","Sirdaryo viloyati","Surxondaryo viloyati","Qoraqalpog‘iston Respublikasi"] %}
+{% set districts = ["Yunusobod tumani","Chilonzor tumani","Mirzo Ulug‘bek tumani","Yakkasaroy tumani","Shayxontohur tumani","Olmazor tumani"] %}
+{% block content %}
+<div class="stack stack-xl" style="padding-top:16px" x-data="{ open: '', saved: '' }">
+  <div class="row">
+    <span class="avatar lg">{{ me.initials }}</span>
+    <div><h1 style="font-size:22px">{{ me.first }} {{ me.last }}</h1><p class="muted num">{{ me.phone }}</p></div>
+  </div>
+
+  <div class="alert alert-green" x-show="saved" x-cloak x-transition role="status">{{ icon("check-circle") }}<span x-text="saved"></span></div>
+
+  <section class="stack stack-sm">
+    <h2 class="eyebrow">Akkaunt</h2>
+    <div class="card list">
+
+      <!-- Shaxsiy ma'lumotlar -->
+      <div>
+        <button class="list-item" type="button" style="width:100%;border:0;background:none;text-align:left;cursor:pointer" @click="open = open === 'info' ? '' : 'info'" :aria-expanded="open === 'info'">
+          <span class="list-ico">{{ icon("user") }}</span><span class="grow"><span style="display:block">Shaxsiy ma’lumotlar</span><span class="sub">Ism, familiya, telefon, email</span></span>
+          <svg class="ico ico-sm chev" :style="open === 'info' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+        </button>
+        <form class="card-pad stack" style="padding-top:4px" x-show="open === 'info'" x-cloak @submit.prevent="open = ''; saved = 'Shaxsiy ma’lumotlar saqlandi'">
+          <div class="grid-2">
+            <div class="field"><label class="label" for="p-fn">Ism</label><input class="input" id="p-fn" value="{{ me.first }}" autocomplete="given-name" required></div>
+            <div class="field"><label class="label" for="p-ln">Familiya</label><input class="input" id="p-ln" value="{{ me.last }}" autocomplete="family-name" required></div>
+          </div>
+          <div class="field">
+            <label class="label" for="p-phone">Telefon raqam</label>
+            <div class="input-group"><span class="addon">+998</span><input class="input num" id="p-phone" value="90 123 45 67" inputmode="tel" disabled></div>
+            <span class="hint">Raqamni o‘zgartirish uchun yangi raqam Telegram bot orqali tasdiqlanadi. <a class="link" href="{{ url_for('auth.verify_telegram') }}">Raqamni almashtirish</a></span>
+          </div>
+          <div class="field">
+            <label class="label" for="p-email">Email (ixtiyoriy)</label>
+            <input class="input" id="p-email" type="email" placeholder="namuna@maktab.uz" autocomplete="email">
+            <span class="hint">Yangi email kod orqali tasdiqlanadi.</span>
+          </div>
+          <div class="row" style="justify-content:flex-end"><button class="btn btn-ghost" type="button" @click="open = ''">Bekor qilish</button><button class="btn btn-primary" type="submit">Saqlash</button></div>
+        </form>
+      </div>
+
+      <!-- Parolni o'zgartirish -->
+      <div style="border-top:1px solid var(--border)" x-data="{ show: false }">
+        <button class="list-item" type="button" style="width:100%;border:0;background:none;text-align:left;cursor:pointer" @click="open = open === 'pw' ? '' : 'pw'" :aria-expanded="open === 'pw'">
+          <span class="list-ico">{{ icon("lock") }}</span><span class="grow"><span style="display:block">Parolni o‘zgartirish</span><span class="sub">Oxirgi o‘zgarish: 2 oy oldin</span></span>
+          <svg class="ico ico-sm chev" :style="open === 'pw' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+        </button>
+        <form class="card-pad stack" style="padding-top:4px" x-show="open === 'pw'" x-cloak @submit.prevent="open = ''; saved = 'Parol o‘zgartirildi'">
+          <div class="field"><label class="label" for="pw-old">Joriy parol</label><input class="input" id="pw-old" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required></div>
+          <div class="field"><label class="label" for="pw-new">Yangi parol</label><input class="input" id="pw-new" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required><span class="hint">Kamida 8 ta belgi, harf va raqam aralash bo‘lsin.</span></div>
+          <div class="field"><label class="label" for="pw-new2">Yangi parolni takrorlang</label><input class="input" id="pw-new2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required></div>
+          <label class="check"><input type="checkbox" x-model="show"><span>Parollarni ko‘rsatish</span></label>
+          <div class="row between wrap">
+            <a class="link small" href="{{ url_for('auth.reset') }}">Joriy parolni unutdingizmi?</a>
+            <div class="row"><button class="btn btn-ghost" type="button" @click="open = ''">Bekor qilish</button><button class="btn btn-primary" type="submit">Parolni yangilash</button></div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Viloyat va tuman -->
+      <div style="border-top:1px solid var(--border)">
+        <button class="list-item" type="button" style="width:100%;border:0;background:none;text-align:left;cursor:pointer" @click="open = open === 'reg' ? '' : 'reg'" :aria-expanded="open === 'reg'">
+          <span class="list-ico">{{ icon("home") }}</span><span class="grow"><span style="display:block">Viloyat va tuman</span><span class="sub">Toshkent shahri · Yunusobod tumani</span></span>
+          <svg class="ico ico-sm chev" :style="open === 'reg' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+        </button>
+        <form class="card-pad stack" style="padding-top:4px" x-show="open === 'reg'" x-cloak @submit.prevent="open = ''; saved = 'Hudud saqlandi'">
+          <div class="grid-2">
+            <div class="field"><label class="label" for="p-reg">Viloyat</label>
+              <select class="select" id="p-reg">{% for r in regions %}<option {{ 'selected' if loop.first }}>{{ r }}</option>{% endfor %}</select></div>
+            <div class="field"><label class="label" for="p-dist">Tuman (shahar)</label>
+              <select class="select" id="p-dist">{% for d in districts %}<option {{ 'selected' if loop.first }}>{{ d }}</option>{% endfor %}</select></div>
+          </div>
+          <span class="hint">Ixtiyoriy. Faqat umumiy hududiy statistika uchun ishlatiladi.</span>
+          <div class="row" style="justify-content:flex-end"><button class="btn btn-ghost" type="button" @click="open = ''">Bekor qilish</button><button class="btn btn-primary" type="submit">Saqlash</button></div>
+        </form>
+      </div>
+
+      <!-- Attestatsiya sanasi: faqat ko'rish -->
+      <div class="list-item" style="border-top:1px solid var(--border)">
+        <span class="list-ico">{{ icon("calendar") }}</span>
+        <span class="grow"><span style="display:block">Attestatsiya sanasi</span><span class="sub">Administrator tomonidan kiritiladi</span></span>
+        <span class="row row-sm small"><b class="num">{{ me.exam_date }}, 2026</b>{{ icon("lock", "ico-sm faint") }}</span>
+      </div>
+    </div>
+    <p class="xs muted">Sana noto‘g‘ri bo‘lsa, <a class="link" href="#">yordam xizmatiga</a> yozing — administrator uni yangilaydi.</p>
+  </section>
+
+  <section class="stack stack-sm">
+    <h2 class="eyebrow">Telegram bildirishnomalari</h2>
+    <div class="card list">
+      {% for label, sub, on in [("Kunlik eslatma", "5 ta savol, har kuni 19:00 da", True), ("Nazorat eslatmasi", "Majburiy nazorat kutayotganda", True), ("E’tiroz javoblari", "Ekspert xulosasi chiqqanda", False)] %}
+      <label class="list-item" style="cursor:pointer"><div class="grow"><div>{{ label }}</div><div class="sub">{{ sub }}</div></div><span class="switch"><input type="checkbox" {{ 'checked' if on }}><span></span></span></label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="stack stack-sm">
+    <h2 class="eyebrow">Ko‘rinish</h2>
+    <div class="card list">
+      <div class="list-item" x-data="{ fs: window.rmFontSize() }" @rm-fs.document="fs = $event.detail">
+        <span class="list-ico" style="font-weight:600">Aa</span>
+        <span class="grow"><span style="display:block">Matn o‘lchami</span><span class="sub">Darslar, testlar va sahifalardagi matn</span></span>
+        <div class="seg fs-switch" role="radiogroup" aria-label="Matn o‘lchami">
+          <button type="button" role="radio" :aria-checked="fs === 'md'" :class="fs === 'md' && 'active'" @click="rmSetFontSize('md')" aria-label="Oddiy">A</button>
+          <button type="button" role="radio" :aria-checked="fs === 'lg'" :class="fs === 'lg' && 'active'" @click="rmSetFontSize('lg')" aria-label="Katta">A+</button>
+          <button type="button" role="radio" :aria-checked="fs === 'xl'" :class="fs === 'xl' && 'active'" @click="rmSetFontSize('xl')" aria-label="Juda katta">A++</button>
+        </div>
+      </div>
+      <button class="list-item" type="button" data-theme-toggle style="border:0;border-top:1px solid var(--border);background:none;text-align:left;width:100%;cursor:pointer"><span class="list-ico">{{ icon("moon") }}</span><span class="grow">Yorug‘ / qorong‘i mavzu</span></button>
+    </div>
+  </section>
+
+  <div class="card list">
+    <a class="list-item" href="{{ url_for('auth.privacy') }}"><span class="list-ico">{{ icon("shield") }}</span><span class="grow">Maxfiylik siyosati</span>{{ icon("chevron-right", "ico-sm chev") }}</a>
+    <a class="list-item" href="{{ url_for('auth.guest') }}"><span class="list-ico">{{ icon("logout") }}</span><span class="grow">Chiqish</span></a>
+  </div>
+  <button class="btn btn-danger btn-block" type="button">{{ icon("trash", "ico-sm") }}Akkauntni o‘chirish</button>
+</div>
+{% endblock %}

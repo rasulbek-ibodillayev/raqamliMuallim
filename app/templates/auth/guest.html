@@ -1,0 +1,20 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Xush kelibsiz{% endblock %}
+{% block content %}
+<div class="stack stack-xl center" style="align-items:center">
+  <span class="ai-mark lg">{{ icon("sparkle") }}</span>
+  <div class="stack stack-sm">
+    <h1 style="font-size:30px">Attestatsiyaga<br><span class="ai-text">AI bilan</span> tayyorlaning</h1>
+    <p class="lead">Informatika o‘qituvchilari uchun: bilimingizni aniqlaymiz, shaxsiy reja tuzamiz va AI tutor bilan birga o‘qiysiz.</p>
+  </div>
+  <div class="stack stack-sm" style="width:100%">
+    <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('auth.register') }}">Ro‘yxatdan o‘tish</a>
+    <a class="btn btn-outline btn-lg btn-block" href="{{ url_for('auth.login') }}">Kirish</a>
+  </div>
+  <ul class="row wrap small muted" style="justify-content:center;list-style:none;padding:0;margin:0;gap:8px 20px">
+    <li class="row row-sm">{{ icon("target", "ico-sm") }}Diagnostika</li>
+    <li class="row row-sm">{{ icon("route", "ico-sm") }}Shaxsiy reja</li>
+    <li class="row row-sm">{{ icon("sparkle", "ico-sm") }}AI tutor</li>
+  </ul>
+</div>
+{% endblock %}
