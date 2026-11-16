@@ -1,5 +1,50 @@
 /* raqamliMuallim — kichik yordamchi skriptlar (Alpine.js bilan birga ishlaydi) */
 
+/* PWA o'rnatish taklifi.
+   Android/desktop Chrome: brauzerning beforeinstallprompt hodisasi saqlanadi va tugma bosilganda ko'rsatiladi.
+   iPhone/iPad Safari: bunday hodisa yo'q, shuning uchun «Ulashish → Bosh ekranga» yo'riqnomasi chiqadi.
+   Namunada ?pwa=1 (tugma) yoki ?pwa=ios (yo'riqnoma) bilan majburan ko'rsatish mumkin. */
+window.rmDeferredInstall = null;
+window.addEventListener("beforeinstallprompt", function (e) {
+  e.preventDefault();
+  window.rmDeferredInstall = e;
+  document.dispatchEvent(new CustomEvent("rm-installable"));
+});
+window.addEventListener("appinstalled", function () {
+  window.rmDeferredInstall = null;
+  document.dispatchEvent(new CustomEvent("rm-installed"));
+});
+window.rmInstall = function (opts) {
+  opts = opts || {};
+  var ua = navigator.userAgent || "";
+  var force = new URLSearchParams(location.search).get("pwa");
+  var isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  function dismissed() {
+    try { return Number(localStorage.getItem("rm-install-later") || 0) > Date.now(); } catch (e) { return false; }
+  }
+  return {
+    canPrompt: !!window.rmDeferredInstall || force === "1",
+    ios: (isIOS && !standalone) || force === "ios",
+    installed: standalone && !force,
+    hidden: !force && !!opts.dismissible && dismissed(),
+    steps: false,
+    get visible() { return !this.installed && !this.hidden && (this.canPrompt || this.ios); },
+    install: function () {
+      var self = this, e = window.rmDeferredInstall;
+      if (this.ios) { this.steps = !this.steps; return; }
+      if (!e) { window.rmToast && window.rmToast("Brauzer menyusidan «Ilovani o‘rnatish»ni tanlang"); return; }
+      e.prompt();
+      e.userChoice.then(function (r) { if (r.outcome === "accepted") self.installed = true; window.rmDeferredInstall = null; });
+    },
+    later: function () {
+      this.hidden = true;
+      // 14 kun davomida qayta ko'rsatmaymiz
+      try { localStorage.setItem("rm-install-later", String(Date.now() + 14 * 864e5)); } catch (e) {}
+    }
+  };
+};
+
 /* Ilova qobig'i: chap menyu, tezkor qidiruv (Ctrl+K) va bildirishnomalar */
 window.rmShell = function () {
   function norm(s) { return (s || "").toLowerCase().replace(/[‘’ʻʼ'`]/g, "").trim(); }

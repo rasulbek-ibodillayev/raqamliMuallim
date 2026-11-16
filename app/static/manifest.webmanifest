@@ -1,10 +1,26 @@
 {
+  "id": "/app/",
   "name": "raqamliMuallim — attestatsiyaga tayyorgarlik",
   "short_name": "raqamliMuallim",
+  "description": "Informatika o‘qituvchilarini attestatsiyaga moslashuvchan tayyorlash platformasi",
   "lang": "uz",
-  "start_url": "/app/",
+  "dir": "ltr",
+  "start_url": "/app/?manba=pwa",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",
-  "icons": [{ "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+  "categories": ["education"],
+  "icons": [
+    { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Darsni davom ettirish", "short_name": "Dars", "url": "/app/dars", "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "AI tutor", "short_name": "Tutor", "url": "/app/tutor", "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Natijalarim", "short_name": "Natijalar", "url": "/app/natijalar", "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
 }

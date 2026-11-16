@@ -15,6 +15,19 @@ def create_app() -> Flask:
     for bp in (meta.bp, auth.bp, user.bp, test.bp, expert.bp, admin.bp):
         app.register_blueprint(bp)
 
+    from flask import render_template
+    from werkzeug.exceptions import HTTPException
+
+    @app.errorhandler(HTTPException)
+    def http_error(e):
+        code = e.code if e.code in (403, 404) else 500
+        return render_template("errors/error.html", code=code), e.code
+
+    @app.errorhandler(Exception)
+    def server_error(e):
+        app.logger.exception(e)
+        return render_template("errors/error.html", code=500), 500
+
     from . import mock
 
     from flask import get_template_attribute

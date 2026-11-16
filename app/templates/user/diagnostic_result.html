@@ -1,0 +1,50 @@
+{% extends "layouts/app.html" %}
+{% block title %}Diagnostika natijasi{% endblock %}
+{% block content %}
+{# Diagnostikadan keyin: umumiy daraja → mavzular holati → shaxsiy reja. Keyingi qadam bitta: rejani ochish #}
+<div class="stack stack-xl">
+  <section class="items-center stack stack-lg center">
+    {{ ring(64, 148, "var(--blue)", "boshlang‘ich daraja") }}
+    <div class="stack stack-sm">
+      <h1>Diagnostika yakunlandi</h1>
+      <p class="lead">42 ta mavzudan <b>18 tasini</b> allaqachon bilasiz. Reja qolgan 24 ta mavzudan tuzildi: taxminan <b>26 kun</b>, kuniga 35 daqiqa.</p>
+    </div>
+  </section>
+
+  <section class="card card-pad stack">
+    <div class="row between"><span class="strong">Mavzular holati</span><a class="small link" href="{{ url_for('user.knowledge', view='xarita') }}">Bilim xaritasi</a></div>
+    {% set colors = {"none": "var(--border-strong)", "learn": "#f59e0b", "relearn": "var(--red)", "done": "var(--blue)", "solid": "var(--green)"} %}
+    <div class="stacked-bar" aria-hidden="true">{% for k, v in dist %}<span style="--v: {{ v }}%; --d: {{ colors[k] }}"></span>{% endfor %}</div>
+    <ul class="list-reset row wrap g-6">
+      {% for k, v in dist %}<li class="status-dot"><span class="dot" style="--d: {{ colors[k] }}"></span>{{ status[k][0] }} <span class="muted num">{{ v }}%</span></li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="strong">Bo‘limlar bo‘yicha</span></div>
+    <div class="list">
+      {% for s in sections %}
+      <div class="list-item"><div class="grow stack stack-sm">
+        <div class="row between"><span>{{ s.name }}</span><span class="num small">{{ s.pct }}%</span></div>
+        {{ progress(s.pct, pct_color(s.pct)|trim, "thin") }}
+      </div></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card card-pad stack stack-sm">
+    <span class="eyebrow">Rejaning boshlanishi</span>
+    <ol class="list-reset stack stack-sm">
+      {% for p in plan[2:5] %}
+      <li class="row row-sm"><span class="badge badge-gray num">{{ loop.index }}</span><span class="grow">{{ p.name }}</span>{% if p.min %}<span class="xs muted num">{{ p.min }} daq</span>{% endif %}</li>
+      {% endfor %}
+    </ol>
+    <p class="xs muted">Bilgan mavzularingiz rejada «O‘zlashtirilgan» bo‘lib turadi. Ularni tasdiqlash testi bilan mustahkamlashingiz mumkin.</p>
+  </section>
+
+  <div class="stack stack-sm">
+    <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('user.plan') }}">Rejani ko‘rish{{ icon("arrow-right") }}</a>
+    <a class="btn btn-ghost btn-block" href="{{ url_for('user.home') }}">Bosh sahifaga</a>
+  </div>
+</div>
+{% endblock %}

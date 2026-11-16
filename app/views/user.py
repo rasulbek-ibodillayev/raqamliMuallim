@@ -18,6 +18,12 @@ def diagnostic():
     return render_template("user/diagnostic.html")
 
 
+@bp.get("/diagnostika/natija")
+def diagnostic_result():
+    return render_template("user/diagnostic_result.html", sections=m.SECTIONS, dist=m.DISTRIBUTION,
+                           status=m.STATUS, plan=m.PLAN)
+
+
 @bp.get("/bilim")
 def knowledge():
     return render_template("user/knowledge.html", sections=m.SECTIONS, dist=m.DISTRIBUTION,

@@ -107,6 +107,13 @@
           <button type="button" role="radio" :aria-checked="fs === 'xl'" :class="fs === 'xl' && 'active'" @click="rmSetFontSize('xl')" aria-label="Juda katta">A++</button>
         </div>
       </div>
+      <div x-data="rmInstall()" @rm-installable.document="canPrompt = true" @rm-installed.document="installed = true" style="display:contents">
+        <button class="list-item" type="button" x-show="visible" x-cloak @click="install()" style="border:0;border-top:1px solid var(--border);background:none;text-align:left;width:100%;cursor:pointer">
+          <span class="list-ico">{{ icon("download") }}</span>
+          <span class="grow"><span class="d-block">Ilovani o‘rnatish</span><span class="sub" x-text="ios ? 'Safari: Ulashish → Bosh ekranga qo‘shish' : 'Bosh ekrandan ochiladi, oflayn ishlaydi'"></span></span>
+        </button>
+        <div class="list-item" x-show="installed" x-cloak><span class="list-ico">{{ icon("check-circle") }}</span><span class="grow">Ilova o‘rnatilgan</span></div>
+      </div>
       <button class="list-item" type="button" data-theme-toggle style="border:0;border-top:1px solid var(--border);background:none;text-align:left;width:100%;cursor:pointer"><span class="list-ico">{{ icon("moon") }}</span><span class="grow">Yorug‘ / qorong‘i mavzu</span></button>
     </div>
   </section>

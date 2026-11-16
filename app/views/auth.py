@@ -41,3 +41,21 @@ def privacy():
 @bp.get("/parol-tiklash")
 def reset():
     return render_template("auth/reset.html")
+
+
+# --- Sertifikatni tekshirish (ommaviy, QR-koddan) ---
+# Namunada: INF-2026-000123 — haqiqiy, INF-2026-000099 — bekor qilingan, qolgani — topilmadi
+_CERT_STATES = {"INF-2026-000123": "valid", "INF-2026-000099": "revoked"}
+
+
+@bp.get("/s/<cert_no>")
+def verify_certificate(cert_no):
+    cert_no = cert_no.upper()
+    state = _CERT_STATES.get(cert_no, "missing")
+    return render_template("auth/verify_certificate.html", cert_no=cert_no, state=state), 200 if state != "missing" else 404
+
+
+@bp.get("/s")
+def verify_certificate_lookup():
+    from flask import redirect, url_for
+    return redirect(url_for("auth.verify_certificate", cert_no=request.args.get("raqam", "").strip() or "-"))

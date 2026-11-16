@@ -1,0 +1,24 @@
+{% extends "layouts/auth.html" %}
+{# 404, 403, 500 va boshqa xatolar uchun yagona sahifa. Kirish qilmagan foydalanuvchi ham ko'radi #}
+{% set E = {
+  404: ("search", "Sahifa topilmadi", "Havola eskirgan yoki manzilda xato bor. Bosh sahifadan kerakli bo‘limni toping."),
+  403: ("lock", "Bu sahifaga ruxsat yo‘q", "Sahifa boshqa rol (ekspert yoki administrator) uchun. Boshqa akkaunt bilan kirib ko‘ring."),
+  500: ("alert", "Nimadir noto‘g‘ri ketdi", "Xato bizning tomonda. Javoblaringiz va progress saqlangan. Bir daqiqadan keyin qayta urinib ko‘ring."),
+} %}
+{% set ico, head, text = E.get(code, E[500]) %}
+{% block title %}{{ head }}{% endblock %}
+{% block content %}
+<div class="empty" style="padding:8px 0">
+  <span class="empty-ico" {% if code >= 500 %}style="background:var(--red-soft);color:var(--red)"{% endif %}>{{ icon(ico, "ico-lg") }}</span>
+  <span class="xs muted num">Xato {{ code }}</span>
+  <h1 style="font-size:22px">{{ head }}</h1>
+  <p class="maxw-360 muted">{{ text }}</p>
+  <div class="justify-center row wrap mt-16">
+    {% if code >= 500 %}
+    <button class="btn btn-primary" type="button" onclick="location.reload()">{{ icon("refresh") }}Qayta urinish</button>
+    {% endif %}
+    <a class="btn {{ 'btn-outline' if code >= 500 else 'btn-primary' }}" href="{{ url_for('user.home') }}">Bosh sahifa</a>
+    {% if code == 404 %}<button class="btn btn-ghost" type="button" onclick="history.back()">{{ icon("arrow-left") }}Orqaga</button>{% endif %}
+  </div>
+</div>
+{% endblock %}

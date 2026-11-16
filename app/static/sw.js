@@ -1,13 +1,15 @@
 /* raqamliMuallim — Service Worker (PWA, oflayn rejim).
    Strategiya: avval tarmoq, bo'lmasa kesh. Shu sababli yangilangan fayllar darhol ko'rinadi,
    internet yo'q bo'lganda esa oxirgi ochilgan sahifalar va asosiy fayllar keshdan beriladi. */
-var VERSION = "rm-v1";
+var VERSION = "rm-v2";
 var CORE = [
   "/static/css/app.css",
   "/static/js/app.js",
   "/static/vendor/alpine-3.14.1.min.js",
   "/static/fonts/inter-latin-wght.woff2",
   "/static/icon.svg",
+  "/static/icons/icon-192.png",
+  "/static/icons/apple-touch-icon.png",
   "/static/manifest.webmanifest",
   "/app/oflayn"
 ];

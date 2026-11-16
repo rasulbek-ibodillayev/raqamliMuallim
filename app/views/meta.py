@@ -14,11 +14,22 @@ SCREENS = [
         ("auth.details", "Ma’lumotlaringiz · 3-qadam", {}),
         ("auth.reset", "Parolni tiklash", {}),
         ("auth.privacy", "Maxfiylik siyosati", {}),
+        ("auth.verify_certificate", "Sertifikatni tekshirish — haqiqiy", {"cert_no": "INF-2026-000123"}),
+        ("auth.verify_certificate", "Sertifikatni tekshirish — bekor qilingan", {"cert_no": "INF-2026-000099"}),
+        ("auth.verify_certificate", "Sertifikatni tekshirish — topilmadi", {"cert_no": "INF-2026-999999"}),
+    ]),
+    ("Xato sahifalari", [
+        ("meta.error_preview", "404 — sahifa topilmadi", {"code": 404}),
+        ("meta.error_preview", "403 — ruxsat yo‘q", {"code": 403}),
+        ("meta.error_preview", "500 — server xatosi", {"code": 500}),
     ]),
     ("Asosiy", [
         ("user.home", "Bosh sahifa", {}),
         ("user.home", "Bosh sahifa — yangi foydalanuvchi", {"yangi": 1, "qadam": 1}),
+        ("user.home", "Bosh sahifa — ilovani o‘rnatish (Android)", {"pwa": 1}),
+        ("user.home", "Bosh sahifa — ilovani o‘rnatish (iPhone)", {"pwa": "ios"}),
         ("user.diagnostic", "Diagnostika taklifi", {}),
+        ("user.diagnostic_result", "Diagnostika natijasi", {}),
         ("user.offline", "Oflayn holat", {}),
     ]),
     ("Bilim va reja", [
@@ -87,6 +98,19 @@ def service_worker():
     resp = send_from_directory(current_app.static_folder, "sw.js", mimetype="application/javascript")
     resp.headers["Cache-Control"] = "no-cache"
     return resp
+
+
+@bp.get("/favicon.ico")
+def favicon():
+    # Ba'zi brauzerlar <link rel="icon"> ga qaramay /favicon.ico ni so'raydi
+    from flask import current_app, send_from_directory
+    return send_from_directory(current_app.static_folder, "icons/favicon-32.png", mimetype="image/png", max_age=86400)
+
+
+@bp.get("/xato/<int:code>")
+def error_preview(code):
+    """Xato sahifalarini /ekranlar ro'yxatidan ko'rish uchun."""
+    return render_template("errors/error.html", code=code)
 
 
 @bp.get("/ekranlar")
