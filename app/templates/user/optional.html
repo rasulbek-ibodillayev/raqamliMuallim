@@ -1,25 +1,25 @@
 {% extends "layouts/app.html" %}
-{% block title %}Ixtiyoriy test{% endblock %}
+{% block title %}{{ _("Ixtiyoriy test") }}{% endblock %}
 {% block content %}
-{% call page_head("Ixtiyoriy test", "Bu test o‘quv rejangizga ta’sir qilmaydi.") %}{% endcall %}
+{% call page_head(_("Ixtiyoriy test"), _("Bu test o‘quv rejangizga ta’sir qilmaydi.")) %}{% endcall %}
 <form class="stack stack-lg" action="{{ url_for('test.question') }}" method="get" x-data="{ n: 20 }">
   <div class="card">
-    <div class="card-head"><span class="strong">Mavzular</span><span class="small muted">5 ta tanlandi</span></div>
+    <div class="card-head"><span class="strong">{{ _("Mavzular") }}</span><span class="small muted">{{ _("5 ta tanlandi") }}</span></div>
     <div class="list">
       {% for name, qn, st, on in topics %}
       <label class="pointer list-item">
-        <input type="checkbox" {{ 'checked' if on }} style="width:18px;height:18px;accent-color:var(--primary)">
-        <div class="grow"><div>{{ name }}</div><div class="sub">{{ qn }} ta savol</div></div>
-        {% if st == "relearn" %}<span class="xs t-yellow">Takrorlash tavsiya etiladi</span>{% endif %}
+        <input class="u-w-18 u-h-18 u-accent-primary" type="checkbox" {{ 'checked' if on }}>
+        <div class="grow"><div>{{ name }}</div><div class="sub">{{ qn }} {{ _("ta savol") }}</div></div>
+        {% if st == "relearn" %}<span class="xs t-yellow">{{ _("Takrorlash tavsiya etiladi") }}</span>{% endif %}
       </label>
       {% endfor %}
     </div>
   </div>
   <div class="field">
-    <span class="label">Savollar soni</span>
+    <span class="label">{{ _("Savollar soni") }}</span>
     <div class="seg">{% for v in [10, 20, 30] %}<button type="button" :class="n === {{ v }} && 'active'" @click="n = {{ v }}">{{ v }}</button>{% endfor %}</div>
-    <span class="hint">Taxminiy vaqt: <span x-text="Math.round(n * 1.25)">25</span> daqiqa</span>
+    <span class="hint">{{ _("Taxminiy vaqt:") }} <span x-text="Math.round(n * 1.25)">25</span> {{ _("daqiqa") }}</span>
   </div>
-  <button class="btn btn-primary btn-lg btn-block" type="submit">Testni boshlash</button>
+  <button class="btn btn-primary btn-lg btn-block" type="submit">{{ _("Testni boshlash") }}</button>
 </form>
 {% endblock %}

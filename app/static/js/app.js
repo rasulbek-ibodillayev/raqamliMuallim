@@ -45,6 +45,91 @@ window.rmInstall = function (opts) {
   };
 };
 
+/* Mavzu testi savoli: javob avtomatik saqlanadi (RMPlayer), taymer tugash vaqtidan hisoblanadi.
+   cfg: { id, kind (test turi), total, duration, pos, mode (yopiq|kop|moslash|ochiq), offline (namuna) } */
+window.rmTestQuestion = function (cfg) {
+  return {
+    s: null, st: "idle", pending: 0, online: navigator.onLine, left: null, started: Date.now(),
+    init: function () {
+      var self = this, form = this.$el;
+      if (cfg.offline) RMPlayer.setForceOffline(true);
+      RMPlayer.on(function (p) { self.st = p.state; self.pending = p.pending; self.online = p.online && !cfg.offline; });
+      RMPlayer.open({ id: cfg.id, kind: cfg.kind, total: cfg.total, duration: cfg.duration }).then(function (s) {
+        self.s = s;
+        var a = s.answers[cfg.pos];
+        if (a) { RMPlayer.writeForm(form, cfg.mode, a.v); self.st = "synced"; }
+        s.setPos(cfg.pos);
+        self.left = s.remaining();
+        setInterval(function () { self.left = s.remaining(); }, 1000);
+      });
+    },
+    save: function () {
+      if (!this.s) return;
+      var v = RMPlayer.readForm(this.$el, cfg.mode);
+      this.s.answer(cfg.pos, v, Date.now() - this.started);
+    },
+    fmt: function (x) {
+      if (x === null) return "--:--";
+      var p = function (n) { return String(n).padStart(2, "0"); };
+      return (x >= 3600 ? Math.floor(x / 3600) + ":" : "") + p(Math.floor(x % 3600 / 60)) + ":" + p(x % 60);
+    },
+    label: function () {
+      if (this.st === "saving") return "Saqlanmoqda…";
+      if (this.st === "local" || (this.st !== "idle" && !this.online)) return "Qurilmada saqlandi";
+      if (this.st === "synced") return "Saqlandi";
+      if (this.st === "error") return "Saqlanmadi";
+      return "";
+    }
+  };
+};
+
+/* Forma: POST + CSRF, server tekshiruvi, xatolarni maydon yonida ko'rsatish.
+   JS bo'lmasa forma oddiy POST bo'lib ishlaydi (server sahifani xatolar bilan qayta chizadi).
+   extra — formaning o'z holati ({ show: false } kabi), onOk(json) — muvaffaqiyatdan keyin (ixtiyoriy). */
+window.rmForm = function (extra, onOk) {
+  var base = {
+    busy: false, errors: {}, message: "", ok: false,
+    initForm: function () {
+      try { this.errors = JSON.parse(this.$el.dataset.errors || "{}"); } catch (e) { this.errors = {}; }
+    },
+    err: function (name) { return this.errors[name] || ""; },
+    clear: function (name) { if (this.errors[name]) { var e = Object.assign({}, this.errors); delete e[name]; this.errors = e; } },
+    submit: function (ev) {
+      var self = this, form = ev.target.closest("form");
+      if (this.busy) return;
+      this.busy = true; this.message = ""; this.ok = false;
+      var body = new FormData(form);
+      if (ev.submitter && ev.submitter.name) body.append(ev.submitter.name, ev.submitter.value);
+      return fetch(ev.submitter && ev.submitter.formAction ? ev.submitter.formAction : form.action, {
+        method: "POST", body: body, credentials: "same-origin",
+        headers: { "Accept": "application/json", "X-CSRFToken": (document.querySelector('meta[name="csrf-token"]') || {}).content || "" }
+      }).then(function (r) {
+        return r.json().catch(function () { return { ok: false, message: "Server javobini o‘qib bo‘lmadi (" + r.status + ")" }; });
+      }).then(function (j) {
+        self.busy = false;
+        if (j.ok) {
+          self.errors = {}; self.ok = true; self.message = j.message || "";
+          if (onOk && onOk.call(self, j, form) === false) return j;
+          if (j.redirect && !(form.dataset.stay)) { location.href = j.redirect; return j; }
+          if (j.message && window.rmToast) window.rmToast(j.message);
+          return j;
+        }
+        self.errors = j.errors || {};
+        self.message = j.message || j.error || "Xatolarni tuzating";
+        // Birinchi xato maydonga fokus
+        var first = Object.keys(self.errors)[0];
+        var el = first && form.querySelector('[name="' + first + '"]');
+        if (el) el.focus();
+        return j;
+      }).catch(function () {
+        self.busy = false;
+        self.message = "Internetga ulanib bo‘lmadi. Ulanishni tekshirib, qayta yuboring.";
+      });
+    }
+  };
+  return Object.assign(base, extra || {});
+};
+
 /* Ilova qobig'i: chap menyu, tezkor qidiruv (Ctrl+K) va bildirishnomalar */
 window.rmShell = function () {
   function norm(s) { return (s || "").toLowerCase().replace(/[‘’ʻʼ'`]/g, "").trim(); }
@@ -60,7 +145,7 @@ window.rmShell = function () {
       var items = (window.RM_SEARCH || []).slice();
       try {
         (JSON.parse(localStorage.getItem("rm-notes")) || []).forEach(function (n) {
-          items.push({ g: "Konspekt", t: n.title || n.text.slice(0, 70), s: n.topic, u: "/app/konspekt", i: "note" });
+          items.push({ g: "Eslatmalar", t: n.title || n.text.slice(0, 70), s: n.topic, u: "/app/eslatmalar", i: "note" });
         });
       } catch (e) {}
       return items;
@@ -259,8 +344,8 @@ window.rmShell = function () {
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lessonNav); else lessonNav();
 
-  // Darsda matnni belgilaganda: «Konspektga saqlash» va «AI’dan so‘rash»
-  // Konspekt hozircha brauzer xotirasiga (rm-notes-inbox) yoziladi, «Shaxsiy konspekt» sahifasi uni o'qib oladi.
+  // Darsda matnni belgilaganda: «Eslatmaga saqlash» va «AI’dan so‘rash»
+  // Eslatmalar hozircha brauzer xotirasiga (rm-notes-inbox) yoziladi, «Eslatmalar» sahifasi uni o'qib oladi.
   var selMenu = null;
   function hideSel() { if (selMenu) { selMenu.remove(); selMenu = null; } }
   function showSel() {
@@ -275,7 +360,7 @@ window.rmShell = function () {
     selMenu.style.left = (r.left + r.width / 2 + window.scrollX) + "px";
     selMenu.style.top = (r.top + window.scrollY) + "px";
     selMenu.innerHTML =
-      '<button type="button" data-act="note"><svg class="ico ico-sm"><use href="#i-bookmark"/></svg>Konspektga saqlash</button>' +
+      '<button type="button" data-act="note"><svg class="ico ico-sm"><use href="#i-bookmark"/></svg>Eslatmaga saqlash</button>' +
       '<button type="button" data-act="ai"><svg class="ico ico-sm"><use href="#i-sparkle"/></svg>AI’dan so‘rash</button>';
     selMenu.addEventListener("mousedown", function (e) { e.preventDefault(); });
     selMenu.addEventListener("click", function (e) {
@@ -286,7 +371,7 @@ window.rmShell = function () {
           inbox.push({ id: Date.now(), topic: box.dataset.topic || "Umumiy", title: "", text: text, code: "", when: "Bugun" });
           localStorage.setItem("rm-notes-inbox", JSON.stringify(inbox));
         } catch (err) {}
-        window.rmToast("Konspektga saqlandi");
+        window.rmToast("Eslatmalarga saqlandi");
       } else if (act === "ai") {
         location.href = box.dataset.tutorUrl + "?q=" + encodeURIComponent("Tushuntirib bering: «" + text.slice(0, 300) + "»");
       }
@@ -298,6 +383,41 @@ window.rmShell = function () {
   document.addEventListener("touchend", function () { setTimeout(showSel, 250); });
   document.addEventListener("keyup", function (e) { if (e.shiftKey) showSel(); if (e.key === "Escape") hideSel(); });
   window.addEventListener("scroll", hideSel, { passive: true });
+
+  // Test rejimi: test sahifasida ([data-leave-guard]) ekranda faqat test qolsin — to'liq ekran.
+  // Brauzer to'liq ekranni faqat foydalanuvchi harakatidan keyin ruxsat beradi, shuning uchun birinchi
+  // bosishda yoqiladi. Test to'xtatilsa yoki yakunlansa (data-safe-leave / sahifadan chiqish) o'chadi.
+  // Foydalanuvchi o'zi o'chirsa (Esc yoki tugma), shu test davomida qayta yoqilmaydi.
+  (function () {
+    if (!document.querySelector("[data-leave-guard]")) return;
+    var root = document.documentElement, optedOut = false;
+    document.body.classList.add("test-mode");
+    function canFs() { return root.requestFullscreen && document.fullscreenEnabled; }
+    function enter() {
+      if (optedOut || !canFs() || document.fullscreenElement) return;
+      root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
+    }
+    window.rmToggleFullscreen = function () {
+      if (document.fullscreenElement) { optedOut = true; document.exitFullscreen().catch(function () {}); }
+      else { optedOut = false; enter(); }
+    };
+    document.addEventListener("pointerdown", function once(e) {
+      if (e.target.closest("[data-safe-leave], [data-fs-toggle]")) return;
+      enter(); document.removeEventListener("pointerdown", once, true);
+    }, true);
+    document.addEventListener("fullscreenchange", function () {
+      document.body.classList.toggle("is-fullscreen", !!document.fullscreenElement);
+    });
+    document.addEventListener("click", function (e) {
+      if (e.target.closest("[data-safe-leave]") && document.fullscreenElement) document.exitFullscreen().catch(function () {});
+    });
+    if (!canFs()) document.querySelectorAll("[data-fs-toggle]").forEach(function (b) { b.hidden = true; });
+  })();
+
+  // Serverdan kelgan flash xabarlar (JS'siz yuborilgan formalar) → toast
+  document.querySelectorAll("[data-flash]").forEach(function (el) {
+    try { JSON.parse(el.dataset.flash).forEach(function (m, i) { setTimeout(function () { window.rmToast(m); }, i * 2600); }); } catch (e) {}
+  });
 
   // PWA: Service Worker (oflayn rejim)
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {

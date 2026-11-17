@@ -1,0 +1,29 @@
+{# Yuklanish holati (skeleton). Sahifa kontenti kelguncha shu ko'rinadi.
+   skeleton_kind: "list" (standart) | "table" | "cards". Backend/HTMX bilan: kontent qismi shu bilan almashtiriladi.
+   Namunada: istalgan sahifaga ?yuklanmoqda=1 qo'shilsa ko'rinadi. #}
+{% set kind = skeleton_kind or "list" %}
+<div class="stack stack-lg skeleton-page" aria-busy="true" aria-live="polite">
+  <span class="sr-only">{{ _("Yuklanmoqda…") }}</span>
+  <div class="stack stack-sm" aria-hidden="true">
+    <div class="skeleton sk-h1"></div>
+    <div class="skeleton sk-line sk-w40"></div>
+  </div>
+  {% if kind in ["cards", "table"] %}
+  <div class="grid-4" aria-hidden="true">
+    {% for i in range(4) %}<div class="card stat stack stack-sm"><div class="skeleton sk-line sk-w60"></div><div class="skeleton sk-num"></div><div class="skeleton sk-line sk-w40"></div></div>{% endfor %}
+  </div>
+  {% endif %}
+  {% if kind == "table" %}
+  <div class="card" aria-hidden="true">
+    {% for i in range(6) %}
+    <div class="list-item{{ ' bt' if not loop.first }}"><div class="skeleton sk-avatar"></div><div class="skeleton sk-line sk-w30"></div><div class="grow"></div><div class="skeleton sk-line sk-w15"></div><div class="skeleton sk-line sk-w10"></div></div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" aria-hidden="true">
+    {% for i in range(5) %}
+    <div class="list-item{{ ' bt' if not loop.first }}"><div class="skeleton sk-avatar"></div><div class="grow stack stack-sm"><div class="skeleton sk-line sk-w{{ [60, 75, 50, 70, 55][i] }}"></div><div class="skeleton sk-line-sm sk-w{{ [35, 25, 40, 30, 20][i] }}"></div></div></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

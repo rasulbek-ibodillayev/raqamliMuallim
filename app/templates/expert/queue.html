@@ -1,34 +1,34 @@
 {% extends "layouts/panel.html" %}
-{% block title %}Tekshiruv navbati{% endblock %}
-{% block heading %}Tekshiruv navbati{% endblock %}
+{% block title %}{{ _("Tekshiruv navbati") }}{% endblock %}
+{% block heading %}{{ _("Tekshiruv navbati") }}{% endblock %}
 {% block content %}
-{% call page_head("Tekshiruv navbati", "12 ta savol tasdiqlashni kutmoqda. O‘zingiz yozgan savolni tasdiqlay olmaysiz.") %}
-<a class="btn btn-primary btn-sm" href="{{ url_for('expert.editor') }}">{{ icon("plus", "ico-sm") }}Yangi savol</a>
+{% call page_head(_("Tekshiruv navbati"), _("12 ta savol tasdiqlashni kutmoqda. O‘zingiz yozgan savolni tasdiqlay olmaysiz.")) %}
+<a class="btn btn-primary btn-sm" href="{{ url_for('expert.editor') }}">{{ icon("plus", "ico-sm") }}{{ _("Yangi savol") }}</a>
 {% endcall %}
 <div class="stack">
   <div class="row wrap row-sm">
-    <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="Savol matni bo‘yicha qidirish" aria-label="Qidirish"></div>
-    <select class="w-auto select" aria-label="Mavzu"><option>Barcha mavzular</option><option>Sanoq sistemalari</option><option>Mantiq asoslari</option><option>Algoritmlar</option></select>
-    <select class="w-auto select" aria-label="Daraja"><option>Barcha darajalar</option><option>Oson</option><option>O‘rta</option><option>Qiyin</option></select>
-    <select class="w-auto select" aria-label="Manba"><option>Barcha manbalar</option><option>AI</option><option>Ekspert</option></select>
+    <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="{{ _('Savol matni bo‘yicha qidirish') }}" aria-label="{{ _('Qidirish') }}"></div>
+    <select class="w-auto select" aria-label="{{ _('Mavzu') }}"><option>{{ _("Barcha mavzular") }}</option><option>{{ _("Sanoq sistemalari") }}</option><option>{{ _("Mantiq asoslari") }}</option><option>{{ _("Algoritmlar") }}</option></select>
+    <select class="w-auto select" aria-label="{{ _('Daraja') }}"><option>{{ _("Barcha darajalar") }}</option><option>{{ _("Oson") }}</option><option>{{ _("O‘rta") }}</option><option>{{ _("Qiyin") }}</option></select>
+    <select class="w-auto select" aria-label="{{ _('Manba') }}"><option>{{ _("Barcha manbalar") }}</option><option>{{ _("AI") }}</option><option>{{ _("Ekspert") }}</option></select>
   </div>
   <div class="table-wrap">
     <table class="table">
-      <thead><tr><th>Savol</th><th>Mavzu</th><th>Daraja</th><th>Turi</th><th>Muallif</th><th></th></tr></thead>
+      <thead><tr><th>{{ _("Savol") }}</th><th>{{ _("Mavzu") }}</th><th>{{ _("Daraja") }}</th><th>{{ _("Turi") }}</th><th>{{ _("Muallif") }}</th><th></th></tr></thead>
       <tbody>
         {% for q, topic, lvl, kind, author, src in items %}
         <tr>
-          <td class="q"><div class="truncate" style="max-width:380px">{{ q }}</div></td>
+          <td class="q"><div class="truncate u-maxw-380">{{ q }}</div></td>
           <td class="nowrap">{{ topic }}</td>
           <td class="nowrap">{{ lvl }}</td>
           <td class="nowrap muted">{{ kind }}</td>
-          <td class="nowrap">{% if src == "ai" %}<span class="row row-sm"><span class="ai-mark" style="width:20px;height:20px;border-radius:6px"><svg class="ico" style="width:12px;height:12px"><use href="#i-sparkle"/></svg></span>AI</span>{% else %}{{ author }}{% endif %}</td>
-          <td><a class="btn btn-outline btn-sm" href="{{ url_for('expert.editor') }}">Ko‘rib chiqish</a></td>
+          <td class="nowrap">{% if src == "ai" %}<span class="row row-sm"><span class="ai-mark u-w-20 u-h-20 u-r-6"><svg class="ico u-w-12 u-h-12"><use href="#i-sparkle"/></svg></span>{{ _("AI") }}</span>{% else %}{{ author }}{% endif %}</td>
+          <td><a class="btn btn-outline btn-sm" href="{{ url_for('expert.editor') }}">{{ _("Ko‘rib chiqish") }}</a></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  <p class="xs muted">AI yaratgan savollar faqat ekspert tasdiqlagandan keyin testlarga tushadi.</p>
+  <p class="xs muted">{{ _("AI yaratgan savollar faqat ekspert tasdiqlagandan keyin testlarga tushadi.") }}</p>
 </div>
 {% endblock %}

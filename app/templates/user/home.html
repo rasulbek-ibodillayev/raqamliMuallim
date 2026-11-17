@@ -1,5 +1,5 @@
 {% extends "layouts/app.html" %}
-{% block title %}Bosh sahifa{% endblock %}
+{% block title %}{{ _("Bosh sahifa") }}{% endblock %}
 {#
   Bosh sahifa tartibi:
   1) salomlashuv + AI so'rov maydoni
@@ -10,22 +10,27 @@
 <div class="stack stack-xl">
   <section class="stack stack-lg pt-24">
     <div class="stack stack-sm">
-      <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}Attestatsiya {{ r.exam }} · {{ r.days_left }} kun qoldi</p>
-      <h1 class="text-display">Salom, {{ me.first }}. <span class="muted fw-500">Bugun nimani o‘rganamiz?</span></h1>
+      <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}{{ _("Attestatsiya") }} {{ r.exam }} · {{ r.days_left }} {{ _("kun qoldi") }}</p>
+      <h1 class="text-display">{{ _("Salom,") }} {{ me.first }}. <span class="muted fw-500">{{ _("Bugun nimani o‘rganamiz?") }}</span></h1>
     </div>
-    {{ composer("AI tutorga savol bering…", note=False) }}
+    {{ composer(_("AI tutorga savol bering…"), note=False) }}
     <div class="chips scroll">
-      <a class="chip" href="{{ url_for('user.tutor', q='elif va else farqi nima?') }}">{{ icon("bulb") }}elif va else farqi nima?</a>
-      <a class="chip" href="{{ url_for('user.tutor', q='Xatolarimni tahlil qil') }}">{{ icon("target") }}Xatolarimni tahlil qil</a>
-      <a class="chip" href="{{ url_for('user.tutor', q='Sikllarga masala ber') }}">{{ icon("code") }}Sikllarga masala ber</a>
+      <a class="chip" href="{{ url_for('user.tutor', q='elif va else farqi nima?') }}">{{ icon("bulb") }}{{ _("elif va else farqi nima?") }}</a>
+      <a class="chip" href="{{ url_for('user.tutor', q='Xatolarimni tahlil qil') }}">{{ icon("target") }}{{ _("Xatolarimni tahlil qil") }}</a>
+      <a class="chip" href="{{ url_for('user.tutor', q='Sikllarga masala ber') }}">{{ icon("code") }}{{ _("Sikllarga masala ber") }}</a>
     </div>
   </section>
 
   {% if new_user %}
+  {# Birinchi kirishda: faol bo'lmagan akkaunt qoidasi haqida eslatma (yopilgach qayta chiqmaydi) #}
+  <div class="alert alert-yellow" role="note" x-data="{ hide: (() => { try { return !!localStorage.getItem('rm-6m-ok') } catch (e) { return false } })() }" x-show="!hide">
+    {{ icon("info") }}<span class="grow"><b>{{ _("Eslatma:") }}</b> {{ _("akkauntga") }} <b>{{ _("6 oy") }}</b> {{ _("davomida kirilmasa, u avtomatik o‘chiriladi. Undan 2 hafta oldin ogohlantiramiz.") }}</span>
+    <button class="icon-btn" type="button" aria-label="{{ _('Tushunarli') }}" @click="hide = true; try { localStorage.setItem('rm-6m-ok', '1') } catch (e) {}">{{ icon("x") }}</button>
+  </div>
   {# ---------- Yangi foydalanuvchi: 3 qadam ---------- #}
   <section class="card card-pad stack" aria-labelledby="ob-title">
     <div class="row between wrap items-start">
-      <div><span class="eyebrow">Boshlash</span><h2 id="ob-title" class="mt-6">3 qadamda tayyorgarlikni boshlang</h2></div>
+      <div><span class="eyebrow">{{ _("Boshlash") }}</span><h2 id="ob-title" class="mt-6">{{ _("3 qadamda tayyorgarlikni boshlang") }}</h2></div>
       <span class="small muted num">{{ done_steps }} / 3</span>
     </div>
     {{ progress((done_steps / 3 * 100)|round, "green", "thin") }}
@@ -35,11 +40,11 @@
       <li class="ob-step {{ st }}">
         <span class="ob-mark">{% if st == "done" %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>
         <div class="grow"><div class="ob-title">{{ s.title }}</div><div class="small muted">{{ s.sub }}</div></div>
-        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for(s.endpoint) }}">Boshlash</a>{% endif %}
+        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for(s.endpoint) }}">{{ _("Boshlash") }}</a>{% endif %}
       </li>
       {% endfor %}
     </ol>
-    <p class="xs muted">Uchala qadam bajarilgach, bu yerda shaxsiy rejangiz va tayyorlik ko‘rsatkichi chiqadi.</p>
+    <p class="xs muted">{{ _("Uchala qadam bajarilgach, bu yerda shaxsiy rejangiz va tayyorlik ko‘rsatkichi chiqadi.") }}</p>
   </section>
 
   {% else %}
@@ -48,11 +53,11 @@
   <section class="card readiness" aria-labelledby="rd-title">
     {{ ring(r.pct, 88, "var(--" ~ color ~ ")") }}
     <div class="grow stack stack-sm">
-      <div class="row row-sm wrap"><h2 id="rd-title" class="text-h3">Attestatsiyaga tayyorlik</h2>{{ status_dot(label, color) }}</div>
+      <div class="row row-sm wrap"><h2 id="rd-title" class="text-h3">{{ _("Attestatsiyaga tayyorlik") }}</h2>{{ status_dot(label, color) }}</div>
       <p class="small c-text2">{{ text.format(m=r.margin_days) }}</p>
       <div class="forecast" role="img" aria-label="Prognoz: {{ r.forecast }}da tayyor bo‘lasiz, attestatsiya {{ r.exam }}">
         <div class="forecast-bar"><span style="--v: {{ r.pct }}%"></span><i class="forecast-ready"></i></div>
-        <div class="row between xs muted"><span>Bugun</span><span>Tayyor: <b class="c-text">{{ r.forecast }}</b></span><span>Attestatsiya: <b class="c-text">{{ r.exam }}</b></span></div>
+        <div class="row between xs muted"><span>{{ _("Bugun") }}</span><span>{{ _("Tayyor:") }} <b class="c-text">{{ r.forecast }}</b></span><span>{{ _("Attestatsiya:") }} <b class="c-text">{{ r.exam }}</b></span></div>
       </div>
     </div>
   </section>
@@ -61,19 +66,19 @@
   <section class="card" aria-labelledby="next-title">
     <div class="card-pad stack">
       <div class="row between wrap">
-        <span class="eyebrow">Keyingi qadam</span>
-        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}≈ 12 daqiqa</span>
+        <span class="eyebrow">{{ _("Keyingi qadam") }}</span>
+        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}{{ _("≈ 12 daqiqa") }}</span>
       </div>
       <div class="stack stack-sm">
-        <h2 id="next-title" class="text-h2l">Python: shart operatorlari</h2>
-        <p class="muted small">Dasturlash · 3 / 4 kichik mavzu · 60% o‘qilgan</p>
+        <h2 id="next-title" class="text-h2l">{{ _("Python: shart operatorlari") }}</h2>
+        <p class="muted small">{{ _("Dasturlash · 3 / 4 kichik mavzu · 60%% o‘qilgan") }}</p>
       </div>
       {{ progress(60) }}
       <div class="next-ai row items-start">
         <span class="ai-mark">{{ icon("sparkle") }}</span>
-        <p class="small grow">Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring.</p>
+        <p class="small grow">{{ _("Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring.") }}</p>
       </div>
-      <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('user.lesson', holat='qayta') }}">Darsni davom ettirish{{ icon("arrow-right") }}</a>
+      <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('user.lesson', holat='qayta') }}">{{ _("Darsni davom ettirish") }}{{ icon("arrow-right") }}</a>
     </div>
   </section>
 
@@ -82,8 +87,8 @@
   {% set done_min = today | selectattr("done") | sum(attribute="min") %}
   <section class="card" aria-labelledby="today-title">
     <div class="card-head">
-      <div><h2 id="today-title" class="text-h3">Bugun · {{ total }} daqiqa</h2><div class="xs muted">Darslar orasidagi qisqa vaqtga mo‘ljallangan</div></div>
-      <span class="small muted num">{{ done_min }} / {{ total }} daq</span>
+      <div><h2 id="today-title" class="text-h3">{{ _("Bugun ·") }} {{ total }} {{ _("daqiqa") }}</h2><div class="xs muted">{{ _("Darslar orasidagi qisqa vaqtga mo‘ljallangan") }}</div></div>
+      <span class="small muted num">{{ done_min }} / {{ total }} {{ _("daq") }}</span>
     </div>
     <div class="today-progress">{{ progress((done_min / total * 100)|round, "green", "thin") }}</div>
     <div class="list">
@@ -91,7 +96,7 @@
       <a class="list-item today-item {{ 'is-done' if t.done }}" href="{{ url_for(t.endpoint) }}">
         <span class="list-ico">{% if t.done %}{{ icon("check", "ico-sm") }}{% else %}{{ icon(t.icon, "ico-sm") }}{% endif %}</span>
         <div class="grow"><div class="today-title">{{ t.title }}</div><div class="sub">{{ t.sub }}</div></div>
-        <span class="time-chip num">{{ t.min }} daq</span>
+        <span class="time-chip num">{{ t.min }} {{ _("daq") }}</span>
       </a>
       {% endfor %}
     </div>

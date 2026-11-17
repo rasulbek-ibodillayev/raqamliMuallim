@@ -18,6 +18,12 @@ SCREENS = [
         ("auth.verify_certificate", "Sertifikatni tekshirish — bekor qilingan", {"cert_no": "INF-2026-000099"}),
         ("auth.verify_certificate", "Sertifikatni tekshirish — topilmadi", {"cert_no": "INF-2026-999999"}),
     ]),
+    ("Yuklanish holatlari", [
+        ("user.knowledge", "Bilim darajasi — yuklanmoqda", {"yuklanmoqda": 1}),
+        ("user.notes", "Eslatmalar — yuklanmoqda", {"yuklanmoqda": 1}),
+        ("expert.queue", "Ekspert: tekshiruv navbati — yuklanmoqda", {"yuklanmoqda": 1}),
+        ("admin.users", "Admin: foydalanuvchilar — yuklanmoqda", {"yuklanmoqda": 1}),
+    ]),
     ("Xato sahifalari", [
         ("meta.error_preview", "404 — sahifa topilmadi", {"code": 404}),
         ("meta.error_preview", "403 — ruxsat yo‘q", {"code": 403}),
@@ -43,7 +49,7 @@ SCREENS = [
         ("user.lesson", "Dars — qayta o‘qitish", {"holat": "qayta"}),
         ("user.lesson", "Dars — audio pleyer", {"audio": 1}),
         ("user.tutor", "AI tutor", {}),
-        ("user.notes", "Shaxsiy konspekt", {}),
+        ("user.notes", "Eslatmalar", {}),
     ]),
     ("Testlar", [
         ("user.tests", "Testlarim", {}),
@@ -59,9 +65,9 @@ SCREENS = [
         ("test.result", "Natija — qaytarildi", {"holat": "qaytarildi"}),
         ("user.control", "Nazorat oldidan", {}),
         ("user.optional", "Ixtiyoriy test", {}),
-        ("test.exam", "Attestatsiya sinovi (savollar navigatori bilan)", {}),
-        ("test.exam", "Attestatsiya sinovi — jadvalli savol", {"savol": 5}),
-        ("test.exam", "Attestatsiya sinovi — yakunlashni tasdiqlash", {"yakun": 1}),
+        ("test.exam", "Attestatsiya sinovi (savollar navigatori bilan)", {"namuna": 1}),
+        ("test.exam", "Attestatsiya sinovi — jadvalli savol", {"savol": 5, "namuna": 1}),
+        ("test.exam", "Attestatsiya sinovi — yakunlashni tasdiqlash", {"yakun": 1, "namuna": 1}),
     ]),
     ("Natijalar va tahlil", [
         ("user.results", "Natijalarim", {}),
@@ -75,17 +81,20 @@ SCREENS = [
         ("user.certificates", "Sertifikatlarim", {}),
         ("user.certificate_print", "Sertifikat — bosma ko‘rinish", {}),
         ("user.profile", "Profil", {}),
+        ("user.help", "Yordam", {}),
     ]),
     ("Ekspert paneli", [
         ("expert.queue", "Tekshiruv navbati", {}),
-        ("expert.editor", "Savol muharriri", {}),
+        ("expert.questions", "Savollar banki", {}),
+        ("expert.editor", "Savol yaratish", {}),
+        ("expert.topics", "Mavzular va dars muharriri", {}),
         ("expert.objections", "E’tirozlar", {}),
     ]),
     ("Admin paneli", [
-        ("admin.dashboard", "Boshqaruv paneli", {}),
+        ("admin.stats", "Statistika", {}),
         ("admin.users", "Foydalanuvchilar", {}),
-        ("admin.topics", "Mavzular va dars muharriri", {}),
-        ("admin.questions", "Savollar banki", {}),
+        ("admin.user_detail", "Foydalanuvchi — to‘liq ma’lumot", {"uid": 1}),
+        ("admin.experts", "Ekspertlar", {}),
         ("admin.settings", "Sozlamalar", {}),
     ]),
 ]
@@ -113,6 +122,20 @@ def error_preview(code):
     return render_template("errors/error.html", code=code)
 
 
+@bp.get("/_rol/<role>")
+def as_role(role):
+    """Faqat ishlab chiqish uchun: rolni almashtirib, sahifani ochish (/ekranlar havolalari shu orqali o'tadi)."""
+    from flask import abort, redirect, request, session, url_for
+
+    from ..roles import HOME, ROLES
+    if role not in ROLES:
+        abort(404)
+    session["role"] = role
+    nxt = request.args.get("next", "")
+    return redirect(nxt if nxt.startswith("/") and not nxt.startswith("//") else url_for(HOME[role]))
+
+
 @bp.get("/ekranlar")
 def screens():
-    return render_template("meta/screens.html", groups=SCREENS)
+    from ..roles import REQUIRED
+    return render_template("meta/screens.html", groups=SCREENS, required=REQUIRED)

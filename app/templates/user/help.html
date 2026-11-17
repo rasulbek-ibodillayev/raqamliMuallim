@@ -1,0 +1,35 @@
+{% extends "layouts/app.html" %}
+{% block title %}{{ _("Yordam") }}{% endblock %}
+{% block content %}
+<div class="pt-16 stack stack-xl">
+  {{ page_head(_("Yordam"), _("Ko‘p beriladigan savollar va qo‘llab-quvvatlash xizmati")) }}
+
+  <section class="stack stack-sm" aria-labelledby="faq-t">
+    <h2 class="eyebrow" id="faq-t">{{ _("Ko‘p beriladigan savollar") }}</h2>
+    <div class="card list">
+      {% for q, a in [
+        ("Internet uzilsa test javoblarim yo‘qoladimi?", "Yo‘q. Har bir javob avval telefoningizga saqlanadi va internet tiklanganda avtomatik yuboriladi. Sahifani yopsangiz ham test shu joydan davom etadi."),
+        ("Attestatsiya sanasini qanday o‘zgartiraman?", "Sanani administrator kiritadi. Sana noto‘g‘ri bo‘lsa, quyidagi Telegram orqali yozing, administrator uni yangilaydi."),
+        ("Test natijasiga rozi bo‘lmasam nima qilaman?", "Natija sahifasida xato savol ostidagi «E’tiroz bildirish» tugmasini bosing. Ekspert 24 soat ichida xulosa beradi, natija kerak bo‘lsa qayta hisoblanadi."),
+        ("Mavzu nega yopiq turibdi?", "Ba’zi mavzular avvalgi mavzularga tayanadi. Rejadagi oldingi mavzularni o‘zlashtirganingizdan keyin u avtomatik ochiladi."),
+        ("Sertifikat davlat hujjatimi?", "Yo‘q. Sertifikat kursni to‘liq o‘zlashtirib, yakuniy diagnostikadan o‘tganingizni tasdiqlaydi. Uning haqiqiyligini QR-kod orqali istalgan kishi tekshira oladi."),
+        ("Ilovani telefonga qanday o‘rnataman?", "Profil → «Ilovani o‘rnatish». iPhone’da Safari’dagi «Ulashish» → «Bosh ekranga qo‘shish» orqali o‘rnatiladi."),
+      ] %}
+      <details class="faq{{ ' bt' if not loop.first }}">
+        <summary class="list-item pointer"><span class="grow strong">{{ q }}</span>{{ icon("chevron-down", "ico-sm chev") }}</summary>
+        <p class="faq-a small c-text2">{{ a }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="stack stack-sm" aria-labelledby="sup-t">
+    <h2 class="eyebrow" id="sup-t">{{ _("Qo‘llab-quvvatlash") }}</h2>
+    <div class="card list">
+      <a class="list-item" href="https://t.me/raqamliMuallimBot" target="_blank" rel="noopener"><span class="list-ico">{{ icon("telegram") }}</span><span class="grow"><span class="d-block">{{ _("Telegram orqali yozish") }}</span><span class="sub">{{ _("Ish kunlari 9:00–18:00, odatda 1 soat ichida javob beramiz") }}</span></span>{{ icon("chevron-right", "ico-sm chev") }}</a>
+      <a class="bt list-item" href="mailto:yordam@raqamlimuallim.uz"><span class="list-ico">{{ icon("mail") }}</span><span class="grow"><span class="d-block">{{ _("Email") }}</span><span class="sub">{{ _("yordam@raqamlimuallim.uz") }}</span></span>{{ icon("chevron-right", "ico-sm chev") }}</a>
+    </div>
+    <p class="xs muted">{{ _("Telegram bot va email manzili namunaviy: ishga tushirishdan oldin haqiqiysiga almashtiriladi.") }}</p>
+  </section>
+</div>
+{% endblock %}

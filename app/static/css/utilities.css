@@ -1,0 +1,116 @@
+/* Avtomatik: scripts/inline_styles_to_classes.py. Shablonlardagi bir martalik inline uslublar o'rniga.
+   !important — inline uslub kabi komponent qoidalaridan ustun turishi uchun. */
+.u---gap-2 { --gap: 2px !important; }
+.u---v-50p { --v: 50% !important; }
+.u-accent-primary { accent-color: var(--primary) !important; }
+.u-ai-baseline { align-items: baseline !important; }
+.u-ai-center { align-items: center !important; }
+.u-ai-start { align-items: start !important; }
+.u-as-flex-start { align-self: flex-start !important; }
+.u-b-0 { border: 0 !important; }
+.u-bg-5b99e { background: linear-gradient(135deg, var(--ai-soft), var(--surface)) !important; }
+.u-bg-6aaa0 { background: #fff !important; }
+.u-bg-8d2ee { background: var(--green-soft) !important; }
+.u-bg-a2ea3 { background: var(--red-soft) !important; }
+.u-bg-bg { background: var(--bg) !important; }
+.u-bg-none { background: none !important; }
+.u-border-bottom-1 { border-bottom: 1px solid var(--border) !important; }
+.u-border-left-1 { border-left: 1px solid var(--border) !important; }
+.u-border-right-0 { border-right: 0 !important; }
+.u-border-style-dashed { border-style: dashed !important; }
+.u-bottom-beba1 { bottom: calc(var(--tabbar-h) + 8px) !important; }
+.u-bt-1 { border-top: 1px solid var(--border) !important; }
+.u-c-2a388 { color: var(--red) !important; }
+.u-c-4f5ac { color: var(--green) !important; }
+.u-c-text2 { color: var(--text-2) !important; }
+.u-cols-1fr { grid-template-columns: 1fr !important; }
+.u-cols-4a70e { grid-template-columns: repeat(auto-fit,minmax(min(100%,420px),1fr)) !important; }
+.u-cur-default { cursor: default !important; }
+.u-cur-grab { cursor: grab !important; }
+.u-cur-pointer { cursor: pointer !important; }
+.u-d-contents { display: contents !important; }
+.u-d-none { display: none !important; }
+.u-fs-12 { font-size: 12px !important; }
+.u-fs-15 { font-size: 15px !important; }
+.u-fs-16 { font-size: 16px !important; }
+.u-fs-22 { font-size: 22px !important; }
+.u-fw-600 { font-weight: 600 !important; }
+.u-gap-2 { gap: 2px !important; }
+.u-gap-8 { gap: 8px !important; }
+.u-gap-8-20 { gap: 8px 20px !important; }
+.u-h-10 { height: 10px !important; }
+.u-h-12 { height: 12px !important; }
+.u-h-18 { height: 18px !important; }
+.u-h-20 { height: 20px !important; }
+.u-h-22 { height: 22px !important; }
+.u-h-28 { height: 28px !important; }
+.u-h-32 { height: 32px !important; }
+.u-h-34 { height: 34px !important; }
+.u-h-36 { height: 36px !important; }
+.u-h-48 { height: 48px !important; }
+.u-jc-center { justify-content: center !important; }
+.u-ls-none { list-style: none !important; }
+.u-m-0 { margin: 0 !important; }
+.u-maxh-90dvh { max-height: 90dvh !important; }
+.u-maxw-100p { max-width: 100% !important; }
+.u-maxw-340 { max-width: 340px !important; }
+.u-maxw-380 { max-width: 380px !important; }
+.u-minh-0 { min-height: 0 !important; }
+.u-minh-40 { min-height: 40px !important; }
+.u-minh-44 { min-height: 44px !important; }
+.u-minh-48 { min-height: 48px !important; }
+.u-minh-4fcf5 { min-height: calc(100dvh - 60px - var(--tabbar-h) - 40px) !important; }
+.u-minh-52 { min-height: 52px !important; }
+.u-minh-80 { min-height: 80px !important; }
+.u-minw-130 { min-width: 130px !important; }
+.u-minw-200 { min-width: 200px !important; }
+.u-mt-16 { margin-top: 16px !important; }
+.u-mt-2 { margin-top: 2px !important; }
+.u-mt-32 { margin-top: 32px !important; }
+.u-op-_6 { opacity: .6 !important; }
+.u-overflow-y-auto { overflow-y: auto !important; }
+.u-p-0 { padding: 0 !important; }
+.u-p-0-8 { padding: 0 8px !important; }
+.u-p-12 { padding: 12px !important; }
+.u-p-12-14 { padding: 12px 14px !important; }
+.u-p-14-16-12 { padding: 14px 16px 12px !important; }
+.u-p-14-18 { padding: 14px 18px !important; }
+.u-p-16 { padding: 16px !important; }
+.u-p-24-0 { padding: 24px 0 !important; }
+.u-p-28 { padding: 28px !important; }
+.u-p-8 { padding: 8px !important; }
+.u-p-8-0 { padding: 8px 0 !important; }
+.u-pb-16 { padding-bottom: 16px !important; }
+.u-pl-0 { padding-left: 0 !important; }
+.u-pl-18 { padding-left: 18px !important; }
+.u-pl-20 { padding-left: 20px !important; }
+.u-pl-84 { padding-left: 84px !important; }
+.u-pos-sticky { position: sticky !important; }
+.u-pt-12 { padding-top: 12px !important; }
+.u-pt-16 { padding-top: 16px !important; }
+.u-pt-24 { padding-top: 24px !important; }
+.u-r-12 { border-radius: 12px !important; }
+.u-r-14 { border-radius: 14px !important; }
+.u-r-6 { border-radius: 6px !important; }
+.u-r-7 { border-radius: 7px !important; }
+.u-ta-center { text-align: center !important; }
+.u-ta-left { text-align: left !important; }
+.u-ta-right { text-align: right !important; }
+.u-top-76 { top: 76px !important; }
+.u-w-100p { width: 100% !important; }
+.u-w-110 { width: 110px !important; }
+.u-w-12 { width: 12px !important; }
+.u-w-16 { width: 16px !important; }
+.u-w-18 { width: 18px !important; }
+.u-w-20 { width: 20px !important; }
+.u-w-22 { width: 22px !important; }
+.u-w-28 { width: 28px !important; }
+.u-w-32 { width: 32px !important; }
+.u-w-34 { width: 34px !important; }
+.u-w-35p { width: 35% !important; }
+.u-w-36 { width: 36px !important; }
+.u-w-44 { width: 44px !important; }
+.u-w-48 { width: 48px !important; }
+.u-w-60p { width: 60% !important; }
+.u-w-70 { width: 70px !important; }
+.u-ws-pre-line { white-space: pre-line !important; }

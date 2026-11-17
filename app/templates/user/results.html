@@ -1,33 +1,33 @@
 {% extends "layouts/app.html" %}
-{% block title %}Natijalarim{% endblock %}
+{% block title %}{{ _("Natijalarim") }}{% endblock %}
 {% block content %}
-{% call page_head("Natijalarim", "Barcha testlar natijalari va dinamikasi") %}{% endcall %}
+{% call page_head(_("Natijalarim"), _("Barcha testlar natijalari va dinamikasi")) %}{% endcall %}
 {% if not results %}
 <div class="card empty">
   <span class="empty-ico">{{ icon("chart", "ico-lg") }}</span>
-  <h2>Hali natijalar yo‘q</h2>
-  <p class="muted" style="max-width:340px">Birinchi testni topshirganingizdan keyin natijalar shu yerda ko‘rinadi.</p>
-  <a class="btn btn-primary mt-16" href="{{ url_for('user.plan') }}">O‘quv rejaga o‘tish</a>
+  <h2>{{ _("Hali natijalar yo‘q") }}</h2>
+  <p class="muted u-maxw-340">{{ _("Birinchi testni topshirganingizdan keyin natijalar shu yerda ko‘rinadi.") }}</p>
+  <a class="btn btn-primary mt-16" href="{{ url_for('user.plan') }}">{{ _("O‘quv rejaga o‘tish") }}</a>
 </div>
 <div class="card list mt-24" aria-hidden="true">
-  {% for i in range(3) %}<div class="list-item"><div class="skeleton" style="width:36px;height:36px"></div><div class="grow stack stack-sm"><div class="skeleton" style="height:12px;width:60%"></div><div class="skeleton" style="height:10px;width:35%"></div></div></div>{% endfor %}
+  {% for i in range(3) %}<div class="list-item"><div class="skeleton u-w-36 u-h-36"></div><div class="grow stack stack-sm"><div class="skeleton u-h-12 u-w-60p"></div><div class="skeleton u-h-10 u-w-35p"></div></div></div>{% endfor %}
 </div>
-<p class="xs faint center mt-8">Yuklanish holati namunasi</p>
+<p class="xs faint center mt-8">{{ _("Yuklanish holati namunasi") }}</p>
 {% else %}
 <div class="stack stack-lg">
   <div class="chips scroll">
     {% for c in ["Hammasi", "Mavzu testi", "Nazorat", "Diagnostika", "Sinov"] %}<button class="chip {{ 'active' if loop.first }}" type="button">{{ c }}</button>{% endfor %}
   </div>
   <div class="card card-pad stack stack-sm">
-    <div class="row between"><span class="strong">Natijalar dinamikasi</span><span class="small muted">O‘rtacha: <b class="c-text num">76%</b></span></div>
+    <div class="row between"><span class="strong">{{ _("Natijalar dinamikasi") }}</span><span class="small muted">{{ _("O‘rtacha:") }} <b class="c-text num">76%</b></span></div>
     {{ spark(trend, targets=[(70, "O‘tish"), (90, "A’lo")], labels=["1-noy", "5-noy", "8-noy", "12-noy", "Kecha", "Bugun"]) }}
-    <p class="xs muted">Maqsad chiziqlari: 70% — mavzudan o‘tish, 90% — to‘liq o‘zlashtirish.</p>
+    <p class="xs muted">{{ _("Maqsad chiziqlari: 70%% — mavzudan o‘tish, 90%% — to‘liq o‘zlashtirish.") }}</p>
   </div>
   <div class="card list">
     {% for r in results %}
     {% set label, color = decision[r.decision] %}
     <a class="list-item" href="{{ url_for('test.result', holat='qaytarildi' if r.decision == 'fail') }}">
-      <span class="num strong t-{{ color if color != 'yellow' else 'yellow' }}" style="width:44px">{{ r.pct }}%</span>
+      <span class="num strong t-{{ color if color != 'yellow' else 'yellow' }} u-w-44">{{ r.pct }}%</span>
       <div class="grow"><div class="truncate">{{ r.name }}</div><div class="sub">{{ r.kind }} · {{ r.when }}</div></div>
       {% if color == 'red' %}{{ badge(label, color) }}{% else %}{{ status_dot(label, color) }}{% endif %}
       {{ icon("chevron-right", "ico-sm chev") }}

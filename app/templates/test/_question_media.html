@@ -3,13 +3,13 @@
 
 {% if q.image %}
 <figure class="q-figure" x-data="{ zoom: false }">
-  <button type="button" class="q-figure-btn" @click="zoom = true" aria-label="Rasmni kattalashtirish">
+  <button type="button" class="q-figure-btn" @click="zoom = true" aria-label="{{ _('Rasmni kattalashtirish') }}">
     <img src="{{ url_for('static', filename=q.image.src) }}" alt="{{ q.image.alt }}" loading="lazy">
     <span class="q-zoom">{{ icon("search", "ico-sm") }}</span>
   </button>
   {% if q.image.caption %}<figcaption>{{ q.image.caption }}</figcaption>{% endif %}
-  <div class="sheet-backdrop" x-show="zoom" x-cloak @click="zoom = false" @keydown.escape.window="zoom = false" style="align-items:center;padding:16px">
-    <img src="{{ url_for('static', filename=q.image.src) }}" alt="{{ q.image.alt }}" style="max-width:100%;max-height:90dvh;border-radius:12px;background:#fff">
+  <div class="sheet-backdrop u-ai-center u-p-16" x-show="zoom" x-cloak @click="zoom = false" @keydown.escape.window="zoom = false">
+    <img class="u-maxw-100p u-maxh-90dvh u-r-12 u-bg-6aaa0" src="{{ url_for('static', filename=q.image.src) }}" alt="{{ q.image.alt }}">
   </div>
 </figure>
 {% endif %}

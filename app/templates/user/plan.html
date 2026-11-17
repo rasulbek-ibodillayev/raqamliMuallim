@@ -1,12 +1,12 @@
 {% extends "layouts/app.html" %}
-{% block title %}O‘quv reja{% endblock %}
+{% block title %}{{ _("O‘quv reja") }}{% endblock %}
 {% block content %}
-{% call page_head("O‘quv reja", "Reja holatlaringizga qarab o‘zgaradi, joriy mavzu esa o‘z joyida qoladi.") %}{% endcall %}
+{% call page_head(_("O‘quv reja"), _("Reja holatlaringizga qarab o‘zgaradi, joriy mavzu esa o‘z joyida qoladi.")) %}{% endcall %}
 
 <div class="mb-28 grid-3">
-  <div class="card stat"><div class="xs muted">Bajarildi</div><div class="stat-value num">14 / 42</div></div>
-  <div class="card stat"><div class="xs muted">Nazoratgacha</div><div class="stat-value num">2 mavzu</div></div>
-  <div class="card stat"><div class="xs muted">Kuniga kerak</div><div class="stat-value num">≈ 1 mavzu</div><div class="stat-sub">23-dekabrgacha tugatish uchun</div></div>
+  <div class="card stat"><div class="xs muted">{{ _("Bajarildi") }}</div><div class="stat-value num">14 / 42</div></div>
+  <div class="card stat"><div class="xs muted">{{ _("Nazoratgacha") }}</div><div class="stat-value num">{{ _("2 mavzu") }}</div></div>
+  <div class="card stat"><div class="xs muted">{{ _("Kuniga kerak") }}</div><div class="stat-value num">{{ _("≈ 1 mavzu") }}</div><div class="stat-sub">{{ _("23-dekabrgacha tugatish uchun") }}</div></div>
 </div>
 
 <ol class="list-reset timeline">
@@ -21,20 +21,20 @@
     </span>
     {% if state == "current" %}
     <div class="card card-primary card-pad stack stack-sm">
-      <span class="eyebrow t-blue">Hozirgi mavzu</span>
+      <span class="eyebrow t-blue">{{ _("Hozirgi mavzu") }}</span>
       <h3>{{ p.name }}</h3>
-      <p class="small muted">{{ p.note }} · ≈ {{ p.min }} daqiqa qoldi</p>
+      <p class="small muted">{{ p.note }} · ≈ {{ p.min }} {{ _("daqiqa qoldi") }}</p>
       {{ progress(60, cls="thin") }}
-      <a class="self-start btn btn-primary btn-sm mt-8" href="{{ url_for('user.lesson') }}">Davom ettirish{{ icon("arrow-right", "ico-sm") }}</a>
+      <a class="self-start btn btn-primary btn-sm mt-8" href="{{ url_for('user.lesson') }}">{{ _("Davom ettirish") }}{{ icon("arrow-right", "ico-sm") }}</a>
     </div>
     {% else %}
-    <div class="card" style="padding:14px 18px">
+    <div class="card u-p-14-18">
       <div class="row between wrap">
         <div class="grow"><div class="{{ 'strong' if state in ['confirm', 'control'] }}">{{ p.name }}</div><div class="small muted">{{ p.note }}</div></div>
-        {% if p.min %}<span class="time-chip num">≈ {{ p.min }} daq</span>{% endif %}
+        {% if p.min %}<span class="time-chip num">≈ {{ p.min }} {{ _("daq") }}</span>{% endif %}
         {% if state == "done" %}<span class="num small t-green">{{ p.note }}</span>
-        {% elif state == "confirm" %}<a class="btn btn-outline btn-sm" href="{{ url_for('test.question') }}">Testni topshirish</a>
-        {% elif state == "control" %}<a class="btn btn-outline btn-sm" href="{{ url_for('user.control') }}">Ko‘rish</a>{% endif %}
+        {% elif state == "confirm" %}<a class="btn btn-outline btn-sm" href="{{ url_for('test.question') }}">{{ _("Testni topshirish") }}</a>
+        {% elif state == "control" %}<a class="btn btn-outline btn-sm" href="{{ url_for('user.control') }}">{{ _("Ko‘rish") }}</a>{% endif %}
       </div>
     </div>
     {% endif %}

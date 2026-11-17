@@ -86,7 +86,13 @@ def exam():
         if "image" in q:
             q["image"] = {**q["image"], "src": url_for("static", filename=q["image"]["src"])}
         qs.append(q)
-    start = max(1, min(35, int(request.args.get("savol", 1)))) - 1
-    answered = {i: (i * 3) % 4 for i in range(1, 11) if i != start}  # namunaviy javoblar
-    return render_template("test/exam.html", questions=qs, start=start, answered=answered,
-                           flagged=[8, 13], confirm=bool(request.args.get("yakun")))
+    start_given = "savol" in request.args
+    try:
+        start = max(1, min(35, int(request.args.get("savol", 1)))) - 1
+    except ValueError:
+        start = 0
+    # namuna=1 — /ekranlar uchun: oldindan javob berilgan, serverga yuborilmaydigan alohida sessiya
+    sample = bool(request.args.get("namuna"))
+    answered = {i: (i * 3) % 4 for i in range(1, 11) if i != start} if sample else {}
+    return render_template("test/exam.html", questions=qs, start=start, start_given=start_given, answered=answered,
+                           sample=sample, confirm=bool(request.args.get("yakun")))

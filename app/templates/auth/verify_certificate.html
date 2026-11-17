@@ -1,39 +1,39 @@
 {% extends "layouts/auth.html" %}
 {# Ommaviy sahifa: sertifikatdagi QR-kod shu yerga olib keladi. Kirish talab qilinmaydi.
    Shaxsiy ma'lumot minimal: faqat F.I.Sh., natija, sana. Telefon/email ko'rsatilmaydi. #}
-{% block title %}Sertifikatni tekshirish{% endblock %}
+{% block title %}{{ _("Sertifikatni tekshirish") }}{% endblock %}
 {% block content %}
 <div class="stack stack-lg">
   <div class="stack stack-sm">
-    <span class="eyebrow">Sertifikatni tekshirish</span>
+    <span class="eyebrow">{{ _("Sertifikatni tekshirish") }}</span>
     <p class="small muted num">№ {{ cert_no }}</p>
   </div>
 
   {% if state == "valid" %}
-  <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span><b>Sertifikat haqiqiy.</b> raqamliMuallim platformasi tomonidan berilgan.</span></div>
-  <dl class="card list" style="margin:0">
-    <div class="list-item"><dt class="grow muted small">Egasi</dt><dd class="strong" style="margin:0">{{ me.last }} {{ me.first }}</dd></div>
-    <div class="list-item"><dt class="grow muted small">Kurs</dt><dd class="small" style="margin:0;text-align:right">Informatika o‘qituvchilarini<br>attestatsiyaga tayyorlash</dd></div>
-    <div class="list-item"><dt class="grow muted small">Umumiy natija</dt><dd class="strong num" style="margin:0">87%</dd></div>
-    <div class="list-item"><dt class="grow muted small">Mavzular</dt><dd class="num" style="margin:0">42 / 42</dd></div>
-    <div class="list-item"><dt class="grow muted small">Berilgan sana</dt><dd class="num" style="margin:0">20.12.2026</dd></div>
+  <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span><b>{{ _("Sertifikat haqiqiy.") }}</b> {{ _("raqamliMuallim platformasi tomonidan berilgan.") }}</span></div>
+  <dl class="card list u-m-0">
+    <div class="list-item"><dt class="grow muted small">{{ _("Egasi") }}</dt><dd class="strong u-m-0">{{ me.last }} {{ me.first }}</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Kurs") }}</dt><dd class="small u-m-0 u-ta-right">{{ _("Informatika o‘qituvchilarini") }}<br>{{ _("attestatsiyaga tayyorlash") }}</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Umumiy natija") }}</dt><dd class="strong num u-m-0">87%</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Mavzular") }}</dt><dd class="num u-m-0">42 / 42</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Berilgan sana") }}</dt><dd class="num u-m-0">20.12.2026</dd></div>
   </dl>
-  <p class="xs muted">Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. U kursni to‘liq o‘zlashtirib, yakuniy diagnostikadan o‘tganlikni tasdiqlaydi.</p>
+  <p class="xs muted">{{ _("Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. U kursni to‘liq o‘zlashtirib, yakuniy diagnostikadan o‘tganlikni tasdiqlaydi.") }}</p>
 
   {% elif state == "revoked" %}
-  <div class="alert alert-red" role="status">{{ icon("x-circle") }}<span><b>Sertifikat bekor qilingan.</b> 05.01.2027 dan boshlab amal qilmaydi.</span></div>
-  <div class="card card-pad small"><span class="muted">Sabab:</span> yakuniy diagnostika natijasi e’tiroz ko‘rib chiqilgandan keyin qayta hisoblandi.</div>
+  <div class="alert alert-red" role="status">{{ icon("x-circle") }}<span><b>{{ _("Sertifikat bekor qilingan.") }}</b> {{ _("05.01.2027 dan boshlab amal qilmaydi.") }}</span></div>
+  <div class="card card-pad small"><span class="muted">{{ _("Sabab:") }}</span> {{ _("yakuniy diagnostika natijasi e’tiroz ko‘rib chiqilgandan keyin qayta hisoblandi.") }}</div>
 
   {% else %}
-  <div class="alert alert-yellow" role="status">{{ icon("alert") }}<span><b>Bunday raqamli sertifikat topilmadi.</b> Raqamni tekshirib, qayta kiriting.</span></div>
+  <div class="alert alert-yellow" role="status">{{ icon("alert") }}<span><b>{{ _("Bunday raqamli sertifikat topilmadi.") }}</b> {{ _("Raqamni tekshirib, qayta kiriting.") }}</span></div>
   {% endif %}
 
   <form class="stack stack-sm" action="{{ url_for('auth.verify_certificate_lookup') }}" method="get">
-    <label class="label" for="cert-no">Boshqa sertifikatni tekshirish</label>
+    <label class="label" for="cert-no">{{ _("Boshqa sertifikatni tekshirish") }}</label>
     <div class="row row-sm">
-      <input class="input grow num" id="cert-no" name="raqam" placeholder="INF-2026-000123" autocomplete="off"
-             pattern="[A-Za-z]{3}-\d{4}-\d{6}" title="Masalan: INF-2026-000123" required>
-      <button class="btn btn-primary" type="submit">Tekshirish</button>
+      <input class="input grow num" id="cert-no" name="raqam" placeholder="{{ _('INF-2026-000123') }}" autocomplete="off"
+             pattern="[A-Za-z]{3}-\d{4}-\d{6}" title="{{ _('Masalan: INF-2026-000123') }}" required>
+      <button class="btn btn-primary" type="submit">{{ _("Tekshirish") }}</button>
     </div>
   </form>
 </div>

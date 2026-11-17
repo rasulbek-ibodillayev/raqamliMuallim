@@ -1,0 +1,38 @@
+{% extends "layouts/panel.html" %}
+{% block title %}{{ _("Savollar banki") }}{% endblock %}
+{% block heading %}{{ _("Savollar banki") }}{% endblock %}
+{% block content %}
+{% call page_head(_("Savollar banki"), _("1 420 ta savol")) %}
+<button class="btn btn-outline btn-sm" type="button">{{ icon("download", "ico-sm") }}{{ _("Eksport") }}</button>
+<button class="btn btn-outline btn-sm" type="button">{{ icon("upload", "ico-sm") }}{{ _("Excel import") }}</button>
+<a class="btn btn-primary btn-sm" href="{{ url_for('expert.editor') }}">{{ icon("plus", "ico-sm") }}{{ _("Savol qo‘shish") }}</a>
+{% endcall %}
+<div class="stack">
+  <div class="alert alert-red">{{ icon("alert") }}<span class="grow"><b>{{ _("3 ta mavzuda savollar yetarli emas.") }}</b> {{ _("Har kichik mavzu va daraja bo‘yicha testdagidan kamida 4 baravar ko‘p savol bo‘lishi kerak.") }}</span><a class="link nowrap" href="{{ url_for('expert.topics') }}">{{ _("Ko‘rish") }}</a></div>
+  <div class="row wrap row-sm">
+    <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="{{ _('Savol qidirish') }}" aria-label="{{ _('Savol qidirish') }}"></div>
+    {% for l, opts in [("Mavzu", ["Barcha mavzular", "Sanoq sistemalari", "Tarmoqlar"]), ("Daraja", ["Barcha darajalar", "Oson", "O‘rta", "Qiyin"]), ("Turi", ["Barcha turlar", "Yopiq", "Ko‘p javobli", "Moslashtirish", "Ochiq"]), ("Holat", ["Barcha holatlar", "Tasdiqlangan", "Tekshiruvda", "Qoralama", "Arxivlangan"])] %}
+    <select class="w-auto select" aria-label="{{ l }}">{% for o in opts %}<option>{{ o }}</option>{% endfor %}</select>
+    {% endfor %}
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{ _("Savol") }}</th><th>{{ _("Mavzu") }}</th><th>{{ _("Daraja") }}</th><th>{{ _("Turi") }}</th><th>{{ _("Holat") }}</th><th>{{ _("To‘g‘ri %%") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for q, topic, lvl, kind, st, pct, doubt in items %}
+        {% set label, color = state[st] %}
+        <tr>
+          <td class="q"><div class="maxw-360 truncate">{{ q }}</div>{% if doubt %}<span class="xs t-yellow row row-sm u-mt-2">{{ icon("alert", "ico-sm") }}{{ _("Daraja shubhali") }}</span>{% endif %}</td>
+          <td class="nowrap">{{ topic }}</td>
+          <td class="nowrap">{{ lvl }}</td>
+          <td class="nowrap muted">{{ kind }}</td>
+          <td>{{ status_dot(label, color) }}</td>
+          <td class="num">{{ pct ~ "%" if pct is not none else "—" }}</td>
+          <td><a class="icon-btn" href="{{ url_for('expert.editor') }}" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,23 +1,23 @@
 {% extends "layouts/app.html" %}
-{% block title %}Oraliq nazorat{% endblock %}
+{% block title %}{{ _("Oraliq nazorat") }}{% endblock %}
 {% block content %}
 <div class="narrow-center stack stack-xl">
-  <span class="list-ico" style="width:48px;height:48px;border-radius:14px">{{ icon("flag", "ico-lg") }}</span>
+  <span class="list-ico u-w-48 u-h-48 u-r-14">{{ icon("flag", "ico-lg") }}</span>
   <div class="stack stack-sm">
-    <span class="eyebrow">Majburiy nazorat</span>
-    <h1>Oxirgi 3 ta mavzu bo‘yicha nazorat</h1>
-    <p class="lead">Bilimingiz mustahkam ekanini tekshiramiz. Nazoratni qayta topshirib bo‘lmaydi, shuning uchun shoshilmang.</p>
+    <span class="eyebrow">{{ _("Majburiy nazorat") }}</span>
+    <h1>{{ _("Oxirgi 3 ta mavzu bo‘yicha nazorat") }}</h1>
+    <p class="lead">{{ _("Bilimingiz mustahkam ekanini tekshiramiz. Nazoratni qayta topshirib bo‘lmaydi, shuning uchun shoshilmang.") }}</p>
   </div>
   <div class="card list">
     {% for n in ["Shart operatorlari", "Sikllar (for, while)", "Funksiyalar"] %}
     <div class="list-item"><span class="list-ico strong">{{ loop.index }}</span><span class="grow">{{ n }}</span></div>
     {% endfor %}
   </div>
-  <ul class="stack stack-sm small muted" style="padding-left:18px;margin:0">
-    <li>3 bosqich: oson → o‘rta → qiyin, har kichik mavzudan 1 ta savol</li>
-    <li>70% dan past natijada mavzular qayta o‘rganishga qaytadi</li>
-    <li>To‘xtatib, keyin davom ettirish mumkin</li>
+  <ul class="stack stack-sm small muted u-pl-18 u-m-0">
+    <li>{{ _("3 bosqich: oson → o‘rta → qiyin, har kichik mavzudan 1 ta savol") }}</li>
+    <li>{{ _("70%% dan past natijada mavzular qayta o‘rganishga qaytadi") }}</li>
+    <li>{{ _("To‘xtatib, keyin davom ettirish mumkin") }}</li>
   </ul>
-  <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('test.question') }}">Nazoratni boshlash</a>
+  <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('test.question') }}">{{ _("Nazoratni boshlash") }}</a>
 </div>
 {% endblock %}

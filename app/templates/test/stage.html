@@ -1,32 +1,32 @@
 {% extends "layouts/focus.html" %}
-{% block title %}1-bosqichdan o‘tdingiz{% endblock %}
+{% block title %}{{ _("1-bosqichdan o‘tdingiz") }}{% endblock %}
 {% block bar %}
-<a class="icon-btn" href="{{ url_for('user.tests') }}" aria-label="Chiqish">{{ icon("x") }}</a>
+<a class="icon-btn" href="{{ url_for('user.tests') }}" aria-label="{{ _('Chiqish') }}">{{ icon("x") }}</a>
 <div class="grow"></div>
 {% endblock %}
 {% block content %}
-<div class="stack stack-xl center" style="align-items:center;padding-top:24px">
+<div class="stack stack-xl center u-ai-center u-pt-24">
   <div class="g-6 row">
-    <span class="badge badge-green">{{ icon("check", "ico-sm") }}Oson</span>
-    <span class="faint">—</span><span class="badge badge-blue">O‘rta</span>
-    <span class="faint">—</span><span class="badge badge-gray">Qiyin</span>
+    <span class="badge badge-green">{{ icon("check", "ico-sm") }}{{ _("Oson") }}</span>
+    <span class="faint">—</span><span class="badge badge-blue">{{ _("O‘rta") }}</span>
+    <span class="faint">—</span><span class="badge badge-gray">{{ _("Qiyin") }}</span>
   </div>
   {{ ring(90, 148, "var(--green)", "natija") }}
   <div class="stack stack-sm">
-    <h1>1-bosqichdan o‘tdingiz</h1>
-    <p class="lead">O‘tish uchun 90% kerak edi.</p>
+    <h1>{{ _("1-bosqichdan o‘tdingiz") }}</h1>
+    <p class="lead">{{ _("O‘tish uchun 90%% kerak edi.") }}</p>
   </div>
-  <div class="card card-pad stack stack-sm" style="text-align:left;width:100%">
-    <div class="row row-sm strong">{{ icon("info", "ico-sm") }}Keyingi bosqich</div>
-    <p class="small muted">10 ta o‘rta darajadagi savol, 15 daqiqa. Savollar biroz murakkabroq bo‘ladi, shoshilmang.</p>
+  <div class="card card-pad stack stack-sm u-ta-left u-w-100p">
+    <div class="row row-sm strong">{{ icon("info", "ico-sm") }}{{ _("Keyingi bosqich") }}</div>
+    <p class="small muted">{{ _("10 ta o‘rta darajadagi savol, 15 daqiqa. Savollar biroz murakkabroq bo‘ladi, shoshilmang.") }}</p>
   </div>
 </div>
 {% endblock %}
 {% block foot %}
 <footer class="focus-foot">
   <div class="focus-foot-inner">
-    <a class="btn btn-outline" href="{{ url_for('user.tests') }}">Keyinroq</a>
-    <a class="btn btn-primary grow" href="{{ url_for('test.question', tur='kop') }}">2-bosqichni boshlash</a>
+    <a class="btn btn-outline" href="{{ url_for('user.tests') }}">{{ _("Keyinroq") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question', tur='kop') }}">{{ _("2-bosqichni boshlash") }}</a>
   </div>
 </footer>
 {% endblock %}

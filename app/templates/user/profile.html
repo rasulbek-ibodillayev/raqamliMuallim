@@ -1,9 +1,9 @@
 {% extends "layouts/app.html" %}
-{% block title %}Profil{% endblock %}
+{% block title %}{{ _("Profil") }}{% endblock %}
 {% set regions = ["Toshkent shahri","Toshkent viloyati","Andijon viloyati","Buxoro viloyati","Farg‘ona viloyati","Jizzax viloyati","Xorazm viloyati","Namangan viloyati","Navoiy viloyati","Qashqadaryo viloyati","Samarqand viloyati","Sirdaryo viloyati","Surxondaryo viloyati","Qoraqalpog‘iston Respublikasi"] %}
 {% set districts = ["Yunusobod tumani","Chilonzor tumani","Mirzo Ulug‘bek tumani","Yakkasaroy tumani","Shayxontohur tumani","Olmazor tumani"] %}
 {% block content %}
-<div class="pt-16 stack stack-xl" x-data="{ open: '', saved: '' }">
+<div class="pt-16 stack stack-xl" x-data="{ open: '{{ open or '' }}', saved: '' }" @rm-saved="open = ''; saved = $event.detail">
   <div class="row">
     <span class="avatar lg">{{ me.initials }}</span>
     <div><h1 class="text-h2l">{{ me.first }} {{ me.last }}</h1><p class="muted num">{{ me.phone }}</p></div>
@@ -12,48 +12,55 @@
   <div class="alert alert-green" x-show="saved" x-cloak x-transition role="status">{{ icon("check-circle") }}<span x-text="saved"></span></div>
 
   <section class="stack stack-sm">
-    <h2 class="eyebrow">Akkaunt</h2>
+    <h2 class="eyebrow">{{ _("Akkaunt") }}</h2>
     <div class="card list">
 
       <!-- Shaxsiy ma'lumotlar -->
       <div>
         <button class="row-btn list-item" type="button" @click="open = open === 'info' ? '' : 'info'" :aria-expanded="open === 'info'">
-          <span class="list-ico">{{ icon("user") }}</span><span class="grow"><span class="d-block">Shaxsiy ma’lumotlar</span><span class="sub">Ism, familiya, telefon, email</span></span>
+          <span class="list-ico">{{ icon("user") }}</span><span class="grow"><span class="d-block">{{ _("Shaxsiy ma’lumotlar") }}</span><span class="sub">{{ _("Ism, familiya, telefon, email") }}</span></span>
           <svg class="ico ico-sm chev" :style="open === 'info' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
         </button>
-        <form class="pt-4 card-pad stack" x-show="open === 'info'" x-cloak @submit.prevent="open = ''; saved = 'Shaxsiy ma’lumotlar saqlandi'">
+        <form class="pt-4 card-pad stack" x-show="open === 'info'" {{ '' if open == 'info' else 'x-cloak' }} action="{{ url_for('user.profile_info') }}" method="post" novalidate
+              x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()" @submit.prevent="submit($event)" data-errors="{{ (errors if open == 'info' else {})|tojson|forceescape }}">
+          {% include "partials/form_open.html" %}
+          {% set e = errors if open == 'info' else {} %}
           <div class="grid-2">
-            <div class="field"><label class="label" for="p-fn">Ism</label><input class="input" id="p-fn" value="{{ me.first }}" autocomplete="given-name" required></div>
-            <div class="field"><label class="label" for="p-ln">Familiya</label><input class="input" id="p-ln" value="{{ me.last }}" autocomplete="family-name" required></div>
+            <div class="field"><label class="label" for="p-fn">{{ _("Ism") }}</label><input class="input" id="p-fn" name="fn" value="{{ form.fn or me.first }}" autocomplete="given-name" required aria-describedby="fn-err" :aria-invalid="!!err('fn')" @input="clear('fn')">{{ field_error("fn", e) }}</div>
+            <div class="field"><label class="label" for="p-ln">{{ _("Familiya") }}</label><input class="input" id="p-ln" name="ln" value="{{ form.ln or me.last }}" autocomplete="family-name" required aria-describedby="ln-err" :aria-invalid="!!err('ln')" @input="clear('ln')">{{ field_error("ln", e) }}</div>
           </div>
           <div class="field">
-            <label class="label" for="p-phone">Telefon raqam</label>
+            <label class="label" for="p-phone">{{ _("Telefon raqam") }}</label>
             <div class="input-group"><span class="addon">+998</span><input class="input num" id="p-phone" value="90 123 45 67" inputmode="tel" disabled></div>
-            <span class="hint">Raqamni o‘zgartirish uchun yangi raqam Telegram bot orqali tasdiqlanadi. <a class="link" href="{{ url_for('auth.verify_telegram') }}">Raqamni almashtirish</a></span>
+            <span class="hint">{{ _("Raqamni o‘zgartirish uchun yangi raqam Telegram bot orqali tasdiqlanadi.") }} <a class="link" href="{{ url_for('auth.verify_telegram') }}">{{ _("Raqamni almashtirish") }}</a></span>
           </div>
           <div class="field">
-            <label class="label" for="p-email">Email (ixtiyoriy)</label>
-            <input class="input" id="p-email" type="email" placeholder="namuna@maktab.uz" autocomplete="email">
-            <span class="hint">Yangi email kod orqali tasdiqlanadi.</span>
+            <label class="label" for="p-email">{{ _("Email (ixtiyoriy)") }}</label>
+            <input class="input" id="p-email" name="email" type="email" value="{{ form.email }}" placeholder="{{ _('namuna@maktab.uz') }}" autocomplete="email" aria-describedby="email-err" :aria-invalid="!!err('email')" @input="clear('email')">
+            {{ field_error("email", e) }}
+            <span class="hint">{{ _("Yangi email kod orqali tasdiqlanadi.") }}</span>
           </div>
-          <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">Bekor qilish</button><button class="btn btn-primary" type="submit">Saqlash</button></div>
+          <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
         </form>
       </div>
 
       <!-- Parolni o'zgartirish -->
       <div class="bt" x-data="{ show: false }">
         <button class="row-btn list-item" type="button" @click="open = open === 'pw' ? '' : 'pw'" :aria-expanded="open === 'pw'">
-          <span class="list-ico">{{ icon("lock") }}</span><span class="grow"><span class="d-block">Parolni o‘zgartirish</span><span class="sub">Oxirgi o‘zgarish: 2 oy oldin</span></span>
+          <span class="list-ico">{{ icon("lock") }}</span><span class="grow"><span class="d-block">{{ _("Parolni o‘zgartirish") }}</span><span class="sub">{{ _("Oxirgi o‘zgarish: 2 oy oldin") }}</span></span>
           <svg class="ico ico-sm chev" :style="open === 'pw' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
         </button>
-        <form class="pt-4 card-pad stack" x-show="open === 'pw'" x-cloak @submit.prevent="open = ''; saved = 'Parol o‘zgartirildi'">
-          <div class="field"><label class="label" for="pw-old">Joriy parol</label><input class="input" id="pw-old" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required></div>
-          <div class="field"><label class="label" for="pw-new">Yangi parol</label><input class="input" id="pw-new" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required><span class="hint">Kamida 8 ta belgi, harf va raqam aralash bo‘lsin.</span></div>
-          <div class="field"><label class="label" for="pw-new2">Yangi parolni takrorlang</label><input class="input" id="pw-new2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required></div>
-          <label class="check"><input type="checkbox" x-model="show"><span>Parollarni ko‘rsatish</span></label>
+        <form class="pt-4 card-pad stack" x-show="open === 'pw'" {{ '' if open == 'pw' else 'x-cloak' }} action="{{ url_for('user.profile_password') }}" method="post" novalidate
+              x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); f.reset(); return false; })" x-init="initForm()" @submit.prevent="submit($event)" data-errors="{{ (errors if open == 'pw' else {})|tojson|forceescape }}">
+          {% include "partials/form_open.html" %}
+          {% set e = errors if open == 'pw' else {} %}
+          <div class="field"><label class="label" for="pw-old">{{ _("Joriy parol") }}</label><input class="input" id="pw-old" name="old" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required aria-describedby="old-err" :aria-invalid="!!err('old')" @input="clear('old')">{{ field_error("old", e) }}</div>
+          <div class="field"><label class="label" for="pw-new">{{ _("Yangi parol") }}</label><input class="input" id="pw-new" name="new" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required aria-describedby="new-err" :aria-invalid="!!err('new')" @input="clear('new')">{{ field_error("new", e) }}<span class="hint">{{ _("Kamida 8 ta belgi, harf va raqam aralash bo‘lsin.") }}</span></div>
+          <div class="field"><label class="label" for="pw-new2">{{ _("Yangi parolni takrorlang") }}</label><input class="input" id="pw-new2" name="new2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required aria-describedby="new2-err" :aria-invalid="!!err('new2')" @input="clear('new2')">{{ field_error("new2", e) }}</div>
+          <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Parollarni ko‘rsatish") }}</span></label>
           <div class="row between wrap">
-            <a class="link small" href="{{ url_for('auth.reset') }}">Joriy parolni unutdingizmi?</a>
-            <div class="row"><button class="btn btn-ghost" type="button" @click="open = ''">Bekor qilish</button><button class="btn btn-primary" type="submit">Parolni yangilash</button></div>
+            <a class="link small" href="{{ url_for('auth.reset') }}">{{ _("Joriy parolni unutdingizmi?") }}</a>
+            <div class="row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Parolni yangilash") }}</button></div>
           </div>
         </form>
       </div>
@@ -61,33 +68,36 @@
       <!-- Viloyat va tuman -->
       <div class="bt">
         <button class="row-btn list-item" type="button" @click="open = open === 'reg' ? '' : 'reg'" :aria-expanded="open === 'reg'">
-          <span class="list-ico">{{ icon("home") }}</span><span class="grow"><span class="d-block">Viloyat va tuman</span><span class="sub">Toshkent shahri · Yunusobod tumani</span></span>
+          <span class="list-ico">{{ icon("home") }}</span><span class="grow"><span class="d-block">{{ _("Viloyat va tuman") }}</span><span class="sub">{{ _("Toshkent shahri · Yunusobod tumani") }}</span></span>
           <svg class="ico ico-sm chev" :style="open === 'reg' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
         </button>
-        <form class="pt-4 card-pad stack" x-show="open === 'reg'" x-cloak @submit.prevent="open = ''; saved = 'Hudud saqlandi'">
+        <form class="pt-4 card-pad stack" x-show="open === 'reg'" {{ '' if open == 'reg' else 'x-cloak' }} action="{{ url_for('user.profile_region') }}" method="post" novalidate
+              x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()" @submit.prevent="submit($event)" data-errors="{{ (errors if open == 'reg' else {})|tojson|forceescape }}">
+          {% include "partials/form_open.html" %}
           <div class="grid-2">
-            <div class="field"><label class="label" for="p-reg">Viloyat</label>
-              <select class="select" id="p-reg">{% for r in regions %}<option {{ 'selected' if loop.first }}>{{ r }}</option>{% endfor %}</select></div>
-            <div class="field"><label class="label" for="p-dist">Tuman (shahar)</label>
-              <select class="select" id="p-dist">{% for d in districts %}<option {{ 'selected' if loop.first }}>{{ d }}</option>{% endfor %}</select></div>
+            <div class="field"><label class="label" for="p-reg">{{ _("Viloyat") }}</label>
+              <select class="select" id="p-reg" name="region" aria-describedby="region-err" @change="clear('region')">{% for r in regions %}<option {{ 'selected' if (form.region == r or (not form.region and loop.first)) }}>{{ r }}</option>{% endfor %}</select>
+              {{ field_error("region", errors if open == 'reg' else {}) }}</div>
+            <div class="field"><label class="label" for="p-dist">{{ _("Tuman (shahar)") }}</label>
+              <select class="select" id="p-dist" name="district">{% for d in districts %}<option {{ 'selected' if loop.first }}>{{ d }}</option>{% endfor %}</select></div>
           </div>
-          <span class="hint">Ixtiyoriy. Faqat umumiy hududiy statistika uchun ishlatiladi.</span>
-          <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">Bekor qilish</button><button class="btn btn-primary" type="submit">Saqlash</button></div>
+          <span class="hint">{{ _("Ixtiyoriy. Faqat umumiy hududiy statistika uchun ishlatiladi.") }}</span>
+          <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
         </form>
       </div>
 
       <!-- Attestatsiya sanasi: faqat ko'rish -->
       <div class="bt list-item">
         <span class="list-ico">{{ icon("calendar") }}</span>
-        <span class="grow"><span class="d-block">Attestatsiya sanasi</span><span class="sub">Administrator tomonidan kiritiladi</span></span>
+        <span class="grow"><span class="d-block">{{ _("Attestatsiya sanasi") }}</span><span class="sub">{{ _("Administrator tomonidan kiritiladi") }}</span></span>
         <span class="row row-sm small"><b class="num">{{ me.exam_date }}, 2026</b>{{ icon("lock", "ico-sm faint") }}</span>
       </div>
     </div>
-    <p class="xs muted">Sana noto‘g‘ri bo‘lsa, <a class="link" href="#">yordam xizmatiga</a> yozing — administrator uni yangilaydi.</p>
+    <p class="xs muted">{{ _("Sana noto‘g‘ri bo‘lsa,") }} <a class="link" href="{{ url_for('user.help') }}">{{ _("yordam xizmatiga") }}</a> {{ _("yozing — administrator uni yangilaydi.") }}</p>
   </section>
 
   <section class="stack stack-sm">
-    <h2 class="eyebrow">Telegram bildirishnomalari</h2>
+    <h2 class="eyebrow">{{ _("Telegram bildirishnomalari") }}</h2>
     <div class="card list">
       {% for label, sub, on in [("Kunlik eslatma", "5 ta savol, har kuni 19:00 da", True), ("Nazorat eslatmasi", "Majburiy nazorat kutayotganda", True), ("E’tiroz javoblari", "Ekspert xulosasi chiqqanda", False)] %}
       <label class="pointer list-item"><div class="grow"><div>{{ label }}</div><div class="sub">{{ sub }}</div></div><span class="switch"><input type="checkbox" {{ 'checked' if on }}><span></span></span></label>
@@ -96,32 +106,33 @@
   </section>
 
   <section class="stack stack-sm">
-    <h2 class="eyebrow">Ko‘rinish</h2>
+    <h2 class="eyebrow">{{ _("Ko‘rinish") }}</h2>
     <div class="card list">
       <div class="list-item" x-data="{ fs: window.rmFontSize() }" @rm-fs.document="fs = $event.detail">
-        <span class="list-ico" style="font-weight:600">Aa</span>
-        <span class="grow"><span class="d-block">Matn o‘lchami</span><span class="sub">Darslar, testlar va sahifalardagi matn</span></span>
-        <div class="seg fs-switch" role="radiogroup" aria-label="Matn o‘lchami">
-          <button type="button" role="radio" :aria-checked="fs === 'md'" :class="fs === 'md' && 'active'" @click="rmSetFontSize('md')" aria-label="Oddiy">A</button>
-          <button type="button" role="radio" :aria-checked="fs === 'lg'" :class="fs === 'lg' && 'active'" @click="rmSetFontSize('lg')" aria-label="Katta">A+</button>
-          <button type="button" role="radio" :aria-checked="fs === 'xl'" :class="fs === 'xl' && 'active'" @click="rmSetFontSize('xl')" aria-label="Juda katta">A++</button>
+        <span class="list-ico u-fw-600">{{ _("Aa") }}</span>
+        <span class="grow"><span class="d-block">{{ _("Matn o‘lchami") }}</span><span class="sub">{{ _("Darslar, testlar va sahifalardagi matn") }}</span></span>
+        <div class="seg fs-switch" role="radiogroup" aria-label="{{ _('Matn o‘lchami') }}">
+          <button type="button" role="radio" :aria-checked="fs === 'md'" :class="fs === 'md' && 'active'" @click="rmSetFontSize('md')" aria-label="{{ _('Oddiy') }}">A</button>
+          <button type="button" role="radio" :aria-checked="fs === 'lg'" :class="fs === 'lg' && 'active'" @click="rmSetFontSize('lg')" aria-label="{{ _('Katta') }}">A+</button>
+          <button type="button" role="radio" :aria-checked="fs === 'xl'" :class="fs === 'xl' && 'active'" @click="rmSetFontSize('xl')" aria-label="{{ _('Juda katta') }}">A++</button>
         </div>
       </div>
-      <div x-data="rmInstall()" @rm-installable.document="canPrompt = true" @rm-installed.document="installed = true" style="display:contents">
-        <button class="list-item" type="button" x-show="visible" x-cloak @click="install()" style="border:0;border-top:1px solid var(--border);background:none;text-align:left;width:100%;cursor:pointer">
+      <div class="u-d-contents" x-data="rmInstall()" @rm-installable.document="canPrompt = true" @rm-installed.document="installed = true">
+        <button class="list-item u-b-0 u-bt-1 u-bg-none u-ta-left u-w-100p u-cur-pointer" type="button" x-show="visible" x-cloak @click="install()">
           <span class="list-ico">{{ icon("download") }}</span>
-          <span class="grow"><span class="d-block">Ilovani o‘rnatish</span><span class="sub" x-text="ios ? 'Safari: Ulashish → Bosh ekranga qo‘shish' : 'Bosh ekrandan ochiladi, oflayn ishlaydi'"></span></span>
+          <span class="grow"><span class="d-block">{{ _("Ilovani o‘rnatish") }}</span><span class="sub" x-text="ios ? 'Safari: Ulashish → Bosh ekranga qo‘shish' : 'Bosh ekrandan ochiladi, oflayn ishlaydi'"></span></span>
         </button>
-        <div class="list-item" x-show="installed" x-cloak><span class="list-ico">{{ icon("check-circle") }}</span><span class="grow">Ilova o‘rnatilgan</span></div>
+        <div class="list-item" x-show="installed" x-cloak><span class="list-ico">{{ icon("check-circle") }}</span><span class="grow">{{ _("Ilova o‘rnatilgan") }}</span></div>
       </div>
-      <button class="list-item" type="button" data-theme-toggle style="border:0;border-top:1px solid var(--border);background:none;text-align:left;width:100%;cursor:pointer"><span class="list-ico">{{ icon("moon") }}</span><span class="grow">Yorug‘ / qorong‘i mavzu</span></button>
+      <div class="list-item bt"><span class="list-ico">{{ icon("message") }}</span><span class="grow"><span class="d-block">{{ _("Interfeys tili") }}</span><span class="sub">{{ _("Rus tili tarjimasi to‘ldirilmoqda") }}</span></span>{% include "partials/lang_switch.html" %}</div>
+      <button class="list-item u-b-0 u-bt-1 u-bg-none u-ta-left u-w-100p u-cur-pointer" type="button" data-theme-toggle><span class="list-ico">{{ icon("moon") }}</span><span class="grow">{{ _("Yorug‘ / qorong‘i mavzu") }}</span></button>
     </div>
   </section>
 
   <div class="card list">
-    <a class="list-item" href="{{ url_for('auth.privacy') }}"><span class="list-ico">{{ icon("shield") }}</span><span class="grow">Maxfiylik siyosati</span>{{ icon("chevron-right", "ico-sm chev") }}</a>
-    <a class="list-item" href="{{ url_for('auth.guest') }}"><span class="list-ico">{{ icon("logout") }}</span><span class="grow">Chiqish</span></a>
+    <a class="list-item" href="{{ url_for('auth.privacy') }}"><span class="list-ico">{{ icon("shield") }}</span><span class="grow">{{ _("Maxfiylik siyosati") }}</span>{{ icon("chevron-right", "ico-sm chev") }}</a>
+    <a class="list-item" href="{{ url_for('auth.guest') }}"><span class="list-ico">{{ icon("logout") }}</span><span class="grow">{{ _("Chiqish") }}</span></a>
   </div>
-  <button class="btn btn-danger btn-block" type="button">{{ icon("trash", "ico-sm") }}Akkauntni o‘chirish</button>
+  <button class="btn btn-danger btn-block" type="button">{{ icon("trash", "ico-sm") }}{{ _("Akkauntni o‘chirish") }}</button>
 </div>
 {% endblock %}

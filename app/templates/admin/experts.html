@@ -1,0 +1,89 @@
+{% extends "layouts/panel.html" %}
+{% block title %}{{ _("Ekspertlar") }}{% endblock %}
+{% block heading %}{{ _("Ekspertlar") }}{% endblock %}
+{% block content %}
+{# Admin ekspertlarni qo'shadi, huquq beradi va faoliyatini nazorat qiladi. Kontentning o'zini ekspertlar tuzadi. #}
+<div x-data="{ add: {{ 'true' if add_open else 'false' }}, open: null }">
+{% call page_head(_("Ekspertlar"), _("Kontent tuzuvchi va tekshiruvchi metodistlar · ") ~ experts|selectattr('active')|list|length ~ _(" faol")) %}
+<button class="btn btn-primary btn-sm" type="button" @click="add = true">{{ icon("plus", "ico-sm") }}{{ _("Ekspert qo‘shish") }}</button>
+{% endcall %}
+
+<div class="stack stack-lg">
+  <div class="grid-4">
+    <div class="card stat"><div class="small muted">{{ _("Tekshiruv navbati") }}</div><div class="stat-value num">12</div><div class="stat-sub">{{ _("savol ekspert kutmoqda") }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("Ochiq e’tirozlar") }}</div><div class="stat-value num">3</div><div class="stat-sub">{{ _("1 tasi shoshilinch") }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("O‘rtacha javob vaqti") }}</div><div class="stat-value num">{{ _("9 soat") }}</div><div class="stat-sub">{{ _("Me’yor: 24 soatgacha") }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("Shu oy tasdiqlangan") }}</div><div class="stat-value num">214</div><div class="stat-sub">{{ _("savol") }}</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{ _("Ekspert") }}</th><th>{{ _("Yo‘nalishlar") }}</th><th>{{ _("Yaratgan") }}</th><th>{{ _("Tekshirgan") }}</th><th>{{ _("E’tiroz") }}</th><th>{{ _("Javob vaqti") }}</th><th>{{ _("Holat") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for e in experts %}
+        <tr>
+          <td><div class="row row-sm"><span class="avatar u-w-32 u-h-32 u-fs-12">{{ e.ini }}</span><div><div class="nowrap strong">{{ e.name }}</div><div class="xs muted nowrap">{{ e.contact }} · {{ e.last }}</div></div></div></td>
+          <td><div class="row wrap g-6">{% for a in e.areas %}<span class="chip xs">{{ a }}</span>{% endfor %}</div></td>
+          <td class="num">{{ e.created }}</td>
+          <td class="num">{{ e.reviewed }}</td>
+          <td class="num">{{ e.objections }}</td>
+          <td class="nowrap {{ 't-red' if e.resp.endswith('soat') and e.resp.split()[0]|int > 24 }}">{{ e.resp }}</td>
+          <td>{{ status_dot(_("Faol"), "green") if e.active else badge(_("To‘xtatilgan"), "gray") }}</td>
+          <td><button class="btn btn-ghost btn-sm" type="button" @click="open = open === {{ e.id }} ? null : {{ e.id }}" :aria-expanded="open === {{ e.id }}">{{ _("Boshqarish") }}{{ icon("chevron-down", "ico-sm") }}</button></td>
+        </tr>
+        <tr x-show="open === {{ e.id }}" x-cloak>
+          <td colspan="8">
+            <div class="grid u-cols-4a70e">
+              <form class="stack stack-sm" method="post" action="{{ url_for('admin.expert_update', eid=e.id) }}">
+                {{ csrf() }}<input type="hidden" name="action" value="perms">
+                <span class="eyebrow">{{ _("Huquqlar") }}</span>
+                {% for k, label in perms %}<label class="check"><input type="checkbox" name="perms" value="{{ k }}" {{ 'checked' if k in e.perms }}><span>{{ label }}</span></label>{% endfor %}
+                <div><button class="btn btn-outline btn-sm" type="submit">{{ _("Huquqlarni saqlash") }}</button></div>
+              </form>
+              <div class="stack stack-sm">
+                <span class="eyebrow">{{ _("Faoliyat") }}</span>
+                <p class="small">{{ _("Oxirgi faollik:") }} <b>{{ e.last }}</b>. {{ e.created }} {{ _("ta savol yaratgan,") }} {{ e.reviewed }} {{ _("tasini tekshirgan,") }} {{ e.objections }} {{ _("ta e’tirozga xulosa bergan.") }}</p>
+                <form method="post" action="{{ url_for('admin.expert_update', eid=e.id) }}">
+                  {{ csrf() }}<input type="hidden" name="action" value="{{ 'block' if e.active else 'unblock' }}">
+                  <button class="btn btn-outline btn-sm {{ 't-red' if e.active }}" type="submit">{{ icon("shield", "ico-sm") }}{{ "Faoliyatini to‘xtatish" if e.active else "Faollashtirish" }}</button>
+                </form>
+                <p class="xs muted">{{ _("To‘xtatilgan ekspert panelga kira olmaydi; uning savollari va xulosalari saqlanib qoladi.") }}</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Ekspert qo'shish -->
+<div class="sheet-backdrop" x-show="add" {{ '' if add_open else 'x-cloak' }} @click.self="add = false" @keydown.escape.window="add = false">
+  <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="ad-title" action="{{ url_for('admin.expert_add') }}" method="post" novalidate
+        x-data="rmForm()" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+    {% include "partials/form_open.html" %}
+    <div class="sheet-grip"></div>
+    <div class="row between"><h2 id="ad-title">{{ _("Ekspert qo‘shish") }}</h2><button class="icon-btn" type="button" @click="add = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
+    <div class="field"><label class="label" for="x-name">{{ _("Ism va familiya") }}</label>
+      <input class="input" id="x-name" name="name" value="{{ form.name }}" placeholder="{{ _('Masalan: Zuhra Qodirova') }}" required aria-describedby="name-err" :aria-invalid="!!err('name')" @input="clear('name')">
+      {{ field_error("name", errors) }}</div>
+    <div class="field"><label class="label" for="x-contact">{{ _("Telefon yoki email") }}</label>
+      <input class="input" id="x-contact" name="contact" value="{{ form.contact }}" placeholder="{{ _('+998 90 123 45 67 yoki ism@maktab.uz') }}" required aria-describedby="contact-err" :aria-invalid="!!err('contact')" @input="clear('contact')">
+      {{ field_error("contact", errors) }}
+      <span class="hint">{{ _("Shu manzilga taklifnoma yuboriladi; ekspert parolni o‘zi o‘rnatadi.") }}</span></div>
+    <fieldset class="fieldset-reset stack stack-sm">
+      <legend class="label">{{ _("Yo‘nalishlar") }}</legend>
+      <div class="row wrap g-6" @change="clear('areas')">{% for a in areas %}<label class="check chip-check"><input type="checkbox" name="areas" value="{{ a }}"><span>{{ a }}</span></label>{% endfor %}</div>
+      {{ field_error("areas", errors) }}
+    </fieldset>
+    <fieldset class="fieldset-reset stack stack-sm">
+      <legend class="label">{{ _("Huquqlar") }}</legend>
+      <div @change="clear('perms')">{% for k, label in perms %}<label class="check"><input type="checkbox" name="perms" value="{{ k }}" {{ 'checked' if k in ['questions', 'review'] }}><span>{{ label }}</span></label>{% endfor %}</div>
+      {{ field_error("perms", errors) }}
+    </fieldset>
+    <div class="row"><button class="btn btn-ghost" type="button" @click="add = false">{{ _("Bekor qilish") }}</button><button class="btn btn-primary grow" type="submit" :disabled="busy">{{ _("Qo‘shish va taklif yuborish") }}</button></div>
+  </form>
+</div>
+</div>
+{% endblock %}

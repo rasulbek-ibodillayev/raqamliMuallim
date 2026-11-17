@@ -1,7 +1,7 @@
 {% extends "layouts/app.html" %}
-{% block title %}E’tirozlarim{% endblock %}
+{% block title %}{{ _("E’tirozlarim") }}{% endblock %}
 {% block content %}
-{% call page_head("E’tirozlarim", "Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi.") %}{% endcall %}
+{% call page_head(_("E’tirozlarim"), _("Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi.")) %}{% endcall %}
 <div class="stack">
   {% for o in items %}
   {% set label, color = state[o.state] %}
@@ -10,12 +10,12 @@
     <p class="strong">{{ o.q }}</p>
     {% if o.verdict %}
     <div class="p-14 card card-flat stack stack-sm">
-      <div class="row row-sm small strong">{{ icon("shield", "ico-sm") }}Ekspert xulosasi</div>
+      <div class="row row-sm small strong">{{ icon("shield", "ico-sm") }}{{ _("Ekspert xulosasi") }}</div>
       <p class="c-text2 small">{{ o.verdict }}</p>
-      {% if o.recalc %}<div class="row row-sm small"><span class="muted">Natijangiz qayta hisoblandi:</span><span class="num">{{ o.recalc[0] }}</span>{{ icon("arrow-right", "ico-sm faint") }}<b class="num t-green">{{ o.recalc[1] }}</b></div>{% endif %}
+      {% if o.recalc %}<div class="row row-sm small"><span class="muted">{{ _("Natijangiz qayta hisoblandi:") }}</span><span class="num">{{ o.recalc[0] }}</span>{{ icon("arrow-right", "ico-sm faint") }}<b class="num t-green">{{ o.recalc[1] }}</b></div>{% endif %}
     </div>
     {% endif %}
-    <a class="link small" href="{{ url_for('user.discussion') }}">Muhokamani ko‘rish</a>
+    <a class="link small" href="{{ url_for('user.discussion') }}">{{ _("Muhokamani ko‘rish") }}</a>
   </article>
   {% endfor %}
 </div>

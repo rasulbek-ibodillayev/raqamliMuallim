@@ -3,20 +3,21 @@
 {% block body %}
 <div class="auth">
   <header class="auth-top">
-    {% block auth_back %}<a class="brand" href="{{ url_for('auth.guest') }}" style="padding:0"><span class="brand-mark">{{ icon("sparkle") }}</span>raqamliMuallim</a>{% endblock %}
-    <button class="icon-btn" type="button" data-theme-toggle aria-label="Mavzu rangini almashtirish">{{ icon("moon") }}</button>
+    {% block auth_back %}<a class="brand u-p-0" href="{{ url_for('auth.guest') }}"><span class="brand-mark">{{ icon("sparkle") }}</span>{{ _("raqamliMuallim") }}</a>{% endblock %}
+    <span class="row row-sm">{% include "partials/lang_switch.html" %}
+    <button class="icon-btn" type="button" data-theme-toggle aria-label="{{ _('Mavzu rangini almashtirish') }}">{{ icon("moon") }}</button></span>
   </header>
   <main id="main" tabindex="-1" class="auth-main">
     <div class="auth-card">
       {% if step %}
       <div class="mb-28 stack stack-sm">
         <div class="steps" aria-hidden="true">{% for i in range(1, 4) %}<span class="{{ 'on' if i <= step }}"></span>{% endfor %}</div>
-        <span class="xs muted">{{ step }} / 3 qadam</span>
+        <span class="xs muted">{{ step }} {{ _("/ 3 qadam") }}</span>
       </div>
       {% endif %}
       {% block content %}{% endblock %}
     </div>
   </main>
-  <footer class="auth-foot xs faint">© 2026 raqamliMuallim · <a class="link" href="{{ url_for('auth.privacy') }}">Maxfiylik siyosati</a></footer>
+  <footer class="auth-foot xs faint">{{ _("© 2026 raqamliMuallim ·") }} <a class="link" href="{{ url_for('auth.privacy') }}">{{ _("Maxfiylik siyosati") }}</a></footer>
 </div>
 {% endblock %}

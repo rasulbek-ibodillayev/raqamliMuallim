@@ -1,27 +1,34 @@
 {% extends "layouts/auth.html" %}
-{% block title %}Email orqali tasdiqlash{% endblock %}
-{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.register') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>{% endblock %}
+{% block title %}{{ _("Email orqali tasdiqlash") }}{% endblock %}
+{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.register') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{% endblock %}
 {% block content %}
-<form class="stack stack-lg" action="{{ url_for('auth.details') }}" method="get" x-data="{ sent: false }">
+{# «Kod yuborish» alohida endpoint'ga (formaction) ketadi; JS bo'lsa sahifa qayta yuklanmaydi #}
+<form class="stack stack-lg" action="{{ url_for('auth.verify_email') }}" method="post" novalidate data-stay
+      x-data="rmForm({ sent: {{ 'true' if sent else 'false' }} }, function (j, form) { if (!this.sent) { this.sent = true; rmToast(j.message); return false; } })"
+      x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}"
+      @submit.prevent="submit($event).then(j => { if (j && j.ok && sent && j.redirect && $event.submitter.dataset.final) location.href = j.redirect })">
+  {% include "partials/form_open.html" %}
   <div class="stack stack-sm">
-    <h1>Email orqali tasdiqlash</h1>
-    <p class="lead">Kodni emailingizga yuboramiz. Keyin shu email bilan tizimga kirasiz.</p>
+    <h1>{{ _("Email orqali tasdiqlash") }}</h1>
+    <p class="lead">{{ _("Kodni emailingizga yuboramiz. Keyin shu email bilan tizimga kirasiz.") }}</p>
   </div>
   <div class="field">
-    <label class="label" for="email">Email manzil</label>
+    <label class="label" for="email">{{ _("Email manzil") }}</label>
     <div class="row row-sm">
-      <input class="input grow" id="email" type="email" autocomplete="email" placeholder="namuna@maktab.uz">
-      <button class="btn btn-outline" type="button" @click="sent = true">Kod yuborish</button>
+      <input class="input grow" id="email" name="email" type="email" value="{{ form.email or email }}" autocomplete="email" placeholder="{{ _('namuna@maktab.uz') }}" required
+             aria-describedby="email-err" :aria-invalid="!!err('email')" @input="clear('email')">
+      <button class="btn btn-outline" type="submit" formaction="{{ url_for('auth.send_email_code') }}" formnovalidate :disabled="busy" x-text="sent ? 'Qayta yuborish' : 'Kod yuborish'">{{ _("Kod yuborish") }}</button>
     </div>
+    {{ field_error("email", errors) }}
   </div>
-  <div class="field" x-show="sent" x-cloak>
-    <label class="label" for="e1">Tasdiqlash kodi</label>
-    <div class="otp" role="group" aria-label="6 xonali kod">
-      {% for i in range(6) %}<input id="e{{ loop.index }}" inputmode="numeric" maxlength="1" aria-label="{{ loop.index }}-raqam">{% endfor %}
+  <div class="field" x-show="sent" {{ '' if sent else 'x-cloak' }}>
+    <label class="label" for="e1">{{ _("Tasdiqlash kodi") }}</label>
+    <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">
+      {% for i in range(6) %}<input id="e{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="{{ loop.index }}-raqam">{% endfor %}
     </div>
-    <span class="hint">Kod 15 daqiqa amal qiladi. Xat kelmasa, «Spam» papkasini tekshiring.</span>
+    {{ field_error("otp", errors) }}
+    <span class="hint">{{ _("Kod 15 daqiqa amal qiladi. Xat kelmasa, «Spam» papkasini tekshiring.") }}</span>
   </div>
-  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="!sent">Tasdiqlash</button>
-  <button class="btn btn-ghost btn-block" type="button" x-show="sent" x-cloak disabled>Kodni qayta yuborish · 0:48</button>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" data-final="1" :disabled="!sent || busy" {{ '' if sent else 'disabled' }}>{{ _("Tasdiqlash") }}</button>
 </form>
 {% endblock %}

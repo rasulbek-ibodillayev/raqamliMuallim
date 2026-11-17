@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, url_for
+from flask_babel import gettext as _
 
 from .. import mock as m
+from ..forms import (OBJECTION_REASONS, REGIONS, check_email, check_name, check_password, field, required, respond,
+                     validate)
 
 bp = Blueprint("user", __name__, url_prefix="/app")
 
@@ -78,7 +81,7 @@ def errors():
     return render_template("user/errors.html", weak=m.ERRORS_WEAK, items=m.ERRORS_LIST)
 
 
-@bp.get("/konspekt")
+@bp.get("/eslatmalar")
 def notes():
     seed = [{"id": i + 1, "topic": t, "title": "", "text": text, "code": src or "", "when": when}
             for i, (t, text, src, when) in enumerate(m.NOTES)]
@@ -122,6 +125,84 @@ def more():
     return render_template("user/more.html")
 
 
+@bp.get("/yordam")
+def help():
+    return render_template("user/help.html")
+
+
 @bp.get("/oflayn")
 def offline():
     return render_template("user/offline.html")
+
+
+# ---------- Formalar (POST). Tekshiruv: app/forms.py ----------
+
+
+@bp.post("/profil/malumotlar")
+def profile_info():
+    email = field("email").lower()
+    errors = validate({
+        "fn": (field("fn"), lambda v: check_name(v, "first")),
+        "ln": (field("ln"), lambda v: check_name(v, "last")),
+        "email": (email, lambda v: check_email(v) if v else None),
+    })
+    return respond(errors=errors, template="user/profile.html", open="info",
+                   redirect_to=url_for("user.profile"), message=_("Shaxsiy ma’lumotlar saqlandi"))
+
+
+@bp.post("/profil/parol")
+def profile_password():
+    new = request.form.get("new", "")
+    errors = validate({
+        "old": (request.form.get("old", ""), required),
+        "new": (new, check_password),
+        "new2": (request.form.get("new2", ""), lambda v: None if v == new else _("Parollar bir xil emas")),
+    })
+    if not errors and request.form.get("old") == new:
+        errors = {"new": _("Yangi parol joriy paroldan farq qilsin")}
+    return respond(errors=errors, template="user/profile.html", open="pw",
+                   redirect_to=url_for("user.profile"), message=_("Parol o‘zgartirildi"))
+
+
+@bp.post("/profil/hudud")
+def profile_region():
+    errors = validate({"region": (field("region"), lambda v: None if v in REGIONS else _("Viloyatni ro‘yxatdan tanlang"))})
+    return respond(errors=errors, template="user/profile.html", open="reg",
+                   redirect_to=url_for("user.profile"), message=_("Hudud saqlandi"))
+
+
+@bp.post("/etiroz")
+def objection_create():
+    """Natija sahifasi va attestatsiya sinovidan e'tiroz. Backendda: objections jadvali, ekspert navbati."""
+    errors = validate({
+        "question": (field("question"), required),
+        "reason": (field("reason"), lambda v: None if v in OBJECTION_REASONS else _("Sababni tanlang")),
+        "note": (field("note"), lambda v: None if len(v) <= 1000 else _("Izoh 1000 belgidan oshmasin")),
+    })
+    if not errors and field("reason") == "other" and not field("note"):
+        errors = {"note": _("«Boshqa» sababini izohda yozing")}
+    return respond(errors=errors, template="test/result.html", failed=False, review=m.REVIEW,
+                   redirect_to=url_for("user.objections"),
+                   message=_("E’tirozingiz qabul qilindi. Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi"))
+
+
+@bp.post("/muhokama")
+def discussion_reply():
+    body = field("body")
+    errors = validate({"body": (body, lambda v: _("Xabarni yozing") if len(v) < 2 else
+                                (None if len(v) <= 2000 else _("Xabar 2000 belgidan oshmasin")))})
+    return respond(errors=errors, template="user/discussion.html", msgs=m.DISCUSSION,
+                   redirect_to=url_for("user.discussion"), message=_("Fikringiz qo‘shildi"),
+                   data={"author": f"{m.ME['first']} {m.ME['last']}", "when": "Hozir", "body": body})
+
+
+@bp.post("/eslatmalar")
+def notes_save():
+    """Eslatmalar hozircha brauzerda saqlanadi; server tekshiradi va backendda shu yerga yozadi."""
+    errors = validate({
+        "topic": (field("topic"), required),
+        "text": (field("text"), lambda v: _("Qaydni yozing") if not v else (None if len(v) <= 5000 else _("Qayd 5000 belgidan oshmasin"))),
+        "code": (field("code"), lambda v: None if len(v) <= 5000 else _("Kod 5000 belgidan oshmasin")),
+    })
+    return respond(errors=errors, template="user/notes.html", notes=[], topics=[],
+                   redirect_to=url_for("user.notes"), message=_("Eslatma saqlandi"))

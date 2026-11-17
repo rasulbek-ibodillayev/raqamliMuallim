@@ -35,7 +35,7 @@
 
 {% macro code(src, lang="Python", copy=True) -%}
 <div class="code">
-  <div class="code-head"><span>{{ lang }}</span>{% if copy %}<button type="button" data-copy>{{ icon("copy", "ico-sm") }}Nusxa</button>{% endif %}</div>
+  <div class="code-head"><span>{{ lang }}</span>{% if copy %}<button type="button" data-copy>{{ icon("copy", "ico-sm") }}{{ _("Nusxa") }}</button>{% endif %}</div>
   <pre data-lang="{{ lang|lower }}"><code>{{ src }}</code></pre>
 </div>
 {%- endmacro %}
@@ -72,10 +72,19 @@
   <label class="sr-only" for="q">{{ placeholder }}</label>
   <textarea id="q" name="q" rows="1" placeholder="{{ placeholder }}" data-autosize></textarea>
   <div class="composer-actions">
-    <button class="icon-btn" type="button" aria-label="Fayl yoki rasm qo‘shish">{{ icon("plus") }}</button>
-    <button class="icon-btn" type="button" aria-label="Ovozli savol">{{ icon("mic") }}</button>
-    <button class="send" type="submit" aria-label="Yuborish">{{ icon("arrow-up") }}</button>
+    <button class="icon-btn" type="button" aria-label="{{ _('Fayl yoki rasm qo‘shish') }}">{{ icon("plus") }}</button>
+    <button class="icon-btn" type="button" aria-label="{{ _('Ovozli savol') }}">{{ icon("mic") }}</button>
+    <button class="send" type="submit" aria-label="{{ _('Yuborish') }}">{{ icon("arrow-up") }}</button>
   </div>
 </form>
-{% if note %}<p class="composer-note">AI javobini darslik bilan tekshiring. Shaxsiy ma’lumotlaringizni yozmang.</p>{% endif %}
+{% if note %}<p class="composer-note">{{ _("AI javobini darslik bilan tekshiring. Shaxsiy ma’lumotlaringizni yozmang.") }}</p>{% endif %}
 {%- endmacro %}
+
+{# Maydon xatosi: server (JS'siz) va rmForm (JS bilan) uchun bitta element.
+   Ishlatish: <input name="pw" aria-describedby="pw-err" :class="err('pw') && 'invalid'"> {{ field_error("pw", errors) }} #}
+{% macro field_error(name, errors={}) -%}
+<p class="field-error" id="{{ name }}-err" role="alert" x-show="err('{{ name }}')" x-text="err('{{ name }}')"{% if not errors.get(name) %} x-cloak{% endif %}>{{ errors.get(name, "") }}</p>
+{%- endmacro %}
+
+{# Forma ochilish teglari uchun umumiy atributlar: CSRF va server xatolari #}
+{% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}

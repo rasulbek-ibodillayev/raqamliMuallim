@@ -1,21 +1,20 @@
 {% extends "layouts/focus.html" %}
-{% block title %}Shart operatorlari{% endblock %}
+{% block title %}{{ _("Shart operatorlari") }}{% endblock %}
 {% block bar %}
-<a class="icon-btn" href="{{ url_for('user.plan') }}" aria-label="Rejaga qaytish">{{ icon("x") }}</a>
-<div class="grow"><div class="strong truncate">Python: shart operatorlari</div><div class="xs muted">Mavzu 3 · 2 / 4 kichik mavzu</div></div>
-<button class="icon-btn fs-btn" type="button" data-fs-cycle aria-label="Matn o‘lchamini o‘zgartirish" title="Matn o‘lchami">Aa</button>
-<a class="icon-btn" href="{{ url_for('user.lesson', audio=1) }}" aria-label="Ovozli tinglash">{{ icon("volume") }}</a>
-<a class="icon-btn" href="{{ url_for('user.notes') }}" aria-label="Konspektga saqlash">{{ icon("bookmark") }}</a>
+<a class="icon-btn" href="{{ url_for('user.plan') }}" aria-label="{{ _('Rejaga qaytish') }}">{{ icon("x") }}</a>
+<div class="grow"><div class="strong truncate">{{ _("Python: shart operatorlari") }}</div><div class="xs muted">{{ _("Mavzu 3 · 2 / 4 kichik mavzu") }}</div></div>
+<button class="icon-btn fs-btn" type="button" data-fs-cycle aria-label="{{ _('Matn o‘lchamini o‘zgartirish') }}" title="{{ _('Matn o‘lchami') }}">{{ _("Aa") }}</button>
+<a class="icon-btn" href="{{ url_for('user.lesson', audio=1) }}" aria-label="{{ _('Ovozli tinglash') }}">{{ icon("volume") }}</a>
 {% endblock %}
-{% block bar_progress %}<div class="r-0 progress thin"><span style="--v: 50%"></span></div>{% endblock %}
+{% block bar_progress %}<div class="r-0 progress thin"><span class="u---v-50p"></span></div>{% endblock %}
 
 {% block head %}<style>.focus-body { max-width: 1080px; }</style>{% endblock %}
 {% block content %}
 {% set toc = [("if", "if operatori", "done"), ("ifelse", "if / else", "done"), ("elif", "elif zanjiri", "current"), ("nested", "Ichma-ich shartlar", "next"), ("masala", "Yechimli masala", "next")] %}
 <div class="lesson-layout">
   {# Mundarija: desktopda yon tomonda, telefonda yuqorida suriladigan qator #}
-  <nav class="lesson-toc" aria-label="Dars mundarijasi">
-    <div class="eyebrow toc-title">Mundarija · 2 / 4</div>
+  <nav class="lesson-toc" aria-label="{{ _('Dars mundarijasi') }}">
+    <div class="eyebrow toc-title">{{ _("Mundarija · 2 / 4") }}</div>
     <ol class="list-reset toc-list">
       {% for id, name, st in toc %}
       <li><a class="toc-link {{ st }}" href="#{{ id }}" data-toc-link="{{ id }}">
@@ -26,34 +25,34 @@
 
 <article class="stack stack-xl lesson-body" data-select-menu data-topic="Shart operatorlari" data-resume="dars-shart-operatorlari"
          data-notes-url="{{ url_for('user.notes') }}" data-tutor-url="{{ url_for('user.tutor') }}">
-  <p class="hint row row-sm no-print">{{ icon("info", "ico-sm") }}Matnni belgilang — konspektga saqlash yoki AI’dan so‘rash mumkin.</p>
+  <p class="hint row row-sm no-print">{{ icon("info", "ico-sm") }}{{ _("Matnni belgilang — eslatmaga saqlash yoki AI’dan so‘rash mumkin.") }}</p>
   {% if retry %}
   <section class="alert alert-yellow alert-col">
-    <div class="c-text row row-sm strong">{{ icon("refresh") }}Oxirgi testda xato qilgan qismlaringiz</div>
-    <div class="chips"><a class="chip" href="#elif">elif zanjiri</a><a class="chip" href="#nested">Ichma-ich shartlar</a></div>
-    <a class="self-start btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}">{{ icon("sparkle", "ico-sm") }}Boshqa usulda tushuntir</a>
+    <div class="c-text row row-sm strong">{{ icon("refresh") }}{{ _("Oxirgi testda xato qilgan qismlaringiz") }}</div>
+    <div class="chips"><a class="chip" href="#elif">{{ _("elif zanjiri") }}</a><a class="chip" href="#nested">{{ _("Ichma-ich shartlar") }}</a></div>
+    <a class="self-start btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}">{{ icon("sparkle", "ico-sm") }}{{ _("Boshqa usulda tushuntir") }}</a>
   </section>
   {% endif %}
 
   <section id="if" class="stack stack-lg" data-toc-section>
     <div class="prose">
-      <span class="eyebrow">Kichik mavzu 1</span>
-      <h1 class="lesson-h1">if operatori</h1>
-      <p class="{{ 'reading' if audio }}">Shart operatori mantiqiy ifodaning rost (<code>True</code>) yoki yolg‘on (<code>False</code>) ekaniga qarab dasturni turli yo‘nalishga buradi.</p>
-      <p>Shart bajarilsa, unga tegishli kod bloki ishga tushadi. Aks holda bu blok tashlab ketiladi.</p>
+      <span class="eyebrow">{{ _("Kichik mavzu 1") }}</span>
+      <h1 class="lesson-h1">{{ _("if operatori") }}</h1>
+      <p class="{{ 'reading' if audio }}">{{ _("Shart operatori mantiqiy ifodaning rost (") }}<code>True</code>{{ _(") yoki yolg‘on (") }}<code>False</code>{{ _(") ekaniga qarab dasturni turli yo‘nalishga buradi.") }}</p>
+      <p>{{ _("Shart bajarilsa, unga tegishli kod bloki ishga tushadi. Aks holda bu blok tashlab ketiladi.") }}</p>
     </div>
     {{ code('yosh = 18\nif yosh >= 18:\n    print("Kirishga ruxsat berildi")') }}
   </section>
 
   <section id="ifelse" class="stack stack-lg" data-toc-section>
     <div class="prose">
-      <span class="eyebrow">Kichik mavzu 2</span>
-      <h2>if / else</h2>
-      <p>Shart yolg‘on bo‘lganda boshqa amal bajarilishi kerak bo‘lsa, <code>else</code> qismi qo‘shiladi.</p>
+      <span class="eyebrow">{{ _("Kichik mavzu 2") }}</span>
+      <h2>{{ _("if / else") }}</h2>
+      <p>{{ _("Shart yolg‘on bo‘lganda boshqa amal bajarilishi kerak bo‘lsa,") }} <code>else</code> {{ _("qismi qo‘shiladi.") }}</p>
     </div>
     {{ code('yosh = 15\nif yosh >= 18:\n    print("Kirishga ruxsat berildi")\nelse:\n    print("Kirish taqiqlanadi")') }}
     <figure class="card card-pad stack m-0">
-      <figcaption class="eyebrow">Blok-sxema</figcaption>
+      <figcaption class="eyebrow">{{ _("Blok-sxema") }}</figcaption>
       <svg class="lesson-diagram" viewBox="0 0 320 210" role="img" aria-label="Shart blok-sxemasi: yosh 18 dan katta yoki teng bo‘lsa ruxsat, aks holda taqiq">
         <g fill="none" stroke="var(--border-strong)" stroke-width="1.5">
           <rect x="110" y="6" width="100" height="32" rx="16" fill="var(--surface-2)"/>
@@ -71,13 +70,13 @@
       </svg>
     </figure>
     <div class="stack stack-sm">
-      <h3>Mantiqiy ifodalar natijasi</h3>
+      <h3>{{ _("Mantiqiy ifodalar natijasi") }}</h3>
       <div class="table-wrap"><table class="table">
-        <thead><tr><th>Shart</th><th>Qiymat</th><th>Natija</th></tr></thead>
+        <thead><tr><th>{{ _("Shart") }}</th><th>{{ _("Qiymat") }}</th><th>{{ _("Natija") }}</th></tr></thead>
         <tbody>
-          <tr><td><code>a &gt; b</code></td><td class="num">5 &gt; 3</td><td><code>True</code></td></tr>
+          <tr><td><code>a &gt; b</code></td><td class="num">{{ _("5 &gt; 3") }}</td><td><code>True</code></td></tr>
           <tr><td><code>a == b</code></td><td class="num">5 == 3</td><td><code>False</code></td></tr>
-          <tr><td><code>a &lt; b</code></td><td class="num">5 &lt; 3</td><td><code>False</code></td></tr>
+          <tr><td><code>a &lt; b</code></td><td class="num">{{ _("5 &lt; 3") }}</td><td><code>False</code></td></tr>
         </tbody>
       </table></div>
     </div>
@@ -85,29 +84,29 @@
 
   <section id="elif" class="stack stack-lg" data-toc-section>
     <div class="prose">
-      <span class="eyebrow">Kichik mavzu 3</span>
-      <h2>elif zanjiri</h2>
-      <p>Bir nechta shartni ketma-ket tekshirish kerak bo‘lsa, <code>elif</code> ishlatiladi. Python shartlarni yuqoridan pastga tekshiradi va birinchi rost chiqqan blokni bajaradi, qolganlarini tashlab ketadi.</p>
+      <span class="eyebrow">{{ _("Kichik mavzu 3") }}</span>
+      <h2>{{ _("elif zanjiri") }}</h2>
+      <p>{{ _("Bir nechta shartni ketma-ket tekshirish kerak bo‘lsa,") }} <code>elif</code> {{ _("ishlatiladi. Python shartlarni yuqoridan pastga tekshiradi va birinchi rost chiqqan blokni bajaradi, qolganlarini tashlab ketadi.") }}</p>
     </div>
     {{ code('ball = 85\nif ball >= 90:\n    print("A’lo")\nelif ball >= 70:\n    print("Yaxshi")\nelse:\n    print("Qoniqarsiz")') }}
   </section>
 
   <section id="nested" class="stack stack-lg" data-toc-section>
     <div class="prose">
-      <span class="eyebrow">Kichik mavzu 4</span>
-      <h2>Ichma-ich shartlar</h2>
-      <p>Bir shart ichida boshqa shartni tekshirish mumkin. Ichki blok faqat tashqi shart rost bo‘lgandagina ko‘rib chiqiladi. Chalkashmaslik uchun chekinishlarga (4 ta bo‘sh joy) e’tibor bering.</p>
+      <span class="eyebrow">{{ _("Kichik mavzu 4") }}</span>
+      <h2>{{ _("Ichma-ich shartlar") }}</h2>
+      <p>{{ _("Bir shart ichida boshqa shartni tekshirish mumkin. Ichki blok faqat tashqi shart rost bo‘lgandagina ko‘rib chiqiladi. Chalkashmaslik uchun chekinishlarga (4 ta bo‘sh joy) e’tibor bering.") }}</p>
     </div>
     {{ code('yosh = 20\nhujjat = True\nif yosh >= 18:\n    if hujjat:\n        print("Ruxsat")\n    else:\n        print("Hujjat kerak")') }}
   </section>
 
   <details id="masala" class="card" data-toc-section>
     <summary class="card-head pointer summary-plain">
-      <div><div class="eyebrow">Yechimli masala</div><div class="strong">Haroratni tekshirish</div></div>
-      <span class="btn btn-outline btn-sm">Yechimni ko‘rish</span>
+      <div><div class="eyebrow">{{ _("Yechimli masala") }}</div><div class="strong">{{ _("Haroratni tekshirish") }}</div></div>
+      <span class="btn btn-outline btn-sm">{{ _("Yechimni ko‘rish") }}</span>
     </summary>
     <div class="pt-0 card-pad stack">
-      <p>Harorat 0 dan yuqori bo‘lsa «Iliq», aks holda «Sovuq» deb chiqaring.</p>
+      <p>{{ _("Harorat 0 dan yuqori bo‘lsa «Iliq», aks holda «Sovuq» deb chiqaring.") }}</p>
       {{ code('harorat = 15\nif harorat > 0:\n    print("Iliq")\nelse:\n    print("Sovuq")') }}
     </div>
   </details>
@@ -115,8 +114,8 @@
   <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
     <div class="grow stack stack-sm">
-      <p>Tushunmagan joyingiz bormi? Shu mavzu bo‘yicha AI tutordan so‘rang.</p>
-      <div class="chips"><a class="chip" href="{{ url_for('user.tutor', q='elif va else farqi nima?') }}">elif va else farqi?</a><a class="chip" href="{{ url_for('user.tutor', q='Ichma-ich shartlarga misol ber') }}">Yana misol ber</a></div>
+      <p>{{ _("Tushunmagan joyingiz bormi? Shu mavzu bo‘yicha AI tutordan so‘rang.") }}</p>
+      <div class="chips"><a class="chip" href="{{ url_for('user.tutor', q='elif va else farqi nima?') }}">{{ _("elif va else farqi?") }}</a><a class="chip" href="{{ url_for('user.tutor', q='Ichma-ich shartlarga misol ber') }}">{{ _("Yana misol ber") }}</a></div>
     </div>
   </div>
 </article>
@@ -127,11 +126,11 @@
 {% if audio %}
 <div class="player" x-data="{ on: true, speed: '1x' }">
   <div class="player-inner">
-    <button class="play" type="button" @click="on = !on" :aria-label="on ? 'Pauza' : 'Ijro'" aria-label="Pauza">
+    <button class="play" type="button" @click="on = !on" :aria-label="on ? 'Pauza' : 'Ijro'" aria-label="{{ _('Pauza') }}">
       <svg class="ico" x-show="on"><use href="#i-pause"/></svg><svg class="ico" x-show="!on" x-cloak><use href="#i-play"/></svg>
     </button>
     <div class="gap-6 grow stack">
-      <div class="row between xs muted"><span>if operatori · o‘qilmoqda</span><span class="num">02:14 / 08:30</span></div>
+      <div class="row between xs muted"><span>{{ _("if operatori · o‘qilmoqda") }}</span><span class="num">02:14 / 08:30</span></div>
       {{ progress(26, cls="thin") }}
     </div>
     <button class="btn btn-outline btn-sm" type="button" @click="speed = {'0.75x':'1x','1x':'1.25x','1.25x':'1.5x','1.5x':'2x','2x':'0.75x'}[speed]" x-text="speed">1x</button>
@@ -140,9 +139,10 @@
 {% else %}
 <footer class="focus-foot">
   <div class="focus-foot-inner">
-    <a class="btn btn-outline" href="{{ url_for('user.tutor') }}">{{ icon("sparkle") }}<span>AI tutor</span></a>
-    <a class="btn btn-primary grow" href="{{ url_for('test.question') }}">Mavzu testini boshlash</a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question') }}">{{ _("Mavzu testini boshlash") }}</a>
   </div>
 </footer>
 {% endif %}
 {% endblock %}
+
+{% block overlay %}{% with fab_ctx = "focus", fab_topic = "Shart operatorlari" %}{% include "partials/study_fab.html" %}{% endwith %}{% endblock %}

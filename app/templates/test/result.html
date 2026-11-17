@@ -1,34 +1,34 @@
 {% extends "layouts/focus.html" %}
-{% block title %}Natija{% endblock %}
+{% block title %}{{ _("Natija") }}{% endblock %}
 {% block bar %}
-<a class="icon-btn" href="{{ url_for('user.home') }}" aria-label="Bosh sahifa">{{ icon("x") }}</a>
-<div class="grow strong">Natija</div>
+<a class="icon-btn" href="{{ url_for('user.home') }}" aria-label="{{ _('Bosh sahifa') }}">{{ icon("x") }}</a>
+<div class="grow strong">{{ _("Natija") }}</div>
 {% endblock %}
 
 {% block content %}
 {% set pct = 62 if failed else 78 %}
 <div class="stack stack-xl" x-data>
   <section class="items-center stack stack-lg center">
-    {{ ring(pct, 148, "var(--red)" if failed else "var(--blue)", "umumiy ball") }}
+    {{ ring(pct, 148, "var(--red)" if failed else "var(--blue)", _("umumiy ball")) }}
     <div class="stack stack-sm">
       {% if failed %}
-      <h1>Bu mavzuni yana bir bor o‘rganamiz</h1>
-      <p class="lead">2-bosqichdan o‘tish uchun 80% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.</p>
+      <h1>{{ _("Bu mavzuni yana bir bor o‘rganamiz") }}</h1>
+      <p class="lead">{{ _("2-bosqichdan o‘tish uchun 80%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.") }}</p>
       {% else %}
-      <h1>Keyingi mavzuga o‘tishingiz mumkin</h1>
-      <p class="lead">Natija 70–89% oralig‘ida, shuning uchun mavzuni keyinroq takrorlashni tavsiya qilamiz.</p>
+      <h1>{{ _("Keyingi mavzuga o‘tishingiz mumkin") }}</h1>
+      <p class="lead">{{ _("Natija 70–89%% oralig‘ida, shuning uchun mavzuni keyinroq takrorlashni tavsiya qilamiz.") }}</p>
       {% endif %}
     </div>
   </section>
 
   {% if failed %}
   <section class="card card-pad stack stack-sm">
-    <span class="eyebrow">Xato qilingan qismlar</span>
-    <div class="chips"><span class="chip">Kiritish va chiqarish qurilmalari</span><span class="chip">Tarmoq protokollari</span></div>
+    <span class="eyebrow">{{ _("Xato qilingan qismlar") }}</span>
+    <div class="chips"><span class="chip">{{ _("Kiritish va chiqarish qurilmalari") }}</span><span class="chip">{{ _("Tarmoq protokollari") }}</span></div>
   </section>
   {% else %}
   <section class="card">
-    <div class="card-head"><span class="strong">Mavzular bo‘yicha</span></div>
+    <div class="card-head"><span class="strong">{{ _("Mavzular bo‘yicha") }}</span></div>
     <div class="list">
       {% for n, p in [("Shart operatorlari", 78), ("Sanoq sistemalari", 85), ("Kompyuter qurilmalari", 65)] %}
       <div class="list-item"><div class="grow stack stack-sm"><div class="row between"><span>{{ n }}</span><span class="num small">{{ p }}%</span></div>{{ progress(p, "green" if p >= 70 else "red", "thin") }}</div></div>
@@ -38,24 +38,24 @@
   {% endif %}
 
   <section class="stack">
-    <div class="row between"><h2 class="eyebrow">Savollar</h2><span class="xs muted">{{ review|length }} ta</span></div>
+    <div class="row between"><h2 class="eyebrow">{{ _("Savollar") }}</h2><span class="xs muted">{{ review|length }} {{ _("ta") }}</span></div>
     {% for r in review %}
     {% set ok = r.ok and not (failed and r.n == 1) %}
     <article class="card card-pad stack stack-sm" style="border-left:3px solid var(--{{ 'green' if ok else 'red' }})">
-      <div class="row between"><span class="small muted">{{ r.n }}-savol</span>
-        {% if ok %}{{ badge("To‘g‘ri", "green", "check") }}{% else %}{{ badge("Xato", "red", "x") }}{% endif %}</div>
+      <div class="row between"><span class="small muted">{{ r.n }}{{ _("-savol") }}</span>
+        {% if ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}{% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}</div>
       <p>{{ r.q }}</p>
       {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
-      <div class="small"><span class="muted">Sizning javobingiz:</span> <b class="{{ 't-green' if ok else 't-red' }}">{{ '42' if failed and r.n == 1 else r.mine }}</b>
-        {% if not ok %} · <span class="muted">To‘g‘ri javob:</span> <b class="t-green">{{ r.right or '45' }}</b>{% endif %}</div>
+      <div class="small"><span class="muted">{{ _("Sizning javobingiz:") }}</span> <b class="{{ 't-green' if ok else 't-red' }}">{{ '42' if failed and r.n == 1 else r.mine }}</b>
+        {% if not ok %} · <span class="muted">{{ _("To‘g‘ri javob:") }}</span> <b class="t-green">{{ r.right or '45' }}</b>{% endif %}</div>
       {% if not ok %}
-      <div class="card card-flat small" style="padding:12px 14px;color:var(--text-2)"><b>Izoh.</b> {{ r.why or '101101₂ = 32 + 8 + 4 + 1 = 45.' }}</div>
+      <div class="card card-flat small u-p-12-14 u-c-text2"><b>{{ _("Izoh.") }}</b> {{ r.why or '101101₂ = 32 + 8 + 4 + 1 = 45.' }}</div>
       <div class="row wrap row-sm">
-        <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}">{{ icon("sparkle", "ico-sm") }}Xatoimni tushuntir</a>
-        <button class="btn btn-ghost btn-sm" type="button" @click="$dispatch('objection')">{{ icon("flag", "ico-sm") }}E’tiroz bildirish</button>
+        <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}">{{ icon("sparkle", "ico-sm") }}{{ _("Xatoimni tushuntir") }}</a>
+        <button class="btn btn-ghost btn-sm" type="button" @click="$dispatch('objection', { id: 'Q-{{ r.n }}', text: {{ r.q|tojson|forceescape }} })">{{ icon("flag", "ico-sm") }}{{ _("E’tiroz bildirish") }}</button>
       </div>
       {% endif %}
-      <span class="xs muted">(Mavzu: {{ r.topic }})</span>
+      <span class="xs muted">{{ _("(Mavzu:") }} {{ r.topic }})</span>
     </article>
     {% endfor %}
   </section>
@@ -65,39 +65,45 @@
 {% block foot %}
 <footer class="focus-foot">
   <div class="focus-foot-inner">
-    <a class="btn btn-outline" href="{{ url_for('user.home') }}">Bosh sahifa</a>
+    <a class="btn btn-outline" href="{{ url_for('user.home') }}">{{ _("Bosh sahifa") }}</a>
     {% if failed %}
-    <a class="btn btn-primary grow" href="{{ url_for('user.lesson', holat='qayta') }}">Darsga qaytish</a>
+    <a class="btn btn-primary grow" href="{{ url_for('user.lesson', holat='qayta') }}">{{ _("Darsga qaytish") }}</a>
     {% else %}
-    <a class="btn btn-primary grow" href="{{ url_for('user.plan') }}">Keyingi mavzu{{ icon("arrow-right") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('user.plan') }}">{{ _("Keyingi mavzu") }}{{ icon("arrow-right") }}</a>
     {% endif %}
   </div>
 </footer>
 {% endblock %}
 
 {% block overlay %}
-<div x-data="{ open: false, sent: false }" @objection.window="open = true; sent = false" @keydown.escape.window="open = false">
+<div x-data="{ open: false, sent: false, qid: '', qtext: '' }" @objection.window="open = true; sent = false; qid = $event.detail.id; qtext = $event.detail.text"
+     @rm-sent="sent = true" @keydown.escape.window="open = false">
   <div class="sheet-backdrop" x-show="open" x-cloak @click.self="open = false">
-    <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="obj-title" @submit.prevent="sent = true">
+    <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="obj-title" action="{{ url_for('user.objection_create') }}" method="post" novalidate
+          x-data="rmForm({}, function (j, f) { f.reset(); f.dispatchEvent(new CustomEvent('rm-sent', { bubbles: true })); return false; })" x-init="initForm()"
+          data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+      {% include "partials/form_open.html" %}
+      <input type="hidden" name="question" :value="qid">
       <div class="sheet-grip"></div>
       <template x-if="!sent"><div class="stack stack-lg">
-        <div class="row between"><h2 id="obj-title">E’tiroz bildirish</h2><button class="icon-btn" type="button" @click="open = false" aria-label="Yopish">{{ icon("x") }}</button></div>
-        <p class="small muted">«Quyidagi kod natijasini aniqlang» savoli bo‘yicha</p>
+        <div class="row between"><h2 id="obj-title">{{ _("E’tiroz bildirish") }}</h2><button class="icon-btn" type="button" @click="open = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
+        <p class="small muted" x-text="'«' + qtext + '» savoli bo‘yicha'"></p>
         <fieldset class="fieldset-reset options">
-          <legend class="mb-10 label">Sabab</legend>
-          {% for s in ["To‘g‘ri javob noto‘g‘ri ko‘rsatilgan", "Mening javobim ham to‘g‘ri", "Savol tushunarsiz", "Boshqa"] %}
-          <label class="option" style="min-height:48px;font-size:15px"><input type="radio" name="why" {{ 'checked' if loop.first }}><span class="key" style="border-radius:50%;width:20px;height:20px"></span>{{ s }}</label>
+          <legend class="mb-10 label">{{ _("Sabab") }}</legend>
+          {% for v, s in [("wrong_key", "To‘g‘ri javob noto‘g‘ri ko‘rsatilgan"), ("also_correct", "Mening javobim ham to‘g‘ri"), ("unclear", "Savol tushunarsiz"), ("other", "Boshqa")] %}
+          <label class="option option-sm"><input type="radio" name="reason" value="{{ v }}" {{ 'checked' if loop.first }} @change="clear('reason')"><span class="key key-radio"></span>{{ s }}</label>
           {% endfor %}
+          {{ field_error("reason", errors) }}
         </fieldset>
-        <div class="field"><label class="label" for="obj-note">Izoh (ixtiyoriy)</label><textarea class="textarea" id="obj-note" placeholder="Nima uchun shunday deb hisoblaysiz?"></textarea></div>
-        <label class="check"><input type="checkbox"><span>Shoshilinch: xato yaqqol ko‘rinib turibdi</span></label>
-        <button class="btn btn-primary btn-block" type="submit">Yuborish</button>
+        <div class="field"><label class="label" for="obj-note">{{ _("Izoh (ixtiyoriy)") }}</label><textarea class="textarea" id="obj-note" name="note" maxlength="1000" placeholder="Nima uchun shunday deb hisoblaysiz?" aria-describedby="note-err" :aria-invalid="!!err('note')" @input="clear('note')"></textarea>{{ field_error("note", errors) }}</div>
+        <label class="check"><input type="checkbox" name="urgent" value="1"><span>{{ _("Shoshilinch: xato yaqqol ko‘rinib turibdi") }}</span></label>
+        <button class="btn btn-primary btn-block" type="submit" :disabled="busy">{{ _("Yuborish") }}</button>
       </div></template>
-      <template x-if="sent"><div class="empty" style="padding:24px 0">
-        <span class="empty-ico" style="background:var(--green-soft);color:var(--green)">{{ icon("check", "ico-lg") }}</span>
-        <h2>E’tirozingiz qabul qilindi</h2>
-        <p class="muted small">Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi.</p>
-        <button class="btn btn-outline mt-16" type="button" @click="open = false">Yopish</button>
+      <template x-if="sent"><div class="empty u-p-24-0">
+        <span class="empty-ico u-bg-8d2ee u-c-4f5ac">{{ icon("check", "ico-lg") }}</span>
+        <h2>{{ _("E’tirozingiz qabul qilindi") }}</h2>
+        <p class="muted small">{{ _("Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi.") }}</p>
+        <button class="btn btn-outline mt-16" type="button" @click="open = false">{{ _("Yopish") }}</button>
       </div></template>
     </form>
   </div>

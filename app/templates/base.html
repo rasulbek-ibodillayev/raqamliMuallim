@@ -1,12 +1,13 @@
 <!doctype html>
-<html lang="uz">
+<html lang="{{ current_lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}{% endblock %}{% if self.title() %} · {% endif %}raqamliMuallim</title>
+  <title>{% block title %}{% endblock %}{% if self.title() %} · {% endif %}{{ _("raqamliMuallim") }}</title>
   <meta name="description" content="Informatika o‘qituvchilarini attestatsiyaga moslashuvchan tayyorlash platformasi">
   <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0b0f17" media="(prefers-color-scheme: dark)">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
   <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
   <link rel="icon" href="{{ url_for('static', filename='icons/favicon-32.png') }}" type="image/png" sizes="32x32">
@@ -18,15 +19,18 @@
   {# Shrift va Alpine.js loyiha ichida — oflayn PWA va sekin internet uchun #}
   <link rel="preload" href="{{ url_for('static', filename='fonts/inter-latin-wght.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
   <script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}</script>
   {# app.js Alpine'dan oldin: undagi komponentlar (rmShell) Alpine ishga tushganda tayyor bo'lishi kerak #}
+  <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
   <script defer src="{{ url_for('static', filename='vendor/alpine-3.14.1.min.js') }}"></script>
   {% block head %}{% endblock %}
 </head>
 <body>
-  <a class="skip-link" href="#main">Asosiy kontentga o‘tish</a>
+  <a class="skip-link" href="#main">{{ _("Asosiy kontentga o‘tish") }}</a>
   {% include "partials/icons.html" %}
   {% block body %}{% endblock %}
+  {% with msgs = get_flashed_messages() %}{% if msgs %}<div hidden data-flash="{{ msgs|tojson|forceescape }}"></div>{% endif %}{% endwith %}
 </body>
 </html>

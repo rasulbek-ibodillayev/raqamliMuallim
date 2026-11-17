@@ -1,28 +1,35 @@
 {% extends "layouts/focus.html" %}
-{% block title %}Savol {{ q.n }} / 10{% endblock %}
+{% block title %}{{ _("Savol") }} {{ q.n }} / 10{% endblock %}
 {% block bar %}
-<a class="icon-btn" href="{{ url_for('user.tests') }}" data-safe-leave aria-label="To‘xtatish va chiqish (javoblar saqlanadi)">{{ icon("x") }}</a>
-<div class="grow"><div class="strong small">1-bosqich · Oson</div><div class="xs muted num">Savol {{ q.n }} / 10</div></div>
-<span class="badge badge-plain num" style="height:30px;font-size:14px">{{ icon("clock") }}<span data-countdown="522">08:42</span></span>
+<a class="icon-btn" href="{{ url_for('user.tests') }}" data-safe-leave aria-label="{{ _('To‘xtatish va chiqish (javoblar saqlanadi)') }}">{{ icon("x") }}</a>
+<div class="grow"><div class="strong small">{{ _("1-bosqich · Oson") }}</div><div class="xs muted num">{{ _("Savol") }} {{ q.n }} / 10</div></div>
+{# Taymer va oflayn belgisi savol komponentidan hodisa orqali yangilanadi #}
+<button class="icon-btn" type="button" data-fs-toggle onclick="rmToggleFullscreen()" aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran (faqat test oynasi)') }}"><svg class="ico" aria-hidden="true"><use href="#i-maximize"/></svg></button>
+<span class="badge badge-plain num badge-timer" role="timer" aria-label="{{ _('Qolgan vaqt') }}" x-data="{ t: '--:--', low: false }"
+      @rm-q-tick.window="t = $event.detail.text; low = $event.detail.left < 60" :class="low && 'warn'">{{ icon("clock") }}<span x-text="t">--:--</span></span>
 {% endblock %}
 {% block bar_progress %}<div class="r-0 progress thin"><span style="--v: {{ q.n * 10 }}%"></span></div>{% endblock %}
 
 {% block before_body %}
-{% if offline %}
-<div class="alert alert-yellow" style="border-radius:0;border-width:0 0 1px;justify-content:center">{{ icon("wifi-off") }}<span>Internet yo‘q. Javoblaringiz qurilmada saqlanmoqda.</span></div>
-{% endif %}
+<div class="alert alert-yellow alert-bar" role="status" x-data="{ off: {{ 'true' if offline else '!navigator.onLine' }} }"
+     @rm-q-online.window="off = !$event.detail" x-show="off" {{ '' if offline else 'x-cloak' }}>
+  {{ icon("wifi-off") }}<span>{{ _("Internet yo‘q. Javoblaringiz qurilmada saqlanmoqda va internet tiklanganda yuboriladi.") }}</span>
+</div>
 {% endblock %}
 
 {% block content %}
+{# Javob har o'zgarishda qurilmaga (IndexedDB) yoziladi va navbat orqali serverga yuboriladi: static/js/player.js #}
 <form id="answer" class="stack stack-lg" action="{{ url_for('test.stage') }}" method="get" data-leave-guard
-      x-data="{ st: 'saved', t: null, mark() { this.st = 'saving'; clearTimeout(this.t); this.t = setTimeout(() => this.st = 'saved', 700); } }"
-      @change="mark()" @input="mark()">
+      x-data="rmTestQuestion({ id: 'topic:namuna', kind: 'topic', total: 10, duration: 600, pos: {{ q.n - 1 }}, mode: '{{ kind }}', offline: {{ 'true' if offline else 'false' }} })"
+      x-effect="$dispatch('rm-q-tick', { text: fmt(left), left: left === null ? 999 : left }); $dispatch('rm-q-online', online)"
+      @change="save()" @input.debounce.400ms="save()">
   <div class="stack stack-sm">
-    <div class="row row-sm wrap"><span class="badge badge-gray">{{ q.type }}</span><span class="xs muted grow">Mavzu: {{ q.topic }}</span>
-      {# Javob o'zgarishi bilan qurilmaga (oflayn) va serverga saqlanadi #}
+    <div class="row row-sm wrap"><span class="badge badge-gray">{{ q.type }}</span><span class="xs muted grow">{{ _("Mavzu:") }} {{ q.topic }}</span>
       <span class="saved-ind" role="status" aria-live="polite">
-        <template x-if="st === 'saving'"><span>Saqlanmoqda…</span></template>
-        <template x-if="st === 'saved'"><span class="g-6 row"><svg class="ico"><use href="#i-check-circle"/></svg>{{ 'Qurilmada saqlandi' if offline else 'Saqlandi' }}</span></template>
+        <span class="g-6 row" x-show="label()" x-cloak>
+          <svg class="ico" x-show="st !== 'saving'" :class="(st === 'local' || !online) && 'pending'"><use :href="st === 'error' ? '#i-alert' : (st === 'local' || !online ? '#i-upload' : '#i-check-circle')"/></svg>
+          <span x-text="label()"></span><span class="num" x-show="pending && !online" x-text="'· ' + pending + ' ta navbatda'"></span>
+        </span>
       </span>
     </div>
     <h1 class="text-q">{{ q.text }}</h1>
@@ -31,41 +38,40 @@
 
   {% if kind == "yopiq" %}
   <fieldset class="fieldset-reset options">
-    <legend class="sr-only">Bitta javobni tanlang</legend>
+    <legend class="sr-only">{{ _("Bitta javobni tanlang") }}</legend>
     {% for o in q.options %}
-    <label class="option"><input type="radio" name="a" value="{{ loop.index0 }}" {{ 'checked' if loop.index0 == 1 }}><span class="key">{{ "ABCD"[loop.index0] }}</span><span class="grow">{{ o }}</span></label>
+    <label class="option"><input type="radio" name="a" value="{{ loop.index0 }}"><span class="key">{{ "ABCD"[loop.index0] }}</span><span class="grow">{{ o }}</span></label>
     {% endfor %}
   </fieldset>
 
   {% elif kind == "kop" %}
   <fieldset class="fieldset-reset options">
-    <legend class="mb-10 hint">Bir nechta javobni belgilang</legend>
+    <legend class="mb-10 hint">{{ _("Bir nechta javobni belgilang") }}</legend>
     {% for o in q.options %}
-    <label class="option multi"><input type="checkbox" name="a" {{ 'checked' if loop.index0 in [0, 2] }}><span class="key">{{ icon("check", "ico-sm") }}</span><span class="grow">{{ o }}</span></label>
+    <label class="option multi"><input type="checkbox" name="a" value="{{ loop.index0 }}"><span class="key">{{ icon("check", "ico-sm") }}</span><span class="grow">{{ o }}</span></label>
     {% endfor %}
   </fieldset>
 
   {% elif kind == "moslash" %}
   <div class="match">
     {% for p in q.pairs %}
-    {% set pi = loop.index0 %}
     <span class="term">{{ p }}</span>
-    <select class="select" aria-label="{{ p }} uchun ta’rif">
-      <option value="">Tanlang…</option>
-      {# namunada dastlabki ikki juftlik tanlangan holatda ko'rsatiladi #}
-      {% for a in q.answers %}<option {{ 'selected' if pi < 2 and loop.index0 == pi }}>{{ a }}</option>{% endfor %}
+    <select class="select" name="m{{ loop.index0 }}" aria-label="{{ p }} uchun ta’rif">
+      <option value="">{{ _("Tanlang…") }}</option>
+      {% for a in q.answers %}<option value="{{ loop.index0 }}">{{ a }}</option>{% endfor %}
     </select>
     {% endfor %}
   </div>
 
   {% elif kind == "ochiq" %}
-  <div class="field" x-data="{ v: '45' }">
-    <label class="label" for="open">Javobingiz</label>
-    <input class="input num" id="open" x-model="v" inputmode="numeric" autocomplete="off" style="font-size:22px;height:60px;font-weight:600">
+  <div class="field" x-data="{ v: '' }">
+    <label class="label" for="open">{{ _("Javobingiz") }}</label>
+    <input class="input num input-xl" id="open" name="a" data-answer x-model="v" inputmode="numeric" autocomplete="off" maxlength="100">
     <span class="hint">{{ q.hint }}</span>
-    <div class="keypad mt-8" aria-label="Raqamli klaviatura">
+    <div class="keypad mt-8" aria-label="{{ _('Raqamli klaviatura') }}">
       {% for k in ["1","2","3","4","5","6","7","8","9","C","0","⌫"] %}
-      <button type="button" @click="{{ 'v = \'\'' if k == 'C' else ('v = v.slice(0, -1)' if k == '⌫' else 'v += \'' ~ k ~ '\'') }}; mark()">{{ k }}</button>
+      <button type="button" @click="{{ 'v = \'\'' if k == 'C' else ('v = v.slice(0, -1)' if k == '⌫' else 'v += \'' ~ k ~ '\'') }}; $nextTick(() => save())"
+              aria-label="{{ 'Tozalash' if k == 'C' else ('O‘chirish' if k == '⌫' else k) }}">{{ k }}</button>
       {% endfor %}
     </div>
   </div>
@@ -76,8 +82,8 @@
 {% block foot %}
 <footer class="focus-foot">
   <div class="focus-foot-inner">
-    <a class="btn btn-ghost" href="{{ url_for('user.tests') }}" data-safe-leave>{{ icon("pause", "ico-sm") }}<span>To‘xtatish</span></a>
-    <button class="btn btn-primary grow" form="answer" type="submit">Keyingisi{{ icon("arrow-right") }}</button>
+    <a class="btn btn-ghost" href="{{ url_for('user.tests') }}" data-safe-leave>{{ icon("pause", "ico-sm") }}<span>{{ _("To‘xtatish") }}</span></a>
+    <button class="btn btn-primary grow" form="answer" type="submit">{{ _("Keyingisi") }}{{ icon("arrow-right") }}</button>
   </div>
 </footer>
 {% endblock %}

@@ -1,0 +1,11 @@
+{# Mavzuni o'zlashtirish paytidagi tezkor tugmalar (dars va mavzu sahifalari): o'ng pastda.
+   Faqat shu sahifalarda include qilinadi; test paytida ko'rinmaydi.
+   fab_ctx — "focus" (pastda dars paneli bor) yoki "app" (telefonda pastki menyu bor) #}
+<div class="study-fab study-fab-{{ fab_ctx or 'app' }} no-print" role="group" aria-label="{{ _('Tezkor yordam') }}">
+  <a class="fab fab-notes" href="{{ url_for('user.notes') }}" aria-label="{{ _('Eslatmalar') }}" title="{{ _('Eslatmalar') }}">
+    {{ icon("note") }}<span class="fab-label">{{ _("Eslatmalar") }}</span>
+  </a>
+  <a class="fab fab-ai" href="{{ url_for('user.tutor', mavzu=fab_topic) if fab_topic else url_for('user.tutor') }}" aria-label="{{ _('AI tutor') }}" title="{{ _('AI tutor') }}">
+    {{ icon("sparkle") }}<span class="fab-label">{{ _("AI tutor") }}</span>
+  </a>
+</div>

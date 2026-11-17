@@ -146,3 +146,7 @@
 .ex-saved { font-size: 12px; color: var(--ex-muted); min-height: 18px; }
 .ex-saved span { display: inline-flex; align-items: center; gap: 6px; }
 .ex-saved .ico { color: #1e9b5a; }
+.ex-saved .ex-pending, .ex-saved .ex-pending .ico { color: #b7791f; }
+
+.ex-error { margin: 0; font-size: 13px; color: #c62828; }
+.ex-fs { padding: 0 12px; cursor: pointer; }

@@ -1,20 +1,20 @@
 {% extends "layouts/app.html" %}
-{% block title %}Diagnostika{% endblock %}
+{% block title %}{{ _("Diagnostika") }}{% endblock %}
 {% block content %}
 <div class="narrow-center stack stack-xl">
   <span class="ai-mark lg">{{ icon("target") }}</span>
   <div class="stack stack-sm">
-    <h1>Bilimingizni aniqlaymiz</h1>
-    <p class="lead">Diagnostika qaysi mavzularni allaqachon bilishingizni aniqlaydi. Shunda reja faqat sizga kerakli mavzulardan tuziladi.</p>
+    <h1>{{ _("Bilimingizni aniqlaymiz") }}</h1>
+    <p class="lead">{{ _("Diagnostika qaysi mavzularni allaqachon bilishingizni aniqlaydi. Shunda reja faqat sizga kerakli mavzulardan tuziladi.") }}</p>
   </div>
   <ul class="list-reset card list">
-    <li class="list-item"><span class="list-ico">{{ icon("layers") }}</span><div class="grow"><div>3 bosqich: oson → o‘rta → qiyin</div><div class="sub">Keyingi bosqich faqat yaxshi bilgan mavzularingizdan</div></div></li>
-    <li class="list-item"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>Taxminan 40 daqiqa</div><div class="sub">Har bosqich vaqti alohida hisoblanadi</div></div></li>
-    <li class="list-item"><span class="list-ico">{{ icon("pause") }}</span><div class="grow"><div>To‘xtatib, keyin davom ettirish mumkin</div><div class="sub">Javoblaringiz saqlanib boradi</div></div></li>
+    <li class="list-item"><span class="list-ico">{{ icon("layers") }}</span><div class="grow"><div>{{ _("3 bosqich: oson → o‘rta → qiyin") }}</div><div class="sub">{{ _("Keyingi bosqich faqat yaxshi bilgan mavzularingizdan") }}</div></div></li>
+    <li class="list-item"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>{{ _("Taxminan 40 daqiqa") }}</div><div class="sub">{{ _("Har bosqich vaqti alohida hisoblanadi") }}</div></div></li>
+    <li class="list-item"><span class="list-ico">{{ icon("pause") }}</span><div class="grow"><div>{{ _("To‘xtatib, keyin davom ettirish mumkin") }}</div><div class="sub">{{ _("Javoblaringiz saqlanib boradi") }}</div></div></li>
   </ul>
   <div class="stack stack-sm">
-    <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('test.question') }}">Diagnostikani boshlash</a>
-    <a class="btn btn-ghost btn-block" href="{{ url_for('user.plan') }}">Hozir emas, to‘liq rejadan boshlayman</a>
+    <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('test.question') }}">{{ _("Diagnostikani boshlash") }}</a>
+    <a class="btn btn-ghost btn-block" href="{{ url_for('user.plan') }}">{{ _("Hozir emas, to‘liq rejadan boshlayman") }}</a>
   </div>
 </div>
 {% endblock %}

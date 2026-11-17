@@ -1,28 +1,36 @@
 {% extends "layouts/auth.html" %}
-{% block title %}Kirish{% endblock %}
+{% block title %}{{ _("Kirish") }}{% endblock %}
 {% block content %}
-<form class="stack stack-lg" action="{{ url_for('user.home') }}" method="get" x-data="{ show: false }">
+<form class="stack stack-lg" action="{{ url_for('auth.login') }}" method="post" novalidate
+      x-data="rmForm({ show: false })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
   <div class="stack stack-sm">
-    <h1>Qaytganingizdan xursandmiz</h1>
-    <p class="lead">Telefon raqam yoki email va parolingizni kiriting.</p>
+    <h1>{{ _("Qaytganingizdan xursandmiz") }}</h1>
+    <p class="lead">{{ _("Telefon raqam yoki email va parolingizni kiriting.") }}</p>
   </div>
 
   {% if error %}
-  <div class="alert alert-red" role="alert">{{ icon("alert") }}<span>Telefon raqam yoki parol noto‘g‘ri. Yana <b>2 ta</b> urinish qoldi, keyin akkaunt 15 daqiqaga bloklanadi.</span></div>
+  <div class="alert alert-red" role="alert">{{ icon("alert") }}<span>{{ _("Telefon raqam yoki parol noto‘g‘ri. Yana") }} <b>{{ _("2 ta") }}</b> {{ _("urinish qoldi, keyin akkaunt 15 daqiqaga bloklanadi.") }}</span></div>
   {% endif %}
 
   <div class="field">
-    <label class="label" for="login">Telefon raqam yoki email</label>
-    <input class="input {{ 'invalid' if error }}" id="login" name="login" autocomplete="username" placeholder="+998 90 123 45 67" inputmode="email">
+    <label class="label" for="login">{{ _("Telefon raqam yoki email") }}</label>
+    <input class="input" id="login" name="login" value="{{ form.login }}" autocomplete="username" placeholder="+998 90 123 45 67" inputmode="email" required
+           aria-describedby="login-err" :aria-invalid="!!err('login')" @input="clear('login')" {{ 'aria-invalid=true' if errors.login or error }}>
+    {{ field_error("login", errors) }}
   </div>
   <div class="field">
-    <div class="row between"><label class="label" for="pw">Parol</label><a class="link small" href="{{ url_for('auth.reset') }}">Parolni unutdingizmi?</a></div>
+    <div class="row between"><label class="label" for="pw">{{ _("Parol") }}</label><a class="link small" href="{{ url_for('auth.reset') }}">{{ _("Parolni unutdingizmi?") }}</a></div>
     <div class="input-group">
-      <input class="input" id="pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" placeholder="Parolingiz">
-      <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? 'Parolni yashirish' : 'Parolni ko‘rsatish'" aria-label="Parolni ko‘rsatish">{{ icon("eye") }}</button>
+      <input class="input" id="pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" placeholder="{{ _('Parolingiz') }}" required
+             aria-describedby="pw-err" :aria-invalid="!!err('pw')" @input="clear('pw')">
+      <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? 'Parolni yashirish' : 'Parolni ko‘rsatish'" aria-label="{{ _('Parolni ko‘rsatish') }}">{{ icon("eye") }}</button>
     </div>
+    {{ field_error("pw", errors) }}
   </div>
-  <button class="btn btn-primary btn-lg btn-block" type="submit">Kirish</button>
-  <p class="center small muted">Akkauntingiz yo‘qmi? <a class="link" href="{{ url_for('auth.register') }}">Ro‘yxatdan o‘tish</a></p>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Kirish") }}</button>
+  <div class="g-12 row"><hr class="grow"><span class="xs faint">{{ _("yoki") }}</span><hr class="grow"></div>
+  {% include "partials/google_btn.html" %}
+  <p class="center small muted">{{ _("Akkauntingiz yo‘qmi?") }} <a class="link" href="{{ url_for('auth.register') }}">{{ _("Ro‘yxatdan o‘tish") }}</a></p>
 </form>
 {% endblock %}

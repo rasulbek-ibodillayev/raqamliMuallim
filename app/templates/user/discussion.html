@@ -1,36 +1,47 @@
 {% extends "layouts/app.html" %}
-{% block title %}Muhokama{% endblock %}
-{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.discussions') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>Muhokama</span>{% endblock %}
+{% block title %}{{ _("Muhokama") }}{% endblock %}
+{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.discussions') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{{ _("Muhokama") }}</span>{% endblock %}
 {% block content %}
-<div class="stack stack-lg">
+<div class="stack stack-lg" x-data="{ added: [] }" @rm-posted="added.push($event.detail)">
   <div class="card card-pad stack">
-    <span class="xs muted">14-savol · Sanoq sistemalari</span>
-    <p class="strong">101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?</p>
+    <span class="xs muted">{{ _("14-savol · Sanoq sistemalari") }}</span>
+    <p class="strong">{{ _("101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?") }}</p>
     <div class="options">
       {% for k, v in [("A", "43"), ("B", "45"), ("C", "47"), ("D", "53")] %}
-      <div class="option {{ 'correct' if k == 'B' }}" style="min-height:48px;cursor:default"><span class="key">{% if k == 'B' %}{{ icon("check", "ico-sm") }}{% else %}{{ k }}{% endif %}</span><span class="grow">{{ v }}</span>{% if k == 'B' %}<span class="xs t-green">To‘g‘ri javob</span>{% endif %}</div>
+      <div class="option {{ 'correct' if k == 'B' }} u-minh-48 u-cur-default"><span class="key">{% if k == 'B' %}{{ icon("check", "ico-sm") }}{% else %}{{ k }}{% endif %}</span><span class="grow">{{ v }}</span>{% if k == 'B' %}<span class="xs t-green">{{ _("To‘g‘ri javob") }}</span>{% endif %}</div>
       {% endfor %}
     </div>
   </div>
 
   <div class="card card-primary card-pad stack stack-sm">
-    <div class="row row-sm strong">{{ icon("shield", "ico-sm") }}Ekspert javobi · qotirilgan</div>
-    <p>1·2⁵ + 0·2⁴ + 1·2³ + 1·2² + 0·2¹ + 1·2⁰ = 32 + 8 + 4 + 1 = <b>45</b>. Savol va javob to‘g‘ri.</p>
+    <div class="row row-sm strong">{{ icon("shield", "ico-sm") }}{{ _("Ekspert javobi · qotirilgan") }}</div>
+    <p>1·2⁵ + 0·2⁴ + 1·2³ + 1·2² + 0·2¹ + 1·2⁰ = 32 + 8 + 4 + 1 = <b>45</b>{{ _(". Savol va javob to‘g‘ri.") }}</p>
   </div>
 
-  <div class="row between"><h2 class="eyebrow">4 ta fikr</h2><span class="xs muted">Faqat shu savolga javob berganlar ko‘radi</span></div>
+  <div class="row between"><h2 class="eyebrow">{{ _("4 ta fikr") }}</h2><span class="xs muted">{{ _("Faqat shu savolga javob berganlar ko‘radi") }}</span></div>
   <div class="stack">
     {% for name, when, text in msgs %}
     <div class="items-start row">
       <span class="avatar">{{ name.split()[0][0] }}{{ name.split()[1][0] }}</span>
       <div class="gap-4 grow stack"><div class="row row-sm"><span class="strong small">{{ name }}</span><span class="xs muted">{{ when }}</span></div><p class="c-text2 small">{{ text }}</p></div>
-      <button class="icon-btn" aria-label="Shikoyat qilish">{{ icon("flag", "ico-sm") }}</button>
+      <button class="icon-btn" type="button" aria-label="{{ _('Shikoyat qilish') }}" @click="rmToast('Shikoyat moderatorga yuborildi')">{{ icon("flag", "ico-sm") }}</button>
     </div>
     {% endfor %}
+    <template x-for="(m, i) in added" :key="i">
+      <div class="items-start row">
+        <span class="avatar">{{ me.initials }}</span>
+        <div class="gap-4 grow stack"><div class="row row-sm"><span class="strong small" x-text="m.author"></span><span class="xs muted" x-text="m.when"></span></div><p class="c-text2 small pre-wrap" x-text="m.body"></p></div>
+      </div>
+    </template>
   </div>
-  <form class="composer" style="position:sticky;bottom:calc(var(--tabbar-h) + 12px)">
-    <textarea rows="1" placeholder="Fikringizni yozing…" aria-label="Fikringiz" data-autosize></textarea>
-    <div class="composer-actions"><button class="send" type="button" aria-label="Yuborish">{{ icon("arrow-up") }}</button></div>
+  <form class="composer composer-sticky" action="{{ url_for('user.discussion_reply') }}" method="post" novalidate
+        x-data="rmForm({}, function (j, f) { f.reset(); f.dispatchEvent(new CustomEvent('rm-posted', { bubbles: true, detail: j.data })); rmToast(j.message); return false; })"
+        x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <textarea rows="1" name="body" maxlength="2000" placeholder="Fikringizni yozing…" aria-label="Fikringiz" aria-describedby="body-err" data-autosize
+              @input="clear('body')" @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); $el.form.requestSubmit() }">{{ form.body }}</textarea>
+    <div class="composer-actions"><button class="send" type="submit" aria-label="{{ _('Yuborish') }}" :disabled="busy">{{ icon("arrow-up") }}</button></div>
+    {{ field_error("body", errors) }}
   </form>
 </div>
 {% endblock %}

@@ -3,6 +3,7 @@
 Backend tayyor bo'lgunga qadar shablonlar shu ma'lumotlar bilan ko'rsatiladi.
 Keyin har bir funksiya ma'lumotlar bazasidan o'qiydigan servisga almashtiriladi.
 """
+from flask_babel import lazy_gettext as _l
 
 ME = {
     "first": "Dilnoza",
@@ -17,47 +18,50 @@ ME = {
 # Foydalanuvchi paneli navigatsiyasi: (endpoint, nom, ikonka, mobil pastki panelda)
 NAV = {
     "user": [
-        ("user.home", "Bosh sahifa", "home", True),
-        ("user.plan", "O‘quv reja", "route", True),
-        ("user.knowledge", "Bilim darajasi", "layers", True),
-        ("user.results", "Natijalarim", "chart", True),
+        ("user.home", _l("Bosh sahifa"), "home", True),
+        ("user.plan", _l("O‘quv reja"), "route", True),
+        ("user.knowledge", _l("Bilim darajasi"), "layers", True),
+        ("user.results", _l("Natijalarim"), "chart", True),
     ],
     # Chap menyuning qolgan guruhlari
     "user_groups": [
-        ("O‘qish", [
-            ("user.tutor", "AI tutor", "sparkle"),
-            ("user.notes", "Shaxsiy konspekt", "note"),
-            ("user.discussions", "Muhokamalar", "message"),
+        (_l("O‘qish"), [
+            ("user.tutor", _l("AI tutor"), "sparkle"),
+            ("user.notes", _l("Eslatmalar"), "note"),
+            ("user.discussions", _l("Muhokamalar"), "message"),
         ]),
-        ("Test va natijalar", [
-            ("user.tests", "Testlarim", "clipboard"),
-            ("test.exam", "Attestatsiya sinovi", "clock"),
-            ("user.errors", "Xatolar analitikasi", "target"),
-            ("user.objections", "E’tirozlarim", "flag"),
-            ("user.certificates", "Sertifikatlarim", "award"),
+        (_l("Test va natijalar"), [
+            ("user.tests", _l("Testlarim"), "clipboard"),
+            ("test.exam", _l("Attestatsiya sinovi"), "clock"),
+            ("user.errors", _l("Xatolar analitikasi"), "target"),
+            ("user.objections", _l("E’tirozlarim"), "flag"),
+            ("user.certificates", _l("Sertifikatlarim"), "award"),
         ]),
     ],
+    # Ekspert: kontent (mavzular, darslar, savollar) va sifat nazorati
     "expert": [
-        ("expert.queue", "Tekshiruv navbati", "inbox", 12),
-        ("expert.editor", "Savol yaratish", "edit", None),
-        ("expert.objections", "E’tirozlar", "flag", 3),
+        ("expert.queue", _l("Tekshiruv navbati"), "inbox", 12),
+        ("expert.questions", _l("Savollar banki"), "database", None),
+        ("expert.editor", _l("Savol yaratish"), "edit", None),
+        ("expert.topics", _l("Mavzular va darslar"), "book", None),
+        ("expert.objections", _l("E’tirozlar"), "flag", 3),
     ],
+    # Admin: foydalanuvchilar, ekspertlar, statistika va tizim sozlamalari (kontent bilan ishlamaydi)
     "admin": [
-        ("admin.dashboard", "Boshqaruv paneli", "grid", None),
-        ("admin.topics", "Mavzular va darslar", "book", None),
-        ("admin.questions", "Savollar banki", "database", None),
-        ("admin.users", "Foydalanuvchilar", "users", None),
-        ("admin.settings", "Sozlamalar", "settings", None),
+        ("admin.stats", _l("Statistika"), "chart", None),
+        ("admin.users", _l("Foydalanuvchilar"), "users", None),
+        ("admin.experts", _l("Ekspertlar"), "shield", None),
+        ("admin.settings", _l("Sozlamalar"), "settings", None),
     ],
 }
 
 # Mavzu holatlari (TZ 7-bo'lim)
 STATUS = {
-    "none":   ("O‘zlashtirilmagan", "gray"),
-    "learn":  ("O‘rganilmoqda", "yellow"),
-    "relearn": ("Qayta o‘zlashtirish kerak", "red"),
-    "done":   ("O‘zlashtirilgan", "blue"),
-    "solid":  ("Mustahkam", "green"),
+    "none":   (_l("O‘zlashtirilmagan"), "gray"),
+    "learn":  (_l("O‘rganilmoqda"), "yellow"),
+    "relearn": (_l("Qayta o‘zlashtirish kerak"), "red"),
+    "done":   (_l("O‘zlashtirilgan"), "blue"),
+    "solid":  (_l("Mustahkam"), "green"),
 }
 
 SECTIONS = [
@@ -110,7 +114,7 @@ RESULTS = [
     {"id": 5, "name": "Attestatsiya sinovi", "kind": "Sinov", "when": "5-noyabr", "pct": 84, "decision": "pass"},
     {"id": 6, "name": "Sikllar va takrorlanish", "kind": "Mavzu testi", "when": "1-noyabr", "pct": 65, "decision": "fail"},
 ]
-DECISION = {"pass": ("O‘tdi", "green"), "warn": ("Tavsiya bilan", "yellow"), "fail": ("Qaytarildi", "red")}
+DECISION = {"pass": (_l("O‘tdi"), "green"), "warn": (_l("Tavsiya bilan"), "yellow"), "fail": (_l("Qaytarildi"), "red")}
 TREND = [62, 70, 65, 78, 84, 92]
 
 REVIEW = [
@@ -153,7 +157,7 @@ OBJECTIONS = [
     {"when": "5-noyabr", "q": "Ikkilik sanoq sistemasida 101101 + 11011 yig‘indisi nechaga teng?", "state": "rejected",
      "verdict": "Savol va javob to‘g‘ri. 101101₂ + 11011₂ = 1001000₂ (72)."},
 ]
-OBJ_STATE = {"review": ("Ko‘rib chiqilmoqda", "yellow"), "accepted": ("Qabul qilindi", "green"), "rejected": ("Rad etildi", "gray")}
+OBJ_STATE = {"review": (_l("Ko‘rib chiqilmoqda"), "yellow"), "accepted": (_l("Qabul qilindi"), "green"), "rejected": (_l("Rad etildi"), "gray")}
 
 CERT_TOPICS = [
     ("Axborot nazariyasi va sanoq sistemalari", 92), ("Mantiq asoslari va rostlik jadvallari", 88),
@@ -173,9 +177,9 @@ READINESS = {
     "state": "ok",             # ok | risk | late
 }
 READINESS_STATE = {
-    "ok":   ("Reja bo‘yicha", "green", "Hozirgi sur’atda attestatsiyadan {m} kun oldin tayyor bo‘lasiz."),
-    "risk": ("Biroz ortda", "yellow", "Sur’at sekinlashdi: attestatsiyaga zo‘rg‘a ulgurasiz. Kuniga 15 daqiqa qo‘shing."),
-    "late": ("Ortda qolmoqda", "red", "Hozirgi sur’atda attestatsiyaga ulgurmaysiz. Rejani tezlashtiring."),
+    "ok":   (_l("Reja bo‘yicha"), "green", _l("Hozirgi sur’atda attestatsiyadan {m} kun oldin tayyor bo‘lasiz.")),
+    "risk": (_l("Biroz ortda"), "yellow", _l("Sur’at sekinlashdi: attestatsiyaga zo‘rg‘a ulgurasiz. Kuniga 15 daqiqa qo‘shing.")),
+    "late": (_l("Ortda qolmoqda"), "red", _l("Hozirgi sur’atda attestatsiyaga ulgurmaysiz. Rejani tezlashtiring.")),
 }
 
 # «Bugun» rejasi: har vazifa uchun taxminiy vaqt (daqiqa)
@@ -247,6 +251,7 @@ HARD_TOPICS = [("Ikkilik va o‘nlik sanoq sistemalari", 68), ("De Morgan qonunl
                ("Ikkilik qidiruv algoritmi", 54), ("Funksiyalar va rekursiya", 47), ("Graf va daraxtlar", 41)]
 USERS = [
     # (ism, initsial, aloqa, viloyat, o'tilgan mavzu, oxirgi faollik, faol, attestatsiya sanasi YYYY-MM-DD yoki None)
+    # Ro'yxatdagi tartib raqami (1 dan) — namunada foydalanuvchi ID'si: /admin/foydalanuvchilar/<id>
     ("Dilnoza Karimova", "DK", "+998 90 123 45 67", "Toshkent sh.", 14, "Bugun 11:42", True, "2026-12-23"),
     ("Javlon Toshmatov", "JT", "+998 93 456 78 90", "Samarqand vil.", 38, "Kecha 18:20", True, "2026-12-05"),
     ("Nigora Mirzayeva", "NM", "+998 97 712 34 56", "Farg‘ona vil.", 21, "3 kun oldin", True, None),
@@ -260,11 +265,66 @@ QUESTIONS = [
     ("Qaysilari kiritish qurilmalari?", "Kompyuter qurilmalari", "Oson", "Ko‘p javobli", "draft", None, False),
     ("for sikli necha marta bajariladi?", "Sikllar", "Qiyin", "Yopiq", "archived", 88, True),
 ]
-Q_STATE = {"approved": ("Tasdiqlangan", "green"), "review": ("Tekshiruvda", "yellow"),
-           "draft": ("Qoralama", "gray"), "archived": ("Arxivlangan", "gray"), "paused": ("To‘xtatilgan", "red")}
+Q_STATE = {"approved": (_l("Tasdiqlangan"), "green"), "review": (_l("Tekshiruvda"), "yellow"),
+           "draft": (_l("Qoralama"), "gray"), "archived": (_l("Arxivlangan"), "gray"), "paused": (_l("To‘xtatilgan"), "red")}
 TOPIC_TREE = [
     ("Dasturlash asoslari", [("Python asoslari", 8), ("Python: shart operatorlari", 14), ("Sikllar", 14), ("Funksiyalar va modullar", 19)]),
     ("Algoritmlar va ma’lumotlar tuzilmasi", [("Saralash algoritmlari", 22), ("Qidiruv algoritmlari", 9)]),
     ("Kompyuter tarmoqlari", [("IP-manzillash", 16), ("Protokollar", 11)]),
     ("Ma’lumotlar bazasi va SQL", [("Relyatsion model", 6)]),
 ]
+
+
+# --- Admin: foydalanuvchi tafsiloti (namunada hamma uchun bir xil tarix, ism/aloqa USERS'dan) ---
+USER_DETAIL = {
+    "registered": "8-noyabr, 2026", "auth": ["Telegram", "Google"], "email": "dilnoza.k@maktab.uz",
+    "school": "Toshkent sh., 110-maktab", "experience": "12 yil", "category": "Birinchi toifa",
+    "readiness": 68, "study_hours": 21.5, "streak": 6, "tests": 18, "avg": 79, "ai_requests": 64,
+    "devices": [("Android · Chrome (PWA o‘rnatilgan)", "Bugun 11:42"), ("Windows · Edge", "3 kun oldin")],
+    "activity": [
+        ("Bugun 11:42", "Mavzu testi topshirildi", "Funksiyalar va modullar · 92% · o‘tdi"),
+        ("Bugun 11:05", "Dars o‘qildi", "Funksiyalar va modullar · 100%"),
+        ("Kecha 18:45", "Oraliq nazorat", "3 ta mavzu · 78% · tavsiya bilan"),
+        ("Kecha 18:02", "E’tiroz yuborildi", "#Q-84920 · ko‘rib chiqilmoqda"),
+        ("12-noyabr", "Mavzu testi", "Sanoq sistemalari va mantiq · 62% · qaytarildi"),
+        ("8-noyabr", "Diagnostika yakunlandi", "Boshlang‘ich daraja 70%"),
+        ("8-noyabr", "Ro‘yxatdan o‘tdi", "Telegram orqali"),
+    ],
+}
+
+# --- Admin: ekspertlar ---
+EXPERTS = [
+    # id, ism, initsial, aloqa, yo'nalishlar, yaratgan, tekshirgan, e'tiroz hal qilgan, o'rtacha javob vaqti, faol, oxirgi faollik, huquqlar
+    {"id": 1, "name": "Zuhra Qodirova", "ini": "ZQ", "contact": "zuhra.q@raqamlimuallim.uz", "areas": ["Mantiq asoslari", "Dasturlash"],
+     "created": 142, "reviewed": 388, "objections": 41, "resp": "3 soat", "active": True, "last": "Bugun 10:20",
+     "perms": ["questions", "review", "topics", "objections"]},
+    {"id": 2, "name": "Alisher Rustamov", "ini": "AR", "contact": "+998 90 777 12 34", "areas": ["Algoritmlar", "Ma’lumotlar bazasi"],
+     "created": 96, "reviewed": 210, "objections": 18, "resp": "7 soat", "active": True, "last": "Kecha 21:05",
+     "perms": ["questions", "review", "objections"]},
+    {"id": 3, "name": "Kamola Ergasheva", "ini": "KE", "contact": "kamola.e@raqamlimuallim.uz", "areas": ["Kompyuter tarmoqlari"],
+     "created": 37, "reviewed": 64, "objections": 5, "resp": "26 soat", "active": True, "last": "4 kun oldin",
+     "perms": ["questions", "review"]},
+    {"id": 4, "name": "Bobur Nazarov", "ini": "BN", "contact": "+998 93 101 20 30", "areas": ["Ofis dasturlari"],
+     "created": 12, "reviewed": 8, "objections": 0, "resp": "—", "active": False, "last": "2 oy oldin",
+     "perms": ["questions"]},
+]
+EXPERT_PERMS = [("questions", _l("Savol yaratish va tahrirlash")), ("review", _l("Savollarni tekshirish va tasdiqlash")),
+                ("topics", _l("Mavzular va darslarni tahrirlash")), ("objections", _l("E’tirozlarni ko‘rib chiqish"))]
+CONTENT_AREAS = ["Dasturlash", "Algoritmlar", "Mantiq asoslari", "Axborot va kodlash", "Kompyuter tarmoqlari",
+                 "Ma’lumotlar bazasi", "Ofis dasturlari"]
+
+# --- Admin: statistika ---
+STATS = {
+    "kpi": [("Foydalanuvchilar", "1 248", "+34 bu hafta", "users"), ("Kunlik faol", "312", "25% · o‘tgan haftadan +8%", "zap"),
+            ("O‘rtacha tayyorlik", "64%", "+3 p.p. bu oy", "target"), ("Sertifikatlar", "87", "+12 bu oy", "award"),
+            ("Diagnostikani tugatgan", "61%", "Maqsad ≥ 60%", "check-circle"), ("AI xarajati", "$210", "$500 limitning 42%", "sparkle")],
+    "signups": [18, 24, 31, 22, 40, 36, 34, 29, 45, 38, 41, 52],
+    "funnel": [("Ro‘yxatdan o‘tgan", 1248), ("Diagnostikani tugatgan", 761), ("Birinchi darsni o‘qigan", 702),
+               ("Birinchi mavzu testini topshirgan", 655), ("Yarim kursdan o‘tgan", 388), ("Sertifikat olgan", 87)],
+    "regions": [("Toshkent shahri", 248), ("Samarqand viloyati", 156), ("Farg‘ona viloyati", 141), ("Andijon viloyati", 128),
+                ("Toshkent viloyati", 117), ("Qashqadaryo viloyati", 102), ("Boshqa viloyatlar", 356)],
+    "devices": [("Telefon", 71), ("Kompyuter", 24), ("Planshet", 5)],
+    "pwa": 38,
+    "content": [("Tasdiqlangan savollar", "2 140"), ("Tekshiruvda", "86"), ("Ochiq e’tirozlar", "3"), ("O‘rtacha tekshiruv vaqti", "9 soat")],
+    "inactive": [("3–6 oy kirmagan", 42), ("O‘chirishga 2 haftadan kam qolgan", 7), ("Shu oy avtomatik o‘chirilgan", 11)],
+}

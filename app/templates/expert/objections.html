@@ -1,13 +1,14 @@
 {% extends "layouts/panel.html" %}
-{% block title %}E’tirozlar{% endblock %}
-{% block heading %}E’tirozlar{% endblock %}
+{% block title %}{{ _("E’tirozlar") }}{% endblock %}
+{% block heading %}{{ _("E’tirozlar") }}{% endblock %}
 {% block content %}
-{% call page_head("E’tirozlar", "Har bir e’tirozga 24 soat ichida xulosa beriladi.") %}{% endcall %}
+{% call page_head(_("E’tirozlar"), _("Har bir e’tirozga 24 soat ichida xulosa beriladi.")) %}{% endcall %}
 <div class="split">
   <div class="card list">
+    {% set sel = request.args.get('id') or items[0].id %}
     {% for o in items %}
-    <a class="list-item {{ 'active' if loop.first }}" href="#" style="flex-direction:column;align-items:stretch;gap:6px;{{ 'background:var(--primary-soft)' if loop.first }}">
-      <div class="row between"><span class="xs muted num">{{ o.id }}</span>{% if o.urgent %}{{ badge("Shoshilinch", "red") }}{% else %}<span class="xs muted">{{ o.n }} ta e’tiroz</span>{% endif %}</div>
+    <a class="list-item list-item-col {{ 'active' if o.id == sel }}" href="{{ url_for('expert.objections', id=o.id) }}" {{ 'aria-current=page' if o.id == sel }}>
+      <div class="row between"><span class="xs muted num">{{ o.id }}</span>{% if o.urgent %}{{ badge(_("Shoshilinch"), "red") }}{% else %}<span class="xs muted">{{ o.n }} {{ _("ta e’tiroz") }}</span>{% endif %}</div>
       <span class="clamp-2 small strong">{{ o.q }}</span>
       <span class="xs muted">{{ o.topic }} · {{ o.lvl }} · {{ o.ago }}</span>
     </a>
@@ -16,20 +17,20 @@
 
   <div class="stack stack-lg">
     <div class="card card-pad stack">
-      <div class="row between wrap"><span class="small muted num">#Q-84920 · Sanoq sistemalari · O‘rta</span>{{ badge("Testlarda vaqtincha to‘xtatilgan", "yellow") }}</div>
-      <p class="strong">101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?</p>
+      <div class="row between wrap"><span class="small muted num">{{ _("#Q-84920 · Sanoq sistemalari · O‘rta") }}</span>{{ badge(_("Testlarda vaqtincha to‘xtatilgan"), "yellow") }}</div>
+      <p class="strong">{{ _("101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?") }}</p>
       <div class="stack stack-sm">
         {% for k, v, p in [("A", "43", 12), ("B", "45", 58), ("C", "47", 26), ("D", "53", 4)] %}
         <div class="g-12 row">
-          <span class="strong small" style="width:16px">{{ k }}</span>
-          <div class="gap-4 grow stack"><div class="row between small"><span>{{ v }}{% if k == "B" %} <span class="t-green">· to‘g‘ri deb belgilangan</span>{% endif %}</span><span class="num muted">{{ p }}%</span></div>{{ progress(p, "green" if k == "B" else "", "thin") }}</div>
+          <span class="strong small u-w-16">{{ k }}</span>
+          <div class="gap-4 grow stack"><div class="row between small"><span>{{ v }}{% if k == "B" %} <span class="t-green">{{ _("· to‘g‘ri deb belgilangan") }}</span>{% endif %}</span><span class="num muted">{{ p }}%</span></div>{{ progress(p, "green" if k == "B" else "", "thin") }}</div>
         </div>
         {% endfor %}
       </div>
     </div>
 
     <div class="card">
-      <div class="card-head"><span class="strong">5 ta e’tiroz</span><span class="xs muted">sabablari</span></div>
+      <div class="card-head"><span class="strong">{{ _("5 ta e’tiroz") }}</span><span class="xs muted">{{ _("sabablari") }}</span></div>
       <div class="list">
         {% for who, why, note in [("Dilshod K.", "Mening javobim ham to‘g‘ri", "47 ni tanladim, chunki…"), ("Nodira A.", "Savol tushunarsiz", "Qaysi sanoq sistemasidan o‘tkazish aniq emas."), ("Sarvar R.", "To‘g‘ri javob noto‘g‘ri", "")] %}
         <div class="items-start list-item"><span class="avatar">{{ who[0] }}{{ who.split()[1][0] }}</span><div class="grow"><div class="small"><b>{{ who }}</b> · {{ why }}</div>{% if note %}<div class="sub">{{ note }}</div>{% endif %}</div></div>
@@ -38,13 +39,13 @@
     </div>
 
     <div class="card card-pad stack">
-      <span class="label">Ekspert xulosasi</span>
+      <span class="label">{{ _("Ekspert xulosasi") }}</span>
       <textarea class="textarea" placeholder="Xulosa barcha e’tiroz bildirganlarga yuboriladi…"></textarea>
       <div class="row wrap">
-        <button class="btn btn-primary" type="button">E’tiroz o‘rinli · savolni tuzatish</button>
-        <button class="btn btn-outline" type="button">O‘rinsiz · rad etish</button>
+        <button class="btn btn-primary" type="button">{{ _("E’tiroz o‘rinli · savolni tuzatish") }}</button>
+        <button class="btn btn-outline" type="button">{{ _("O‘rinsiz · rad etish") }}</button>
       </div>
-      <p class="xs muted">O‘rinli deb topilsa, savolning yangi versiyasi yaratiladi va natijalar faqat foydalanuvchi foydasiga qayta hisoblanadi.</p>
+      <p class="xs muted">{{ _("O‘rinli deb topilsa, savolning yangi versiyasi yaratiladi va natijalar faqat foydalanuvchi foydasiga qayta hisoblanadi.") }}</p>
     </div>
   </div>
 </div>

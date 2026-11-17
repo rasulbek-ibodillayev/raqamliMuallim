@@ -1,132 +1,174 @@
 {% extends "base.html" %}
-{% block title %}Sertifikat № INF-2026-000123{% endblock %}
+{% block title %}{{ _("Sertifikat № INF-2026-000123") }}{% endblock %}
 {% block head %}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fonts-exam.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/certificate.css') }}">
 {% endblock %}
 {#
-  Sertifikat: 1-sahifa — asosiy sertifikat, 2-sahifa — mavzular bo'yicha natijalar ilovasi.
+  IT uslubidagi sertifikat (A4 albom):
+  1-sahifa — sertifikat: chapda sxema (circuit) naqshli to'q tasma, o'ngda asosiy matn, pastda mikrochip muhr va QR.
+  2-sahifa — ilova, alohida dizayn: hisobot ko'rinishi (umumiy natija halqasi + mavzular jadvali).
   QR-kod hozircha namunaviy; backendda haqiqiy tekshiruv havolasidan yaratiladi.
 #}
 {% set cert_no = "INF-2026-000123" %}
+{% set total = 87 %}
 {% macro qr(size=25) -%}
 <svg class="cert-qr" viewBox="0 0 {{ size }} {{ size }}" shape-rendering="crispEdges" aria-label="Sertifikatni tekshirish uchun QR-kod">
   <rect width="{{ size }}" height="{{ size }}" fill="#fff"/>
   {% for y in range(size) %}{% for x in range(size) %}
     {% set finder = (x < 7 and y < 7) or (x >= size - 7 and y < 7) or (x < 7 and y >= size - 7) %}
-    {% if not finder and ((x * 7 + y * 13 + x * y) % 5 < 2) %}<rect x="{{ x }}" y="{{ y }}" width="1" height="1" fill="#0f172a"/>{% endif %}
+    {% if not finder and ((x * 7 + y * 13 + x * y) % 5 < 2) %}<rect x="{{ x }}" y="{{ y }}" width="1" height="1" fill="#0b1220"/>{% endif %}
   {% endfor %}{% endfor %}
   {% for fx, fy in [(0, 0), (size - 7, 0), (0, size - 7)] %}
-    <rect x="{{ fx }}" y="{{ fy }}" width="7" height="7" fill="#0f172a"/><rect x="{{ fx + 1 }}" y="{{ fy + 1 }}" width="5" height="5" fill="#fff"/><rect x="{{ fx + 2 }}" y="{{ fy + 2 }}" width="3" height="3" fill="#0f172a"/>
+    <rect x="{{ fx }}" y="{{ fy }}" width="7" height="7" fill="#0b1220"/><rect x="{{ fx + 1 }}" y="{{ fy + 1 }}" width="5" height="5" fill="#fff"/><rect x="{{ fx + 2 }}" y="{{ fy + 2 }}" width="3" height="3" fill="#0b1220"/>
   {% endfor %}
 </svg>
 {%- endmacro %}
 
-{% macro frame() -%}
-<svg class="cert-frame" viewBox="0 0 297 210" preserveAspectRatio="none" aria-hidden="true">
+{# Sxema naqshi: tasma ichidagi o'tkazgich yo'llari va kontaktlar #}
+{% macro circuit() -%}
+<svg class="it-circuit" viewBox="0 0 80 210" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
   <defs>
-    <pattern id="guilloche" width="6" height="6" patternUnits="userSpaceOnUse">
-      <path d="M0 3 Q1.5 0 3 3 T6 3" fill="none" stroke="#1e3a8a" stroke-width=".35" opacity=".55"/>
-      <path d="M0 3 Q1.5 6 3 3 T6 3" fill="none" stroke="#b08d3c" stroke-width=".35" opacity=".6"/>
-    </pattern>
+    <linearGradient id="trace" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset=".5" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
   </defs>
-  <rect x="4" y="4" width="289" height="202" fill="url(#guilloche)"/>
-  <rect x="11" y="11" width="275" height="188" fill="#fffdf8"/>
-  <rect x="4" y="4" width="289" height="202" fill="none" stroke="#1e3a8a" stroke-width=".8"/>
-  <rect x="11" y="11" width="275" height="188" fill="none" stroke="#b08d3c" stroke-width=".6"/>
-  <rect x="13.5" y="13.5" width="270" height="183" fill="none" stroke="#b08d3c" stroke-width=".25"/>
-  {% for cx, cy, r in [(13.5, 13.5, 0), (283.5, 13.5, 90), (283.5, 196.5, 180), (13.5, 196.5, 270)] %}
-  <g transform="translate({{ cx }} {{ cy }}) rotate({{ r }})"><path d="M0 0h14M0 0v14M3 3h7M3 3v7" stroke="#b08d3c" stroke-width=".5" fill="none"/><circle cx="3" cy="3" r="1.2" fill="#b08d3c"/></g>
-  {% endfor %}
+  <g fill="none" stroke="url(#trace)" stroke-width=".6" opacity=".55">
+    {% for x, y1, y2, dx in [(10, 0, 40, 12), (18, 20, 70, -8), (30, 50, 110, 14), (44, 90, 150, -10), (56, 0, 30, 10), (62, 120, 180, -14), (24, 140, 210, 10), (70, 60, 100, -12), (36, 170, 210, 12), (50, 30, 64, 8)] %}
+    <path d="M{{ x }} {{ y1 }}V{{ (y1 + y2) / 2 }}l{{ dx }} {{ dx|abs }}V{{ y2 }}"/>
+    <circle cx="{{ x + dx }}" cy="{{ y2 }}" r="1.4" fill="#0b1220" stroke-width=".6"/>
+    {% endfor %}
+  </g>
+  <g fill="#22d3ee" opacity=".7">{% for x, y in [(10, 40), (18, 70), (30, 110), (56, 30), (70, 100), (44, 150)] %}<circle cx="{{ x }}" cy="{{ y }}" r=".9"/>{% endfor %}</g>
 </svg>
 {%- endmacro %}
 
 {% block body %}
 <div class="cert-toolbar no-print">
-  <a class="btn btn-ghost btn-sm" href="{{ url_for('user.certificates') }}">{{ icon("arrow-left", "ico-sm") }}Sertifikatlarim</a>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('user.certificates') }}">{{ icon("arrow-left", "ico-sm") }}{{ _("Sertifikatlarim") }}</a>
   <span class="grow"></span>
-  <button class="btn btn-outline btn-sm" type="button" onclick="window.print()">{{ icon("printer", "ico-sm") }}<span class="hide-sm">Chop etish</span></button>
-  <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">{{ icon("download", "ico-sm") }}PDF<span class="hide-sm">&nbsp;yuklab olish</span></button>
+  <button class="btn btn-outline btn-sm" type="button" onclick="window.print()">{{ icon("printer", "ico-sm") }}<span class="hide-sm">{{ _("Chop etish") }}</span></button>
+  <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">{{ icon("download", "ico-sm") }}{{ _("PDF") }}<span class="hide-sm">{{ _("&nbsp;yuklab olish") }}</span></button>
 </div>
 
 <main id="main" tabindex="-1" class="cert-stage">
   <!-- 1-sahifa: sertifikat -->
-  <article class="cert-page" aria-label="Sertifikat">
-    {{ frame() }}
-    <div class="cert-inner">
-      <header class="cert-top">
-        <div class="cert-emblem">
-          <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="em" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#em)"/><path d="M29 14l5 13.5L47.5 32 34 37 29 50.5 24 37 10.5 32 24 27.5z" fill="#fff"/></svg>
-          <span>raqamliMuallim</span>
-        </div>
-        <div class="cert-no">№ <b>{{ cert_no }}</b></div>
+  <article class="cert-page it-cert" aria-label="{{ _('Sertifikat') }}">
+    <aside class="it-band">
+      {{ circuit() }}
+      <div class="it-band-top">
+        <svg class="it-logo" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="em" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#em)"/><path d="M29 14l5 13.5L47.5 32 34 37 29 50.5 24 37 10.5 32 24 27.5z" fill="#fff"/></svg>
+        <span>{{ _("raqamli") }}<br>{{ _("Muallim") }}</span>
+      </div>
+      <div class="it-band-vert">{{ _("INFORMATIKA · IT") }}</div>
+      <div class="it-band-code">0x{{ "%06X"|format(123) }}<br>v2026.12</div>
+    </aside>
+
+    <div class="it-main">
+      <header class="it-head">
+        <span class="it-mono it-kicker">{{ _('&lt;malaka_oshirish kurs="informatika" /&gt;') }}</span>
+        <span class="it-mono it-no">№ {{ cert_no }}</span>
       </header>
 
-      <div class="cert-center">
-        <div class="cert-kicker">Malaka oshirish tayyorlov kursi</div>
-        <h1 class="cert-title">Sertifikat</h1>
-        <div class="cert-rule"><span></span>{{ icon("award") }}<span></span></div>
-        <p class="cert-lead">Ushbu sertifikat</p>
-        <p class="cert-name">{{ me.last }} {{ me.first }}</p>
-        <p class="cert-text">Informatika va axborot texnologiyalari fani o‘qituvchilarini attestatsiyaga tayyorlash kursini
-          to‘liq o‘zlashtirib, yakuniy diagnostikadan muvaffaqiyatli o‘tganini tasdiqlaydi.</p>
+      <h1 class="it-title">{{ _("Sertifikat") }}</h1>
+      <div class="it-rule"></div>
 
-        <div class="cert-facts">
-          <div><span>Umumiy natija</span><b>87%</b></div>
-          <div><span>Mavzular</span><b>42 / 42</b></div>
-          <div><span>Berilgan sana</span><b>20.12.2026</b></div>
-        </div>
+      <p class="it-lead">{{ _("Ushbu sertifikat egasi") }}</p>
+      <p class="it-name">{{ me.last }} {{ me.first }}</p>
+      <p class="it-text">{{ _("Informatika va axborot texnologiyalari fani o‘qituvchilarini attestatsiyaga tayyorlash kursini
+        to‘liq o‘zlashtirgani va yakuniy diagnostikadan muvaffaqiyatli o‘tganini tasdiqlaydi.") }}</p>
+
+      <div class="it-facts">
+        <div><span class="it-mono">{{ _("natija") }}</span><b>{{ total }}%</b></div>
+        <div><span class="it-mono">{{ _("mavzular") }}</span><b>42 / 42</b></div>
+        <div><span class="it-mono">{{ _("sana") }}</span><b>20.12.2026</b></div>
       </div>
 
-      <footer class="cert-bottom">
-        <div class="cert-sign">
-          <svg viewBox="0 0 160 40" aria-hidden="true"><path d="M8 30c12-18 20-22 24-14s-6 18 2 10 14-24 20-16-4 16 6 10 10-14 16-8 4 10 14 4 18-10 30-6" fill="none" stroke="#1e3a8a" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <div class="cert-line"></div>
-          <div class="cert-role">[F.I.Sh.]<br><span>Platforma rahbari</span></div>
+      <footer class="it-foot">
+        <div class="it-sign">
+          <svg viewBox="0 0 160 40" aria-hidden="true"><path d="M8 30c12-18 20-22 24-14s-6 18 2 10 14-24 20-16-4 16 6 10 10-14 16-8 4 10 14 4 18-10 30-6" fill="none" stroke="#1e293b" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <div class="it-line"></div>
+          <div class="it-role">{{ _("[F.I.Sh.]") }}<br><span>{{ _("Platforma rahbari") }}</span></div>
         </div>
 
-        <svg class="cert-seal" viewBox="0 0 120 120" aria-label="Muhr">
-          <defs><path id="sealpath" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"/></defs>
-          <circle cx="60" cy="60" r="56" fill="none" stroke="#1d4ed8" stroke-width="2.5"/>
-          <circle cx="60" cy="60" r="50" fill="none" stroke="#1d4ed8" stroke-width="1"/>
-          <circle cx="60" cy="60" r="32" fill="none" stroke="#1d4ed8" stroke-width="1"/>
-          <text font-family="Inter, Arial, sans-serif" font-size="8.6" font-weight="600" letter-spacing="1.6" fill="#1d4ed8"><textPath href="#sealpath">RAQAMLIMUALLIM • ONLINE TAYYORLOV PLATFORMASI •</textPath></text>
-          <path d="M57 42l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#1d4ed8"/>
-          <text x="60" y="86" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="7" font-weight="600" fill="#1d4ed8">2026</text>
+        {# Muhr: mikrochip ko'rinishida #}
+        <svg class="it-chip" viewBox="0 0 120 120" aria-label="Muhr">
+          <defs><linearGradient id="chipg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="120" y2="120"><stop offset="0" stop-color="#6366f1"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+          <g stroke="url(#chipg)" stroke-width="2.4" stroke-linecap="round">
+            {% for i in range(6) %}{% set p = 30 + i * 12 %}
+            <line x1="{{ p }}" y1="8" x2="{{ p }}" y2="20"/><line x1="{{ p }}" y1="100" x2="{{ p }}" y2="112"/>
+            <line x1="8" y1="{{ p }}" x2="20" y2="{{ p }}"/><line x1="100" y1="{{ p }}" x2="112" y2="{{ p }}"/>
+            {% endfor %}
+          </g>
+          <rect x="20" y="20" width="80" height="80" rx="12" fill="#0b1220" stroke="url(#chipg)" stroke-width="2"/>
+          <rect x="28" y="28" width="64" height="64" rx="7" fill="none" stroke="#334155" stroke-width="1"/>
+          <path d="M57 38l3.6 10 10 3.6-10 3.6L57 65.2l-3.6-10-10-3.6 10-3.6z" fill="url(#chipg)"/>
+          <text x="60" y="80" text-anchor="middle" font-family="Montserrat Alternates, Inter, sans-serif" font-size="6.4" font-weight="700" fill="#e2e8f0" letter-spacing=".3">TASDIQLANGAN</text>
+          <text x="60" y="88.5" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="6" fill="#22d3ee">2026</text>
         </svg>
 
-        <div class="cert-verify">
+        <div class="it-verify">
           {{ qr() }}
-          <div><b>Haqiqiyligini tekshirish</b><span>raqamlimuallim.uz/s/{{ cert_no }}</span></div>
+          <div><span class="it-mono it-prompt">{{ _("$ verify") }}</span><b>{{ _("raqamlimuallim.uz/s/") }}<br>{{ cert_no }}</b><span>{{ _("QR-kodni skanerlab haqiqiyligini tekshiring") }}</span></div>
         </div>
       </footer>
-      <p class="cert-note">Ushbu sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. Mavzular bo‘yicha natijalar ilovada keltirilgan.</p>
+      <p class="it-note">{{ _("Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. Mavzular bo‘yicha natijalar ilovada keltirilgan.") }}</p>
     </div>
   </article>
 
-  <!-- 2-sahifa: ilova -->
-  <article class="cert-page" aria-label="Sertifikatga ilova">
-    {{ frame() }}
-    <div class="cert-inner">
-      <header class="cert-top">
-        <div class="cert-emblem"><span>Sertifikatga ilova</span></div>
-        <div class="cert-no">№ <b>{{ cert_no }}</b></div>
-      </header>
-      <div class="cert-annex">
-        <h2 class="cert-annex-title">Mavzular bo‘yicha o‘zlashtirish natijalari</h2>
-        <p class="cert-annex-name">{{ me.last }} {{ me.first }}</p>
-        <table class="cert-table">
-          <thead><tr><th>№</th><th>Mavzular bloki</th><th>O‘zlashtirish</th></tr></thead>
+  <!-- 2-sahifa: ilova — hisobot ko'rinishidagi alohida dizayn -->
+  <article class="cert-page it-annex" aria-label="{{ _('Sertifikatga ilova') }}">
+    <div class="ax-strip"></div>
+    <header class="ax-head">
+      <div>
+        <span class="it-mono ax-path">{{ _("sertifikat /") }} {{ cert_no }} {{ _("/ ilova.json") }}</span>
+        <h2 class="ax-title">{{ _("Natijalar hisoboti") }}</h2>
+        <p class="ax-sub">{{ me.last }} {{ me.first }} {{ _("· Informatika va axborot texnologiyalari") }}</p>
+      </div>
+      <span class="it-mono ax-badge">{{ _("ILOVA · 1/1") }}</span>
+    </header>
+
+    <div class="ax-body">
+      <section class="ax-summary">
+        {% set r = 15.9155 %}
+        <svg class="ax-ring" viewBox="0 0 36 36" aria-label="Umumiy natija {{ total }}%">
+          <defs><linearGradient id="axg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+          <circle cx="18" cy="18" r="{{ r }}" fill="none" stroke="#e2e8f0" stroke-width="2.6"/>
+          <circle cx="18" cy="18" r="{{ r }}" fill="none" stroke="url(#axg)" stroke-width="2.6" stroke-linecap="round"
+                  stroke-dasharray="{{ total }} {{ 100 - total }}" transform="rotate(-90 18 18)"/>
+          <text x="18" y="19.2" text-anchor="middle" font-size="7.2" font-weight="700" fill="#0b1220" font-family="Montserrat Alternates, Inter, sans-serif">{{ total }}%</text>
+          <text x="18" y="24" text-anchor="middle" font-size="2.4" fill="#64748b" font-family="Inter, sans-serif">umumiy natija</text>
+        </svg>
+        <dl class="ax-kv">
+          <div><dt class="it-mono">{{ _("mavzular") }}</dt><dd>42 / 42</dd></div>
+          <div><dt class="it-mono">{{ _("savollar") }}</dt><dd>1 260</dd></div>
+          <div><dt class="it-mono">{{ _("o‘qish vaqti") }}</dt><dd>{{ _("38 soat") }}</dd></div>
+          <div><dt class="it-mono">{{ _("berilgan") }}</dt><dd>20.12.2026</dd></div>
+        </dl>
+      </section>
+
+      <section class="ax-table-wrap">
+        <table class="ax-table">
+          <thead><tr><th>{{ _("ID") }}</th><th>{{ _("Mavzular bloki") }}</th><th>{{ _("O‘zlashtirish") }}</th><th>{{ _("Daraja") }}</th></tr></thead>
           <tbody>
             {% for n, p in topics %}
-            <tr><td>{{ loop.index }}</td><td>{{ n }}</td><td><span class="cert-bar"><i style="width: {{ p }}%"></i></span><b>{{ p }}%</b></td></tr>
+            {% set lvl, cls = ("A’lo", "hi") if p >= 90 else (("Yaxshi", "mid") if p >= 80 else ("Qoniqarli", "lo")) %}
+            <tr>
+              <td class="it-mono">T-{{ "%02d"|format(loop.index) }}</td>
+              <td>{{ n }}</td>
+              <td><span class="ax-bar"><i class="ax-{{ cls }}" style="--w: {{ p }}%"></i></span><b>{{ p }}%</b></td>
+              <td><span class="ax-chip ax-chip-{{ cls }}">{{ lvl }}</span></td>
+            </tr>
             {% endfor %}
           </tbody>
-          <tfoot><tr><td></td><td>Umumiy natija</td><td><b>87%</b></td></tr></tfoot>
         </table>
-      </div>
-      <p class="cert-note">Sertifikat yakuniy diagnostika natijalari asosida avtomatik shakllantirilgan. Tekshirish: raqamlimuallim.uz/s/{{ cert_no }}</p>
+        <p class="ax-legend"><span class="ax-chip ax-chip-hi">{{ _("A’lo") }}</span> ≥ 90% <span class="ax-chip ax-chip-mid">{{ _("Yaxshi") }}</span> 80–89% <span class="ax-chip ax-chip-lo">{{ _("Qoniqarli") }}</span> 70–79%</p>
+      </section>
     </div>
+
+    <footer class="ax-foot it-mono">
+      <span>{{ _("sha256: 9f2c…a71e") }}</span>
+      <span>{{ _("Yakuniy diagnostika natijalari asosida avtomatik shakllantirilgan") }}</span>
+      <span>{{ _("raqamlimuallim.uz/s/") }}{{ cert_no }}</span>
+    </footer>
   </article>
 </main>
 {% endblock %}

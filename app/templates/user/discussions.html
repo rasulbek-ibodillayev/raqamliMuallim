@@ -1,20 +1,20 @@
 {% extends "layouts/app.html" %}
-{% block title %}Muhokamalar{% endblock %}
+{% block title %}{{ _("Muhokamalar") }}{% endblock %}
 {% block content %}
-{% call page_head("Muhokamalar", "Faqat javob bergan savollaringiz muhokamasi ko‘rinadi — bu savollar bankini himoya qiladi.") %}{% endcall %}
+{% call page_head(_("Muhokamalar"), _("Faqat javob bergan savollaringiz muhokamasi ko‘rinadi — bu savollar bankini himoya qiladi.")) %}{% endcall %}
 <div class="stack stack-lg" x-data="{ f: 'all' }">
   <div class="seg">
-    <button type="button" :class="f === 'all' && 'active'" @click="f = 'all'">Hammasi</button>
-    <button type="button" :class="f === 'mine' && 'active'" @click="f = 'mine'">Men qatnashganlar</button>
+    <button type="button" :class="f === 'all' && 'active'" @click="f = 'all'">{{ _("Hammasi") }}</button>
+    <button type="button" :class="f === 'mine' && 'active'" @click="f = 'mine'">{{ _("Men qatnashganlar") }}</button>
   </div>
   <div class="card list">
     {% for d in items %}
     <a class="items-start list-item" href="{{ url_for('user.discussion') }}" {% if not d.mine %}x-show="f === 'all'"{% endif %}>
       <span class="list-ico">{{ icon("message") }}</span>
       <div class="gap-4 grow stack">
-        <span class="xs muted">{{ d.n }}-savol · {{ d.topic }}</span>
+        <span class="xs muted">{{ d.n }}{{ _("-savol ·") }} {{ d.topic }}</span>
         <span class="clamp-2">{{ d.q }}</span>
-        <span class="row row-sm wrap xs muted">{{ d.count }} ta fikr · {{ d.last }}{% if d.expert %} <span class="row g-6 t-blue">{{ icon("shield", "ico-sm") }}Ekspert javob bergan</span>{% endif %}</span>
+        <span class="row row-sm wrap xs muted">{{ d.count }} {{ _("ta fikr ·") }} {{ d.last }}{% if d.expert %} <span class="row g-6 t-blue">{{ icon("shield", "ico-sm") }}{{ _("Ekspert javob bergan") }}</span>{% endif %}</span>
       </div>
       {{ icon("chevron-right", "ico-sm chev") }}
     </a>

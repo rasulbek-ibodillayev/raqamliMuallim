@@ -1,16 +1,16 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ t.name }}{% endblock %}
-{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.knowledge') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>Bilim darajasi</span>{% endblock %}
+{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.knowledge') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{{ _("Bilim darajasi") }}</span>{% endblock %}
 {% block content %}
 <div class="stack stack-lg">
   <div class="pt-8 stack stack-sm">
     <span class="xs muted">{{ t.section }}</span>
     <h1>{{ t.name }}</h1>
-    <div class="row row-sm wrap">{{ status_dot(status[t.status][0], status[t.status][1]) }}<span class="small muted">Oxirgi natija: {{ t.last }}</span></div>
+    <div class="row row-sm wrap">{{ status_dot(status[t.status][0], status[t.status][1]) }}<span class="small muted">{{ _("Oxirgi natija:") }} {{ t.last }}</span></div>
   </div>
 
   <div class="card">
-    <div class="card-head"><span class="strong">Kichik mavzular</span><span class="small muted">3 / 4 tayyor</span></div>
+    <div class="card-head"><span class="strong">{{ _("Kichik mavzular") }}</span><span class="small muted">{{ _("3 / 4 tayyor") }}</span></div>
     <div class="list">
       {% for name, p in t.subtopics %}
       <div class="list-item">
@@ -24,12 +24,13 @@
 
   <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
-    <p class="grow">«elif zanjiri» bo‘yicha 40%. Avval shu qismni sxema orqali qayta ko‘rib chiqing, keyin takrorlash testini topshiring.</p>
+    <p class="grow">{{ _("«elif zanjiri» bo‘yicha 40%%. Avval shu qismni sxema orqali qayta ko‘rib chiqing, keyin takrorlash testini topshiring.") }}</p>
   </div>
 
   <div class="grid-2">
-    <a class="btn btn-primary btn-block" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("book") }}Darsni ochish</a>
-    <a class="btn btn-outline btn-block" href="{{ url_for('test.question') }}">{{ icon("refresh") }}Takrorlash testi</a>
+    <a class="btn btn-primary btn-block" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("book") }}{{ _("Darsni ochish") }}</a>
+    <a class="btn btn-outline btn-block" href="{{ url_for('test.question') }}">{{ icon("refresh") }}{{ _("Takrorlash testi") }}</a>
   </div>
 </div>
+{% with fab_ctx = "app", fab_topic = t.name %}{% include "partials/study_fab.html" %}{% endwith %}
 {% endblock %}

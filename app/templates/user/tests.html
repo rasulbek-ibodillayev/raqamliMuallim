@@ -1,27 +1,27 @@
 {% extends "layouts/app.html" %}
-{% block title %}Testlarim{% endblock %}
+{% block title %}{{ _("Testlarim") }}{% endblock %}
 {% block content %}
-{% call page_head("Testlarim", "To‘xtatilgan testlar va boshlash mumkin bo‘lganlari") %}{% endcall %}
+{% call page_head(_("Testlarim"), _("To‘xtatilgan testlar va boshlash mumkin bo‘lganlari")) %}{% endcall %}
 <div class="stack stack-xl">
   <section class="stack">
-    <h2 class="eyebrow">Davom ettirish</h2>
+    <h2 class="eyebrow">{{ _("Davom ettirish") }}</h2>
     <div class="card card-pad stack">
       <div class="row between wrap">
-        <div><div class="strong">Nazorat testi · 3 ta mavzu</div><div class="small muted">2-bosqich · 6 / 12 savol · javoblar saqlangan</div></div>
-        {{ status_dot("To‘xtatilgan", "yellow") }}
+        <div><div class="strong">{{ _("Nazorat testi · 3 ta mavzu") }}</div><div class="small muted">{{ _("2-bosqich · 6 / 12 savol · javoblar saqlangan") }}</div></div>
+        {{ status_dot(_("To‘xtatilgan"), "yellow") }}
       </div>
       {{ progress(50) }}
-      <a class="btn btn-primary btn-block" href="{{ url_for('test.question') }}">Davom ettirish</a>
+      <a class="btn btn-primary btn-block" href="{{ url_for('test.question') }}">{{ _("Davom ettirish") }}</a>
     </div>
   </section>
 
   <section class="stack">
-    <h2 class="eyebrow">Boshlash mumkin</h2>
+    <h2 class="eyebrow">{{ _("Boshlash mumkin") }}</h2>
     <div class="card list">
-      <a class="list-item" href="{{ url_for('test.question') }}"><span class="list-ico">{{ icon("zap") }}</span><div class="grow"><div>Kunlik 5 ta savol</div><div class="sub">3 daqiqa · takrorlash</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <a class="list-item" href="{{ url_for('user.optional') }}"><span class="list-ico">{{ icon("settings") }}</span><div class="grow"><div>Ixtiyoriy test</div><div class="sub">O‘tilgan mavzulardan, rejaga ta’sir qilmaydi</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <a class="list-item" href="{{ url_for('test.exam') }}"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>Attestatsiya sinovi</div><div class="sub">35 ta savol · 105 daqiqa · real format</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <div class="list-item" style="opacity:.6"><span class="list-ico">{{ icon("lock") }}</span><div class="grow"><div>Yakuniy diagnostika</div><div class="sub">Barcha mavzular o‘tilgach ochiladi</div></div></div>
+      <a class="list-item" href="{{ url_for('test.question') }}"><span class="list-ico">{{ icon("zap") }}</span><div class="grow"><div>{{ _("Kunlik 5 ta savol") }}</div><div class="sub">{{ _("3 daqiqa · takrorlash") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
+      <a class="list-item" href="{{ url_for('user.optional') }}"><span class="list-ico">{{ icon("settings") }}</span><div class="grow"><div>{{ _("Ixtiyoriy test") }}</div><div class="sub">{{ _("O‘tilgan mavzulardan, rejaga ta’sir qilmaydi") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
+      <a class="list-item" href="{{ url_for('test.exam') }}"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>{{ _("Attestatsiya sinovi") }}</div><div class="sub">{{ _("35 ta savol · 105 daqiqa · real format") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
+      <div class="list-item u-op-_6"><span class="list-ico">{{ icon("lock") }}</span><div class="grow"><div>{{ _("Yakuniy diagnostika") }}</div><div class="sub">{{ _("Barcha mavzular o‘tilgach ochiladi") }}</div></div></div>
     </div>
   </section>
 </div>

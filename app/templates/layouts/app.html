@@ -6,17 +6,15 @@
 <script>window.RM_SEARCH = {{ search_index()|tojson }};</script>
 <div class="app" x-data="rmShell()" :class="menu && 'menu-open'" @keydown.window="keys($event)">
   <div class="drawer-backdrop" x-show="menu" x-cloak x-transition.opacity @click="menu = false" aria-hidden="true"></div>
-  <aside class="sidebar" id="app-menu" aria-label="Asosiy menyu">
+  <aside class="sidebar" id="app-menu" aria-label="{{ _('Asosiy menyu') }}">
     <div class="row between">
       <a class="brand" href="{{ url_for('user.home') }}">
-        <span class="brand-mark">{{ icon("sparkle") }}</span>raqamliMuallim
+        <span class="brand-mark">{{ icon("sparkle") }}</span>{{ _("raqamliMuallim") }}
       </a>
-      <button class="icon-btn drawer-close" type="button" @click="menu = false" aria-label="Menyuni yopish">{{ icon("x") }}</button>
+      <button class="icon-btn drawer-close" type="button" @click="menu = false" aria-label="{{ _('Menyuni yopish') }}">{{ icon("x") }}</button>
     </div>
-    <button class="search-trigger" type="button" @click="openSearch()">{{ icon("search", "ico-sm") }}Qidirish<span class="kbd hide-touch">Ctrl K</span></button>
-    <a class="new-chat" href="{{ url_for('user.tutor') }}">{{ icon("edit", "ico-sm") }}AI bilan yangi suhbat</a>
 
-    <nav class="stack" style="--gap:2px;overflow-y:auto;min-height:0">
+    <nav class="stack u---gap-2 u-overflow-y-auto u-minh-0">
     {% for e, label, ic, _ in nav.user %}
       <a class="nav-item {{ 'active' if ep == e }}" href="{{ url_for(e) }}">{{ icon(ic) }}{{ label }}</a>
     {% endfor %}
@@ -31,7 +29,7 @@
     <div class="sidebar-foot">
       <a class="me" href="{{ url_for('user.profile') }}">
         <span class="avatar">{{ me.initials }}</span>
-        <span class="grow"><span class="d-block strong small">{{ me.first }} {{ me.last }}</span><span class="xs muted">Attestatsiyagacha {{ me.days_left }} kun</span></span>
+        <span class="grow"><span class="d-block strong small">{{ me.first }} {{ me.last }}</span><span class="xs muted">{{ _("Attestatsiyagacha") }} {{ me.days_left }} {{ _("kun") }}</span></span>
         {{ icon("settings", "ico-sm faint") }}
       </a>
     </div>
@@ -40,11 +38,11 @@
   <div class="main">
     {% block topbar %}
     <header class="topbar">
-      <button class="icon-btn menu-btn" type="button" @click="menu = true" aria-label="Menyuni ochish" aria-controls="app-menu" :aria-expanded="menu">{{ icon("menu") }}</button>
+      <button class="icon-btn menu-btn" type="button" @click="menu = true" aria-label="{{ _('Menyuni ochish') }}" aria-controls="app-menu" :aria-expanded="menu">{{ icon("menu") }}</button>
       <div class="topbar-title grow truncate">{% block heading %}{% endblock %}</div>
       {% block topbar_actions %}{% endblock %}
-      <button class="icon-btn" type="button" @click="openSearch()" aria-label="Qidirish (Ctrl+K)">{{ icon("search") }}</button>
-      <button class="icon-btn" type="button" data-theme-toggle aria-label="Mavzu rangini almashtirish">{{ icon("moon") }}</button>
+      <button class="icon-btn" type="button" @click="openSearch()" aria-label="{{ _('Qidirish (Ctrl+K)') }}">{{ icon("search") }}</button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="{{ _('Mavzu rangini almashtirish') }}">{{ icon("moon") }}</button>
       <button class="icon-btn bell" type="button" @click.stop="notif = !notif" :aria-expanded="notif" aria-controls="notif-pop" aria-label="Bildirishnomalar{{ ', ' ~ unread ~ ' ta yangi' if unread }}">
         {{ icon("bell") }}{% if unread %}<span class="bell-dot" x-show="!seen"></span>{% endif %}
       </button>
@@ -52,24 +50,24 @@
     {% endblock %}
 
     <main id="main" tabindex="-1" class="page {% block page_class %}{% endblock %}">
-      {% block content %}{% endblock %}
+      {% if request.args.get("yuklanmoqda") %}{% include "partials/skeleton.html" %}{% else %}{% block content %}{% endblock %}{% endif %}
     </main>
   </div>
 
-  <nav class="tabbar" aria-label="Pastki menyu">
-    <a class="tab {{ 'active' if ep == 'user.home' }}" href="{{ url_for('user.home') }}">{{ icon("home") }}Bosh sahifa</a>
-    <a class="tab {{ 'active' if ep in ['user.plan', 'user.lesson'] }}" href="{{ url_for('user.plan') }}">{{ icon("route") }}Reja</a>
-    <a class="tab tab-ai {{ 'active' if ep == 'user.tutor' }}" href="{{ url_for('user.tutor') }}"><span class="tab-ai-dot">{{ icon("sparkle") }}</span>AI tutor</a>
-    <a class="tab {{ 'active' if ep in ['user.knowledge', 'user.topic'] }}" href="{{ url_for('user.knowledge') }}">{{ icon("layers") }}Bilim</a>
+  <nav class="tabbar" aria-label="{{ _('Pastki menyu') }}">
+    <a class="tab {{ 'active' if ep == 'user.home' }}" href="{{ url_for('user.home') }}">{{ icon("home") }}{{ _("Bosh sahifa") }}</a>
+    <a class="tab {{ 'active' if ep in ['user.plan', 'user.lesson'] }}" href="{{ url_for('user.plan') }}">{{ icon("route") }}{{ _("Reja") }}</a>
+    <a class="tab tab-ai {{ 'active' if ep == 'user.tutor' }}" href="{{ url_for('user.tutor') }}"><span class="tab-ai-dot">{{ icon("sparkle") }}</span>{{ _("AI tutor") }}</a>
+    <a class="tab {{ 'active' if ep in ['user.knowledge', 'user.topic'] }}" href="{{ url_for('user.knowledge') }}">{{ icon("layers") }}{{ _("Bilim") }}</a>
     {# «Yana» alohida sahifa emas — chap menyuni ochadi (JS o'chiq bo'lsa, eski sahifaga o'tadi) #}
-    <a class="tab" :class="menu && 'active'" href="{{ url_for('user.more') }}" @click.prevent="menu = true" aria-controls="app-menu">{{ icon("menu") }}Yana</a>
+    <a class="tab" :class="menu && 'active'" href="{{ url_for('user.more') }}" @click.prevent="menu = true" aria-controls="app-menu">{{ icon("menu") }}{{ _("Yana") }}</a>
   </nav>
 
   <!-- Bildirishnomalar -->
-  <div id="notif-pop" class="notif-pop" x-show="notif" x-cloak x-transition.origin.top.right @click.outside="notif = false" role="dialog" aria-label="Bildirishnomalar">
-    <div class="row between" style="padding:14px 16px 12px">
-      <span class="strong">Bildirishnomalar</span>
-      <button class="link small" type="button" style="background:none;border:0;cursor:pointer" @click="seen = true">Hammasini o‘qilgan deb belgilash</button>
+  <div id="notif-pop" class="notif-pop" x-show="notif" x-cloak x-transition.origin.top.right @click.outside="notif = false" role="dialog" aria-label="{{ _('Bildirishnomalar') }}">
+    <div class="row between u-p-14-16-12">
+      <span class="strong">{{ _("Bildirishnomalar") }}</span>
+      <button class="link small u-bg-none u-b-0 u-cur-pointer" type="button" @click="seen = true">{{ _("Hammasini o‘qilgan deb belgilash") }}</button>
     </div>
     {% for n in notifications %}
     <a class="notif {{ 'unread' if n.unread }}" :class="seen && 'read'" href="{{ url_for(n.endpoint) }}">
@@ -78,17 +76,17 @@
       {% if n.unread %}<span class="mt-6 dot dot-blue" x-show="!seen"></span>{% endif %}
     </a>
     {% endfor %}
-    <div class="xs muted center" style="padding:12px;border-top:1px solid var(--border)">Telegram orqali ham yuboriladi · <a class="link" href="{{ url_for('user.profile') }}">Sozlash</a></div>
+    <div class="xs muted center u-p-12 u-bt-1">{{ _("Telegram orqali ham yuboriladi ·") }} <a class="link" href="{{ url_for('user.profile') }}">{{ _("Sozlash") }}</a></div>
   </div>
 
   <!-- Tezkor qidiruv (Ctrl+K) -->
   <div class="palette-backdrop" x-show="search" x-cloak x-transition.opacity @click.self="search = false">
-    <div class="palette" role="dialog" aria-modal="true" aria-label="Tezkor qidiruv">
+    <div class="palette" role="dialog" aria-modal="true" aria-label="{{ _('Tezkor qidiruv') }}">
       <div class="palette-input">
         {{ icon("search", "faint") }}
         <input x-ref="q" x-model="q" @input="pos = 0" @keydown.arrow-down.prevent="move(1)" @keydown.arrow-up.prevent="move(-1)" @keydown.enter.prevent="open()"
-               placeholder="Mavzu, bo‘lim yoki konspektni qidiring…" aria-label="Qidiruv" role="combobox" aria-controls="palette-list" aria-autocomplete="list">
-        <span class="kbd">Esc</span>
+               placeholder="{{ _('Mavzu, bo‘lim yoki eslatmani qidiring…') }}" aria-label="{{ _('Qidiruv') }}" role="combobox" aria-controls="palette-list" aria-autocomplete="list">
+        <span class="kbd">{{ _("Esc") }}</span>
       </div>
       <div class="palette-list" id="palette-list" role="listbox">
         <template x-for="(r, i) in results()" :key="r.u + r.t">
@@ -100,9 +98,9 @@
             </a>
           </div>
         </template>
-        <div class="empty" style="padding:28px" x-show="!results().length">
-          <p class="muted small">Hech narsa topilmadi.</p>
-          <a class="btn btn-ai btn-sm" :href="'{{ url_for('user.tutor') }}?q=' + encodeURIComponent(q)">{{ icon("sparkle", "ico-sm") }}AI tutordan so‘rash</a>
+        <div class="empty u-p-28" x-show="!results().length">
+          <p class="muted small">{{ _("Hech narsa topilmadi.") }}</p>
+          <a class="btn btn-ai btn-sm" :href="'{{ url_for('user.tutor') }}?q=' + encodeURIComponent(q)">{{ icon("sparkle", "ico-sm") }}{{ _("AI tutordan so‘rash") }}</a>
         </div>
       </div>
     </div>

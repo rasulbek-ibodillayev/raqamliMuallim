@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% from "_ui.html" import icon %}
-{% block title %}Barcha ekranlar{% endblock %}
+{% block title %}{{ _("Barcha ekranlar") }}{% endblock %}
 {% block body %}
 <main id="main" tabindex="-1" class="pb-64 page page-wide">
   <div class="page-head">
     <div class="row"><span class="ai-mark lg">{{ icon("sparkle") }}</span>
-      <div><h1>raqamliMuallim — ekranlar</h1><p class="lead">Frontend prototipi. Har bir ekran mobil va desktop uchun moslashuvchan.</p></div></div>
-    <button class="btn btn-outline btn-sm" type="button" data-theme-toggle>{{ icon("moon", "ico-sm") }}Mavzu</button>
+      <div><h1>{{ _("raqamliMuallim — ekranlar") }}</h1><p class="lead">{{ _("Frontend prototipi. Panel sahifalari tegishli rol (o‘qituvchi, ekspert, admin) bilan ochiladi.") }}</p></div></div>
+    <button class="btn btn-outline btn-sm" type="button" data-theme-toggle>{{ icon("moon", "ico-sm") }}{{ _("Mavzu") }}</button>
   </div>
   <div class="stack stack-xl">
   {% for title, items in groups %}
@@ -14,7 +14,9 @@
       <h2 class="eyebrow">{{ title }}</h2>
       <div class="screens-grid">
         {% for ep, label, args in items %}
-        <a class="p-14 card card-link row" href="{{ url_for(ep, **args) }}">
+        {# Panel sahifalari tegishli rol bilan ochiladi (rol tekshiruvi: app/roles.py) #}
+        {% set need = required.get(ep.split('.')[0]) %}
+        <a class="p-14 card card-link row" href="{{ url_for('meta.as_role', role=need, next=url_for(ep, **args)) if need else url_for(ep, **args) }}">
           <span class="grow">{{ label }}</span>{{ icon("arrow-right", "ico-sm faint") }}
         </a>
         {% endfor %}

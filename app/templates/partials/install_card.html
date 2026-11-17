@@ -4,18 +4,18 @@
   <div class="row row-sm items-start">
     <span class="list-ico">{{ icon("download") }}</span>
     <div class="grow stack stack-sm">
-      <h2 id="pwa-title" class="text-h3">Ilovani telefoningizga o‘rnating</h2>
-      <p class="small muted">Bosh ekrandan bir bosishda ochiladi, internet bo‘lmaganda ham darslar va boshlangan test ishlaydi.</p>
+      <h2 id="pwa-title" class="text-h3">{{ _("Ilovani telefoningizga o‘rnating") }}</h2>
+      <p class="small muted">{{ _("Bosh ekrandan bir bosishda ochiladi, internet bo‘lmaganda ham darslar va boshlangan test ishlaydi.") }}</p>
     </div>
-    <button class="icon-btn" type="button" @click="later()" aria-label="Keyinroq">{{ icon("x") }}</button>
+    <button class="icon-btn" type="button" @click="later()" aria-label="{{ _('Keyinroq') }}">{{ icon("x") }}</button>
   </div>
-  <ol class="small stack stack-sm" x-show="steps" x-cloak style="margin:0;padding-left:20px">
-    <li>Safari pastidagi <b>Ulashish</b> {{ icon("share", "ico-sm") }} tugmasini bosing</li>
-    <li><b>«Bosh ekranga qo‘shish»</b> (Add to Home Screen) bandini tanlang</li>
-    <li>O‘ng yuqoridagi <b>«Qo‘shish»</b> ni bosing</li>
+  <ol class="small stack stack-sm u-m-0 u-pl-20" x-show="steps" x-cloak>
+    <li>{{ _("Safari pastidagi") }} <b>{{ _("Ulashish") }}</b> {{ icon("share", "ico-sm") }} {{ _("tugmasini bosing") }}</li>
+    <li><b>{{ _("«Bosh ekranga qo‘shish»") }}</b> {{ _("(Add to Home Screen) bandini tanlang") }}</li>
+    <li>{{ _("O‘ng yuqoridagi") }} <b>{{ _("«Qo‘shish»") }}</b> {{ _("ni bosing") }}</li>
   </ol>
   <div class="row row-sm">
-    <button class="btn btn-primary btn-sm" type="button" @click="install()" x-text="ios ? (steps ? 'Yo‘riqnomani yopish' : 'Qanday o‘rnatiladi?') : 'O‘rnatish'">O‘rnatish</button>
-    <button class="btn btn-ghost btn-sm" type="button" @click="later()">Keyinroq</button>
+    <button class="btn btn-primary btn-sm" type="button" @click="install()" x-text="ios ? (steps ? 'Yo‘riqnomani yopish' : 'Qanday o‘rnatiladi?') : 'O‘rnatish'">{{ _("O‘rnatish") }}</button>
+    <button class="btn btn-ghost btn-sm" type="button" @click="later()">{{ _("Keyinroq") }}</button>
   </div>
 </section>

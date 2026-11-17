@@ -1,32 +1,36 @@
 {% extends "layouts/auth.html" %}
-{% block title %}Raqamni tasdiqlash{% endblock %}
-{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.register') }}" aria-label="Orqaga">{{ icon("arrow-left") }}</a>{% endblock %}
+{% block title %}{{ _("Raqamni tasdiqlash") }}{% endblock %}
+{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.register') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{% endblock %}
 {% block content %}
-<form class="stack stack-lg" action="{{ url_for('auth.details') }}" method="get">
+<form class="stack stack-lg" action="{{ url_for('auth.verify_telegram') }}" method="post" novalidate
+      x-data="rmForm()" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
   <div class="stack stack-sm">
-    <h1>Raqamni tasdiqlang</h1>
-    <p class="lead">+998 90 123 45 67 raqami uchun uch qadam:</p>
+    <h1>{{ _("Raqamni tasdiqlang") }}</h1>
+    <p class="lead"><span class="num">{{ phone or "+998 90 123 45 67" }}</span> {{ _("raqami uchun uch qadam:") }}</p>
   </div>
 
   <ol class="list-reset card list">
-    <li class="list-item"><span class="list-ico strong">1</span><span class="grow">Telegram botni oching</span></li>
-    <li class="list-item"><span class="list-ico strong">2</span><span class="grow">«Telefon raqamni ulashish» tugmasini bosing</span></li>
-    <li class="list-item"><span class="list-ico strong">3</span><span class="grow">Bot yuborgan 6 xonali kodni kiriting</span></li>
+    <li class="list-item"><span class="list-ico strong">1</span><span class="grow">{{ _("Telegram botni oching") }}</span></li>
+    <li class="list-item"><span class="list-ico strong">2</span><span class="grow">{{ _("«Telefon raqamni ulashish» tugmasini bosing") }}</span></li>
+    <li class="list-item"><span class="list-ico strong">3</span><span class="grow">{{ _("Bot yuborgan 6 xonali kodni kiriting") }}</span></li>
   </ol>
 
-  <a class="btn btn-outline btn-block" href="#" target="_blank" rel="noopener">{{ icon("telegram") }}Telegram botni ochish</a>
+  <a class="btn btn-outline btn-block" href="{{ bot_url or 'https://t.me/raqamliMuallimBot' }}" target="_blank" rel="noopener">{{ icon("telegram") }}{{ _("Telegram botni ochish") }}</a>
 
   <div class="field">
-    <label class="label" for="otp1">Tasdiqlash kodi</label>
-    <div class="otp" role="group" aria-label="6 xonali kod">
-      {% for i in range(6) %}<input id="otp{{ loop.index }}" inputmode="numeric" maxlength="1" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}
+    <label class="label" for="otp1">{{ _("Tasdiqlash kodi") }}</label>
+    <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err otp-hint" :class="err('otp') && 'invalid'" @input="clear('otp')">
+      {% for i in range(6) %}<input id="otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}
     </div>
-    <span class="hint">Kod 5 daqiqa amal qiladi. 5 ta urinish bor.</span>
+    {{ field_error("otp", errors) }}
+    <span class="hint" id="otp-hint">{{ _("Kod 5 daqiqa amal qiladi. 5 ta urinish bor. Namunada kod: 123456") }}</span>
   </div>
 
-  <div class="alert alert-yellow">{{ icon("info") }}<span>Telegram boshqa raqamga ulanganmi? Bot sizga <b>Telegram’dagi raqam bilan davom etish</b>ni taklif qiladi.</span></div>
+  <div class="alert alert-yellow">{{ icon("info") }}<span>{{ _("Telegram boshqa raqamga ulanganmi? Bot sizga") }} <b>{{ _("Telegram’dagi raqam bilan davom etish") }}</b>{{ _("ni taklif qiladi.") }}</span></div>
 
-  <button class="btn btn-primary btn-lg btn-block" type="submit">Tasdiqlash</button>
-  <button class="btn btn-ghost btn-block" type="button" disabled>Kodni qayta yuborish · 0:48</button>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Tasdiqlash") }}</button>
+  <button class="btn btn-ghost btn-block" type="button" x-data="{ s: 48 }" x-init="let t = setInterval(() => { if (--s <= 0) clearInterval(t) }, 1000)"
+          :disabled="s > 0" @click="s = 60; rmToast('Kod qayta yuborildi')" x-text="s > 0 ? 'Kodni qayta yuborish · 0:' + String(s).padStart(2, '0') : 'Kodni qayta yuborish'">{{ _("Kodni qayta yuborish") }}</button>
 </form>
 {% endblock %}

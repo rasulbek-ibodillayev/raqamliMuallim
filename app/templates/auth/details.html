@@ -1,34 +1,49 @@
 {% extends "layouts/auth.html" %}
-{% block title %}Ma’lumotlaringiz{% endblock %}
+{% block title %}{{ _("Ma’lumotlaringiz") }}{% endblock %}
 {% block content %}
-<form class="stack stack-lg" action="{{ url_for('user.diagnostic') }}" method="get" x-data="{ show: false, more: false }">
+<form class="stack stack-lg" action="{{ url_for('auth.details') }}" method="post" novalidate
+      x-data="rmForm({ show: false, more: {{ 'true' if form.region else 'false' }} })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
   <div class="stack stack-sm">
-    <h1>Oxirgi qadam</h1>
-    <p class="lead">Ismingiz sertifikatda shunday yoziladi.</p>
+    <h1>{{ _("Oxirgi qadam") }}</h1>
+    <p class="lead">{{ _("Ismingiz sertifikatda shunday yoziladi.") }}</p>
   </div>
-  <div class="grid-2" style="gap:16px">
-    <div class="field"><label class="label" for="fn">Ism</label><input class="input" id="fn" autocomplete="given-name" placeholder="Dilnoza"></div>
-    <div class="field"><label class="label" for="ln">Familiya</label><input class="input" id="ln" autocomplete="family-name" placeholder="Karimova"></div>
+  <div class="grid-2 g-16">
+    <div class="field"><label class="label" for="fn">{{ _("Ism") }}</label>
+      <input class="input" id="fn" name="fn" value="{{ form.fn }}" autocomplete="given-name" placeholder="{{ _('Dilnoza') }}" required aria-describedby="fn-err" :aria-invalid="!!err('fn')" @input="clear('fn')">
+      {{ field_error("fn", errors) }}</div>
+    <div class="field"><label class="label" for="ln">{{ _("Familiya") }}</label>
+      <input class="input" id="ln" name="ln" value="{{ form.ln }}" autocomplete="family-name" placeholder="{{ _('Karimova') }}" required aria-describedby="ln-err" :aria-invalid="!!err('ln')" @input="clear('ln')">
+      {{ field_error("ln", errors) }}</div>
   </div>
   <div class="field">
-    <label class="label" for="np">Parol</label>
+    <label class="label" for="np">{{ _("Parol") }}</label>
     <div class="input-group">
-      <input class="input" id="np" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="Kamida 8 ta belgi">
-      <button class="icon-btn" type="button" @click="show = !show" aria-label="Parolni ko‘rsatish">{{ icon("eye") }}</button>
+      <input class="input" id="np" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required
+             aria-describedby="pw-err" :aria-invalid="!!err('pw')" @input="clear('pw')">
+      <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? 'Parolni yashirish' : 'Parolni ko‘rsatish'" aria-label="{{ _('Parolni ko‘rsatish') }}">{{ icon("eye") }}</button>
     </div>
+    {{ field_error("pw", errors) }}
   </div>
-  <div class="field"><label class="label" for="np2">Parolni takrorlang</label><input class="input" id="np2" type="password" autocomplete="new-password"></div>
+  <div class="field"><label class="label" for="np2">{{ _("Parolni takrorlang") }}</label>
+    <input class="input" id="np2" name="pw2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="pw2-err" :aria-invalid="!!err('pw2')" @input="clear('pw2')">
+    {{ field_error("pw2", errors) }}</div>
 
   <div>
-    <button class="btn btn-ghost btn-sm" type="button" @click="more = !more" style="padding-left:0">{{ icon("chevron-down", "ico-sm") }}Hudud (ixtiyoriy)</button>
-    <div class="grid-2 mt-8" x-show="more" x-cloak>
-      <div class="field"><label class="label" for="reg">Viloyat</label>
-        <select class="select" id="reg"><option>Tanlang</option>{% for v in ["Toshkent shahri","Toshkent viloyati","Andijon","Buxoro","Farg‘ona","Jizzax","Xorazm","Namangan","Navoiy","Qashqadaryo","Samarqand","Sirdaryo","Surxondaryo","Qoraqalpog‘iston Respublikasi"] %}<option>{{ v }}</option>{% endfor %}</select></div>
-      <div class="field"><label class="label" for="dist">Tuman</label><select class="select" id="dist"><option>Tanlang</option></select></div>
+    <button class="btn btn-ghost btn-sm pl-0" type="button" @click="more = !more" :aria-expanded="more">{{ icon("chevron-down", "ico-sm") }}{{ _("Hudud (ixtiyoriy)") }}</button>
+    <div class="grid-2 mt-8" x-show="more" {{ '' if form.region else 'x-cloak' }}>
+      <div class="field"><label class="label" for="reg">{{ _("Viloyat") }}</label>
+        <select class="select" id="reg" name="region" aria-describedby="region-err" @change="clear('region')"><option value="">{{ _("Tanlang") }}</option>{% for v in regions %}<option {{ 'selected' if form.region == v }}>{{ v }}</option>{% endfor %}</select>
+        {{ field_error("region", errors) }}</div>
+      <div class="field"><label class="label" for="dist">{{ _("Tuman") }}</label><select class="select" id="dist" name="district"><option value="">{{ _("Tanlang") }}</option></select></div>
     </div>
   </div>
 
-  <label class="check"><input type="checkbox" required><span>Shaxsiy ma’lumotlarimni qayta ishlashga roziman va <a class="link" href="{{ url_for('auth.privacy') }}" target="_blank">maxfiylik siyosati</a>ni qabul qilaman.</span></label>
-  <button class="btn btn-primary btn-lg btn-block" type="submit">Ro‘yxatdan o‘tish</button>
+  <div class="alert alert-yellow" role="note">{{ icon("info") }}<span><b>{{ _("Muhim:") }}</b> {{ _("akkauntingizga") }} <b>{{ _("6 oy") }}</b> {{ _("davomida kirilmasa, u ma’lumotlari bilan birga avtomatik o‘chiriladi. O‘chirishdan 2 hafta oldin Telegram va email orqali ogohlantiramiz.") }}</span></div>
+  <div class="field">
+    <label class="check"><input type="checkbox" name="consent" value="1" required aria-describedby="consent-err" @change="clear('consent')" {{ 'checked' if form.consent }}><span>{{ _("Shaxsiy ma’lumotlarimni qayta ishlashga roziman va") }} <a class="link" href="{{ url_for('auth.privacy') }}" target="_blank">{{ _("maxfiylik siyosati") }}</a>{{ _("ni qabul qilaman.") }}</span></label>
+    {{ field_error("consent", errors) }}
+  </div>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Ro‘yxatdan o‘tish") }}</button>
 </form>
 {% endblock %}

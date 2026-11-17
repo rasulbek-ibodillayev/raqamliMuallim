@@ -1,33 +1,33 @@
 {% extends "layouts/app.html" %}
-{% block title %}Sertifikatlarim{% endblock %}
+{% block title %}{{ _("Sertifikatlarim") }}{% endblock %}
 {% block content %}
-{% call page_head("Sertifikatlarim") %}{% endcall %}
+{% call page_head(_("Sertifikatlarim")) %}{% endcall %}
 <div class="stack stack-xl">
   <article class="of-hidden card">
-    <a href="{{ url_for('user.certificate_print') }}" class="card-pad stack stack-sm" style="background:linear-gradient(135deg, var(--ai-soft), var(--surface));border-bottom:1px solid var(--border)">
-      <div class="row between"><span class="ai-mark">{{ icon("award") }}</span>{{ status_dot("Amalda", "green") }}</div>
-      <h2 class="mt-8">Informatika kursi sertifikati</h2>
-      <p class="small muted num">№ INF-2026-000123 · 20-dekabr, 2026</p>
-      <div class="row row-sm" style="align-items:baseline"><span class="stat-value num">87%</span><span class="small muted">umumiy natija</span></div>
+    <a href="{{ url_for('user.certificate_print') }}" class="card-pad stack stack-sm u-bg-5b99e u-border-bottom-1">
+      <div class="row between"><span class="ai-mark">{{ icon("award") }}</span>{{ status_dot(_("Amalda"), "green") }}</div>
+      <h2 class="mt-8">{{ _("Informatika kursi sertifikati") }}</h2>
+      <p class="small muted num">{{ _("№ INF-2026-000123 · 20-dekabr, 2026") }}</p>
+      <div class="row row-sm u-ai-baseline"><span class="stat-value num">87%</span><span class="small muted">{{ _("umumiy natija") }}</span></div>
     </a>
     <div class="list">
       {% for name, p in topics[:4] %}<div class="minh-48 list-item"><span class="grow small">{{ name }}</span><span class="num small">{{ p }}%</span></div>{% endfor %}
     </div>
-    <div class="card-pad row wrap" style="border-top:1px solid var(--border);padding-top:16px;padding-bottom:16px">
-      <a class="btn btn-primary btn-sm" href="{{ url_for('user.certificate_print') }}">{{ icon("download", "ico-sm") }}PDF yuklab olish</a>
+    <div class="card-pad row wrap u-bt-1 u-pt-16 u-pb-16">
+      <a class="btn btn-primary btn-sm" href="{{ url_for('user.certificate_print') }}">{{ icon("download", "ico-sm") }}{{ _("PDF yuklab olish") }}</a>
       {% set verify_url = url_for('auth.verify_certificate', cert_no='INF-2026-000123', _external=True) %}
       <button class="btn btn-outline btn-sm" type="button" x-data="{ done: false }"
               @click="const u = '{{ verify_url }}'; if (navigator.share) { navigator.share({ title: 'raqamliMuallim sertifikati', url: u }).catch(() => {}) } else { navigator.clipboard.writeText(u).then(() => { done = true; setTimeout(() => done = false, 2000) }) }">
-        {{ icon("share", "ico-sm") }}<span x-text="done ? 'Havola nusxalandi ✓' : 'Havolani ulashish'">Havolani ulashish</span></button>
-      <a class="btn btn-ghost btn-sm" href="{{ verify_url }}">{{ icon("shield", "ico-sm") }}Tekshirish sahifasi</a>
+        {{ icon("share", "ico-sm") }}<span x-text="done ? 'Havola nusxalandi ✓' : 'Havolani ulashish'">{{ _("Havolani ulashish") }}</span></button>
+      <a class="btn btn-ghost btn-sm" href="{{ verify_url }}">{{ icon("shield", "ico-sm") }}{{ _("Tekshirish sahifasi") }}</a>
     </div>
   </article>
 
-  <section class="card card-pad stack stack-sm" style="border-style:dashed">
-    <span class="eyebrow">Keyingi sertifikat</span>
-    <h3>Pedagogika va metodika kursi</h3>
-    <p class="small muted">Kurs keyinroq qo‘shiladi. Sertifikat yakuniy diagnostikadan so‘ng beriladi.</p>
+  <section class="card card-pad stack stack-sm u-border-style-dashed">
+    <span class="eyebrow">{{ _("Keyingi sertifikat") }}</span>
+    <h3>{{ _("Pedagogika va metodika kursi") }}</h3>
+    <p class="small muted">{{ _("Kurs keyinroq qo‘shiladi. Sertifikat yakuniy diagnostikadan so‘ng beriladi.") }}</p>
   </section>
-  <p class="xs muted center">Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. Haqiqiyligi QR-kod orqali tekshiriladi.</p>
+  <p class="xs muted center">{{ _("Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. Haqiqiyligi QR-kod orqali tekshiriladi.") }}</p>
 </div>
 {% endblock %}

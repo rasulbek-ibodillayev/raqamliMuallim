@@ -1,0 +1,49 @@
+{% extends "layouts/panel.html" %}
+{% block title %}{{ _("Mavzular va darslar") }}{% endblock %}
+{% block heading %}{{ _("Mavzular va darslar") }}{% endblock %}
+{% block content %}
+{% call page_head(_("Mavzular va dars muharriri"), _("Informatika kursi · 42 mavzu")) %}
+<button class="btn btn-outline btn-sm" type="button">{{ icon("eye", "ico-sm") }}{{ _("Ko‘rish") }}</button>
+<button class="btn btn-primary btn-sm" type="button">{{ _("Saqlash") }}</button>
+{% endcall %}
+<div class="split">
+  <aside class="card u-p-12">
+    <div class="mb-10 input-group"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input u-minh-40" placeholder="{{ _('Mavzu qidirish') }}" aria-label="{{ _('Mavzu qidirish') }}"></div>
+    {% for sec, topics in tree %}
+    <details {{ 'open' if loop.first }}>
+      <summary class="tree-item strong u-cur-pointer u-ls-none">{{ icon("chevron-down", "ico-sm faint") }}{{ sec }}</summary>
+      <div class="u-pl-18">
+        {% for t, n in topics %}<a class="tree-item {{ 'active' if t == selected }}" href="{{ url_for('expert.topics', mavzu=t) }}" {{ 'aria-current=page' if t == selected }}><span class="grow">{{ t }}</span><span class="xs {{ 't-red' if n < 10 else 'muted' }} num">{{ n }}</span></a>{% endfor %}
+      </div>
+    </details>
+    {% endfor %}
+    <button class="btn btn-ghost btn-sm btn-block mt-8" type="button">{{ icon("plus", "ico-sm") }}{{ _("Mavzu qo‘shish") }}</button>
+  </aside>
+
+  <section class="stack">
+    <div class="card card-pad stack stack-sm">
+      <div class="row between wrap"><h2>{{ selected }}</h2>{{ badge(_("Tahrirlanmoqda"), "yellow") }}</div>
+      <p class="small muted">{{ _("4 ta kichik mavzu · 6 ta blok · bog‘liqlik: Python asoslari · 14 ta tasdiqlangan savol") }}</p>
+    </div>
+
+    {% for kind, ic, title, body in [("Matn", "note", "if operatori", "Shart operatori mantiqiy ifodaning rost yoki yolg‘on ekaniga qarab dasturni turli yo‘nalishga buradi…"), ("Kod", "code", "Misol", "yosh = 18\nif yosh >= 18:\n    print(\"Ruxsat\")"), ("Sxema", "graph", "Blok-sxema (Mermaid)", "flowchart TD; A[Boshlash] --> B{yosh ≥ 18?}"), ("Jadval", "table", "Mantiqiy ifodalar", "3 qator × 3 ustun")] %}
+    <div class="p-14 card">
+      <div class="row">
+        <span class="faint u-cur-grab">{{ icon("drag", "ico-sm") }}</span>
+        <span class="list-ico u-w-32 u-h-32">{{ icon(ic, "ico-sm") }}</span>
+        <div class="grow"><div class="xs muted">{{ kind }} {{ _("bloki · kichik mavzu: if operatori") }}</div><div class="strong small">{{ title }}</div></div>
+        <button class="icon-btn" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</button>
+        <button class="icon-btn" aria-label="{{ _('O‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+      </div>
+      {% if kind == "Kod" %}<div class="mt-8">{{ code(body, copy=False) }}</div>{% else %}<p class="small muted mt-8 u-pl-84">{{ body }}</p>{% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="justify-center block-edit row wrap">
+      <span class="small muted">{{ _("Blok qo‘shish:") }}</span>
+      {% for ic, l in [("note","Matn"),("code","Kod"),("table","Jadval"),("graph","Sxema"),("sigma","Formula"),("image","Rasm"),("play","Video")] %}<button class="chip" type="button">{{ icon(ic) }}{{ l }}</button>{% endfor %}
+      <button class="btn btn-ai btn-sm" type="button">{{ icon("sparkle", "ico-sm") }}{{ _("AI bilan qoralama") }}</button>
+    </div>
+  </section>
+</div>
+{% endblock %}

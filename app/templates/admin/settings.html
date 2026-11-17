@@ -1,58 +1,93 @@
 {% extends "layouts/panel.html" %}
-{% block title %}Sozlamalar{% endblock %}
-{% block heading %}Sozlamalar{% endblock %}
+{% block title %}{{ _("Sozlamalar") }}{% endblock %}
+{% block heading %}{{ _("Sozlamalar") }}{% endblock %}
 {% block content %}
-{% call page_head("Sozlamalar", "O‘zgarishlar faqat yangi boshlangan testlarga ta’sir qiladi.") %}
-<button class="btn btn-primary btn-sm" type="button">Saqlash</button>
+{% call page_head(_("Sozlamalar"), _("O‘zgarishlar faqat yangi boshlangan testlarga ta’sir qiladi.")) %}
+<button class="btn btn-primary btn-sm" type="button">{{ _("Saqlash") }}</button>
 {% endcall %}
 <div class="split" x-data="{ tab: 'limits' }">
-  <nav class="card" style="padding:8px">
-    {% for k, ic, l in [("limits", "target", "Test chegaralari"), ("count", "list", "Savollar soni"), ("ai", "sparkle", "AI va byudjet"), ("notify", "bell", "Bildirishnomalar"), ("roles", "shield", "Rollar va huquqlar")] %}
-    <button class="nav-item" type="button" style="width:100%;border:0;background:none;cursor:pointer" :class="tab === '{{ k }}' && 'active'" @click="tab = '{{ k }}'">{{ icon(ic) }}{{ l }}</button>
+  <nav class="card u-p-8">
+    {% for k, ic, l in [("limits", "target", "Test chegaralari"), ("count", "list", "Savollar soni"), ("ai", "sparkle", "AI va byudjet"), ("accounts", "users", "Akkauntlar"), ("notify", "bell", "Bildirishnomalar"), ("roles", "shield", "Rollar va huquqlar")] %}
+    <button class="nav-item u-w-100p u-b-0 u-bg-none u-cur-pointer" type="button" :class="tab === '{{ k }}' && 'active'" @click="tab = '{{ k }}'">{{ icon(ic) }}{{ l }}</button>
     {% endfor %}
   </nav>
 
   <div class="stack stack-lg">
     <section class="card" x-show="tab === 'limits'">
-      <div class="card-head"><div><div class="strong">Mavzu testi</div><div class="xs muted">Bosqichdan o‘tish chegaralari</div></div></div>
+      <div class="card-head"><div><div class="strong">{{ _("Mavzu testi") }}</div><div class="xs muted">{{ _("Bosqichdan o‘tish chegaralari") }}</div></div></div>
       <div class="list">
         {% for l, sub, v in [("1-bosqich (oson)", "2-bosqichga o‘tish", 90), ("2-bosqich (o‘rta)", "3-bosqichga o‘tish", 80), ("3-bosqich: to‘liq o‘tish", "«O‘zlashtirilgan» holati", 90), ("3-bosqich: tavsiya bilan o‘tish", "Keyingi mavzuga ruxsat + takrorlash belgisi", 70)] %}
         <div class="list-item"><div class="grow"><div>{{ l }}</div><div class="sub">{{ sub }}</div></div>
-          <div class="input-group" style="width:110px"><input class="input num" value="{{ v }}" aria-label="{{ l }}" style="text-align:right;min-height:40px"><span class="addon" style="border-right:0;border-left:1px solid var(--border)">%</span></div></div>
+          <div class="input-group u-w-110"><input class="input num u-ta-right u-minh-40" value="{{ v }}" aria-label="{{ l }}"><span class="addon u-border-right-0 u-border-left-1">%</span></div></div>
         {% endfor %}
       </div>
     </section>
 
     <section class="card" x-show="tab === 'limits'">
-      <div class="card-head"><div class="strong">Nazoratlar</div></div>
+      <div class="card-head"><div class="strong">{{ _("Nazoratlar") }}</div></div>
       <div class="list">
-        <div class="list-item"><div class="grow"><div>Oraliq nazorat chastotasi</div><div class="sub">Har N ta birinchi marta o‘tilgan mavzudan keyin</div></div><input class="input-num input num" value="3" aria-label="Chastota"></div>
-        <div class="list-item"><div class="grow"><div>Xatolar bo‘yicha nazorat</div><div class="sub">Har N ta muvaffaqiyatli oraliq nazoratdan keyin</div></div><input class="input-num input num" value="2" aria-label="Xatolar nazorati"></div>
-        <label class="pointer list-item"><div class="grow"><div>Diagnostikadan keyin tasdiqlash testi</div><div class="sub">Qiyin bosqichdan o‘tgan mavzu uchun to‘liq test majburiy</div></div><span class="switch"><input type="checkbox" checked><span></span></span></label>
+        <div class="list-item"><div class="grow"><div>{{ _("Oraliq nazorat chastotasi") }}</div><div class="sub">{{ _("Har N ta birinchi marta o‘tilgan mavzudan keyin") }}</div></div><input class="input-num input num" value="3" aria-label="{{ _('Chastota') }}"></div>
+        <div class="list-item"><div class="grow"><div>{{ _("Xatolar bo‘yicha nazorat") }}</div><div class="sub">{{ _("Har N ta muvaffaqiyatli oraliq nazoratdan keyin") }}</div></div><input class="input-num input num" value="2" aria-label="{{ _('Xatolar nazorati') }}"></div>
+        <label class="pointer list-item"><div class="grow"><div>{{ _("Diagnostikadan keyin tasdiqlash testi") }}</div><div class="sub">{{ _("Qiyin bosqichdan o‘tgan mavzu uchun to‘liq test majburiy") }}</div></div><span class="switch"><input type="checkbox" checked><span></span></span></label>
       </div>
     </section>
 
     <section class="card" x-show="tab === 'count'" x-cloak>
-      <div class="card-head"><div class="strong">Savollar soni</div></div>
+      <div class="card-head"><div class="strong">{{ _("Savollar soni") }}</div></div>
       <div class="list">
-        <div class="list-item"><div class="grow"><div>Bosqichdagi minimal savollar</div><div class="sub">Kam bo‘lsa, kichik mavzular orasida navbat bilan to‘ldiriladi</div></div><input class="input-num input num" value="10" aria-label="Minimal savollar"></div>
-        <div class="list-item"><div class="grow"><div>Diagnostikada har mavzudan</div><div class="sub">1-bosqich, oson savollar</div></div><input class="input-num input num" value="2" aria-label="Diagnostika savollari"></div>
-        <div class="list-item"><div class="grow"><div>Attestatsiya sinovi</div><div class="sub">Savollar soni va vaqt (daqiqa)</div></div><div class="row row-sm"><input class="input num" value="35" style="width:70px;text-align:right;min-height:40px" aria-label="Savollar"><input class="input-num input num" value="105" aria-label="Daqiqa"></div></div>
+        <div class="list-item"><div class="grow"><div>{{ _("Bosqichdagi minimal savollar") }}</div><div class="sub">{{ _("Kam bo‘lsa, kichik mavzular orasida navbat bilan to‘ldiriladi") }}</div></div><input class="input-num input num" value="10" aria-label="{{ _('Minimal savollar') }}"></div>
+        <div class="list-item"><div class="grow"><div>{{ _("Diagnostikada har mavzudan") }}</div><div class="sub">{{ _("1-bosqich, oson savollar") }}</div></div><input class="input-num input num" value="2" aria-label="{{ _('Diagnostika savollari') }}"></div>
+        <div class="list-item"><div class="grow"><div>{{ _("Attestatsiya sinovi") }}</div><div class="sub">{{ _("Savollar soni va vaqt (daqiqa)") }}</div></div><div class="row row-sm"><input class="input num u-w-70 u-ta-right u-minh-40" value="35" aria-label="{{ _('Savollar') }}"><input class="input-num input num" value="105" aria-label="{{ _('Daqiqa') }}"></div></div>
       </div>
     </section>
 
     <section class="card" x-show="tab === 'ai'" x-cloak>
-      <div class="card-head"><div class="strong">AI va byudjet</div><span class="small muted">Shu oy: $210 / $500</span></div>
+      <div class="card-head"><div class="strong">{{ _("AI va byudjet") }}</div><span class="small muted">{{ _("Shu oy: $210 / $500") }}</span></div>
       <div class="card-pad stack">
         {{ progress(42) }}
-        <div class="field"><label class="label" for="budget">Oylik AI byudjeti ($)</label><input class="input num" id="budget" value="500"><span class="hint">Byudjet tugasa, AI tutor faqat keshdan javob beradi.</span></div>
-        <div class="field"><span class="label">Zaxira zanjiri</span>
-          <div class="card list">{% for n, s in [("Gemini · bepul tarif", "Asosiy"), ("Pullik API kalit", "Limitga yetganda"), ("Keshdagi javob", "Oxirgi zaxira")] %}<div class="minh-48 list-item"><span class="list-ico strong" style="width:28px;height:28px">{{ loop.index }}</span><span class="grow">{{ n }}</span><span class="xs muted">{{ s }}</span></div>{% endfor %}</div></div>
+        <div class="field"><label class="label" for="budget">{{ _("Oylik AI byudjeti ($)") }}</label><input class="input num" id="budget" value="500"><span class="hint">{{ _("Byudjet tugasa, AI tutor faqat keshdan javob beradi.") }}</span></div>
+        <div class="field"><span class="label">{{ _("Zaxira zanjiri") }}</span>
+          <div class="card list">{% for n, s in [("Gemini · bepul tarif", "Asosiy"), ("Pullik API kalit", "Limitga yetganda"), ("Keshdagi javob", "Oxirgi zaxira")] %}<div class="minh-48 list-item"><span class="list-ico strong u-w-28 u-h-28">{{ loop.index }}</span><span class="grow">{{ n }}</span><span class="xs muted">{{ s }}</span></div>{% endfor %}</div></div>
       </div>
     </section>
 
-    <section class="card card-pad" x-show="tab === 'notify' || tab === 'roles'" x-cloak>
-      <p class="muted">Bu bo‘lim backend bilan birga to‘ldiriladi.</p>
+    <section class="card" id="akkauntlar" x-show="tab === 'accounts'" x-cloak>
+      <div class="card-head"><div><div class="strong">{{ _("Faol bo‘lmagan akkauntlar") }}</div><div class="xs muted">{{ _("Ro‘yxatdan o‘tishda va maxfiylik siyosatida foydalanuvchiga ko‘rsatiladi") }}</div></div></div>
+      <div class="list">
+        <div class="list-item"><div class="grow"><div>{{ _("Avtomatik o‘chirish muddati") }}</div><div class="sub">{{ _("Shuncha vaqt kirilmasa akkaunt ma’lumotlari bilan o‘chiriladi") }}</div></div>
+          <select class="w-auto select" aria-label="{{ _('O‘chirish muddati') }}"><option>{{ _("3 oy") }}</option><option selected>{{ _("6 oy") }}</option><option>{{ _("12 oy") }}</option><option>{{ _("O‘chirilmasin") }}</option></select></div>
+        <div class="list-item"><div class="grow"><div>{{ _("Oldindan ogohlantirish") }}</div><div class="sub">{{ _("Telegram va email orqali") }}</div></div>
+          <select class="w-auto select" aria-label="{{ _('Ogohlantirish') }}"><option>{{ _("1 hafta") }}</option><option selected>{{ _("2 hafta") }}</option><option>{{ _("1 oy") }}</option></select></div>
+        <label class="pointer list-item"><div class="grow"><div>{{ _("Sertifikat olganlarni istisno qilish") }}</div><div class="sub">{{ _("Sertifikat tekshiruv sahifasi ishlashda davom etadi") }}</div></div><span class="switch"><input type="checkbox" checked><span></span></span></label>
+      </div>
+    </section>
+
+    <section class="card" x-show="tab === 'notify'" x-cloak>
+      <div class="card-head"><div class="strong">{{ _("Bildirishnomalar") }}</div></div>
+      <div class="list">
+        {% for label, sub, on in [("Telegram bot", "Kunlik eslatma, nazorat, e’tiroz javoblari", True), ("Email", "Parol tiklash, akkaunt o‘chirish ogohlantirishi", True), ("Brauzer (push)", "PWA o‘rnatganlar uchun", False)] %}
+        <label class="pointer list-item"><div class="grow"><div>{{ label }}</div><div class="sub">{{ sub }}</div></div><span class="switch"><input type="checkbox" {{ 'checked' if on }}><span></span></span></label>
+        {% endfor %}
+        <div class="list-item"><div class="grow"><div>{{ _("Kunlik eslatma vaqti") }}</div><div class="sub">{{ _("Foydalanuvchi profilida o‘zgartira oladi") }}</div></div><input class="input num w-auto" type="time" value="19:00" aria-label="{{ _('Eslatma vaqti') }}"></div>
+      </div>
+    </section>
+
+    <section class="card" x-show="tab === 'roles'" x-cloak>
+      <div class="card-head"><div><div class="strong">{{ _("Rollar va huquqlar") }}</div><div class="xs muted">{{ _("Har bir rol faqat o‘z paneliga kiradi") }}</div></div></div>
+      <div class="table-wrap u-b-0">
+        <table class="table">
+          <thead><tr><th>{{ _("Bo‘lim") }}</th><th>{{ _("O‘qituvchi") }}</th><th>{{ _("Ekspert") }}</th><th>{{ _("Admin") }}</th></tr></thead>
+          <tbody>
+            {% for name, u, e, a in [("O‘qish: reja, darslar, testlar, natijalar", 1, 0, 0), ("Eslatmalar, e’tiroz yuborish, sertifikat", 1, 0, 0),
+                                    ("Savollar banki, savol yaratish, tekshiruv navbati", 0, 1, 0), ("Mavzular va darslar muharriri", 0, 1, 0),
+                                    ("E’tirozlarga xulosa berish", 0, 1, 0), ("Statistika", 0, 0, 1), ("Foydalanuvchilar va ularning to‘liq ma’lumoti", 0, 0, 1),
+                                    ("Ekspertlarni qo‘shish va nazorat qilish", 0, 0, 1), ("Tizim sozlamalari", 0, 0, 1)] %}
+            <tr><td>{{ name }}</td>{% for v in [u, e, a] %}<td>{% if v %}<span class="t-green">{{ icon("check", "ico-sm") }}</span><span class="sr-only">{{ _("ruxsat bor") }}</span>{% else %}<span class="faint">—</span><span class="sr-only">{{ _("ruxsat yo‘q") }}</span>{% endif %}</td>{% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="xs muted card-pad">{{ _("Ekspertlarning ichki huquqlari (savol yaratish, tekshirish, mavzular, e’tirozlar) «Ekspertlar» bo‘limida beriladi.") }}</p>
     </section>
   </div>
 </div>
