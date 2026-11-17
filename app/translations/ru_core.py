@@ -229,4 +229,66 @@ RU = {
     "Interfeys tili": "Язык интерфейса", "Rus tili tarjimasi to‘ldirilmoqda": "Перевод на русский дополняется",
     "Ko‘rinish": "Внешний вид", "Yorug‘ / qorong‘i mavzu": "Светлая / тёмная тема",
     "Google orqali kirish": "Войти через Google", "Google orqali ro‘yxatdan o‘tish": "Регистрация через Google",
+
+    # Sertifikat qidiruvi, maxfiy so'z, aloqani almashtirish
+    "Sertifikatdagi raqamni kiriting yoki QR-kodni telefon kamerasi bilan skanerlang. Kirish shart emas.":
+        "Введите номер с сертификата или отсканируйте QR-код камерой телефона. Входить не нужно.",
+    "Sertifikat raqami": "Номер сертификата",
+    "Raqam sertifikatning yuqori o‘ng burchagida: INF-2026-000123 ko‘rinishida.": "Номер — в правом верхнем углу сертификата, вида INF-2026-000123.",
+    "Raqam formati: 3 harf, yil va 6 raqam. Masalan: INF-2026-000123": "Формат: 3 буквы, год и 6 цифр. Например: INF-2026-000123",
+    "Raqam bo‘yicha sertifikat haqiqiyligini bilib oling": "Проверьте подлинность сертификата по номеру",
+    "Maxfiy so‘z": "Секретное слово", "Masalan: birinchi maktabim nomi": "Например: название моей первой школы",
+    "Telefon raqamingiz o‘zgarsa yoki emailingizga kira olmasangiz, akkauntni shu so‘z orqali tiklaysiz. Eslab qoladigan, lekin boshqalar bilmaydigan so‘z tanlang. Katta-kichik harf farqlanmaydi.":
+        "Если номер телефона сменится или доступа к почте не будет, аккаунт восстанавливается по этому слову. Выберите слово, которое вы запомните, а другие не знают. Регистр не важен.",
+    "Maxfiy so‘zni kiriting": "Введите секретное слово",
+    "Maxfiy so‘z kamida 4 ta belgidan iborat bo‘lsin": "Секретное слово — не менее 4 символов",
+    "Maxfiy so‘z 64 belgidan oshmasin": "Секретное слово — не более 64 символов",
+    "Maxfiy so‘z paroldan farq qilsin": "Секретное слово должно отличаться от пароля",
+    "Boshqa usul": "Другой способ",
+    "Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang.":
+        "Сменился номер или нет доступа к почте? Восстановите доступ по секретному слову через «Другой способ».",
+    "Maxfiy so‘z orqali tiklash": "Восстановление по секретному слову", "qadam": "шаг",
+    "Telefon raqamingiz o‘zgargan yoki emailingizga kira olmasangiz: ro‘yxatdan o‘tishda bergan maxfiy so‘zingizni kiriting.":
+        "Если номер сменился или нет доступа к почте, введите секретное слово, указанное при регистрации.",
+    "Akkauntdagi eski telefon raqam yoki email": "Прежний номер телефона или email аккаунта",
+    "Yashirish": "Скрыть", "Ko‘rsatish": "Показать",
+    "Katta-kichik harf farqlanmaydi. 5 ta urinish bor. Namunada: informatika": "Регистр не важен. 5 попыток. В демо-версии: informatika",
+    "Davom etish": "Продолжить",
+    "Maxfiy so‘z to‘g‘ri. Endi yangi telefon raqam yoki emailingizni kiriting — unga tasdiqlash kodi yuboramiz.":
+        "Секретное слово верное. Введите новый номер или email — отправим на него код.",
+    "Kod qayerga yuborilsin?": "Куда отправить код?", "Telefon (Telegram)": "Телефон (Telegram)",
+    "Yangi telefon raqam": "Новый номер телефона", "Yangi email": "Новый email",
+    "Kod shu raqamga ulangan Telegram bot orqali keladi.": "Код придёт через Telegram-бот, привязанный к этому номеру.",
+    "Kod shu manzilga xat bilan keladi.": "Код придёт письмом на этот адрес.",
+    "Yangi telefon yoki emailga kelgan kodni va yangi parolni kiriting. Shundan keyin akkauntingizga kirasiz.":
+        "Введите код, пришедший на новый номер или email, и новый пароль — после этого вы войдёте в аккаунт.",
+    "Kod yuborilgan manzil:": "Код отправлен на:", "Tasdiqlash va kirish": "Подтвердить и войти",
+    "Boshqa telefon yoki email kiritish": "Ввести другой номер или email",
+    "Maxfiy so‘zni ham eslay olmasangiz, yordam xizmatiga yozing: shaxsingizni tasdiqlab, akkauntni qo‘lda tiklaymiz.":
+        "Если не помните и секретное слово, напишите в поддержку: подтвердим личность и восстановим аккаунт вручную.",
+    "Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing":
+        "Попытки закончились. Повторите через 30 минут или напишите в поддержку",
+    "Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi": "Неверный номер/email или секретное слово. Осталось попыток: %(n)s",
+    "Kod Telegram bot orqali %(c)s raqamiga yuborildi": "Код отправлен через Telegram-бот на номер %(c)s",
+    "Kod %(c)s manziliga yuborildi": "Код отправлен на %(c)s",
+    "Akkaunt tiklandi: yangi telefon raqam yoki email saqlandi, endi yangi parol bilan kirasiz":
+        "Аккаунт восстановлен: новый номер или email сохранён, теперь входите с новым паролем",
+    "Telefon va email": "Телефон и email", "Nimani almashtirasiz?": "Что меняем?",
+    "Hozirgi telefon": "Текущий телефон", "Hozirgi email": "Текущий email",
+    "Tasdiqlash kodi yangi raqamga ulangan Telegram bot orqali keladi.": "Код придёт через Telegram-бот, привязанный к новому номеру.",
+    "Tasdiqlash kodi yangi emailga xat bilan keladi.": "Код придёт письмом на новый email.",
+    "Kod yuborildi:": "Код отправлен:", "Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi.": "До подтверждения кода действуют прежние данные.",
+    "Boshqa qiymat kiritish": "Ввести другое значение",
+    "Telefon yoki emailga kira olmaganda akkauntni tiklash uchun": "Для восстановления, если нет доступа к телефону или почте",
+    "Joriy parol": "Текущий пароль", "Yangi maxfiy so‘z": "Новое секретное слово",
+    "Katta-kichik harf farqlanmaydi. Uni hech kimga aytmang: u parol kabi akkauntingizga kirish imkonini beradi.":
+        "Регистр не важен. Никому его не сообщайте: как и пароль, оно даёт доступ к аккаунту.",
+    "Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting": "Это ваши текущие данные. Введите другие",
+    "Avval yangi telefon yoki emailni kiriting": "Сначала введите новый номер или email",
+    "Telefon raqam yangilandi": "Номер телефона обновлён", "Email yangilandi": "Email обновлён",
+    "Maxfiy so‘z yangilandi": "Секретное слово обновлено",
+    "Telefon raqam va email «Telefon va email» bo‘limida kod orqali almashtiriladi.":
+        "Номер телефона и email меняются с подтверждением кодом в разделе «Телефон и email».",
+    "Ism va familiya (sertifikatda shunday yoziladi)": "Имя и фамилия (так указываются в сертификате)",
+    "Bekor qilish": "Отмена", "Saqlash": "Сохранить",
 }

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: raqamliMuallim VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-17 20:10+0500\n"
+"POT-Creation-Date: 2026-11-17 20:31+0500\n"
 "PO-Revision-Date: 2026-11-17 20:04+0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -18,59 +18,75 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app/forms.py:52
+#: app/forms.py:58
 msgid "Maydonni to‘ldiring"
 msgstr "Заполните поле"
 
-#: app/forms.py:56
+#: app/forms.py:62
 msgid "Telefon raqam noto‘g‘ri: +998 va 9 ta raqam bo‘lishi kerak"
 msgstr "Неверный номер: нужен код +998 и 9 цифр"
 
-#: app/forms.py:60
+#: app/forms.py:66
 msgid "Email manzil noto‘g‘ri"
 msgstr "Неверный адрес email"
 
-#: app/forms.py:65
+#: app/forms.py:71
 msgid "Telefon raqam yoki emailni kiriting"
 msgstr "Введите номер телефона или email"
 
-#: app/forms.py:71
+#: app/forms.py:77
 msgid "Parol kamida 8 ta belgidan iborat bo‘lsin"
 msgstr "Пароль должен содержать не менее 8 символов"
 
-#: app/forms.py:73
+#: app/forms.py:79
 msgid "Parolda harf ham, raqam ham bo‘lsin"
 msgstr "Пароль должен содержать буквы и цифры"
 
-#: app/forms.py:78
+#: app/forms.py:84
 msgid "6 xonali kodni to‘liq kiriting"
 msgstr "Введите 6-значный код полностью"
 
-#: app/forms.py:84
+#: app/forms.py:90
 msgid "Ismni kiriting"
 msgstr "Введите имя"
 
-#: app/forms.py:84
+#: app/forms.py:90
 msgid "Familiyani kiriting"
 msgstr "Введите фамилию"
 
-#: app/forms.py:87
+#: app/forms.py:93
 msgid "Ism faqat harflardan iborat bo‘lsin"
 msgstr "Имя должно состоять только из букв"
 
-#: app/forms.py:87
+#: app/forms.py:93
 msgid "Familiya faqat harflardan iborat bo‘lsin"
 msgstr "Фамилия должна состоять только из букв"
 
-#: app/forms.py:94
+#: app/forms.py:105
+msgid "Maxfiy so‘zni kiriting"
+msgstr "Введите секретное слово"
+
+#: app/forms.py:107
+msgid "Maxfiy so‘z kamida 4 ta belgidan iborat bo‘lsin"
+msgstr "Секретное слово — не менее 4 символов"
+
+#: app/forms.py:109
+msgid "Maxfiy so‘z 64 belgidan oshmasin"
+msgstr "Секретное слово — не более 64 символов"
+
+#: app/forms.py:111
+msgid "Maxfiy so‘z paroldan farq qilsin"
+msgstr "Секретное слово должно отличаться от пароля"
+
+#: app/forms.py:119
 msgid "Sanani tanlang"
 msgstr "Выберите дату"
 
-#: app/forms.py:95
+#: app/forms.py:120
 msgid "Sana o‘tib ketgan bo‘lmasin"
 msgstr "Дата не должна быть в прошлом"
 
-#: app/forms.py:116
+#: app/forms.py:141
 msgid "Xatolarni tuzating"
 msgstr "Исправьте ошибки"
 
@@ -98,7 +114,7 @@ msgstr "Мои результаты"
 msgid "O‘qish"
 msgstr "Обучение"
 
-#: app/mock.py:29 app/templates/auth/guest.html:17
+#: app/mock.py:29 app/templates/auth/guest.html:22
 #: app/templates/layouts/app.html:60 app/templates/partials/study_fab.html:8
 #: app/templates/partials/study_fab.html:9 app/templates/user/tutor.html:2
 #: app/templates/user/tutor.html:3
@@ -328,7 +344,7 @@ msgstr "Закрыть"
 
 #: app/templates/admin/_exam_date_sheet.html:10
 #: app/templates/admin/user_detail.html:67 app/templates/admin/users.html:15
-#: app/templates/admin/users.html:20 app/templates/user/profile.html:92
+#: app/templates/admin/users.html:20 app/templates/user/profile.html:84
 msgid "Attestatsiya sanasi"
 msgstr ""
 
@@ -347,17 +363,19 @@ msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:19
 #: app/templates/admin/experts.html:85 app/templates/test/exam.html:122
-#: app/templates/user/notes.html:78 app/templates/user/profile.html:43
-#: app/templates/user/profile.html:63 app/templates/user/profile.html:85
+#: app/templates/user/_contact_change.html:31
+#: app/templates/user/_contact_change.html:73 app/templates/user/notes.html:78
+#: app/templates/user/profile.html:33 app/templates/user/profile.html:55
+#: app/templates/user/profile.html:77
 msgid "Bekor qilish"
-msgstr ""
+msgstr "Отмена"
 
 #: app/templates/admin/_exam_date_sheet.html:19
 #: app/templates/admin/settings.html:6 app/templates/expert/topics.html:7
-#: app/templates/user/notes.html:79 app/templates/user/profile.html:43
-#: app/templates/user/profile.html:85
+#: app/templates/user/_contact_change.html:73 app/templates/user/notes.html:79
+#: app/templates/user/profile.html:33 app/templates/user/profile.html:77
 msgid "Saqlash"
-msgstr ""
+msgstr "Сохранить"
 
 #: app/templates/admin/experts.html:7
 msgid "Kontent tuzuvchi va tekshiruvchi metodistlar · "
@@ -638,7 +656,7 @@ msgstr ""
 msgid "O‘chirilmasin"
 msgstr ""
 
-#: app/templates/admin/settings.html:58 app/templates/auth/details.html:42
+#: app/templates/admin/settings.html:58 app/templates/auth/details.html:49
 #: app/templates/user/home.html:27
 msgid "6 oy"
 msgstr "6 месяцев"
@@ -1004,7 +1022,7 @@ msgid "E’tirozlari"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:115
-#: app/templates/admin/user_detail.html:119 app/templates/user/profile.html:136
+#: app/templates/admin/user_detail.html:119 app/templates/user/profile.html:128
 msgid "Akkauntni o‘chirish"
 msgstr ""
 
@@ -1045,7 +1063,7 @@ msgid "Samarqand"
 msgstr ""
 
 #: app/templates/admin/users.html:14 app/templates/admin/users.html:20
-#: app/templates/auth/details.html:35 app/templates/user/profile.html:78
+#: app/templates/auth/details.html:42 app/templates/user/profile.html:70
 msgid "Viloyat"
 msgstr "Область"
 
@@ -1118,56 +1136,71 @@ msgstr ""
 msgid "Parol"
 msgstr "Пароль"
 
-#: app/templates/auth/details.html:22 app/templates/auth/reset.html:34
+#: app/templates/auth/details.html:22 app/templates/auth/recover.html:78
+#: app/templates/auth/reset.html:37
 msgid "Kamida 8 ta belgi, harf va raqam"
 msgstr "Не менее 8 символов, буквы и цифры"
 
 #: app/templates/auth/details.html:24 app/templates/auth/login.html:27
-#: app/templates/auth/reset.html:39
+#: app/templates/auth/recover.html:83 app/templates/auth/reset.html:42
 msgid "Parolni ko‘rsatish"
 msgstr "Показать пароль"
 
-#: app/templates/auth/details.html:28 app/templates/auth/reset.html:36
+#: app/templates/auth/details.html:28 app/templates/auth/recover.html:80
+#: app/templates/auth/reset.html:39
 msgid "Parolni takrorlang"
 msgstr "Повторите пароль"
 
-#: app/templates/auth/details.html:33
+#: app/templates/auth/details.html:32 app/templates/auth/recover.html:28
+#: app/templates/user/_contact_change.html:57
+msgid "Maxfiy so‘z"
+msgstr "Секретное слово"
+
+#: app/templates/auth/details.html:34
+msgid "Masalan: birinchi maktabim nomi"
+msgstr "Например: название моей первой школы"
+
+#: app/templates/auth/details.html:36
+msgid "Telefon raqamingiz o‘zgarsa yoki emailingizga kira olmasangiz, akkauntni shu so‘z orqali tiklaysiz. Eslab qoladigan, lekin boshqalar bilmaydigan so‘z tanlang. Katta-kichik harf farqlanmaydi."
+msgstr "Если номер телефона сменится или доступа к почте не будет, аккаунт восстанавливается по этому слову. Выберите слово, которое вы запомните, а другие не знают. Регистр не важен."
+
+#: app/templates/auth/details.html:40
 msgid "Hudud (ixtiyoriy)"
 msgstr "Регион (необязательно)"
 
-#: app/templates/auth/details.html:36 app/templates/auth/details.html:38
+#: app/templates/auth/details.html:43 app/templates/auth/details.html:45
 msgid "Tanlang"
 msgstr "Выберите"
 
-#: app/templates/auth/details.html:38
+#: app/templates/auth/details.html:45
 msgid "Tuman"
 msgstr "Район"
 
-#: app/templates/auth/details.html:42
+#: app/templates/auth/details.html:49
 msgid "Muhim:"
 msgstr "Важно:"
 
-#: app/templates/auth/details.html:42
+#: app/templates/auth/details.html:49
 msgid "akkauntingizga"
 msgstr "если в аккаунт не входить"
 
-#: app/templates/auth/details.html:42
+#: app/templates/auth/details.html:49
 msgid "davomida kirilmasa, u ma’lumotlari bilan birga avtomatik o‘chiriladi. O‘chirishdan 2 hafta oldin Telegram va email orqali ogohlantiramiz."
 msgstr ", он будет автоматически удалён вместе с данными. За 2 недели до удаления предупредим в Telegram и по email."
 
-#: app/templates/auth/details.html:44
+#: app/templates/auth/details.html:51
 msgid "Shaxsiy ma’lumotlarimni qayta ishlashga roziman va"
 msgstr "Я согласен(на) на обработку персональных данных и принимаю"
 
-#: app/templates/auth/details.html:44
+#: app/templates/auth/details.html:51
 msgid "maxfiylik siyosati"
 msgstr "политику конфиденциальности"
 
-#: app/templates/auth/details.html:44
+#: app/templates/auth/details.html:51
 msgid "ni qabul qilaman."
 msgstr "."
 
-#: app/templates/auth/details.html:47 app/templates/auth/guest.html:11
+#: app/templates/auth/details.html:54 app/templates/auth/guest.html:11
 #: app/templates/auth/login.html:34 app/templates/auth/register.html:2
 #: app/templates/auth/register.html:8
 msgid "Ro‘yxatdan o‘tish"
@@ -1198,11 +1231,22 @@ msgstr "Для учителей информатики: определим ва�
 msgid "Kirish"
 msgstr "Войти"
 
-#: app/templates/auth/guest.html:15 app/templates/user/diagnostic.html:2
+#: app/templates/auth/guest.html:16
+msgid "Raqam bo‘yicha sertifikat haqiqiyligini bilib oling"
+msgstr "Проверьте подлинность сертификата по номеру"
+
+#: app/templates/auth/guest.html:16
+#: app/templates/auth/verify_certificate.html:4
+#: app/templates/auth/verify_certificate.html:10
+#: app/templates/auth/verify_certificate.html:13
+msgid "Sertifikatni tekshirish"
+msgstr "Проверка сертификата"
+
+#: app/templates/auth/guest.html:20 app/templates/user/diagnostic.html:2
 msgid "Diagnostika"
 msgstr "Диагностика"
 
-#: app/templates/auth/guest.html:16
+#: app/templates/auth/guest.html:21
 msgid "Shaxsiy reja"
 msgstr "Личный план"
 
@@ -1247,12 +1291,12 @@ msgid "Akkauntingiz yo‘qmi?"
 msgstr "Нет аккаунта?"
 
 #: app/templates/auth/privacy.html:2 app/templates/auth/privacy.html:16
-#: app/templates/layouts/auth.html:21 app/templates/user/profile.html:133
+#: app/templates/layouts/auth.html:21 app/templates/user/profile.html:125
 msgid "Maxfiylik siyosati"
 msgstr "Политика конфиденциальности"
 
-#: app/templates/auth/privacy.html:9 app/templates/auth/reset.html:3
-#: app/templates/auth/verify_email.html:3
+#: app/templates/auth/privacy.html:9 app/templates/auth/recover.html:3
+#: app/templates/auth/reset.html:3 app/templates/auth/verify_email.html:3
 #: app/templates/auth/verify_telegram.html:3 app/templates/errors/error.html:22
 #: app/templates/user/discussion.html:3 app/templates/user/topic.html:3
 msgid "Orqaga"
@@ -1423,11 +1467,139 @@ msgstr ""
 msgid "Ushbu siyosat O‘zbekiston Respublikasining «Shaxsga doir ma’lumotlar to‘g‘risida»gi Qonuni talablariga muvofiq tuzilgan. Savollar bo‘yicha: [email]."
 msgstr ""
 
+#: app/templates/auth/recover.html:2 app/templates/auth/recover.html:19
+msgid "Maxfiy so‘z orqali tiklash"
+msgstr "Восстановление по секретному слову"
+
+#: app/templates/auth/recover.html:10
+msgid "qadam"
+msgstr "шаг"
+
+#: app/templates/auth/recover.html:20
+msgid "Telefon raqamingiz o‘zgargan yoki emailingizga kira olmasangiz: ro‘yxatdan o‘tishda bergan maxfiy so‘zingizni kiriting."
+msgstr "Если номер сменился или нет доступа к почте, введите секретное слово, указанное при регистрации."
+
+#: app/templates/auth/recover.html:22 app/views/auth.py:197
+#: app/views/auth.py:206
+msgid "Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing"
+msgstr "Попытки закончились. Повторите через 30 минут или напишите в поддержку"
+
+#: app/templates/auth/recover.html:24
+msgid "Akkauntdagi eski telefon raqam yoki email"
+msgstr "Прежний номер телефона или email аккаунта"
+
+#: app/templates/auth/recover.html:25 app/templates/auth/reset.html:18
+msgid "+998 90 123 45 67 yoki email@maktab.uz"
+msgstr "+998 90 123 45 67 или email@maktab.uz"
+
+#: app/templates/auth/recover.html:32
+msgid "Yashirish"
+msgstr "Скрыть"
+
+#: app/templates/auth/recover.html:32
+#: app/templates/user/_contact_change.html:72
+msgid "Ko‘rsatish"
+msgstr "Показать"
+
+#: app/templates/auth/recover.html:35
+msgid "Katta-kichik harf farqlanmaydi. 5 ta urinish bor. Namunada: informatika"
+msgstr "Регистр не важен. 5 попыток. В демо-версии: informatika"
+
+#: app/templates/auth/recover.html:36
+msgid "Davom etish"
+msgstr "Продолжить"
+
+#: app/templates/auth/recover.html:44
+msgid "Maxfiy so‘z to‘g‘ri. Endi yangi telefon raqam yoki emailingizni kiriting — unga tasdiqlash kodi yuboramiz."
+msgstr "Секретное слово верное. Введите новый номер или email — отправим на него код."
+
+#: app/templates/auth/recover.html:46
+msgid "Kod qayerga yuborilsin?"
+msgstr "Куда отправить код?"
+
+#: app/templates/auth/recover.html:48
+msgid "Telefon (Telegram)"
+msgstr "Телефон (Telegram)"
+
+#: app/templates/auth/recover.html:49
+#: app/templates/user/_contact_change.html:16 app/templates/user/help.html:30
+msgid "Email"
+msgstr ""
+
+#: app/templates/auth/recover.html:53
+#: app/templates/user/_contact_change.html:23
+msgid "Yangi telefon raqam"
+msgstr "Новый номер телефона"
+
+#: app/templates/auth/recover.html:53
+#: app/templates/user/_contact_change.html:23
+msgid "Yangi email"
+msgstr "Новый email"
+
+#: app/templates/auth/recover.html:59
+msgid "Kod shu raqamga ulangan Telegram bot orqali keladi."
+msgstr "Код придёт через Telegram-бот, привязанный к этому номеру."
+
+#: app/templates/auth/recover.html:59
+msgid "Kod shu manzilga xat bilan keladi."
+msgstr "Код придёт письмом на этот адрес."
+
+#: app/templates/auth/recover.html:61 app/templates/auth/reset.html:21
+#: app/templates/auth/verify_email.html:20
+#: app/templates/user/_contact_change.html:31
+msgid "Kod yuborish"
+msgstr "Отправить код"
+
+#: app/templates/auth/recover.html:69
+msgid "Yangi telefon yoki emailga kelgan kodni va yangi parolni kiriting. Shundan keyin akkauntingizga kirasiz."
+msgstr "Введите код, пришедший на новый номер или email, и новый пароль — после этого вы войдёте в аккаунт."
+
+#: app/templates/auth/recover.html:70
+msgid "Kod yuborilgan manzil:"
+msgstr "Код отправлен на:"
+
+#: app/templates/auth/recover.html:72 app/templates/auth/reset.html:31
+#: app/templates/auth/verify_email.html:25
+#: app/templates/auth/verify_telegram.html:22
+#: app/templates/user/_contact_change.html:41
+msgid "Tasdiqlash kodi"
+msgstr "Код подтверждения"
+
+#: app/templates/auth/recover.html:73 app/templates/auth/reset.html:32
+#: app/templates/auth/verify_email.html:26
+#: app/templates/auth/verify_telegram.html:23
+#: app/templates/user/_contact_change.html:42
+msgid "6 xonali kod"
+msgstr "6-значный код"
+
+#: app/templates/auth/recover.html:75 app/templates/auth/reset.html:34
+#: app/templates/user/_contact_change.html:44
+msgid "Namunada kod: 123456"
+msgstr "В демо-версии код: 123456"
+
+#: app/templates/auth/recover.html:77 app/templates/auth/reset.html:36
+#: app/templates/user/profile.html:50
+msgid "Yangi parol"
+msgstr "Новый пароль"
+
+#: app/templates/auth/recover.html:84
+msgid "Tasdiqlash va kirish"
+msgstr "Подтвердить и войти"
+
+#: app/templates/auth/recover.html:85
+msgid "Boshqa telefon yoki email kiritish"
+msgstr "Ввести другой номер или email"
+
+#: app/templates/auth/recover.html:88
+msgid "Maxfiy so‘zni ham eslay olmasangiz, yordam xizmatiga yozing: shaxsingizni tasdiqlab, akkauntni qo‘lda tiklaymiz."
+msgstr "Если не помните и секретное слово, напишите в поддержку: подтвердим личность и восстановим аккаунт вручную."
+
 #: app/templates/auth/register.html:9
 msgid "Telefon raqamingizni kiriting. Uni Telegram bot orqali tasdiqlaymiz."
 msgstr "Введите номер телефона. Подтвердим его через Telegram-бот."
 
-#: app/templates/auth/register.html:12 app/templates/user/profile.html:33
+#: app/templates/auth/register.html:12
+#: app/templates/user/_contact_change.html:15
 msgid "Telefon raqam"
 msgstr "Номер телефона"
 
@@ -1459,125 +1631,114 @@ msgstr "Введите номер или email — пришлём код в Tele
 msgid "Kodni va yangi parolni kiriting."
 msgstr "Введите код и новый пароль."
 
-#: app/templates/auth/reset.html:18
-msgid "+998 90 123 45 67 yoki email@maktab.uz"
-msgstr "+998 90 123 45 67 или email@maktab.uz"
+#: app/templates/auth/reset.html:23
+msgid "Boshqa usul"
+msgstr "Другой способ"
 
-#: app/templates/auth/reset.html:21 app/templates/auth/verify_email.html:20
-msgid "Kod yuborish"
-msgstr "Отправить код"
+#: app/templates/auth/reset.html:24
+msgid "Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang."
+msgstr "Сменился номер или нет доступа к почте? Восстановите доступ по секретному слову через «Другой способ»."
 
-#: app/templates/auth/reset.html:28 app/templates/auth/verify_email.html:25
-#: app/templates/auth/verify_telegram.html:22
-msgid "Tasdiqlash kodi"
-msgstr "Код подтверждения"
-
-#: app/templates/auth/reset.html:29 app/templates/auth/verify_email.html:26
-#: app/templates/auth/verify_telegram.html:23
-msgid "6 xonali kod"
-msgstr "6-значный код"
-
-#: app/templates/auth/reset.html:31
-msgid "Namunada kod: 123456"
-msgstr "В демо-версии код: 123456"
-
-#: app/templates/auth/reset.html:33 app/templates/user/profile.html:58
-msgid "Yangi parol"
-msgstr "Новый пароль"
-
-#: app/templates/auth/reset.html:40
+#: app/templates/auth/reset.html:43
 msgid "Parolni saqlash"
 msgstr "Сохранить пароль"
 
-#: app/templates/auth/reset.html:41
+#: app/templates/auth/reset.html:44
 msgid "Boshqa raqam yoki email kiritish"
 msgstr "Ввести другой номер или email"
 
-#: app/templates/auth/verify_certificate.html:4
-#: app/templates/auth/verify_certificate.html:8
-msgid "Sertifikatni tekshirish"
-msgstr "Проверка сертификата"
+#: app/templates/auth/verify_certificate.html:11
+msgid "Sertifikatdagi raqamni kiriting yoki QR-kodni telefon kamerasi bilan skanerlang. Kirish shart emas."
+msgstr "Введите номер с сертификата или отсканируйте QR-код камерой телефона. Входить не нужно."
 
-#: app/templates/auth/verify_certificate.html:13
+#: app/templates/auth/verify_certificate.html:20
 msgid "Sertifikat haqiqiy."
 msgstr "Сертификат действителен."
 
-#: app/templates/auth/verify_certificate.html:13
+#: app/templates/auth/verify_certificate.html:20
 msgid "raqamliMuallim platformasi tomonidan berilgan."
 msgstr "Выдан платформой raqamliMuallim."
 
-#: app/templates/auth/verify_certificate.html:15
+#: app/templates/auth/verify_certificate.html:22
 msgid "Egasi"
 msgstr "Владелец"
 
-#: app/templates/auth/verify_certificate.html:16
+#: app/templates/auth/verify_certificate.html:23
 msgid "Kurs"
 msgstr "Курс"
 
-#: app/templates/auth/verify_certificate.html:16
+#: app/templates/auth/verify_certificate.html:23
 msgid "Informatika o‘qituvchilarini"
 msgstr "Подготовка учителей информатики"
 
-#: app/templates/auth/verify_certificate.html:16
+#: app/templates/auth/verify_certificate.html:23
 msgid "attestatsiyaga tayyorlash"
 msgstr "к аттестации"
 
-#: app/templates/auth/verify_certificate.html:17
+#: app/templates/auth/verify_certificate.html:24
 msgid "Umumiy natija"
 msgstr "Общий результат"
 
-#: app/templates/auth/verify_certificate.html:18
+#: app/templates/auth/verify_certificate.html:25
 #: app/templates/user/optional.html:7
 msgid "Mavzular"
 msgstr "Темы"
 
-#: app/templates/auth/verify_certificate.html:19
+#: app/templates/auth/verify_certificate.html:26
 msgid "Berilgan sana"
 msgstr "Дата выдачи"
 
-#: app/templates/auth/verify_certificate.html:21
+#: app/templates/auth/verify_certificate.html:28
 msgid "Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. U kursni to‘liq o‘zlashtirib, yakuniy diagnostikadan o‘tganlikni tasdiqlaydi."
 msgstr "Сертификат не является документом государственной аттестации. Он подтверждает полное прохождение курса и итоговой диагностики."
 
-#: app/templates/auth/verify_certificate.html:24
+#: app/templates/auth/verify_certificate.html:31
 msgid "Sertifikat bekor qilingan."
 msgstr "Сертификат аннулирован."
 
-#: app/templates/auth/verify_certificate.html:24
+#: app/templates/auth/verify_certificate.html:31
 msgid "05.01.2027 dan boshlab amal qilmaydi."
 msgstr "Недействителен с 05.01.2027."
 
-#: app/templates/auth/verify_certificate.html:25
+#: app/templates/auth/verify_certificate.html:32
 msgid "Sabab:"
 msgstr "Причина:"
 
-#: app/templates/auth/verify_certificate.html:25
+#: app/templates/auth/verify_certificate.html:32
 msgid "yakuniy diagnostika natijasi e’tiroz ko‘rib chiqilgandan keyin qayta hisoblandi."
 msgstr "результат итоговой диагностики пересчитан после рассмотрения апелляции."
 
-#: app/templates/auth/verify_certificate.html:28
+#: app/templates/auth/verify_certificate.html:35
 msgid "Bunday raqamli sertifikat topilmadi."
 msgstr "Сертификат с таким номером не найден."
 
-#: app/templates/auth/verify_certificate.html:28
+#: app/templates/auth/verify_certificate.html:35
 msgid "Raqamni tekshirib, qayta kiriting."
 msgstr "Проверьте номер и введите снова."
 
-#: app/templates/auth/verify_certificate.html:32
+#: app/templates/auth/verify_certificate.html:39
+msgid "Sertifikat raqami"
+msgstr "Номер сертификата"
+
+#: app/templates/auth/verify_certificate.html:39
 msgid "Boshqa sertifikatni tekshirish"
 msgstr "Проверить другой сертификат"
 
-#: app/templates/auth/verify_certificate.html:34
+#: app/templates/auth/verify_certificate.html:41
 msgid "INF-2026-000123"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:35
+#: app/templates/auth/verify_certificate.html:42
 msgid "Masalan: INF-2026-000123"
 msgstr "Например: INF-2026-000123"
 
-#: app/templates/auth/verify_certificate.html:36
+#: app/templates/auth/verify_certificate.html:44
 msgid "Tekshirish"
 msgstr "Проверить"
+
+#: app/templates/auth/verify_certificate.html:47
+msgid "Raqam sertifikatning yuqori o‘ng burchagida: INF-2026-000123 ko‘rinishida."
+msgstr "Номер — в правом верхнем углу сертификата, вида INF-2026-000123."
 
 #: app/templates/auth/verify_email.html:2
 #: app/templates/auth/verify_email.html:12
@@ -1592,7 +1753,7 @@ msgstr "Отправим код на почту. Затем вы будете в
 msgid "Email manzil"
 msgstr "Адрес email"
 
-#: app/templates/auth/verify_email.html:18 app/templates/user/profile.html:39
+#: app/templates/auth/verify_email.html:18
 msgid "namuna@maktab.uz"
 msgstr ""
 
@@ -1603,6 +1764,7 @@ msgstr "Код действует 15 минут. Если письма нет, �
 #: app/templates/auth/verify_email.html:32
 #: app/templates/auth/verify_telegram.html:32
 #: app/templates/expert/editor.html:61
+#: app/templates/user/_contact_change.html:48
 msgid "Tasdiqlash"
 msgstr "Подтвердить"
 
@@ -2079,7 +2241,7 @@ msgid "Panel menyusi"
 msgstr "Меню панели"
 
 #: app/templates/layouts/panel.html:23 app/templates/test/exam.html:132
-#: app/templates/test/stage.html:4 app/templates/user/profile.html:134
+#: app/templates/test/stage.html:4 app/templates/user/profile.html:126
 msgid "Chiqish"
 msgstr "Выйти"
 
@@ -2149,7 +2311,7 @@ msgid "O‘rnatish"
 msgstr "Установить"
 
 #: app/templates/partials/lang_switch.html:2
-#: app/templates/user/profile.html:127
+#: app/templates/user/profile.html:119
 msgid "Interfeys tili"
 msgstr "Язык интерфейса"
 
@@ -2442,6 +2604,59 @@ msgstr "10 вопросов среднего уровня, 15 минут. Воп
 #: app/templates/test/stage.html:29
 msgid "2-bosqichni boshlash"
 msgstr "Начать этап 2"
+
+#: app/templates/user/_contact_change.html:5
+msgid "Telefon va email"
+msgstr "Телефон и email"
+
+#: app/templates/user/_contact_change.html:14
+msgid "Nimani almashtirasiz?"
+msgstr "Что меняем?"
+
+#: app/templates/user/_contact_change.html:19
+msgid "Hozirgi telefon"
+msgstr "Текущий телефон"
+
+#: app/templates/user/_contact_change.html:20
+msgid "Hozirgi email"
+msgstr "Текущий email"
+
+#: app/templates/user/_contact_change.html:29
+msgid "Tasdiqlash kodi yangi raqamga ulangan Telegram bot orqali keladi."
+msgstr "Код придёт через Telegram-бот, привязанный к новому номеру."
+
+#: app/templates/user/_contact_change.html:29
+msgid "Tasdiqlash kodi yangi emailga xat bilan keladi."
+msgstr "Код придёт письмом на новый email."
+
+#: app/templates/user/_contact_change.html:39
+msgid "Kod yuborildi:"
+msgstr "Код отправлен:"
+
+#: app/templates/user/_contact_change.html:39
+msgid "Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi."
+msgstr "До подтверждения кода действуют прежние данные."
+
+#: app/templates/user/_contact_change.html:47
+msgid "Boshqa qiymat kiritish"
+msgstr "Ввести другое значение"
+
+#: app/templates/user/_contact_change.html:57
+msgid "Telefon yoki emailga kira olmaganda akkauntni tiklash uchun"
+msgstr "Для восстановления, если нет доступа к телефону или почте"
+
+#: app/templates/user/_contact_change.html:65
+#: app/templates/user/profile.html:49
+msgid "Joriy parol"
+msgstr "Текущий пароль"
+
+#: app/templates/user/_contact_change.html:68
+msgid "Yangi maxfiy so‘z"
+msgstr "Новое секретное слово"
+
+#: app/templates/user/_contact_change.html:71
+msgid "Katta-kichik harf farqlanmaydi. Uni hech kimga aytmang: u parol kabi akkauntingizga kirish imkonini beradi."
+msgstr "Регистр не важен. Никому его не сообщайте: как и пароль, оно даёт доступ к аккаунту."
 
 #: app/templates/user/certificate_print.html:2
 msgid "Sertifikat № INF-2026-000123"
@@ -2878,10 +3093,6 @@ msgid "Ish kunlari 9:00–18:00, odatda 1 soat ichida javob beramiz"
 msgstr ""
 
 #: app/templates/user/help.html:30
-msgid "Email"
-msgstr ""
-
-#: app/templates/user/help.html:30
 msgid "yordam@raqamlimuallim.uz"
 msgstr ""
 
@@ -3060,12 +3271,12 @@ msgstr ""
 msgid "Matn o‘lchamini o‘zgartirish"
 msgstr ""
 
-#: app/templates/user/lesson.html:6 app/templates/user/profile.html:112
+#: app/templates/user/lesson.html:6 app/templates/user/profile.html:104
 msgid "Aa"
 msgstr ""
 
-#: app/templates/user/lesson.html:6 app/templates/user/profile.html:113
-#: app/templates/user/profile.html:114
+#: app/templates/user/lesson.html:6 app/templates/user/profile.html:105
+#: app/templates/user/profile.html:106
 msgid "Matn o‘lchami"
 msgstr ""
 
@@ -3379,126 +3590,110 @@ msgid "Shaxsiy ma’lumotlar"
 msgstr ""
 
 #: app/templates/user/profile.html:21
-msgid "Ism, familiya, telefon, email"
-msgstr ""
+msgid "Ism va familiya (sertifikatda shunday yoziladi)"
+msgstr "Имя и фамилия (так указываются в сертификате)"
 
-#: app/templates/user/profile.html:35
-msgid "Raqamni o‘zgartirish uchun yangi raqam Telegram bot orqali tasdiqlanadi."
-msgstr ""
+#: app/templates/user/profile.html:32
+msgid "Telefon raqam va email «Telefon va email» bo‘limida kod orqali almashtiriladi."
+msgstr "Номер телефона и email меняются с подтверждением кодом в разделе «Телефон и email»."
 
-#: app/templates/user/profile.html:35
-msgid "Raqamni almashtirish"
-msgstr ""
-
-#: app/templates/user/profile.html:38
-msgid "Email (ixtiyoriy)"
-msgstr ""
-
-#: app/templates/user/profile.html:41
-msgid "Yangi email kod orqali tasdiqlanadi."
-msgstr ""
-
-#: app/templates/user/profile.html:50
+#: app/templates/user/profile.html:42
 msgid "Parolni o‘zgartirish"
 msgstr ""
 
-#: app/templates/user/profile.html:50
+#: app/templates/user/profile.html:42
 msgid "Oxirgi o‘zgarish: 2 oy oldin"
 msgstr ""
 
-#: app/templates/user/profile.html:57
-msgid "Joriy parol"
-msgstr ""
-
-#: app/templates/user/profile.html:58
+#: app/templates/user/profile.html:50
 msgid "Kamida 8 ta belgi, harf va raqam aralash bo‘lsin."
 msgstr ""
 
-#: app/templates/user/profile.html:59
+#: app/templates/user/profile.html:51
 msgid "Yangi parolni takrorlang"
 msgstr ""
 
-#: app/templates/user/profile.html:60
+#: app/templates/user/profile.html:52
 msgid "Parollarni ko‘rsatish"
 msgstr ""
 
-#: app/templates/user/profile.html:62
+#: app/templates/user/profile.html:54
 msgid "Joriy parolni unutdingizmi?"
 msgstr ""
 
-#: app/templates/user/profile.html:63
+#: app/templates/user/profile.html:55
 msgid "Parolni yangilash"
 msgstr ""
 
-#: app/templates/user/profile.html:71
+#: app/templates/user/profile.html:63
 msgid "Viloyat va tuman"
 msgstr ""
 
-#: app/templates/user/profile.html:71
+#: app/templates/user/profile.html:63
 msgid "Toshkent shahri · Yunusobod tumani"
 msgstr ""
 
-#: app/templates/user/profile.html:81
+#: app/templates/user/profile.html:73
 msgid "Tuman (shahar)"
 msgstr ""
 
-#: app/templates/user/profile.html:84
+#: app/templates/user/profile.html:76
 msgid "Ixtiyoriy. Faqat umumiy hududiy statistika uchun ishlatiladi."
 msgstr ""
 
-#: app/templates/user/profile.html:92
+#: app/templates/user/profile.html:84
 msgid "Administrator tomonidan kiritiladi"
 msgstr ""
 
-#: app/templates/user/profile.html:96
+#: app/templates/user/profile.html:88
 msgid "Sana noto‘g‘ri bo‘lsa,"
 msgstr ""
 
-#: app/templates/user/profile.html:96
+#: app/templates/user/profile.html:88
 msgid "yordam xizmatiga"
 msgstr ""
 
-#: app/templates/user/profile.html:96
+#: app/templates/user/profile.html:88
 msgid "yozing — administrator uni yangilaydi."
 msgstr ""
 
-#: app/templates/user/profile.html:100
+#: app/templates/user/profile.html:92
 msgid "Telegram bildirishnomalari"
 msgstr ""
 
-#: app/templates/user/profile.html:109
+#: app/templates/user/profile.html:101
 msgid "Ko‘rinish"
 msgstr "Внешний вид"
 
-#: app/templates/user/profile.html:113
+#: app/templates/user/profile.html:105
 msgid "Darslar, testlar va sahifalardagi matn"
 msgstr ""
 
-#: app/templates/user/profile.html:115
+#: app/templates/user/profile.html:107
 msgid "Oddiy"
 msgstr ""
 
-#: app/templates/user/profile.html:116
+#: app/templates/user/profile.html:108
 msgid "Katta"
 msgstr ""
 
-#: app/templates/user/profile.html:117
+#: app/templates/user/profile.html:109
 msgid "Juda katta"
 msgstr ""
 
-#: app/templates/user/profile.html:123
+#: app/templates/user/profile.html:115
 msgid "Ilovani o‘rnatish"
 msgstr ""
 
-#: app/templates/user/profile.html:125
+#: app/templates/user/profile.html:117
 msgid "Ilova o‘rnatilgan"
 msgstr ""
 
-#: app/templates/user/profile.html:127
+#: app/templates/user/profile.html:119
 msgid "Rus tili tarjimasi to‘ldirilmoqda"
 msgstr "Перевод на русский дополняется"
 
-#: app/templates/user/profile.html:128
+#: app/templates/user/profile.html:120
 msgid "Yorug‘ / qorong‘i mavzu"
 msgstr "Светлая / тёмная тема"
 
@@ -3807,7 +4002,7 @@ msgstr "Тип попытки не совпадает"
 msgid "Urinish yakunlangan, javoblarni o‘zgartirib bo‘lmaydi"
 msgstr "Попытка завершена, ответы изменить нельзя"
 
-#: app/views/auth.py:19
+#: app/views/auth.py:19 app/views/user.py:188
 msgid "Kod noto‘g‘ri. Namunada kod: 123456"
 msgstr "Неверный код. В демо-версии код: 123456"
 
@@ -3820,91 +4015,150 @@ msgstr "Добро пожаловать!"
 msgid "Kod %(email)s manziliga yuborildi"
 msgstr "Код отправлен на %(email)s"
 
-#: app/views/auth.py:102 app/views/auth.py:149 app/views/user.py:159
+#: app/views/auth.py:102 app/views/auth.py:150 app/views/auth.py:244
+#: app/views/user.py:210
 msgid "Parollar bir xil emas"
 msgstr "Пароли не совпадают"
 
-#: app/views/auth.py:103 app/views/user.py:169
+#: app/views/auth.py:104 app/views/user.py:220
 msgid "Viloyatni ro‘yxatdan tanlang"
 msgstr "Выберите область из списка"
 
-#: app/views/auth.py:104
+#: app/views/auth.py:105
 msgid "Davom etish uchun rozilik kerak"
 msgstr "Для продолжения нужно согласие"
 
-#: app/views/auth.py:112
+#: app/views/auth.py:113
 msgid "Ro‘yxatdan o‘tdingiz. Eslatma: 6 oy kirilmasa akkaunt avtomatik o‘chiriladi"
 msgstr "Вы зарегистрированы. Напоминание: если не входить 6 месяцев, аккаунт удаляется автоматически"
 
-#: app/views/auth.py:123
+#: app/views/auth.py:124
 msgid "Google akkaunti orqali kirdingiz (namuna)"
 msgstr "Вы вошли через Google (демо)"
 
-#: app/views/auth.py:154
+#: app/views/auth.py:155
 msgid "Parol yangilandi. Yangi parol bilan kiring"
 msgstr "Пароль обновлён. Войдите с новым паролем"
 
-#: app/views/auth.py:164
+#: app/views/auth.py:165
 msgid "Tasdiqlash kodi yuborildi"
 msgstr "Код подтверждения отправлен"
 
-#: app/views/user.py:150
+#: app/views/auth.py:205
+#, python-format
+msgid "Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi"
+msgstr "Неверный номер/email или секретное слово. Осталось попыток: %(n)s"
+
+#: app/views/auth.py:226 app/views/user.py:174
+#, python-format
+msgid "Kod Telegram bot orqali %(c)s raqamiga yuborildi"
+msgstr "Код отправлен через Telegram-бот на номер %(c)s"
+
+#: app/views/auth.py:227 app/views/user.py:175
+#, python-format
+msgid "Kod %(c)s manziliga yuborildi"
+msgstr "Код отправлен на %(c)s"
+
+#: app/views/auth.py:251
+msgid "Akkaunt tiklandi: yangi telefon raqam yoki email saqlandi, endi yangi parol bilan kirasiz"
+msgstr "Аккаунт восстановлен: новый номер или email сохранён, теперь входите с новым паролем"
+
+#: app/views/auth.py:275
+msgid "Raqam formati: 3 harf, yil va 6 raqam. Masalan: INF-2026-000123"
+msgstr "Формат: 3 буквы, год и 6 цифр. Например: INF-2026-000123"
+
+#: app/views/user.py:151
 msgid "Shaxsiy ma’lumotlar saqlandi"
 msgstr "Личные данные сохранены"
 
-#: app/views/user.py:162
+#: app/views/user.py:171
+msgid "Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting"
+msgstr "Это ваши текущие данные. Введите другие"
+
+#: app/views/user.py:186
+msgid "Avval yangi telefon yoki emailni kiriting"
+msgstr "Сначала введите новый номер или email"
+
+#: app/views/user.py:191
+msgid "Telefon raqam yangilandi"
+msgstr "Номер телефона обновлён"
+
+#: app/views/user.py:191
+msgid "Email yangilandi"
+msgstr "Email обновлён"
+
+#: app/views/user.py:201
+msgid "Maxfiy so‘z yangilandi"
+msgstr "Секретное слово обновлено"
+
+#: app/views/user.py:213
 msgid "Yangi parol joriy paroldan farq qilsin"
 msgstr "Новый пароль должен отличаться от текущего"
 
-#: app/views/user.py:164
+#: app/views/user.py:215
 msgid "Parol o‘zgartirildi"
 msgstr "Пароль изменён"
 
-#: app/views/user.py:171
+#: app/views/user.py:222
 msgid "Hudud saqlandi"
 msgstr "Регион сохранён"
 
-#: app/views/user.py:179
+#: app/views/user.py:230
 msgid "Sababni tanlang"
 msgstr "Выберите причину"
 
-#: app/views/user.py:180
+#: app/views/user.py:231
 msgid "Izoh 1000 belgidan oshmasin"
 msgstr "Комментарий — не более 1000 символов"
 
-#: app/views/user.py:183
+#: app/views/user.py:234
 msgid "«Boshqa» sababini izohda yozing"
 msgstr "Опишите причину «Другое» в комментарии"
 
-#: app/views/user.py:186
+#: app/views/user.py:237
 msgid "E’tirozingiz qabul qilindi. Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi"
 msgstr "Апелляция принята. Решение эксперта появится в разделе «Мои апелляции»"
 
-#: app/views/user.py:192
+#: app/views/user.py:243
 msgid "Xabarni yozing"
 msgstr "Напишите сообщение"
 
-#: app/views/user.py:193
+#: app/views/user.py:244
 msgid "Xabar 2000 belgidan oshmasin"
 msgstr "Сообщение — не более 2000 символов"
 
-#: app/views/user.py:195
+#: app/views/user.py:246
 msgid "Fikringiz qo‘shildi"
 msgstr "Комментарий добавлен"
 
-#: app/views/user.py:204
+#: app/views/user.py:255
 msgid "Qaydni yozing"
 msgstr "Напишите заметку"
 
-#: app/views/user.py:204
+#: app/views/user.py:255
 msgid "Qayd 5000 belgidan oshmasin"
 msgstr "Заметка — не более 5000 символов"
 
-#: app/views/user.py:205
+#: app/views/user.py:256
 msgid "Kod 5000 belgidan oshmasin"
 msgstr "Код — не более 5000 символов"
 
-#: app/views/user.py:208
+#: app/views/user.py:259
 msgid "Eslatma saqlandi"
 msgstr "Заметка сохранена"
+
+#~ msgid "Ism, familiya, telefon, email"
+#~ msgstr ""
+
+#~ msgid "Raqamni o‘zgartirish uchun yangi raqam Telegram bot orqali tasdiqlanadi."
+#~ msgstr ""
+
+#~ msgid "Raqamni almashtirish"
+#~ msgstr ""
+
+#~ msgid "Email (ixtiyoriy)"
+#~ msgstr ""
+
+#~ msgid "Yangi email kod orqali tasdiqlanadi."
+#~ msgstr ""
 

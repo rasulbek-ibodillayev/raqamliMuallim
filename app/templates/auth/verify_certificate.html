@@ -5,11 +5,18 @@
 {% block content %}
 <div class="stack stack-lg">
   <div class="stack stack-sm">
+    {% if state == "form" %}
+    <span class="ai-mark lg">{{ icon("shield") }}</span>
+    <h1>{{ _("Sertifikatni tekshirish") }}</h1>
+    <p class="lead">{{ _("Sertifikatdagi raqamni kiriting yoki QR-kodni telefon kamerasi bilan skanerlang. Kirish shart emas.") }}</p>
+    {% else %}
     <span class="eyebrow">{{ _("Sertifikatni tekshirish") }}</span>
     <p class="small muted num">№ {{ cert_no }}</p>
+    {% endif %}
   </div>
 
-  {% if state == "valid" %}
+  {% if state == "form" %}
+  {% elif state == "valid" %}
   <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span><b>{{ _("Sertifikat haqiqiy.") }}</b> {{ _("raqamliMuallim platformasi tomonidan berilgan.") }}</span></div>
   <dl class="card list u-m-0">
     <div class="list-item"><dt class="grow muted small">{{ _("Egasi") }}</dt><dd class="strong u-m-0">{{ me.last }} {{ me.first }}</dd></div>
@@ -29,12 +36,15 @@
   {% endif %}
 
   <form class="stack stack-sm" action="{{ url_for('auth.verify_certificate_lookup') }}" method="get">
-    <label class="label" for="cert-no">{{ _("Boshqa sertifikatni tekshirish") }}</label>
+    <label class="label" for="cert-no">{{ _("Sertifikat raqami") if state == "form" else _("Boshqa sertifikatni tekshirish") }}</label>
     <div class="row row-sm">
-      <input class="input grow num" id="cert-no" name="raqam" placeholder="{{ _('INF-2026-000123') }}" autocomplete="off"
-             pattern="[A-Za-z]{3}-\d{4}-\d{6}" title="{{ _('Masalan: INF-2026-000123') }}" required>
+      <input class="input grow num" id="cert-no" name="raqam" value="{{ cert_no if state == 'form' else '' }}" placeholder="{{ _('INF-2026-000123') }}" autocomplete="off"
+             pattern="[A-Za-z]{3}-\d{4}-\d{6}" title="{{ _('Masalan: INF-2026-000123') }}" required {{ 'autofocus' if state == 'form' }}
+             aria-describedby="cert-err cert-hint" {{ 'aria-invalid=true' if lookup_error }}>
       <button class="btn btn-primary" type="submit">{{ _("Tekshirish") }}</button>
     </div>
+    {% if lookup_error %}<p class="field-error" id="cert-err" role="alert">{{ lookup_error }}</p>{% endif %}
+    <span class="hint" id="cert-hint">{{ _("Raqam sertifikatning yuqori o‘ng burchagida: INF-2026-000123 ko‘rinishida.") }}</span>
   </form>
 </div>
 {% endblock %}

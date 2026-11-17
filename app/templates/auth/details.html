@@ -28,6 +28,13 @@
   <div class="field"><label class="label" for="np2">{{ _("Parolni takrorlang") }}</label>
     <input class="input" id="np2" name="pw2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="pw2-err" :aria-invalid="!!err('pw2')" @input="clear('pw2')">
     {{ field_error("pw2", errors) }}</div>
+  <div class="field">
+    <label class="label" for="secret">{{ _("Maxfiy so‘z") }}</label>
+    <input class="input" id="secret" name="secret" :type="show ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required
+           placeholder="{{ _('Masalan: birinchi maktabim nomi') }}" aria-describedby="secret-err secret-hint" :aria-invalid="!!err('secret')" @input="clear('secret')">
+    {{ field_error("secret", errors) }}
+    <span class="hint" id="secret-hint">{{ _("Telefon raqamingiz o‘zgarsa yoki emailingizga kira olmasangiz, akkauntni shu so‘z orqali tiklaysiz. Eslab qoladigan, lekin boshqalar bilmaydigan so‘z tanlang. Katta-kichik harf farqlanmaydi.") }}</span>
+  </div>
 
   <div>
     <button class="btn btn-ghost btn-sm pl-0" type="button" @click="more = !more" :aria-expanded="more">{{ icon("chevron-down", "ico-sm") }}{{ _("Hudud (ixtiyoriy)") }}</button>

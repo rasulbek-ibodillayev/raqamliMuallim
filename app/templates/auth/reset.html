@@ -19,6 +19,9 @@
              aria-describedby="who-err" :aria-invalid="!!err('who')" @input="clear('who')">
       {{ field_error("who", errors if step != 2 else {}) }}</div>
     <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Kod yuborish") }}</button>
+    {# Telefon o'zgargan yoki emailga kirib bo'lmasa — maxfiy so'z orqali tiklash #}
+    <a class="btn btn-ghost btn-block alt-method" href="{{ url_for('auth.recover', qayta=1) }}">{{ icon("shield", "ico-sm") }}{{ _("Boshqa usul") }}</a>
+    <p class="xs muted center">{{ _("Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang.") }}</p>
   </form>
 
   <form class="stack stack-lg" action="{{ url_for('auth.reset') }}" method="post" novalidate x-show="step === 2" {{ 'x-cloak' if step != 2 }}

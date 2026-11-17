@@ -988,3 +988,11 @@ body:has(.study-fab) .page, body:has(.study-fab) .focus-body { padding-bottom: 1
 .sk-w70 { width: 70%; } .sk-w75 { width: 75%; }
 .lang-switch a { display: inline-grid; place-items: center; min-width: 40px; height: 32px; padding: 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); border-radius: 8px; text-decoration: none; }
 .lang-switch a.active { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--border); }
+/* Segment ichidagi radio-tanlov (label + yashirin input) */
+.seg-opt { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; border-radius: 9px;
+  font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
+.seg-opt:has(input:checked) { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--border); }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+.alt-method { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.guest-cert { display: flex !important; flex-direction: row; align-items: center; gap: 12px; width: 100%; text-align: left; }
+.guest-cert .grow { min-width: 0; }

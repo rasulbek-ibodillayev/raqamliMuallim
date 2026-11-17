@@ -1,0 +1,90 @@
+{% extends "layouts/auth.html" %}
+{% block title %}{{ _("Maxfiy so‘z orqali tiklash") }}{% endblock %}
+{% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.reset') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{% endblock %}
+{% block content %}
+{# Telefon raqam o'zgargan yoki emailga kirib bo'lmaganda: 1) eski login + maxfiy so'z, 2) yangi telefon/email,
+   3) yangi aloqaga kelgan kod + yangi parol. Holat serverda (sessiya), JS bo'lsa qadamlar sahifa yangilanmasdan almashadi. #}
+<div class="stack stack-lg" x-data="{ step: {{ rstep }}, method: '{{ method }}' }">
+  <div class="stack stack-sm">
+    <div class="steps" aria-hidden="true"><span :class="step >= 1 && 'on'" class="on"></span><span :class="step >= 2 && 'on'" class="{{ 'on' if rstep >= 2 }}"></span><span :class="step >= 3 && 'on'" class="{{ 'on' if rstep >= 3 }}"></span></div>
+    <span class="xs muted"><span x-text="step">{{ rstep }}</span> / 3 {{ _("qadam") }}</span>
+  </div>
+
+  <!-- 1-qadam: eski telefon/email va maxfiy so'z -->
+  <form class="stack stack-lg" action="{{ url_for('auth.recover') }}" method="post" novalidate data-stay x-show="step === 1" {{ 'x-cloak' if rstep != 1 }}
+        x-data="rmForm({}, function (j) { step = 2; return false; })" x-init="initForm()"
+        data-errors="{{ (errors if rstep == 1 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+    {% include "partials/form_open.html" %}
+    <div class="stack stack-sm">
+      <h1>{{ _("Maxfiy so‘z orqali tiklash") }}</h1>
+      <p class="lead">{{ _("Telefon raqamingiz o‘zgargan yoki emailingizga kira olmasangiz: ro‘yxatdan o‘tishda bergan maxfiy so‘zingizni kiriting.") }}</p>
+    </div>
+    {% if locked %}<div class="alert alert-red" role="alert">{{ icon("lock") }}<span>{{ _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing") }}</span></div>{% endif %}
+    {% set e = errors if rstep == 1 else {} %}
+    <div class="field"><label class="label" for="rc-who">{{ _("Akkauntdagi eski telefon raqam yoki email") }}</label>
+      <input class="input" id="rc-who" name="who" value="{{ form.who }}" placeholder="{{ _('+998 90 123 45 67 yoki email@maktab.uz') }}" autocomplete="username" required
+             aria-describedby="who-err" :aria-invalid="!!err('who')" @input="clear('who')">
+      {{ field_error("who", e) }}</div>
+    <div class="field" x-data="{ show: false }"><label class="label" for="rc-secret">{{ _("Maxfiy so‘z") }}</label>
+      <div class="input-group">
+        <input class="input" id="rc-secret" name="secret" :type="show ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required
+               aria-describedby="secret-err secret-hint" :aria-invalid="!!err('secret')" @input="clear('secret')">
+        <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? '{{ _('Yashirish') }}' : '{{ _('Ko‘rsatish') }}'" aria-label="{{ _('Ko‘rsatish') }}">{{ icon("eye") }}</button>
+      </div>
+      {{ field_error("secret", e) }}
+      <span class="hint" id="secret-hint">{{ _("Katta-kichik harf farqlanmaydi. 5 ta urinish bor. Namunada: informatika") }}</span></div>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy" {{ 'disabled' if locked }}>{{ _("Davom etish") }}</button>
+  </form>
+
+  <!-- 2-qadam: yangi telefon yoki email -->
+  <form class="stack stack-lg" action="{{ url_for('auth.recover_contact') }}" method="post" novalidate data-stay x-show="step === 2" {{ 'x-cloak' if rstep != 2 }}
+        x-data="rmForm({}, function (j) { step = 3; rmToast(j.message); return false; })" x-init="initForm()"
+        data-errors="{{ (errors if rstep == 2 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+    {% include "partials/form_open.html" %}
+    <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span>{{ _("Maxfiy so‘z to‘g‘ri. Endi yangi telefon raqam yoki emailingizni kiriting — unga tasdiqlash kodi yuboramiz.") }}</span></div>
+    <fieldset class="fieldset-reset stack stack-sm">
+      <legend class="label">{{ _("Kod qayerga yuborilsin?") }}</legend>
+      <div class="seg u-w-100p" role="radiogroup">
+        <label class="seg-opt grow"><input class="sr-only" type="radio" name="method" value="phone" x-model="method" {{ 'checked' if method == 'phone' }}>{{ icon("telegram", "ico-sm") }}{{ _("Telefon (Telegram)") }}</label>
+        <label class="seg-opt grow"><input class="sr-only" type="radio" name="method" value="email" x-model="method" {{ 'checked' if method == 'email' }}>{{ icon("mail", "ico-sm") }}{{ _("Email") }}</label>
+      </div>
+    </fieldset>
+    <div class="field">
+      <label class="label" for="rc-contact" x-text="method === 'phone' ? '{{ _('Yangi telefon raqam') }}' : '{{ _('Yangi email') }}'">{{ _("Yangi telefon raqam") }}</label>
+      <input class="input" id="rc-contact" name="contact" value="{{ form.contact }}" required
+             :inputmode="method === 'phone' ? 'tel' : 'email'" :autocomplete="method === 'phone' ? 'tel' : 'email'"
+             :placeholder="method === 'phone' ? '+998 90 123 45 67' : 'namuna@maktab.uz'" placeholder="+998 90 123 45 67"
+             aria-describedby="contact-err contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
+      {{ field_error("contact", errors if rstep == 2 else {}) }}
+      <span class="hint" id="contact-hint" x-text="method === 'phone' ? '{{ _('Kod shu raqamga ulangan Telegram bot orqali keladi.') }}' : '{{ _('Kod shu manzilga xat bilan keladi.') }}'">{{ _("Kod shu raqamga ulangan Telegram bot orqali keladi.") }}</span>
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Kod yuborish") }}</button>
+  </form>
+
+  <!-- 3-qadam: kod + yangi parol -->
+  <form class="stack stack-lg" action="{{ url_for('auth.recover_confirm') }}" method="post" novalidate x-show="step === 3" {{ 'x-cloak' if rstep != 3 }}
+        x-data="rmForm({ show: false })" x-init="initForm()" data-errors="{{ (errors if rstep == 3 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+    {% include "partials/form_open.html" %}
+    {% set e = errors if rstep == 3 else {} %}
+    <p class="lead">{{ _("Yangi telefon yoki emailga kelgan kodni va yangi parolni kiriting. Shundan keyin akkauntingizga kirasiz.") }}</p>
+    {% if contact %}<p class="small muted">{{ _("Kod yuborilgan manzil:") }} <b class="num">{{ contact }}</b></p>{% endif %}
+    <div class="field">
+      <label class="label" for="rc-otp1">{{ _("Tasdiqlash kodi") }}</label>
+      <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">{% for i in range(6) %}<input id="rc-otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
+      {{ field_error("otp", e) }}
+      <span class="hint">{{ _("Namunada kod: 123456") }}</span>
+    </div>
+    <div class="field"><label class="label" for="rc-p1">{{ _("Yangi parol") }}</label>
+      <input class="input" id="rc-p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">
+      {{ field_error("p1", e) }}</div>
+    <div class="field"><label class="label" for="rc-p2">{{ _("Parolni takrorlang") }}</label>
+      <input class="input" id="rc-p2" name="p2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">
+      {{ field_error("p2", e) }}</div>
+    <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Parolni ko‘rsatish") }}</span></label>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Tasdiqlash va kirish") }}</button>
+    <a class="link center small" href="{{ url_for('auth.recover', qayta=1) }}">{{ _("Boshqa telefon yoki email kiritish") }}</a>
+  </form>
+
+  <p class="xs muted">{{ _("Maxfiy so‘zni ham eslay olmasangiz, yordam xizmatiga yozing: shaxsingizni tasdiqlab, akkauntni qo‘lda tiklaymiz.") }}</p>
+</div>
+{% endblock %}

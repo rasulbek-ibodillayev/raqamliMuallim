@@ -18,7 +18,7 @@
       <!-- Shaxsiy ma'lumotlar -->
       <div>
         <button class="row-btn list-item" type="button" @click="open = open === 'info' ? '' : 'info'" :aria-expanded="open === 'info'">
-          <span class="list-ico">{{ icon("user") }}</span><span class="grow"><span class="d-block">{{ _("Shaxsiy ma’lumotlar") }}</span><span class="sub">{{ _("Ism, familiya, telefon, email") }}</span></span>
+          <span class="list-ico">{{ icon("user") }}</span><span class="grow"><span class="d-block">{{ _("Shaxsiy ma’lumotlar") }}</span><span class="sub">{{ _("Ism va familiya (sertifikatda shunday yoziladi)") }}</span></span>
           <svg class="ico ico-sm chev" :style="open === 'info' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
         </button>
         <form class="pt-4 card-pad stack" x-show="open === 'info'" {{ '' if open == 'info' else 'x-cloak' }} action="{{ url_for('user.profile_info') }}" method="post" novalidate
@@ -29,20 +29,12 @@
             <div class="field"><label class="label" for="p-fn">{{ _("Ism") }}</label><input class="input" id="p-fn" name="fn" value="{{ form.fn or me.first }}" autocomplete="given-name" required aria-describedby="fn-err" :aria-invalid="!!err('fn')" @input="clear('fn')">{{ field_error("fn", e) }}</div>
             <div class="field"><label class="label" for="p-ln">{{ _("Familiya") }}</label><input class="input" id="p-ln" name="ln" value="{{ form.ln or me.last }}" autocomplete="family-name" required aria-describedby="ln-err" :aria-invalid="!!err('ln')" @input="clear('ln')">{{ field_error("ln", e) }}</div>
           </div>
-          <div class="field">
-            <label class="label" for="p-phone">{{ _("Telefon raqam") }}</label>
-            <div class="input-group"><span class="addon">+998</span><input class="input num" id="p-phone" value="90 123 45 67" inputmode="tel" disabled></div>
-            <span class="hint">{{ _("Raqamni o‘zgartirish uchun yangi raqam Telegram bot orqali tasdiqlanadi.") }} <a class="link" href="{{ url_for('auth.verify_telegram') }}">{{ _("Raqamni almashtirish") }}</a></span>
-          </div>
-          <div class="field">
-            <label class="label" for="p-email">{{ _("Email (ixtiyoriy)") }}</label>
-            <input class="input" id="p-email" name="email" type="email" value="{{ form.email }}" placeholder="{{ _('namuna@maktab.uz') }}" autocomplete="email" aria-describedby="email-err" :aria-invalid="!!err('email')" @input="clear('email')">
-            {{ field_error("email", e) }}
-            <span class="hint">{{ _("Yangi email kod orqali tasdiqlanadi.") }}</span>
-          </div>
+          <p class="hint">{{ _("Telefon raqam va email «Telefon va email» bo‘limida kod orqali almashtiriladi.") }}</p>
           <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
         </form>
       </div>
+
+      {% include "user/_contact_change.html" %}
 
       <!-- Parolni o'zgartirish -->
       <div class="bt" x-data="{ show: false }">

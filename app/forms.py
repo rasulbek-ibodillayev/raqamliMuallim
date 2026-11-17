@@ -36,6 +36,12 @@ def norm_phone(value: str) -> str:
     return "+" + digits if digits else ""
 
 
+def fmt_phone(p: str) -> str:
+    """'+998931112233' → '+998 93 111 22 33'."""
+    d = (p or "").lstrip("+")
+    return f"+{d[:3]} {d[3:5]} {d[5:8]} {d[8:10]} {d[10:]}" if len(d) == 12 else p
+
+
 def field(name: str, default: str = "") -> str:
     return (request.form.get(name) or default).strip()
 
@@ -85,6 +91,25 @@ def check_name(v, what="first"):
     if NAME_RE.match(v):
         return None
     return _("Ism faqat harflardan iborat bo‘lsin") if what == "first" else _("Familiya faqat harflardan iborat bo‘lsin")
+
+
+def norm_secret(v: str) -> str:
+    """Maxfiy so'z: bo'sh joylar qisqartiriladi, katta-kichik harf va o'zbekcha tutuq belgisi farqlanmaydi.
+    Backendda faqat shu ko'rinishning xeshi saqlanadi (parol kabi)."""
+    return re.sub(r"\s+", " ", (v or "").strip().lower()).replace("’", "‘").replace("'", "‘").replace("ʻ", "‘")
+
+
+def check_secret(v, password=""):
+    s = norm_secret(v)
+    if not s:
+        return _("Maxfiy so‘zni kiriting")
+    if len(s) < 4:
+        return _("Maxfiy so‘z kamida 4 ta belgidan iborat bo‘lsin")
+    if len(s) > 64:
+        return _("Maxfiy so‘z 64 belgidan oshmasin")
+    if password and s == norm_secret(password):
+        return _("Maxfiy so‘z paroldan farq qilsin")
+    return None
 
 
 def check_date(v):

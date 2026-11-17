@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, url_for
 from flask_babel import gettext as _
 
 from .. import mock as m
-from ..forms import (OBJECTION_REASONS, REGIONS, check_email, check_name, check_password, field, required, respond,
+from ..forms import (fmt_phone, check_otp, check_phone, check_secret, norm_phone, otp_code,
+                     OBJECTION_REASONS, REGIONS, check_email, check_name, check_password, field, required, respond,
                      validate)
 
 bp = Blueprint("user", __name__, url_prefix="/app")
@@ -117,7 +118,7 @@ def certificate_print():
 
 @bp.get("/profil")
 def profile():
-    return render_template("user/profile.html")
+    return render_template("user/profile.html", **_profile())
 
 
 @bp.get("/yana")
@@ -146,8 +147,58 @@ def profile_info():
         "ln": (field("ln"), lambda v: check_name(v, "last")),
         "email": (email, lambda v: check_email(v) if v else None),
     })
-    return respond(errors=errors, template="user/profile.html", open="info",
+    return respond(errors=errors, template="user/profile.html", **_profile(open="info"),
                    redirect_to=url_for("user.profile"), message=_("Shaxsiy ma’lumotlar saqlandi"))
+
+
+def _profile(**ctx):
+    """Profil sahifasi uchun umumiy kontekst (aloqani almashtirish holati sessiyadan)."""
+    from flask import session
+    cc = session.get("contact_change") or {}
+    return {"cc_pending": bool(cc), "cc_method": cc.get("method"), "cc_target": cc.get("target"), **ctx}
+
+
+@bp.post("/profil/aloqa/kod")
+def contact_code():
+    """Telefon yoki emailni almashtirish, 1-qadam: yangi qiymatga kod yuborish (telefon — Telegram bot orqali)."""
+    from flask import session
+    method = field("method") if field("method") in ("phone", "email") else "phone"
+    value = field("contact")
+    current = {"phone": "+998901234567", "email": "dilnoza.k@maktab.uz"}[method]   # namuna: joriy qiymat
+    errors = validate({"contact": (value, required, check_phone if method == "phone" else (lambda v: check_email(v.lower())))})
+    target = norm_phone(value) if method == "phone" else value.lower()
+    if not errors and target == current:
+        errors = {"contact": _("Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting")}
+    if not errors:
+        session["contact_change"] = {"method": method, "target": target}
+    msg = (_("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=fmt_phone(target)) if method == "phone"
+           else _("Kod %(c)s manziliga yuborildi", c=target)) if not errors else None
+    return respond(errors=errors, template="user/profile.html", **_profile(open="contact", cc_method=method),
+                   redirect_to=url_for("user.profile"), message=msg, data={"target": fmt_phone(target) if method == "phone" else target})
+
+
+@bp.post("/profil/aloqa/tasdiq")
+def contact_confirm():
+    """2-qadam: kod to'g'ri bo'lsa yangi telefon/email saqlanadi (eskisi shu paytgacha amalda)."""
+    from flask import session
+    cc = session.get("contact_change")
+    if not cc:
+        return respond(errors={"otp": _("Avval yangi telefon yoki emailni kiriting")}, template="user/profile.html",
+                       **_profile(open="contact"))
+    errors = validate({"otp": (otp_code(), check_otp, lambda v: None if v == "123456" else _("Kod noto‘g‘ri. Namunada kod: 123456"))})
+    if not errors:
+        session.pop("contact_change", None)
+    msg = (_("Telefon raqam yangilandi") if cc["method"] == "phone" else _("Email yangilandi")) if not errors else None
+    return respond(errors=errors, template="user/profile.html", **_profile(open="contact"),
+                   redirect_to=url_for("user.profile"), message=msg)
+
+
+@bp.post("/profil/maxfiy-soz")
+def profile_secret():
+    pw = request.form.get("pw", "")
+    errors = validate({"pw": (pw, required), "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw))})
+    return respond(errors=errors, template="user/profile.html", **_profile(open="secret"),
+                   redirect_to=url_for("user.profile"), message=_("Maxfiy so‘z yangilandi"))
 
 
 @bp.post("/profil/parol")
@@ -160,14 +211,14 @@ def profile_password():
     })
     if not errors and request.form.get("old") == new:
         errors = {"new": _("Yangi parol joriy paroldan farq qilsin")}
-    return respond(errors=errors, template="user/profile.html", open="pw",
+    return respond(errors=errors, template="user/profile.html", **_profile(open="pw"),
                    redirect_to=url_for("user.profile"), message=_("Parol o‘zgartirildi"))
 
 
 @bp.post("/profil/hudud")
 def profile_region():
     errors = validate({"region": (field("region"), lambda v: None if v in REGIONS else _("Viloyatni ro‘yxatdan tanlang"))})
-    return respond(errors=errors, template="user/profile.html", open="reg",
+    return respond(errors=errors, template="user/profile.html", **_profile(open="reg"),
                    redirect_to=url_for("user.profile"), message=_("Hudud saqlandi"))
 
 

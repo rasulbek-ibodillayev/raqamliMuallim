@@ -1,0 +1,75 @@
+{# Profil → Telefon va email. Almashtirish ikki qadamda: yangi qiymat → shu raqamga (Telegram bot) yoki emailga
+   kelgan kod. Kod tasdiqlanmaguncha eski aloqa amalda qoladi. Server: user.contact_code, user.contact_confirm. #}
+<div class="bt" x-data="{ method: '{{ cc_method or 'phone' }}', step: {{ 2 if cc_pending else 1 }}, target: '{{ cc_target or '' }}' }">
+  <button class="row-btn list-item" type="button" @click="open = open === 'contact' ? '' : 'contact'" :aria-expanded="open === 'contact'">
+    <span class="list-ico">{{ icon("phone") }}</span><span class="grow"><span class="d-block">{{ _("Telefon va email") }}</span><span class="sub num">{{ me.phone }} · dilnoza.k@maktab.uz</span></span>
+    <svg class="ico ico-sm chev" :style="open === 'contact' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+  </button>
+  <div class="pt-4 card-pad stack" x-show="open === 'contact'" {{ '' if open == 'contact' else 'x-cloak' }}>
+    <!-- 1-qadam: nimani almashtiramiz va yangi qiymat -->
+    <form class="stack" action="{{ url_for('user.contact_code') }}" method="post" novalidate x-show="step === 1" {{ 'x-cloak' if cc_pending }}
+          x-data="rmForm({}, function (j, f) { target = j.data.target; step = 2; rmToast(j.message); return false; })" x-init="initForm()"
+          data-errors="{{ (errors if open == 'contact' and not cc_pending else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+      {% include "partials/form_open.html" %}
+      <div class="seg u-w-100p" role="radiogroup" aria-label="{{ _('Nimani almashtirasiz?') }}">
+        <label class="seg-opt grow"><input class="sr-only" type="radio" name="method" value="phone" x-model="method" {{ 'checked' if (cc_method or 'phone') == 'phone' }}>{{ icon("telegram", "ico-sm") }}{{ _("Telefon raqam") }}</label>
+        <label class="seg-opt grow"><input class="sr-only" type="radio" name="method" value="email" x-model="method" {{ 'checked' if cc_method == 'email' }}>{{ icon("mail", "ico-sm") }}{{ _("Email") }}</label>
+      </div>
+      <div class="list card card-flat">
+        <div class="list-item"><span class="grow small muted">{{ _("Hozirgi telefon") }}</span><span class="small num">{{ me.phone }}</span></div>
+        <div class="list-item bt"><span class="grow small muted">{{ _("Hozirgi email") }}</span><span class="small">dilnoza.k@maktab.uz</span></div>
+      </div>
+      <div class="field">
+        <label class="label" for="cc-new" x-text="method === 'phone' ? '{{ _('Yangi telefon raqam') }}' : '{{ _('Yangi email') }}'">{{ _("Yangi telefon raqam") }}</label>
+        <input class="input" id="cc-new" name="contact" value="{{ form.contact }}" required
+               :inputmode="method === 'phone' ? 'tel' : 'email'" :autocomplete="method === 'phone' ? 'tel' : 'email'"
+               :placeholder="method === 'phone' ? '+998 90 123 45 67' : 'namuna@maktab.uz'" placeholder="+998 90 123 45 67"
+               aria-describedby="contact-err cc-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
+        {{ field_error("contact", errors if open == 'contact' and not cc_pending else {}) }}
+        <span class="hint" id="cc-hint" x-text="method === 'phone' ? '{{ _('Tasdiqlash kodi yangi raqamga ulangan Telegram bot orqali keladi.') }}' : '{{ _('Tasdiqlash kodi yangi emailga xat bilan keladi.') }}'">{{ _("Tasdiqlash kodi yangi raqamga ulangan Telegram bot orqali keladi.") }}</span>
+      </div>
+      <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Kod yuborish") }}</button></div>
+    </form>
+
+    <!-- 2-qadam: kod -->
+    <form class="stack" action="{{ url_for('user.contact_confirm') }}" method="post" novalidate x-show="step === 2" {{ '' if cc_pending else 'x-cloak' }}
+          x-data="rmForm({}, function (j, f) { f.reset(); step = 1; f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()"
+          data-errors="{{ (errors if open == 'contact' and cc_pending else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+      {% include "partials/form_open.html" %}
+      <p class="small">{{ _("Kod yuborildi:") }} <b class="num" x-text="target">{{ cc_target }}</b>. {{ _("Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi.") }}</p>
+      <div class="field">
+        <label class="label" for="cc-otp1">{{ _("Tasdiqlash kodi") }}</label>
+        <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">{% for i in range(6) %}<input id="cc-otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
+        {{ field_error("otp", errors if open == 'contact' and cc_pending else {}) }}
+        <span class="hint">{{ _("Namunada kod: 123456") }}</span>
+      </div>
+      <div class="row between wrap">
+        <button class="link btn-reset" type="button" @click="step = 1">{{ _("Boshqa qiymat kiritish") }}</button>
+        <button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Tasdiqlash") }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Maxfiy so'z: akkauntni telefon/emailsiz tiklash uchun -->
+<div class="bt" x-data="{ show: false }">
+  <button class="row-btn list-item" type="button" @click="open = open === 'secret' ? '' : 'secret'" :aria-expanded="open === 'secret'">
+    <span class="list-ico">{{ icon("shield") }}</span><span class="grow"><span class="d-block">{{ _("Maxfiy so‘z") }}</span><span class="sub">{{ _("Telefon yoki emailga kira olmaganda akkauntni tiklash uchun") }}</span></span>
+    <svg class="ico ico-sm chev" :style="open === 'secret' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+  </button>
+  <form class="pt-4 card-pad stack" x-show="open === 'secret'" {{ '' if open == 'secret' else 'x-cloak' }} action="{{ url_for('user.profile_secret') }}" method="post" novalidate
+        x-data="rmForm({}, function (j, f) { f.reset(); f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()"
+        data-errors="{{ (errors if open == 'secret' else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+    {% include "partials/form_open.html" %}
+    {% set e = errors if open == 'secret' else {} %}
+    <div class="field"><label class="label" for="sc-pw">{{ _("Joriy parol") }}</label>
+      <input class="input" id="sc-pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required aria-describedby="pw-err" :aria-invalid="!!err('pw')" @input="clear('pw')">
+      {{ field_error("pw", e) }}</div>
+    <div class="field"><label class="label" for="sc-new">{{ _("Yangi maxfiy so‘z") }}</label>
+      <input class="input" id="sc-new" name="secret" :type="show ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required aria-describedby="secret-err" :aria-invalid="!!err('secret')" @input="clear('secret')">
+      {{ field_error("secret", e) }}
+      <span class="hint">{{ _("Katta-kichik harf farqlanmaydi. Uni hech kimga aytmang: u parol kabi akkauntingizga kirish imkonini beradi.") }}</span></div>
+    <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Ko‘rsatish") }}</span></label>
+    <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
+  </form>
+</div>

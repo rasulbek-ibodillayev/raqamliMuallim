@@ -11,6 +11,11 @@
     <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('auth.register') }}">{{ _("Ro‘yxatdan o‘tish") }}</a>
     <a class="btn btn-outline btn-lg btn-block" href="{{ url_for('auth.login') }}">{{ _("Kirish") }}</a>
   </div>
+  <a class="card card-link card-pad guest-cert" href="{{ url_for('auth.verify_certificate_lookup') }}">
+    <span class="list-ico">{{ icon("shield") }}</span>
+    <span class="grow"><span class="d-block strong">{{ _("Sertifikatni tekshirish") }}</span><span class="d-block small muted">{{ _("Raqam bo‘yicha sertifikat haqiqiyligini bilib oling") }}</span></span>
+    {{ icon("chevron-right", "ico-sm chev") }}
+  </a>
   <ul class="row wrap small muted u-jc-center u-ls-none u-p-0 u-m-0 u-gap-8-20">
     <li class="row row-sm">{{ icon("target", "ico-sm") }}{{ _("Diagnostika") }}</li>
     <li class="row row-sm">{{ icon("route", "ico-sm") }}{{ _("Shaxsiy reja") }}</li>

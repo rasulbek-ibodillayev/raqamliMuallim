@@ -7,7 +7,7 @@ Namunada tasdiqlash kodi har doim 123456 (backendda Telegram bot / email yuborad
 from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
 from flask_babel import gettext as _
 
-from ..forms import (REGIONS, check_email, check_login, check_name, check_otp, check_password, check_phone,
+from ..forms import (REGIONS, check_secret, norm_secret, check_email, check_login, check_name, check_otp, check_password, check_phone,
                      field, norm_phone, otp_code, required, respond, validate)
 
 bp = Blueprint("auth", __name__)
@@ -100,6 +100,7 @@ def details():
         "ln": (field("ln"), lambda v: check_name(v, "last")),
         "pw": (pw, check_password),
         "pw2": (request.form.get("pw2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
+        "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw)),
         "region": (region, lambda v: None if not v or v in REGIONS else _("Viloyatni ro‘yxatdan tanlang")),
         "consent": (request.form.get("consent"), lambda v: None if v else _("Davom etish uchun rozilik kerak")),
     })
@@ -164,6 +165,92 @@ def reset_code():
                    redirect_to=url_for("auth.reset", kod=1), message=_("Tasdiqlash kodi yuborildi"))
 
 
+# --- Maxfiy so'z orqali tiklash ---
+# Telefon raqam o'zgargan yoki emailga kirib bo'lmaganda: eski login + maxfiy so'z → yangi aloqa (kod bilan) → yangi parol.
+# Holat sessiyada: recover = {"step": 1|2|3, "who", "fails", "method", "contact"}.
+# Namunada maxfiy so'z: "informatika". Backendda: users.secret_hash bilan solishtiriladi, urinishlar audit_log'ga yoziladi.
+DEMO_SECRET = "informatika"
+RECOVER_MAX_FAILS = 5
+
+
+def _recover():
+    return session.get("recover") or {"step": 1, "fails": 0}
+
+
+def _recover_ctx(rec, **extra):
+    method = rec.get("method", "phone")
+    return {"rstep": rec.get("step", 1), "method": method, "contact": rec.get("contact", ""),
+            "locked": rec.get("fails", 0) >= RECOVER_MAX_FAILS, "fails_left": RECOVER_MAX_FAILS - rec.get("fails", 0), **extra}
+
+
+@bp.route("/parol-tiklash/maxfiy-soz", methods=["GET", "POST"])
+def recover():
+    rec = _recover()
+    if request.method == "GET":
+        if request.args.get("qayta"):
+            rec = {"step": 1, "fails": rec.get("fails", 0)}
+            session["recover"] = rec
+        return render_template("auth/recover.html", **_recover_ctx(rec))
+
+    # 1-qadam: eski telefon/email va maxfiy so'z
+    if rec.get("fails", 0) >= RECOVER_MAX_FAILS:
+        return respond(errors={"secret": _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing")},
+                       template="auth/recover.html", **_recover_ctx(rec))
+    who, secret = field("who"), request.form.get("secret", "")
+    errors = validate({"who": (who, check_login), "secret": (secret, required)})
+    if not errors and norm_secret(secret) != DEMO_SECRET:
+        rec["fails"] = rec.get("fails", 0) + 1
+        session["recover"] = rec
+        left = RECOVER_MAX_FAILS - rec["fails"]
+        errors = {"secret": _("Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=left) if left
+                  else _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing")}
+    if not errors:
+        session["recover"] = {"step": 2, "fails": 0, "who": who}
+    return respond(errors=errors, template="auth/recover.html", **_recover_ctx(rec),
+                   redirect_to=url_for("auth.recover"), data={"step": 2})
+
+
+@bp.post("/parol-tiklash/maxfiy-soz/aloqa")
+def recover_contact():
+    """2-qadam: yangi telefon (kod Telegram bot orqali) yoki yangi email (kod pochtaga)."""
+    rec = _recover()
+    if rec.get("step", 1) < 2:
+        return redirect(url_for("auth.recover"))
+    method = field("method") if field("method") in ("phone", "email") else "phone"
+    value = field("contact")
+    check = (lambda v: check_phone(v)) if method == "phone" else (lambda v: check_email(v.lower()))
+    errors = validate({"contact": (value, required, check)})
+    if not errors:
+        contact = norm_phone(value) if method == "phone" else value.lower()
+        session["recover"] = {**rec, "step": 3, "method": method, "contact": contact}
+        msg = (_("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=_fmt_phone(contact)) if method == "phone"
+               else _("Kod %(c)s manziliga yuborildi", c=contact))
+    else:
+        msg = None
+    return respond(errors=errors, template="auth/recover.html", **_recover_ctx({**rec, "method": method}),
+                   redirect_to=url_for("auth.recover"), message=msg, data={"step": 3})
+
+
+@bp.post("/parol-tiklash/maxfiy-soz/tasdiq")
+def recover_confirm():
+    """3-qadam: yangi aloqadagi kod + yangi parol → aloqa yangilanadi va foydalanuvchi akkauntiga kiradi."""
+    rec = _recover()
+    if rec.get("step", 1) < 3:
+        return redirect(url_for("auth.recover"))
+    pw = request.form.get("p1", "")
+    errors = validate({
+        "otp": (otp_code(), check_otp, _otp_matches),
+        "p1": (pw, check_password),
+        "p2": (request.form.get("p2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
+    })
+    if not errors:
+        session.pop("recover", None)
+        session["role"] = "user"
+    return respond(errors=errors, template="auth/recover.html", **_recover_ctx(rec),
+                   redirect_to=url_for("user.home"),
+                   message=_("Akkaunt tiklandi: yangi telefon raqam yoki email saqlandi, endi yangi parol bilan kirasiz"))
+
+
 # --- Sertifikatni tekshirish (ommaviy, QR-koddan) ---
 # Namunada: INF-2026-000123 — haqiqiy, INF-2026-000099 — bekor qilingan, qolgani — topilmadi
 _CERT_STATES = {"INF-2026-000123": "valid", "INF-2026-000099": "revoked"}
@@ -178,4 +265,12 @@ def verify_certificate(cert_no):
 
 @bp.get("/s")
 def verify_certificate_lookup():
-    return redirect(url_for("auth.verify_certificate", cert_no=request.args.get("raqam", "").strip() or "-"))
+    """Raqam kiritish sahifasi (mehmon sahifasidan). Raqam berilsa — natija sahifasiga yo'naltiradi."""
+    import re
+    raw = request.args.get("raqam", "").strip().upper()
+    if not raw:
+        return render_template("auth/verify_certificate.html", state="form", cert_no="")
+    if not re.fullmatch(r"[A-Z]{3}-\d{4}-\d{6}", raw):
+        return render_template("auth/verify_certificate.html", state="form", cert_no=raw,
+                               lookup_error=_("Raqam formati: 3 harf, yil va 6 raqam. Masalan: INF-2026-000123")), 422
+    return redirect(url_for("auth.verify_certificate", cert_no=raw))
