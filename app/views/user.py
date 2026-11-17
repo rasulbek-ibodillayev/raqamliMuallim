@@ -158,9 +158,42 @@ def _profile(**ctx):
     return {"cc_pending": bool(cc), "cc_method": cc.get("method"), "cc_target": cc.get("target"), **ctx}
 
 
+# Namunada joriy parol. Backendda: users.password_hash bilan solishtiriladi, urinishlar audit_log'ga yoziladi.
+DEMO_PASSWORD = "parol1234"
+PW_MAX_FAILS = 5
+
+
+def _check_current_password(pw: str):
+    """Joriy parolni tekshiradi; 5 ta xato urinishdan keyin 15 daqiqa bloklanadi (namunada — sessiya oxirigacha)."""
+    from flask import session
+    fails = session.get("pw_fails", 0)
+    if fails >= PW_MAX_FAILS:
+        return _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring")
+    if not pw:
+        return _("Joriy parolni kiriting")
+    if pw != DEMO_PASSWORD:
+        session["pw_fails"] = fails + 1
+        left = PW_MAX_FAILS - fails - 1
+        return (_("Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=left) if left
+                else _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring"))
+    session.pop("pw_fails", None)
+    return None
+
+
+@bp.post("/profil/parol-tekshirish")
+def password_check():
+    """Telefon/emailni almashtirishdan oldin joriy parolni tekshirish: to'g'ri bo'lsa «Kod yuborish» faollashadi."""
+    from flask import jsonify
+    err = _check_current_password(request.form.get("pw", ""))
+    if err:
+        return jsonify(ok=False, errors={"pw": err}), 422
+    return jsonify(ok=True, message=_("Parol to‘g‘ri"))
+
+
 @bp.post("/profil/aloqa/kod")
 def contact_code():
-    """Telefon yoki emailni almashtirish, 1-qadam: yangi qiymatga kod yuborish (telefon — Telegram bot orqali)."""
+    """Telefon yoki emailni almashtirish, 1-qadam: yangi qiymat + joriy parol → yangi qiymatga kod (telefon — Telegram bot).
+    Parol shu yerda ham qayta tekshiriladi: «Kod yuborish» tugmasini chetlab o'tib bo'lmaydi."""
     from flask import session
     method = field("method") if field("method") in ("phone", "email") else "phone"
     value = field("contact")
@@ -169,6 +202,9 @@ def contact_code():
     target = norm_phone(value) if method == "phone" else value.lower()
     if not errors and target == current:
         errors = {"contact": _("Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting")}
+    pw_error = _check_current_password(request.form.get("pw", ""))
+    if pw_error:
+        errors = {**errors, "pw": pw_error}
     if not errors:
         session["contact_change"] = {"method": method, "target": target}
     msg = (_("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=fmt_phone(target)) if method == "phone"

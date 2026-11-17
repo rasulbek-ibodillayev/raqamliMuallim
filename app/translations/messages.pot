@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: raqamliMuallim VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-17 20:40+0500\n"
+"POT-Creation-Date: 2026-11-17 21:02+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -362,8 +362,8 @@ msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:19
 #: app/templates/admin/experts.html:85 app/templates/test/exam.html:122
-#: app/templates/user/_contact_change.html:31
-#: app/templates/user/_contact_change.html:73 app/templates/user/notes.html:78
+#: app/templates/user/_contact_change.html:47
+#: app/templates/user/_contact_change.html:89 app/templates/user/notes.html:78
 #: app/templates/user/profile.html:33 app/templates/user/profile.html:55
 #: app/templates/user/profile.html:77
 msgid "Bekor qilish"
@@ -371,7 +371,7 @@ msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:19
 #: app/templates/admin/settings.html:6 app/templates/expert/topics.html:7
-#: app/templates/user/_contact_change.html:73 app/templates/user/notes.html:79
+#: app/templates/user/_contact_change.html:89 app/templates/user/notes.html:79
 #: app/templates/user/profile.html:33 app/templates/user/profile.html:77
 msgid "Saqlash"
 msgstr ""
@@ -905,7 +905,7 @@ msgid "orqali kiradi"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:27 app/templates/auth/reset.html:2
-#: app/templates/auth/reset.html:8
+#: app/templates/auth/reset.html:25
 msgid "Parolni tiklash"
 msgstr ""
 
@@ -1136,22 +1136,22 @@ msgid "Parol"
 msgstr ""
 
 #: app/templates/auth/details.html:22 app/templates/auth/recover.html:78
-#: app/templates/auth/reset.html:37
+#: app/templates/auth/reset.html:62
 msgid "Kamida 8 ta belgi, harf va raqam"
 msgstr ""
 
 #: app/templates/auth/details.html:24 app/templates/auth/login.html:27
-#: app/templates/auth/recover.html:83 app/templates/auth/reset.html:42
+#: app/templates/auth/recover.html:83 app/templates/auth/reset.html:67
 msgid "Parolni ko‘rsatish"
 msgstr ""
 
 #: app/templates/auth/details.html:28 app/templates/auth/recover.html:80
-#: app/templates/auth/reset.html:39
+#: app/templates/auth/reset.html:64
 msgid "Parolni takrorlang"
 msgstr ""
 
 #: app/templates/auth/details.html:32 app/templates/auth/recover.html:28
-#: app/templates/user/_contact_change.html:57
+#: app/templates/user/_contact_change.html:73
 msgid "Maxfiy so‘z"
 msgstr ""
 
@@ -1269,7 +1269,7 @@ msgstr ""
 msgid "urinish qoldi, keyin akkaunt 15 daqiqaga bloklanadi."
 msgstr ""
 
-#: app/templates/auth/login.html:17 app/templates/auth/reset.html:17
+#: app/templates/auth/login.html:17 app/templates/auth/reset.html:31
 msgid "Telefon raqam yoki email"
 msgstr ""
 
@@ -1478,8 +1478,8 @@ msgstr ""
 msgid "Telefon raqamingiz o‘zgargan yoki emailingizga kira olmasangiz: ro‘yxatdan o‘tishda bergan maxfiy so‘zingizni kiriting."
 msgstr ""
 
-#: app/templates/auth/recover.html:22 app/views/auth.py:197
-#: app/views/auth.py:206
+#: app/templates/auth/recover.html:22 app/views/auth.py:246
+#: app/views/auth.py:255
 msgid "Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing"
 msgstr ""
 
@@ -1487,16 +1487,18 @@ msgstr ""
 msgid "Akkauntdagi eski telefon raqam yoki email"
 msgstr ""
 
-#: app/templates/auth/recover.html:25 app/templates/auth/reset.html:18
+#: app/templates/auth/recover.html:25 app/templates/auth/reset.html:33
 msgid "+998 90 123 45 67 yoki email@maktab.uz"
 msgstr ""
 
 #: app/templates/auth/recover.html:32
+#: app/templates/user/_contact_change.html:39
 msgid "Yashirish"
 msgstr ""
 
 #: app/templates/auth/recover.html:32
-#: app/templates/user/_contact_change.html:72
+#: app/templates/user/_contact_change.html:39
+#: app/templates/user/_contact_change.html:88
 msgid "Ko‘rsatish"
 msgstr ""
 
@@ -1543,9 +1545,9 @@ msgstr ""
 msgid "Kod shu manzilga xat bilan keladi."
 msgstr ""
 
-#: app/templates/auth/recover.html:61 app/templates/auth/reset.html:21
+#: app/templates/auth/recover.html:61 app/templates/auth/reset.html:36
 #: app/templates/auth/verify_email.html:20
-#: app/templates/user/_contact_change.html:31
+#: app/templates/user/_contact_change.html:47
 msgid "Kod yuborish"
 msgstr ""
 
@@ -1557,26 +1559,26 @@ msgstr ""
 msgid "Kod yuborilgan manzil:"
 msgstr ""
 
-#: app/templates/auth/recover.html:72 app/templates/auth/reset.html:31
+#: app/templates/auth/recover.html:72 app/templates/auth/reset.html:43
 #: app/templates/auth/verify_email.html:25
 #: app/templates/auth/verify_telegram.html:22
-#: app/templates/user/_contact_change.html:41
+#: app/templates/user/_contact_change.html:57
 msgid "Tasdiqlash kodi"
 msgstr ""
 
-#: app/templates/auth/recover.html:73 app/templates/auth/reset.html:32
+#: app/templates/auth/recover.html:73 app/templates/auth/reset.html:45
 #: app/templates/auth/verify_email.html:26
 #: app/templates/auth/verify_telegram.html:23
-#: app/templates/user/_contact_change.html:42
+#: app/templates/user/_contact_change.html:58
 msgid "6 xonali kod"
 msgstr ""
 
-#: app/templates/auth/recover.html:75 app/templates/auth/reset.html:34
-#: app/templates/user/_contact_change.html:44
+#: app/templates/auth/recover.html:75
+#: app/templates/user/_contact_change.html:60
 msgid "Namunada kod: 123456"
 msgstr ""
 
-#: app/templates/auth/recover.html:77 app/templates/auth/reset.html:36
+#: app/templates/auth/recover.html:77 app/templates/auth/reset.html:61
 #: app/templates/user/profile.html:50
 msgid "Yangi parol"
 msgstr ""
@@ -1622,28 +1624,40 @@ msgstr ""
 msgid "Akkauntingiz bormi?"
 msgstr ""
 
-#: app/templates/auth/reset.html:9
+#: app/templates/auth/reset.html:26
 msgid "Telefon raqam yoki emailingizni kiriting, kodni Telegram yoki email orqali yuboramiz."
 msgstr ""
 
-#: app/templates/auth/reset.html:10
-msgid "Kodni va yangi parolni kiriting."
+#: app/templates/auth/reset.html:36
+msgid "Qayta yuborish"
 msgstr ""
 
-#: app/templates/auth/reset.html:23
-msgid "Boshqa usul"
+#: app/templates/auth/reset.html:51 app/templates/auth/verify_email.html:32
+#: app/templates/auth/verify_telegram.html:32
+#: app/templates/expert/editor.html:61
+#: app/templates/user/_contact_change.html:41
+#: app/templates/user/_contact_change.html:64
+msgid "Tasdiqlash"
 msgstr ""
 
-#: app/templates/auth/reset.html:24
-msgid "Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang."
+#: app/templates/auth/reset.html:52
+msgid "Kod tasdiqlandi"
 msgstr ""
 
-#: app/templates/auth/reset.html:43
+#: app/templates/auth/reset.html:55
+msgid "Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing. Namunada kod: 123456"
+msgstr ""
+
+#: app/templates/auth/reset.html:68
 msgid "Parolni saqlash"
 msgstr ""
 
-#: app/templates/auth/reset.html:44
-msgid "Boshqa raqam yoki email kiritish"
+#: app/templates/auth/reset.html:73
+msgid "Boshqa usul"
+msgstr ""
+
+#: app/templates/auth/reset.html:74
+msgid "Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang."
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:11
@@ -1758,13 +1772,6 @@ msgstr ""
 
 #: app/templates/auth/verify_email.html:30
 msgid "Kod 15 daqiqa amal qiladi. Xat kelmasa, «Spam» papkasini tekshiring."
-msgstr ""
-
-#: app/templates/auth/verify_email.html:32
-#: app/templates/auth/verify_telegram.html:32
-#: app/templates/expert/editor.html:61
-#: app/templates/user/_contact_change.html:48
-msgid "Tasdiqlash"
 msgstr ""
 
 #: app/templates/auth/verify_telegram.html:2
@@ -2628,32 +2635,45 @@ msgstr ""
 msgid "Tasdiqlash kodi yangi emailga xat bilan keladi."
 msgstr ""
 
-#: app/templates/user/_contact_change.html:39
-msgid "Kod yuborildi:"
-msgstr ""
-
-#: app/templates/user/_contact_change.html:39
-msgid "Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi."
-msgstr ""
-
-#: app/templates/user/_contact_change.html:47
-msgid "Boshqa qiymat kiritish"
-msgstr ""
-
-#: app/templates/user/_contact_change.html:57
-msgid "Telefon yoki emailga kira olmaganda akkauntni tiklash uchun"
-msgstr ""
-
-#: app/templates/user/_contact_change.html:65
+#: app/templates/user/_contact_change.html:33
+#: app/templates/user/_contact_change.html:81
 #: app/templates/user/profile.html:49
 msgid "Joriy parol"
 msgstr ""
 
-#: app/templates/user/_contact_change.html:68
+#: app/templates/user/_contact_change.html:44 app/views/user.py:190
+msgid "Parol to‘g‘ri"
+msgstr ""
+
+#: app/templates/user/_contact_change.html:45
+msgid "Xavfsizlik uchun: telefon raqam yoki email faqat akkaunt paroli bilan almashtiriladi. Namunada parol: parol1234"
+msgstr ""
+
+#: app/templates/user/_contact_change.html:47
+msgid "Avval joriy parolni tasdiqlang"
+msgstr ""
+
+#: app/templates/user/_contact_change.html:55
+msgid "Kod yuborildi:"
+msgstr ""
+
+#: app/templates/user/_contact_change.html:55
+msgid "Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi."
+msgstr ""
+
+#: app/templates/user/_contact_change.html:63
+msgid "Boshqa qiymat kiritish"
+msgstr ""
+
+#: app/templates/user/_contact_change.html:73
+msgid "Telefon yoki emailga kira olmaganda akkauntni tiklash uchun"
+msgstr ""
+
+#: app/templates/user/_contact_change.html:84
 msgid "Yangi maxfiy so‘z"
 msgstr ""
 
-#: app/templates/user/_contact_change.html:71
+#: app/templates/user/_contact_change.html:87
 msgid "Katta-kichik harf farqlanmaydi. Uni hech kimga aytmang: u parol kabi akkauntingizga kirish imkonini beradi."
 msgstr ""
 
@@ -4001,7 +4021,7 @@ msgstr ""
 msgid "Urinish yakunlangan, javoblarni o‘zgartirib bo‘lmaydi"
 msgstr ""
 
-#: app/views/auth.py:19 app/views/user.py:188
+#: app/views/auth.py:19 app/views/user.py:224
 msgid "Kod noto‘g‘ri. Namunada kod: 123456"
 msgstr ""
 
@@ -4014,12 +4034,12 @@ msgstr ""
 msgid "Kod %(email)s manziliga yuborildi"
 msgstr ""
 
-#: app/views/auth.py:102 app/views/auth.py:150 app/views/auth.py:244
-#: app/views/user.py:210
+#: app/views/auth.py:102 app/views/auth.py:168 app/views/auth.py:293
+#: app/views/user.py:246
 msgid "Parollar bir xil emas"
 msgstr ""
 
-#: app/views/auth.py:104 app/views/user.py:220
+#: app/views/auth.py:104 app/views/user.py:256
 msgid "Viloyatni ro‘yxatdan tanlang"
 msgstr ""
 
@@ -4035,34 +4055,55 @@ msgstr ""
 msgid "Google akkaunti orqali kirdingiz (namuna)"
 msgstr ""
 
-#: app/views/auth.py:155
+#: app/views/auth.py:161
+msgid "Avval tasdiqlash kodini kiriting"
+msgstr ""
+
+#: app/views/auth.py:163 app/views/auth.py:199
+msgid "Telefon/email o‘zgardi. Yangisiga kodni qayta yuboring"
+msgstr ""
+
+#: app/views/auth.py:174
 msgid "Parol yangilandi. Yangi parol bilan kiring"
 msgstr ""
 
-#: app/views/auth.py:165
-msgid "Tasdiqlash kodi yuborildi"
-msgstr ""
-
-#: app/views/auth.py:205
-#, python-format
-msgid "Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi"
-msgstr ""
-
-#: app/views/auth.py:226 app/views/user.py:174
-#, python-format
-msgid "Kod Telegram bot orqali %(c)s raqamiga yuborildi"
-msgstr ""
-
-#: app/views/auth.py:227 app/views/user.py:175
+#: app/views/auth.py:186 app/views/auth.py:276 app/views/user.py:211
 #, python-format
 msgid "Kod %(c)s manziliga yuborildi"
 msgstr ""
 
-#: app/views/auth.py:251
+#: app/views/auth.py:187 app/views/auth.py:275 app/views/user.py:210
+#, python-format
+msgid "Kod Telegram bot orqali %(c)s raqamiga yuborildi"
+msgstr ""
+
+#: app/views/auth.py:197
+msgid "Avval telefon raqam yoki emailga kod yuboring"
+msgstr ""
+
+#: app/views/auth.py:208
+msgid "Kod 5 marta noto‘g‘ri kiritildi. Yangi kod so‘rang"
+msgstr ""
+
+#: app/views/auth.py:210
+#, python-format
+msgid "Kod noto‘g‘ri. Yana %(n)s ta urinish qoldi"
+msgstr ""
+
+#: app/views/auth.py:214
+msgid "Kod tasdiqlandi. Endi yangi parolni kiriting"
+msgstr ""
+
+#: app/views/auth.py:254
+#, python-format
+msgid "Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi"
+msgstr ""
+
+#: app/views/auth.py:300
 msgid "Akkaunt tiklandi: yangi telefon raqam yoki email saqlandi, endi yangi parol bilan kirasiz"
 msgstr ""
 
-#: app/views/auth.py:275
+#: app/views/auth.py:324
 msgid "Raqam formati: 3 harf, yil va 6 raqam. Masalan: INF-2026-000123"
 msgstr ""
 
@@ -4070,79 +4111,92 @@ msgstr ""
 msgid "Shaxsiy ma’lumotlar saqlandi"
 msgstr ""
 
-#: app/views/user.py:171
+#: app/views/user.py:171 app/views/user.py:178
+msgid "Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring"
+msgstr ""
+
+#: app/views/user.py:173
+msgid "Joriy parolni kiriting"
+msgstr ""
+
+#: app/views/user.py:177
+#, python-format
+msgid "Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi"
+msgstr ""
+
+#: app/views/user.py:204
 msgid "Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting"
 msgstr ""
 
-#: app/views/user.py:186
+#: app/views/user.py:222
 msgid "Avval yangi telefon yoki emailni kiriting"
 msgstr ""
 
-#: app/views/user.py:191
+#: app/views/user.py:227
 msgid "Telefon raqam yangilandi"
 msgstr ""
 
-#: app/views/user.py:191
+#: app/views/user.py:227
 msgid "Email yangilandi"
 msgstr ""
 
-#: app/views/user.py:201
+#: app/views/user.py:237
 msgid "Maxfiy so‘z yangilandi"
 msgstr ""
 
-#: app/views/user.py:213
+#: app/views/user.py:249
 msgid "Yangi parol joriy paroldan farq qilsin"
 msgstr ""
 
-#: app/views/user.py:215
+#: app/views/user.py:251
 msgid "Parol o‘zgartirildi"
 msgstr ""
 
-#: app/views/user.py:222
+#: app/views/user.py:258
 msgid "Hudud saqlandi"
 msgstr ""
 
-#: app/views/user.py:230
+#: app/views/user.py:266
 msgid "Sababni tanlang"
 msgstr ""
 
-#: app/views/user.py:231
+#: app/views/user.py:267
 msgid "Izoh 1000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:234
+#: app/views/user.py:270
 msgid "«Boshqa» sababini izohda yozing"
 msgstr ""
 
-#: app/views/user.py:237
+#: app/views/user.py:273
 msgid "E’tirozingiz qabul qilindi. Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi"
 msgstr ""
 
-#: app/views/user.py:243
+#: app/views/user.py:279
 msgid "Xabarni yozing"
 msgstr ""
 
-#: app/views/user.py:244
+#: app/views/user.py:280
 msgid "Xabar 2000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:246
+#: app/views/user.py:282
 msgid "Fikringiz qo‘shildi"
 msgstr ""
 
-#: app/views/user.py:255
+#: app/views/user.py:291
 msgid "Qaydni yozing"
 msgstr ""
 
-#: app/views/user.py:255
+#: app/views/user.py:291
 msgid "Qayd 5000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:256
+#: app/views/user.py:292
 msgid "Kod 5000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:259
+#: app/views/user.py:295
 msgid "Eslatma saqlandi"
 msgstr ""
 

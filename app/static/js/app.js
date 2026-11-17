@@ -130,6 +130,29 @@ window.rmForm = function (extra, onOk) {
   return Object.assign(base, extra || {});
 };
 
+/* Joriy parolni tasdiqlash "darvozasi" (rmForm bilan birga): parol serverda tekshiriladi, to'g'ri bo'lsa pwOk = true
+   va asosiy tugma faollashadi. Har bir harfda emas, faqat «Tasdiqlash» / Enter / maydondan chiqishda tekshiriladi —
+   aks holda chala yozilgan parol urinishlar limitini (5 ta) behuda sarflaydi. */
+window.rmPwGate = function (url) {
+  var last = null;
+  return {
+    pwOk: false, pwChecking: false,
+    pwInput: function () { this.pwOk = false; last = null; this.clear("pw"); },
+    checkPw: function () {
+      var self = this, input = this.$root.querySelector('input[name="pw"]'), v = input ? input.value : "";
+      if (!v || v === last || this.pwChecking) return;
+      last = v; this.pwChecking = true;
+      var body = new FormData(); body.append("pw", v);
+      return fetch(url, { method: "POST", body: body, credentials: "same-origin",
+        headers: { "Accept": "application/json", "X-CSRFToken": (document.querySelector('meta[name="csrf-token"]') || {}).content || "" }
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        self.pwChecking = false; self.pwOk = !!j.ok;
+        if (!j.ok) { self.errors = Object.assign({}, self.errors, j.errors || { pw: j.error }); }
+      }).catch(function () { self.pwChecking = false; last = null; self.errors = Object.assign({}, self.errors, { pw: "Internetga ulanib bo‘lmadi" }); });
+    }
+  };
+};
+
 /* Ilova qobig'i: chap menyu, tezkor qidiruv (Ctrl+K) va bildirishnomalar */
 window.rmShell = function () {
   function norm(s) { return (s || "").toLowerCase().replace(/[‘’ʻʼ'`]/g, "").trim(); }

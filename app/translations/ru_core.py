@@ -44,8 +44,7 @@ RU = {
         "Вы зарегистрированы. Напоминание: если не входить 6 месяцев, аккаунт удаляется автоматически",
     "Google akkaunti orqali kirdingiz (namuna)": "Вы вошли через Google (демо)",
     "Parol yangilandi. Yangi parol bilan kiring": "Пароль обновлён. Войдите с новым паролем",
-    "Tasdiqlash kodi yuborildi": "Код подтверждения отправлен",
-    "Shaxsiy ma’lumotlar saqlandi": "Личные данные сохранены",
+        "Shaxsiy ma’lumotlar saqlandi": "Личные данные сохранены",
     "Parol o‘zgartirildi": "Пароль изменён",
     "Hudud saqlandi": "Регион сохранён",
     "E’tirozingiz qabul qilindi. Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi":
@@ -154,12 +153,10 @@ RU = {
     "Akkauntingiz bormi?": "Уже есть аккаунт?",
     "Telefon raqam yoki emailingizni kiriting, kodni Telegram yoki email orqali yuboramiz.":
         "Введите номер или email — пришлём код в Telegram или на почту.",
-    "Kodni va yangi parolni kiriting.": "Введите код и новый пароль.",
-    "+998 90 123 45 67 yoki email@maktab.uz": "+998 90 123 45 67 или email@maktab.uz",
+        "+998 90 123 45 67 yoki email@maktab.uz": "+998 90 123 45 67 или email@maktab.uz",
     "Kod yuborish": "Отправить код", "Tasdiqlash kodi": "Код подтверждения", "6 xonali kod": "6-значный код",
     "Namunada kod: 123456": "В демо-версии код: 123456", "Yangi parol": "Новый пароль", "Parolni saqlash": "Сохранить пароль",
-    "Boshqa raqam yoki email kiritish": "Ввести другой номер или email",
-    "Email orqali tasdiqlash": "Подтверждение по email",
+        "Email orqali tasdiqlash": "Подтверждение по email",
     "Kodni emailingizga yuboramiz. Keyin shu email bilan tizimga kirasiz.": "Отправим код на почту. Затем вы будете входить с этим email.",
     "Email manzil": "Адрес email", "Kod 15 daqiqa amal qiladi. Xat kelmasa, «Spam» papkasini tekshiring.":
         "Код действует 15 минут. Если письма нет, проверьте папку «Спам».",
@@ -292,4 +289,21 @@ RU = {
     "Ism va familiya (sertifikatda shunday yoziladi)": "Имя и фамилия (так указываются в сертификате)",
     "Bekor qilish": "Отмена", "Saqlash": "Сохранить",
     "Raqamni qayta kiritish": "Ввести номер заново",
+    "Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring": "Пароль введён неверно 5 раз. Повторите через 15 минут",
+    "Joriy parolni kiriting": "Введите текущий пароль",
+    "Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi": "Неверный пароль. Осталось попыток: %(n)s",
+    "Parol to‘g‘ri": "Пароль верный",
+    "Xavfsizlik uchun: telefon raqam yoki email faqat akkaunt paroli bilan almashtiriladi. Namunada parol: parol1234":
+        "В целях безопасности номер или email меняются только с паролем аккаунта. В демо-версии пароль: parol1234",
+    "Avval joriy parolni tasdiqlang": "Сначала подтвердите текущий пароль",
+    "Qayta yuborish": "Отправить повторно",
+    "Avval telefon raqam yoki emailga kod yuboring": "Сначала отправьте код на номер или email",
+    "Telefon/email o‘zgardi. Yangisiga kodni qayta yuboring": "Номер/email изменён. Отправьте код повторно",
+    "Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing. Namunada kod: 123456":
+        "Код действует 15 минут. Не пришёл — нажмите «Отправить повторно». В демо-версии код: 123456",
+    "Avval tasdiqlash kodini kiriting": "Сначала введите код подтверждения",
+    "Kod 5 marta noto‘g‘ri kiritildi. Yangi kod so‘rang": "Код введён неверно 5 раз. Запросите новый код",
+    "Kod noto‘g‘ri. Yana %(n)s ta urinish qoldi": "Неверный код. Осталось попыток: %(n)s",
+    "Kod tasdiqlandi. Endi yangi parolni kiriting": "Код подтверждён. Теперь введите новый пароль",
+    "Kod tasdiqlandi": "Код подтверждён",
 }

@@ -8,7 +8,7 @@
   <div class="pt-4 card-pad stack" x-show="open === 'contact'" {{ '' if open == 'contact' else 'x-cloak' }}>
     <!-- 1-qadam: nimani almashtiramiz va yangi qiymat -->
     <form class="stack" action="{{ url_for('user.contact_code') }}" method="post" novalidate x-show="step === 1" {{ 'x-cloak' if cc_pending }}
-          x-data="rmForm({}, function (j, f) { target = j.data.target; step = 2; rmToast(j.message); return false; })" x-init="initForm()"
+          x-data="rmForm(rmPwGate('{{ url_for('user.password_check') }}'), function (j, f) { target = j.data.target; step = 2; f.reset(); this.pwOk = false; rmToast(j.message); return false; })" x-init="initForm()"
           data-errors="{{ (errors if open == 'contact' and not cc_pending else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
       {% include "partials/form_open.html" %}
       <div class="seg u-w-100p" role="radiogroup" aria-label="{{ _('Nimani almashtirasiz?') }}">
@@ -28,7 +28,23 @@
         {{ field_error("contact", errors if open == 'contact' and not cc_pending else {}) }}
         <span class="hint" id="cc-hint" x-text="method === 'phone' ? '{{ _('Tasdiqlash kodi yangi raqamga ulangan Telegram bot orqali keladi.') }}' : '{{ _('Tasdiqlash kodi yangi emailga xat bilan keladi.') }}'">{{ _("Tasdiqlash kodi yangi raqamga ulangan Telegram bot orqali keladi.") }}</span>
       </div>
-      <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Kod yuborish") }}</button></div>
+      {# Xavfsizlik: aloqani almashtirishdan oldin joriy parol so'raladi. To'g'ri bo'lsa «Kod yuborish» faollashadi #}
+      <div class="field" x-data="{ show: false }">
+        <label class="label" for="cc-pw">{{ _("Joriy parol") }}</label>
+        <div class="row row-sm">
+          <div class="input-group grow">
+            <input class="input" id="cc-pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required
+                   aria-describedby="pw-err pw-ok cc-pw-hint" :aria-invalid="!!err('pw')" @input="pwInput()" @change="checkPw()"
+                   @keydown.enter.prevent="checkPw()">
+            <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? '{{ _('Yashirish') }}' : '{{ _('Ko‘rsatish') }}'" aria-label="{{ _('Ko‘rsatish') }}">{{ icon("eye") }}</button>
+          </div>
+          <button class="btn btn-outline" type="button" @click="checkPw()" :disabled="pwChecking || pwOk" x-cloak x-show="!pwOk">{{ _("Tasdiqlash") }}</button>
+        </div>
+        {{ field_error("pw", errors if open == 'contact' and not cc_pending else {}) }}
+        <p class="pw-ok" id="pw-ok" role="status" x-show="pwOk" x-cloak>{{ icon("check-circle", "ico-sm") }}{{ _("Parol to‘g‘ri") }}</p>
+        <span class="hint" id="cc-pw-hint">{{ _("Xavfsizlik uchun: telefon raqam yoki email faqat akkaunt paroli bilan almashtiriladi. Namunada parol: parol1234") }}</span>
+      </div>
+      <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy || !pwOk" :title="pwOk ? '' : '{{ _('Avval joriy parolni tasdiqlang') }}'">{{ _("Kod yuborish") }}</button></div>
     </form>
 
     <!-- 2-qadam: kod -->

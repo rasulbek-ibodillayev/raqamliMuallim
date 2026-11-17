@@ -996,3 +996,4 @@ body:has(.study-fab) .page, body:has(.study-fab) .focus-body { padding-bottom: 1
 .alt-method { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .guest-cert { display: flex !important; flex-direction: row; align-items: center; gap: 12px; width: 100%; text-align: left; }
 .guest-cert .grow { min-width: 0; }
+.pw-ok { margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--green); }

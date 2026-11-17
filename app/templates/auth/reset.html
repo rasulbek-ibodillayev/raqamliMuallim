@@ -2,46 +2,76 @@
 {% block title %}{{ _("Parolni tiklash") }}{% endblock %}
 {% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.login') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{% endblock %}
 {% block content %}
-{# 1-qadam: kod so'rash (/parol-tiklash/kod), 2-qadam: kod + yangi parol (/parol-tiklash) #}
-<div class="stack stack-lg" x-data="{ step: {{ step or 1 }} }">
+{# Bitta sahifa, uch bosqich (sahifa yangilanmaydi):
+   1) telefon/email → «Kod yuborish» (/parol-tiklash/kod) — kod maydoni ochiladi;
+   2) kod → «Tasdiqlash» (/parol-tiklash/kod-tekshirish) yoki 6 raqam kiritilganda avtomatik — kod to'g'ri bo'lsagina
+      yangi parol maydonlari ochiladi;
+   3) yangi parol → «Parolni saqlash» (/parol-tiklash). Server ham har bir bosqichni tekshiradi. #}
+<form class="stack stack-lg" action="{{ url_for('auth.reset') }}" method="post" novalidate data-stay
+      x-data="rmForm({ sent: {{ 'true' if sent else 'false' }}, verified: {{ 'true' if verified else 'false' }}, show: false, act: '' }, function (j, form) {
+        if (this.act === 'send') {
+          this.sent = true; this.verified = false; rmToast(j.message);
+          form.querySelectorAll('input[name=otp]').forEach(i => i.value = '');
+          this.$nextTick(() => { const o = form.querySelector('input[name=otp]'); if (o) o.focus(); }); return false;
+        }
+        if (this.act === 'verify') {
+          this.verified = true; rmToast(j.message);
+          this.$nextTick(() => { const p = form.querySelector('input[name=p1]'); if (p) p.focus(); }); return false;
+        } })"
+      x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}"
+      @submit.prevent="act = ($event.submitter && $event.submitter.dataset.act) || 'final'; submit($event).then(j => { if (j && j.ok && act === 'final' && j.redirect) location.href = j.redirect })">
+  {% include "partials/form_open.html" %}
   <div class="stack stack-sm">
     <h1>{{ _("Parolni tiklash") }}</h1>
-    <p class="lead" x-show="step === 1" {{ 'x-cloak' if step == 2 }}>{{ _("Telefon raqam yoki emailingizni kiriting, kodni Telegram yoki email orqali yuboramiz.") }}</p>
-    <p class="lead" x-show="step === 2" {{ 'x-cloak' if step != 2 }}>{{ _("Kodni va yangi parolni kiriting.") }}</p>
+    <p class="lead">{{ _("Telefon raqam yoki emailingizni kiriting, kodni Telegram yoki email orqali yuboramiz.") }}</p>
   </div>
 
-  <form class="stack stack-lg" action="{{ url_for('auth.reset_code') }}" method="post" novalidate data-stay x-show="step === 1" {{ 'x-cloak' if step == 2 }}
-        x-data="rmForm({}, function () { step = 2; rmToast('Tasdiqlash kodi yuborildi'); return false; })" x-init="initForm()"
-        data-errors="{{ (errors if step != 2 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
-    {% include "partials/form_open.html" %}
-    <div class="field"><label class="label" for="who">{{ _("Telefon raqam yoki email") }}</label>
-      <input class="input" id="who" name="who" value="{{ form.who }}" placeholder="{{ _('+998 90 123 45 67 yoki email@maktab.uz') }}" autocomplete="username" required
-             aria-describedby="who-err" :aria-invalid="!!err('who')" @input="clear('who')">
-      {{ field_error("who", errors if step != 2 else {}) }}</div>
-    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Kod yuborish") }}</button>
-    {# Telefon o'zgargan yoki emailga kirib bo'lmasa — maxfiy so'z orqali tiklash #}
-    <a class="btn btn-ghost btn-block alt-method" href="{{ url_for('auth.recover', qayta=1) }}">{{ icon("shield", "ico-sm") }}{{ _("Boshqa usul") }}</a>
-    <p class="xs muted center">{{ _("Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang.") }}</p>
-  </form>
-
-  <form class="stack stack-lg" action="{{ url_for('auth.reset') }}" method="post" novalidate x-show="step === 2" {{ 'x-cloak' if step != 2 }}
-        x-data="rmForm({ show: false })" x-init="initForm()" data-errors="{{ (errors if step == 2 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
-    {% include "partials/form_open.html" %}
-    <div class="field">
-      <label class="label" for="r1">{{ _("Tasdiqlash kodi") }}</label>
-      <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">{% for i in range(6) %}<input id="r{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
-      {{ field_error("otp", errors if step == 2 else {}) }}
-      <span class="hint">{{ _("Namunada kod: 123456") }}</span>
+  <!-- 1) Telefon yoki email -->
+  <div class="field">
+    <label class="label" for="who">{{ _("Telefon raqam yoki email") }}</label>
+    <div class="row row-sm">
+      <input class="input grow" id="who" name="who" value="{{ form.who or who }}" placeholder="{{ _('+998 90 123 45 67 yoki email@maktab.uz') }}" autocomplete="username" required
+             aria-describedby="who-err" :aria-invalid="!!err('who')" @input="clear('who'); if (sent) { sent = false; verified = false }">
+      <button class="btn btn-outline" type="submit" data-act="send" formaction="{{ url_for('auth.reset_code') }}" formnovalidate :disabled="busy"
+              x-text="sent ? '{{ _('Qayta yuborish') }}' : '{{ _('Kod yuborish') }}'">{{ _("Qayta yuborish") if sent else _("Kod yuborish") }}</button>
     </div>
+    {{ field_error("who", errors) }}
+  </div>
+
+  <!-- 2) Tasdiqlash kodi: kod yuborilgach ochiladi -->
+  <div class="field" x-show="sent" {{ '' if sent else 'x-cloak' }}>
+    <label class="label" for="r1">{{ _("Tasdiqlash kodi") }}</label>
+    <div class="row row-sm items-center wrap">
+      <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'"
+           @keydown.enter.prevent="$refs.verify.click()"
+           @input="clear('otp'); verified = false; const v = [...$el.querySelectorAll('input')].map(i => i.value).join(''); if (v.length === 6 && !busy) $refs.verify.click()">
+        {% for i in range(6) %}<input id="r{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam" :readonly="verified" {{ 'readonly' if verified }}>{% endfor %}
+      </div>
+      <button class="btn btn-outline" type="submit" data-act="verify" x-ref="verify" formaction="{{ url_for('auth.reset_verify') }}" formnovalidate
+              :disabled="busy || verified" x-show="!verified">{{ _("Tasdiqlash") }}</button>
+      <span class="pw-ok" role="status" x-show="verified" {{ '' if verified else 'x-cloak' }}>{{ icon("check-circle", "ico-sm") }}{{ _("Kod tasdiqlandi") }}</span>
+    </div>
+    {{ field_error("otp", errors) }}
+    <span class="hint" x-show="!verified">{{ _("Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing. Namunada kod: 123456") }}</span>
+  </div>
+
+  <!-- 3) Yangi parol: faqat kod to'g'ri bo'lsa -->
+  {# Enter bu yerda «Parolni saqlash»ni bosadi (formaning birinchi tugmasi — «Kod yuborish» emas) #}
+  <div class="stack stack-lg" x-show="sent && verified" {{ '' if verified else 'x-cloak' }} @keydown.enter.prevent="$refs.final.click()">
     <div class="field"><label class="label" for="p1">{{ _("Yangi parol") }}</label>
       <input class="input" id="p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">
-      {{ field_error("p1", errors if step == 2 else {}) }}</div>
+      {{ field_error("p1", errors) }}</div>
     <div class="field"><label class="label" for="p2">{{ _("Parolni takrorlang") }}</label>
       <input class="input" id="p2" name="p2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">
-      {{ field_error("p2", errors if step == 2 else {}) }}</div>
+      {{ field_error("p2", errors) }}</div>
     <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Parolni ko‘rsatish") }}</span></label>
-    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Parolni saqlash") }}</button>
-    <button class="link btn-reset" type="button" @click="step = 1">{{ _("Boshqa raqam yoki email kiritish") }}</button>
-  </form>
-</div>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" data-act="final" x-ref="final" :disabled="busy || !verified">{{ _("Parolni saqlash") }}</button>
+  </div>
+
+  {# Telefon o'zgargan yoki emailga kirib bo'lmasa — maxfiy so'z orqali tiklash #}
+  <div class="stack stack-sm" x-show="!verified" {{ 'x-cloak' if verified }}>
+    <a class="btn btn-ghost btn-block alt-method" href="{{ url_for('auth.recover', qayta=1) }}">{{ icon("shield", "ico-sm") }}{{ _("Boshqa usul") }}</a>
+    <p class="xs muted center">{{ _("Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang.") }}</p>
+  </div>
+</form>
 {% endblock %}
