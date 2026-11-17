@@ -183,7 +183,7 @@ RU = {
     "Sabab:": "Причина:", "yakuniy diagnostika natijasi e’tiroz ko‘rib chiqilgandan keyin qayta hisoblandi.":
         "результат итоговой диагностики пересчитан после рассмотрения апелляции.",
     "Bunday raqamli sertifikat topilmadi.": "Сертификат с таким номером не найден.", "Raqamni tekshirib, qayta kiriting.": "Проверьте номер и введите снова.",
-    "Boshqa sertifikatni tekshirish": "Проверить другой сертификат", "Masalan: INF-2026-000123": "Например: INF-2026-000123",
+    "Masalan: INF-2026-000123": "Например: INF-2026-000123",
     "Tekshirish": "Проверить",
 
     # Test
@@ -291,4 +291,5 @@ RU = {
         "Номер телефона и email меняются с подтверждением кодом в разделе «Телефон и email».",
     "Ism va familiya (sertifikatda shunday yoziladi)": "Имя и фамилия (так указываются в сертификате)",
     "Bekor qilish": "Отмена", "Saqlash": "Сохранить",
+    "Raqamni qayta kiritish": "Ввести номер заново",
 }

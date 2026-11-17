@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: raqamliMuallim VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-17 20:31+0500\n"
+"POT-Creation-Date: 2026-11-17 20:40+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1715,27 +1715,27 @@ msgstr ""
 msgid "Raqamni tekshirib, qayta kiriting."
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:39
-msgid "Sertifikat raqami"
-msgstr ""
-
-#: app/templates/auth/verify_certificate.html:39
-msgid "Boshqa sertifikatni tekshirish"
-msgstr ""
-
-#: app/templates/auth/verify_certificate.html:41
-msgid "INF-2026-000123"
+#: app/templates/auth/verify_certificate.html:36
+msgid "Raqamni qayta kiritish"
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:42
-msgid "Masalan: INF-2026-000123"
+msgid "Sertifikat raqami"
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:44
-msgid "Tekshirish"
+msgid "INF-2026-000123"
+msgstr ""
+
+#: app/templates/auth/verify_certificate.html:45
+msgid "Masalan: INF-2026-000123"
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:47
+msgid "Tekshirish"
+msgstr ""
+
+#: app/templates/auth/verify_certificate.html:50
 msgid "Raqam sertifikatning yuqori o‘ng burchagida: INF-2026-000123 ko‘rinishida."
 msgstr ""
 

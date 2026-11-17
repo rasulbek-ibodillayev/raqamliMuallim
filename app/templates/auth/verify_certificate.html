@@ -33,18 +33,22 @@
 
   {% else %}
   <div class="alert alert-yellow" role="status">{{ icon("alert") }}<span><b>{{ _("Bunday raqamli sertifikat topilmadi.") }}</b> {{ _("Raqamni tekshirib, qayta kiriting.") }}</span></div>
+  <a class="btn btn-primary btn-block" href="{{ url_for('auth.verify_certificate_lookup') }}">{{ _("Raqamni qayta kiritish") }}</a>
   {% endif %}
 
+  {# Raqam kiritish formasi faqat /s sahifasida; natija sahifasida u ortiqcha #}
+  {% if state == "form" %}
   <form class="stack stack-sm" action="{{ url_for('auth.verify_certificate_lookup') }}" method="get">
-    <label class="label" for="cert-no">{{ _("Sertifikat raqami") if state == "form" else _("Boshqa sertifikatni tekshirish") }}</label>
+    <label class="label" for="cert-no">{{ _("Sertifikat raqami") }}</label>
     <div class="row row-sm">
-      <input class="input grow num" id="cert-no" name="raqam" value="{{ cert_no if state == 'form' else '' }}" placeholder="{{ _('INF-2026-000123') }}" autocomplete="off"
-             pattern="[A-Za-z]{3}-\d{4}-\d{6}" title="{{ _('Masalan: INF-2026-000123') }}" required {{ 'autofocus' if state == 'form' }}
+      <input class="input grow num" id="cert-no" name="raqam" value="{{ cert_no }}" placeholder="{{ _('INF-2026-000123') }}" autocomplete="off"
+             pattern="[A-Za-z]{3}-\d{4}-\d{6}" title="{{ _('Masalan: INF-2026-000123') }}" required autofocus
              aria-describedby="cert-err cert-hint" {{ 'aria-invalid=true' if lookup_error }}>
       <button class="btn btn-primary" type="submit">{{ _("Tekshirish") }}</button>
     </div>
     {% if lookup_error %}<p class="field-error" id="cert-err" role="alert">{{ lookup_error }}</p>{% endif %}
     <span class="hint" id="cert-hint">{{ _("Raqam sertifikatning yuqori o‘ng burchagida: INF-2026-000123 ko‘rinishida.") }}</span>
   </form>
+  {% endif %}
 </div>
 {% endblock %}
