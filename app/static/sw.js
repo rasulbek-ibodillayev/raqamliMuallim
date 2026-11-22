@@ -1,7 +1,7 @@
 /* raqamliMuallim — Service Worker (PWA, oflayn rejim).
    Strategiya: avval tarmoq, bo'lmasa kesh. Shu sababli yangilangan fayllar darhol ko'rinadi,
    internet yo'q bo'lganda esa oxirgi ochilgan sahifalar va asosiy fayllar keshdan beriladi. */
-var VERSION = "rm-v2";
+var VERSION = "rm-v3";  // yangi JS/CSS va olib tashlangan bo‘limlar uchun kesh yangilanadi
 var CORE = [
   "/static/css/app.css",
   "/static/js/app.js",

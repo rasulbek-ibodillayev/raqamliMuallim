@@ -33,13 +33,17 @@ Namunada rol kirishdagi login’dan aniqlanadi: `admin@…` — admin, `ekspert@
 
 ## Tillar
 
-Asosiy til o‘zbekcha; rus tili `?til=ru` yoki profil/kirish sahifasidagi UZ/RU tugmasi. Matnlar `{{ _("...") }}` ichida.
+Asosiy til o‘zbekcha; rus, ingliz va qoraqalpoq tillari — `?til=ru|en|kaa` yoki UZ/RU/EN/QQ tugmalari. Matnlar `{{ _("...") }}` ichida.
+
+Kataloglarni yangilash va tarjima qilish uchun dastur — `scripts/translate.py`:
 
 ```bash
-.venv/Scripts/pybabel extract -F babel.cfg -k _l -o app/translations/messages.pot --no-wrap .
-.venv/Scripts/pybabel update -i app/translations/messages.pot -d app/translations --no-wrap
-.venv/Scripts/python scripts/apply_translations.py   # app/translations/ru_core.py dagi tarjimalarni yozadi va kompilyatsiya qiladi
+.venv/Scripts/python scripts/translate.py --extract   # yangi matnlarni yig'ish + lug'atdan to'ldirish + kompilyatsiya
 ```
+
+Lug'atlar: `app/translations/ru_core.py`, `core_en.py`, `core_kaa.py`. Qolgan satrlar uchun `RM_TRANSLATE_URL`
+(LibreTranslate bilan mos API) va `RM_TRANSLATE_KEY` berilsa, mashina tarjimasi qo'shiladi va «mashina tarjimasi» deb belgilanadi.
+Tarjima qilinmagan satr o‘zbekcha ko‘rinadi.
 
 ## Tuzilma
 

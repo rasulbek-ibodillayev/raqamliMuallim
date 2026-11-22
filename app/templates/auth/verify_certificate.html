@@ -27,9 +27,10 @@
   </dl>
   <p class="xs muted">{{ _("Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. U kursni to‘liq o‘zlashtirib, yakuniy diagnostikadan o‘tganlikni tasdiqlaydi.") }}</p>
 
-  {% elif state == "revoked" %}
-  <div class="alert alert-red" role="status">{{ icon("x-circle") }}<span><b>{{ _("Sertifikat bekor qilingan.") }}</b> {{ _("05.01.2027 dan boshlab amal qilmaydi.") }}</span></div>
-  <div class="card card-pad small"><span class="muted">{{ _("Sabab:") }}</span> {{ _("yakuniy diagnostika natijasi e’tiroz ko‘rib chiqilgandan keyin qayta hisoblandi.") }}</div>
+  {% elif state == "expired" %}
+  {# Sertifikat bekor qilinmaydi: u berilgan kundan boshlab 3 yil amal qiladi, keyin muddati o'tadi #}
+  <div class="alert alert-red" role="status">{{ icon("x-circle") }}<span><b>{{ _("Sertifikat muddati o‘tgan.") }}</b> {{ _("05.01.2026 dan boshlab amal qilmaydi.") }}</span></div>
+  <div class="card card-pad small"><span class="muted">{{ _("Sabab:") }}</span> {{ _("sertifikat berilgan kundan boshlab 3 yil amal qiladi (berilgan sana: 05.01.2023).") }}</div>
 
   {% else %}
   <div class="alert alert-yellow" role="status">{{ icon("alert") }}<span><b>{{ _("Bunday raqamli sertifikat topilmadi.") }}</b> {{ _("Raqamni tekshirib, qayta kiriting.") }}</span></div>

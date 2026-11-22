@@ -3,14 +3,16 @@
 {% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.login') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{% endblock %}
 {% block content %}
 {# Bitta sahifa, uch bosqich (sahifa yangilanmaydi):
-   1) telefon/email → «Kod yuborish» (/parol-tiklash/kod) — kod maydoni ochiladi;
+   1) telefon/email → «Kod yuborish» (/parol-tiklash/kod). Tugma faqat format to'g'ri bo'lganda faollashadi.
+      Telefon bo'lsa kod Telegram bot orqali keladi: bot raqamni ulashishni so'raydi va u bazada borligini tekshiradi
+      (ro'yxatdan o'tmagan raqamga kod yuborilmaydi). Email bo'lsa — xat bilan;
    2) kod → «Tasdiqlash» (/parol-tiklash/kod-tekshirish) yoki 6 raqam kiritilganda avtomatik — kod to'g'ri bo'lsagina
       yangi parol maydonlari ochiladi;
    3) yangi parol → «Parolni saqlash» (/parol-tiklash). Server ham har bir bosqichni tekshiradi. #}
 <form class="stack stack-lg" action="{{ url_for('auth.reset') }}" method="post" novalidate data-stay
-      x-data="rmForm({ sent: {{ 'true' if sent else 'false' }}, verified: {{ 'true' if verified else 'false' }}, show: false, act: '' }, function (j, form) {
+      x-data="rmForm(rmMix(rmContact({{ (form.who or who)|tojson|forceescape }}), { sent: {{ 'true' if sent else 'false' }}, verified: {{ 'true' if verified else 'false' }}, show: false, show2: false, act: '', via: '{{ via }}' }), function (j, form) {
         if (this.act === 'send') {
-          this.sent = true; this.verified = false; rmToast(j.message);
+          this.sent = true; this.verified = false; this.via = (j.data && j.data.via) || this.kind; rmToast(j.message);
           form.querySelectorAll('input[name=otp]').forEach(i => i.value = '');
           this.$nextTick(() => { const o = form.querySelector('input[name=otp]'); if (o) o.focus(); }); return false;
         }
@@ -31,11 +33,23 @@
     <label class="label" for="who">{{ _("Telefon raqam yoki email") }}</label>
     <div class="row row-sm">
       <input class="input grow" id="who" name="who" value="{{ form.who or who }}" placeholder="{{ _('+998 90 123 45 67 yoki email@maktab.uz') }}" autocomplete="username" required
-             aria-describedby="who-err" :aria-invalid="!!err('who')" @input="clear('who'); if (sent) { sent = false; verified = false }">
-      <button class="btn btn-outline" type="submit" data-act="send" formaction="{{ url_for('auth.reset_code') }}" formnovalidate :disabled="busy"
-              x-text="sent ? '{{ _('Qayta yuborish') }}' : '{{ _('Kod yuborish') }}'">{{ _("Qayta yuborish") if sent else _("Kod yuborish") }}</button>
+             x-model="contact" aria-describedby="who-err who-hint" :aria-invalid="!!err('who')" @input="clear('who'); if (sent) { sent = false; verified = false }">
+      {# Format to'g'ri bo'lmaguncha tugma o'chiq va kulrang; to'g'ri bo'lsa asosiy rangga o'tadi #}
+      <button class="btn" :class="valid ? 'btn-primary' : 'btn-outline'" type="submit" data-act="send" formaction="{{ url_for('auth.reset_code') }}" formnovalidate
+              :disabled="busy || !valid" x-text="sent ? '{{ _('Qayta yuborish') }}' : '{{ _('Kod yuborish') }}'">{{ _("Qayta yuborish") if sent else _("Kod yuborish") }}</button>
     </div>
     {{ field_error("who", errors) }}
+    <span class="hint" id="who-hint" x-show="!sent" x-text="kind === 'phone' ? '{{ _('Kod Telegram bot orqali keladi: bot raqamingizni ulashishni so‘raydi.') }}' : (kind === 'email' ? '{{ _('Kod shu emailga xat bilan keladi.') }}' : '{{ _('Masalan: +998 90 123 45 67 yoki email@maktab.uz') }}')">{{ _("Masalan: +998 90 123 45 67 yoki email@maktab.uz") }}</span>
+  </div>
+
+  <!-- 1b) Telefon: Telegram bot orqali -->
+  <div class="stack stack-sm" x-show="sent && !verified && via === 'phone'" {{ '' if sent and via == 'phone' and not verified else 'x-cloak' }}>
+    <ol class="list-reset card list">
+      <li class="list-item"><span class="list-ico strong">1</span><span class="grow">{{ _("Telegram botni oching") }}</span></li>
+      <li class="list-item"><span class="list-ico strong">2</span><span class="grow">{{ _("«Telefon raqamni ulashish» tugmasini bosing — bot raqam ro‘yxatdan o‘tganini tekshiradi") }}</span></li>
+      <li class="list-item"><span class="list-ico strong">3</span><span class="grow">{{ _("Bot yuborgan 6 xonali kodni kiriting") }}</span></li>
+    </ol>
+    <a class="btn btn-telegram btn-block" href="{{ bot_url }}" target="_blank" rel="noopener">{{ icon("telegram") }}{{ _("Telegram botni ochish") }}</a>
   </div>
 
   <!-- 2) Tasdiqlash kodi: kod yuborilgach ochiladi -->
@@ -59,12 +73,11 @@
   {# Enter bu yerda «Parolni saqlash»ni bosadi (formaning birinchi tugmasi — «Kod yuborish» emas) #}
   <div class="stack stack-lg" x-show="sent && verified" {{ '' if verified else 'x-cloak' }} @keydown.enter.prevent="$refs.final.click()">
     <div class="field"><label class="label" for="p1">{{ _("Yangi parol") }}</label>
-      <input class="input" id="p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">
+      <div class="input-group"><input class="input" id="p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">{{ eye("show") }}</div>
       {{ field_error("p1", errors) }}</div>
     <div class="field"><label class="label" for="p2">{{ _("Parolni takrorlang") }}</label>
-      <input class="input" id="p2" name="p2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">
+      <div class="input-group"><input class="input" id="p2" name="p2" :type="show2 ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">{{ eye("show2") }}</div>
       {{ field_error("p2", errors) }}</div>
-    <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Parolni ko‘rsatish") }}</span></label>
     <button class="btn btn-primary btn-lg btn-block" type="submit" data-act="final" x-ref="final" :disabled="busy || !verified">{{ _("Parolni saqlash") }}</button>
   </div>
 

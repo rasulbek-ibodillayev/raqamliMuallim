@@ -16,21 +16,30 @@
     <li class="list-item"><span class="list-ico strong">3</span><span class="grow">{{ _("Bot yuborgan 6 xonali kodni kiriting") }}</span></li>
   </ol>
 
-  <a class="btn btn-outline btn-block" href="{{ bot_url or 'https://t.me/raqamliMuallimBot' }}" target="_blank" rel="noopener">{{ icon("telegram") }}{{ _("Telegram botni ochish") }}</a>
+  <a class="btn btn-telegram btn-lg btn-block" href="{{ bot_url or 'https://t.me/raqamliMuallimBot' }}" target="_blank" rel="noopener">{{ icon("telegram") }}{{ _("Telegram botni ochish") }}</a>
 
-  <div class="field">
-    <label class="label" for="otp1">{{ _("Tasdiqlash kodi") }}</label>
-    <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err otp-hint" :class="err('otp') && 'invalid'" @input="clear('otp')">
-      {% for i in range(6) %}<input id="otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}
+  {# Kod 5 daqiqa amal qiladi: qolgan vaqt ko'rinib turadi, tugagach «Kodni qayta yuborish» chiqadi #}
+  <div class="stack stack-sm" x-data="rmCodeTimer(300)" x-init="start()">
+    <div class="field">
+      <label class="label" for="otp1">{{ _("Tasdiqlash kodi") }}</label>
+      <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err otp-hint" :class="err('otp') && 'invalid'" @input="clear('otp')">
+        {% for i in range(6) %}<input id="otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam" :disabled="expired">{% endfor %}
+      </div>
+      {{ field_error("otp", errors) }}
     </div>
-    {{ field_error("otp", errors) }}
-    <span class="hint" id="otp-hint">{{ _("Kod 5 daqiqa amal qiladi. 5 ta urinish bor. Namunada kod: 123456") }}</span>
+    <div class="code-timer" :class="left <= 60 && 'low'" x-show="!expired" role="timer" aria-live="off">
+      {{ icon("clock", "ico-sm faint") }}<span>{{ _("Kod amal qiladi:") }}</span>
+      <div class="progress thin" :class="left <= 60 && 'progress-red'"><span :style="'--v:' + pct + '%'" style="--v: 100%"></span></div>
+      <b x-text="mmss">5:00</b>
+    </div>
+    <div class="alert alert-red" role="alert" x-show="expired" x-cloak>{{ icon("clock") }}<span>{{ _("Kodning amal qilish muddati (5 daqiqa) tugadi. Yangi kod so‘rang.") }}</span></div>
+    <span class="hint" id="otp-hint">{{ _("5 ta urinish bor. Namunada kod: 123456") }}</span>
+
+    <div class="alert alert-yellow">{{ icon("info") }}<span>{{ _("Telegram boshqa raqamga ulanganmi? Bot sizga") }} <b>{{ _("Telegram’dagi raqam bilan davom etish") }}</b>{{ _("ni taklif qiladi.") }}</span></div>
+
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy || expired">{{ _("Tasdiqlash") }}</button>
+    <button class="btn btn-outline btn-block" type="button" x-show="expired" x-cloak
+            @click="start(); $root.querySelectorAll('input[name=otp]').forEach(i => i.value = ''); rmToast('{{ _('Yangi kod Telegram bot orqali yuborildi') }}')">{{ icon("refresh", "ico-sm") }}{{ _("Kodni qayta yuborish") }}</button>
   </div>
-
-  <div class="alert alert-yellow">{{ icon("info") }}<span>{{ _("Telegram boshqa raqamga ulanganmi? Bot sizga") }} <b>{{ _("Telegram’dagi raqam bilan davom etish") }}</b>{{ _("ni taklif qiladi.") }}</span></div>
-
-  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Tasdiqlash") }}</button>
-  <button class="btn btn-ghost btn-block" type="button" x-data="{ s: 48 }" x-init="let t = setInterval(() => { if (--s <= 0) clearInterval(t) }, 1000)"
-          :disabled="s > 0" @click="s = 60; rmToast('Kod qayta yuborildi')" x-text="s > 0 ? 'Kodni qayta yuborish · 0:' + String(s).padStart(2, '0') : 'Kodni qayta yuborish'">{{ _("Kodni qayta yuborish") }}</button>
 </form>
 {% endblock %}

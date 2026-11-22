@@ -1,14 +1,15 @@
 {% extends "layouts/focus.html" %}
-{% block title %}{{ _("Savol") }} {{ q.n }} / 10{% endblock %}
+{% block title %}{{ _("Savol") }} {{ q.n }} / {{ total }}{% endblock %}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.tests') }}" data-safe-leave aria-label="{{ _('To‘xtatish va chiqish (javoblar saqlanadi)') }}">{{ icon("x") }}</a>
-<div class="grow"><div class="strong small">{{ _("1-bosqich · Oson") }}</div><div class="xs muted num">{{ _("Savol") }} {{ q.n }} / 10</div></div>
+{# Bosqich faqat bosqichli testlarda (diagnostika, oraliq, haftalik, ixtiyoriy, oylik, yakuniy) ko'rsatiladi #}
+<div class="grow"><div class="strong small">{{ tname }}{% if staged %} · {{ _("1-bosqich · Oson") }}{% endif %}</div><div class="xs muted num">{{ _("Savol") }} {{ q.n }} / {{ total }}</div></div>
 {# Taymer va oflayn belgisi savol komponentidan hodisa orqali yangilanadi #}
 <button class="icon-btn" type="button" data-fs-toggle onclick="rmToggleFullscreen()" aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran (faqat test oynasi)') }}"><svg class="ico" aria-hidden="true"><use href="#i-maximize"/></svg></button>
 <span class="badge badge-plain num badge-timer" role="timer" aria-label="{{ _('Qolgan vaqt') }}" x-data="{ t: '--:--', low: false }"
       @rm-q-tick.window="t = $event.detail.text; low = $event.detail.left < 60" :class="low && 'warn'">{{ icon("clock") }}<span x-text="t">--:--</span></span>
 {% endblock %}
-{% block bar_progress %}<div class="r-0 progress thin"><span style="--v: {{ q.n * 10 }}%"></span></div>{% endblock %}
+{% block bar_progress %}<div class="r-0 progress thin"><span style="--v: {{ (q.n / total * 100)|round|int }}%"></span></div>{% endblock %}
 
 {% block before_body %}
 <div class="alert alert-yellow alert-bar" role="status" x-data="{ off: {{ 'true' if offline else '!navigator.onLine' }} }"
@@ -19,10 +20,12 @@
 
 {% block content %}
 {# Javob har o'zgarishda qurilmaga (IndexedDB) yoziladi va navbat orqali serverga yuboriladi: static/js/player.js #}
-<form id="answer" class="stack stack-lg" action="{{ url_for('test.stage') }}" method="get" data-leave-guard
-      x-data="rmTestQuestion({ id: 'topic:namuna', kind: 'topic', total: 10, duration: 600, pos: {{ q.n - 1 }}, mode: '{{ kind }}', offline: {{ 'true' if offline else 'false' }} })"
+{# GET forma: action'dagi ?turi=… yo'qoladi, shuning uchun test turi yashirin maydonda #}
+<form id="answer" class="stack stack-lg" action="{{ next_url }}" method="get" data-leave-guard
+      x-data="rmTestQuestion({ id: '{{ ttype }}:namuna', kind: '{{ ttype }}', total: {{ total }}, duration: {{ total * 60 }}, pos: {{ q.n - 1 }}, mode: '{{ kind }}', offline: {{ 'true' if offline else 'false' }} })"
       x-effect="$dispatch('rm-q-tick', { text: fmt(left), left: left === null ? 999 : left }); $dispatch('rm-q-online', online)"
       @change="save()" @input.debounce.400ms="save()">
+  <input type="hidden" name="turi" value="{{ slug }}">
   <div class="stack stack-sm">
     <div class="row row-sm wrap"><span class="badge badge-gray">{{ q.type }}</span><span class="xs muted grow">{{ _("Mavzu:") }} {{ q.topic }}</span>
       <span class="saved-ind" role="status" aria-live="polite">
@@ -53,7 +56,8 @@
   </fieldset>
 
   {% elif kind == "moslash" %}
-  <div class="match">
+  {# Bir ta'rif faqat bitta atamaga: tanlangan javob boshqa atamalarning ro'yxatidan olib tashlanadi (rmMatch) #}
+  <div class="match" x-data="rmMatch()" x-init="init()" @change="sync()">
     {% for p in q.pairs %}
     <span class="term">{{ p }}</span>
     <select class="select" name="m{{ loop.index0 }}" aria-label="{{ p }} uchun ta’rif">

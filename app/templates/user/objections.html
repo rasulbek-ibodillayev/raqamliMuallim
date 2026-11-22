@@ -1,13 +1,51 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ _("E’tirozlarim") }}{% endblock %}
 {% block content %}
-{% call page_head(_("E’tirozlarim"), _("Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi.")) %}{% endcall %}
-<div class="stack">
+{# Hali ko'rib chiqilmagan e'tirozni foydalanuvchi tahrirlashi (sabab va izoh) yoki o'chirishi mumkin.
+   Ko'rib chiqilgani (qabul/rad) o'zgartirilmaydi — server ham tekshiradi. #}
+{% set reasons = [("wrong_key", _("To‘g‘ri javob noto‘g‘ri ko‘rsatilgan")), ("also_correct", _("Mening javobim ham to‘g‘ri")), ("unclear", _("Savol tushunarsiz")), ("media", _("Rasm yoki jadvalda xato")), ("other", _("Boshqa"))] %}
+{% call page_head(_("E’tirozlarim"), _("Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi. Ko‘rib chiqilmaguncha uni tahrirlash yoki o‘chirish mumkin.")) %}{% endcall %}
+<div class="stack" x-data="{ gone: [] }">
   {% for o in items %}
   {% set label, color = state[o.state] %}
-  <article class="card card-pad stack stack-sm">
-    <div class="row between"><span class="xs muted">{{ o.when }}</span>{{ status_dot(label, color) }}</div>
+  <article class="card card-pad stack stack-sm" x-show="!gone.includes({{ o.id }})" x-transition.opacity
+           x-data="{ edit: false, reason: {{ (o.reason or 'unclear')|tojson|forceescape }}, note: {{ (o.note or '')|tojson|forceescape }} }">
+    <div class="row between"><span class="xs muted">{{ o.when }}</span>
+      <span class="row row-sm">{{ status_dot(label, color) }}
+      {% if o.state == "review" %}
+      <button class="icon-btn" type="button" @click="edit = !edit" :aria-pressed="edit" aria-label="{{ _('E’tirozni tahrirlash') }}" title="{{ _('E’tirozni tahrirlash') }}">{{ icon("edit", "ico-sm") }}</button>
+      <form action="{{ url_for('user.objection_delete', oid=o.id) }}" method="post" class="u-d-inline"
+            x-data="rmForm({}, function () { gone.push({{ o.id }}); rmToast('{{ _('E’tiroz o‘chirildi') }}'); return false; })"
+            @submit.prevent="if (confirm('{{ _('E’tiroz o‘chirilsinmi? Uni ekspert hali ko‘rib chiqmagan.') }}')) submit($event).then(j => { if (j && !j.ok) rmToast(Object.values(j.errors || {})[0] || j.message) })">
+        {{ csrf() }}
+        <button class="icon-btn" type="submit" :disabled="busy" aria-label="{{ _('E’tirozni o‘chirish') }}" title="{{ _('E’tirozni o‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+      </form>
+      {% endif %}</span></div>
     <p class="strong">{{ o.q }}</p>
+
+    {% if o.state == "review" %}
+    {# Ko'rish holati: yuborilgan sabab va izoh #}
+    <div class="small c-text2" x-show="!edit">
+      <span class="muted">{{ _("Sabab:") }}</span> <span x-text="{{ dict(reasons)|tojson|forceescape }}[reason]">{{ dict(reasons)[o.reason or 'unclear'] }}</span>
+      <template x-if="note"><span> · <span class="muted">{{ _("Izoh:") }}</span> <span x-text="note"></span></span></template>
+    </div>
+    {# Tahrirlash #}
+    <form class="stack stack-sm obj-edit" x-show="edit" x-cloak action="{{ url_for('user.objection_edit', oid=o.id) }}" method="post" novalidate
+          x-data="rmForm({}, function (j) { edit = false; rmToast(j.message); return false; })" x-init="initForm()" @submit.prevent="submit($event)">
+      {{ csrf() }}
+      <label class="label" for="obj-r-{{ o.id }}">{{ _("Sabab") }}</label>
+      <select class="select" id="obj-r-{{ o.id }}" name="reason" x-model="reason" @change="clear('reason')">
+        {% for v, l in reasons %}<option value="{{ v }}">{{ l }}</option>{% endfor %}
+      </select>
+      {{ field_error("reason") }}
+      <label class="label" for="obj-n-{{ o.id }}">{{ _("Izoh") }}</label>
+      <textarea class="textarea" id="obj-n-{{ o.id }}" name="note" maxlength="1000" x-model="note" @input="clear('note')"></textarea>
+      {{ field_error("note") }}
+      <div class="row justify-end"><button class="btn btn-ghost" type="button" @click="edit = false">{{ _("Bekor qilish") }}</button>
+        <button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
+    </form>
+    {% endif %}
+
     {% if o.verdict %}
     <div class="p-14 card card-flat stack stack-sm">
       <div class="row row-sm small strong">{{ icon("shield", "ico-sm") }}{{ _("Ekspert xulosasi") }}</div>

@@ -13,7 +13,7 @@
     <div class="stack stack-sm">
       {% if failed %}
       <h1>{{ _("Bu mavzuni yana bir bor o‘rganamiz") }}</h1>
-      <p class="lead">{{ _("2-bosqichdan o‘tish uchun 80%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.") }}</p>
+      <p class="lead">{{ _("Keyingi mavzuga o‘tish uchun kamida 70%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.") }}</p>
       {% else %}
       <h1>{{ _("Keyingi mavzuga o‘tishingiz mumkin") }}</h1>
       <p class="lead">{{ _("Natija 70–89%% oralig‘ida, shuning uchun mavzuni keyinroq takrorlashni tavsiya qilamiz.") }}</p>
@@ -37,27 +37,15 @@
   </section>
   {% endif %}
 
+  {# Har bir savol: xato javob — qizil, to'g'ri javob — yashil (barcha test turlarida bir xil) #}
   <section class="stack">
-    <div class="row between"><h2 class="eyebrow">{{ _("Savollar") }}</h2><span class="xs muted">{{ review|length }} {{ _("ta") }}</span></div>
-    {% for r in review %}
-    {% set ok = r.ok and not (failed and r.n == 1) %}
-    <article class="card card-pad stack stack-sm" style="border-left:3px solid var(--{{ 'green' if ok else 'red' }})">
-      <div class="row between"><span class="small muted">{{ r.n }}{{ _("-savol") }}</span>
-        {% if ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}{% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}</div>
-      <p>{{ r.q }}</p>
-      {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
-      <div class="small"><span class="muted">{{ _("Sizning javobingiz:") }}</span> <b class="{{ 't-green' if ok else 't-red' }}">{{ '42' if failed and r.n == 1 else r.mine }}</b>
-        {% if not ok %} · <span class="muted">{{ _("To‘g‘ri javob:") }}</span> <b class="t-green">{{ r.right or '45' }}</b>{% endif %}</div>
-      {% if not ok %}
-      <div class="card card-flat small u-p-12-14 u-c-text2"><b>{{ _("Izoh.") }}</b> {{ r.why or '101101₂ = 32 + 8 + 4 + 1 = 45.' }}</div>
-      <div class="row wrap row-sm">
-        <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor') }}">{{ icon("sparkle", "ico-sm") }}{{ _("Xatoimni tushuntir") }}</a>
-        <button class="btn btn-ghost btn-sm" type="button" @click="$dispatch('objection', { id: 'Q-{{ r.n }}', text: {{ r.q|tojson|forceescape }} })">{{ icon("flag", "ico-sm") }}{{ _("E’tiroz bildirish") }}</button>
-      </div>
-      {% endif %}
-      <span class="xs muted">{{ _("(Mavzu:") }} {{ r.topic }})</span>
-    </article>
-    {% endfor %}
+    <div class="row between wrap"><h2 class="eyebrow">{{ _("Savollar va javoblar") }}</h2>
+      <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("xato javobingiz") }} <span class="dot dot-green"></span>{{ _("to‘g‘ri javob") }}</span></div>
+    {% include "partials/answer_review.html" %}
+    <div class="row wrap row-sm">
+      <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor', q='Xatolarimni tushuntir') }}">{{ icon("sparkle", "ico-sm") }}{{ _("Xatolarimni tushuntir") }}</a>
+      <button class="btn btn-ghost btn-sm" type="button" @click="$dispatch('objection', { id: 'Q-4', text: {{ questions[3].q|tojson|forceescape }} })">{{ icon("flag", "ico-sm") }}{{ _("E’tiroz bildirish") }}</button>
+    </div>
   </section>
 </div>
 {% endblock %}

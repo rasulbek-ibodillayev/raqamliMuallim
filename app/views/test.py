@@ -1,6 +1,15 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, redirect, render_template, request, url_for
 
 from .. import mock as m
+
+# Test turi URL'da (?turi=…) → mock.TEST_TYPES kaliti. «Bosqichlar orasi» ekrani faqat mock.STAGED_TYPES uchun.
+TYPE_SLUGS = {"diagnostika": "diagnostic", "mavzu": "topic", "kunlik": "daily", "oraliq": "interim", "haftalik": "weekly",
+              "ixtiyoriy": "optional", "oylik": "monthly", "yakuniy": "final", "xatolar": "errors"}
+
+
+def _test_type():
+    t = request.args.get("turi") or ("xatolar" if request.args.get("manba") == "xatolar" else "mavzu")
+    return TYPE_SLUGS.get(t, "topic"), (t if t in TYPE_SLUGS else "mavzu")
 
 bp = Blueprint("test", __name__, url_prefix="/test")
 
@@ -40,40 +49,58 @@ QUESTIONS = {
 def question():
     kind = request.args.get("tur", "yopiq")
     q = QUESTIONS.get(kind, QUESTIONS["yopiq"])
-    # mode — javob berish usuli (yopiq/kop/moslash/ochiq); rasm va jadval istalgan turga qo'shilishi mumkin
-    return render_template("test/question.html", q=q, kind=q.get("mode", kind),
-                           offline=bool(request.args.get("oflayn")))
+    ttype, slug = _test_type()
+    staged = ttype in m.STAGED_TYPES
+    try:
+        total = max(1, min(50, int(request.args.get("soni", 10))))
+    except ValueError:
+        total = 10
+    # mode — javob berish usuli (yopiq/kop/moslash/ochiq); rasm va jadval istalgan turga qo'shilishi mumkin.
+    # Bosqichli test (diagnostika, oraliq, haftalik, ixtiyoriy, oylik, yakuniy) — keyin «Bosqichlar orasi»;
+    # boshqalari (mavzu testi, kunlik, xatolar ustida ishlash) — to'g'ridan-to'g'ri natijaga.
+    # Forma GET bilan yuboriladi: action manzilidagi ?turi=… brauzer tomonidan tashlab yuboriladi,
+    # shuning uchun test turi formaning yashirin maydoni (turi) orqali uzatiladi.
+    next_url = url_for("test.stage") if staged else url_for("test.result")
+    return render_template("test/question.html", q=q, kind=q.get("mode", kind), total=total,
+                           offline=bool(request.args.get("oflayn")), staged=staged, ttype=ttype,
+                           tname=m.TEST_TYPES[ttype][0], next_url=next_url, slug=slug)
 
 
 @bp.get("/bosqich")
 def stage():
-    return render_template("test/stage.html")
+    """Bosqichlar orasi: faqat diagnostika, oraliq sinov, haftalik, ixtiyoriy, oylik test va yakuniy diagnostikada."""
+    ttype, slug = _test_type()
+    if request.args.get("turi") and ttype not in m.STAGED_TYPES:
+        return redirect(url_for("test.result", turi=slug))
+    if ttype not in m.STAGED_TYPES:
+        ttype, slug = "interim", "oraliq"
+    return render_template("test/stage.html", slug=slug, tname=m.TEST_TYPES[ttype][0])
 
 
 @bp.get("/natija")
 def result():
     failed = request.args.get("holat") == "qaytarildi"
-    return render_template("test/result.html", failed=failed, review=m.REVIEW)
+    return render_template("test/result.html", failed=failed, questions=m.RESULT_QUESTIONS)
 
 
 EXAM_POOL = [
     {"topic": "Mantiq asoslari", "text": "(A ∨ B) ∧ ¬(A ∧ B) mantiqiy ifodasi qachon 1 ga teng bo‘ladi?",
      "options": ["Faqat A va B bir vaqtda rost bo‘lganda", "A va B turli qiymatga ega bo‘lganda",
-                 "A va B ikkalasi yolg‘on bo‘lganda", "Har doim"]},
+                 "A va B ikkalasi yolg‘on bo‘lganda", "Har doim"], "right": 1},
     {"topic": "Sanoq sistemalari", "text": "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.",
-     "options": ["43", "45", "47", "53"]},
+     "options": ["43", "45", "47", "53"], "right": 1},
     {"topic": "Dasturlash", "text": "Quyidagi Python kodi natijasini aniqlang:",
-     "code": "s = 0\nfor i in range(1, 5):\n    s += i\nprint(s)", "options": ["10", "15", "4", "5"]},
+     "code": "s = 0\nfor i in range(1, 5):\n    s += i\nprint(s)", "options": ["10", "15", "4", "5"], "right": 0},
     {"topic": "Tarmoq texnologiyalari", "text": "DNS serverning asosiy vazifasi qaysi?",
-     "options": ["Fayllarni uzatish", "Domen nomini IP-manzilga o‘girish", "Elektron xat yuborish", "Sahifani shifrlash"]},
+     "options": ["Fayllarni uzatish", "Domen nomini IP-manzilga o‘girish", "Elektron xat yuborish", "Sahifani shifrlash"], "right": 1},
     {"topic": "Elektron jadvallar", "text": "C4 katakka =SUMIF(A1:A3;\">1\";B1:B3) formulasi yozildi. C4 qiymati nechaga teng?",
      "table": {"head": ["", "A", "B", "C"], "rows": [["1", "1", "10", ""], ["2", "2", "20", ""], ["3", "3", "30", ""], ["4", "", "", "?"]]},
-     "options": ["60", "50", "30", "20"]},
+     "options": ["60", "50", "30", "20"], "right": 1},
     {"topic": "Mantiq asoslari", "text": "Rasmdagi mantiqiy sxema qaysi ifodaga mos keladi?",
      "image": {"src": "img/savol-mantiqiy-sxema.svg", "alt": "Mantiqiy sxema: OR va NAND elementlari natijasi AND orqali F chiqishiga beriladi"},
-     "options": ["F = (A ∨ B) ∧ ¬(A ∧ B)", "F = (A ∧ B) ∨ ¬(A ∨ B)", "F = ¬(A ∨ B)", "F = A ∧ B"]},
+     "options": ["F = (A ∨ B) ∧ ¬(A ∧ B)", "F = (A ∧ B) ∨ ¬(A ∨ B)", "F = ¬(A ∨ B)", "F = A ∧ B"], "right": 0},
     {"topic": "Axborot hajmi", "text": "256 xil belgidan iborat alifbodagi bitta belgi necha bit axborot olib keladi?",
-     "options": ["6", "7", "8", "16"]},
+     "options": ["6", "7", "8", "16"], "right": 2},
 ]
 
 
@@ -96,3 +123,33 @@ def exam():
     answered = {i: (i * 3) % 4 for i in range(1, 11) if i != start} if sample else {}
     return render_template("test/exam.html", questions=qs, start=start, start_given=start_given, answered=answered,
                            sample=sample, confirm=bool(request.args.get("yakun")))
+
+
+@bp.get("/sinov/natija")
+def exam_result():
+    """Attestatsiya testi yakuni: to'plangan ball, har bir savol (xato javob — qizil, to'g'ri javob — yashil),
+    mavzular bo'yicha o'zlashtirish foizi va qayta o'zlashtirish tavsiyasi.
+    Namunada javoblar soxta; backendda urinish (attempt) javoblaridan hisoblanadi."""
+    qs = []
+    for i in range(35):
+        q = EXAM_POOL[i % len(EXAM_POOL)]
+        right = q["right"]
+        # namuna: har 4-savol xato, 33–35 javobsiz; «Mantiq asoslari»da xato ko'proq
+        if i >= 32:
+            mine = None
+        elif i % 4 == 3 or (q["topic"] == "Mantiq asoslari" and i % 3 == 0):
+            mine = (right + 1) % len(q["options"])
+        else:
+            mine = right
+        qs.append({"n": i + 1, "topic": q["topic"], "q": q["text"], "code": q.get("code"), "options": q["options"],
+                   "mine": mine, "right": right})
+    correct = sum(1 for q in qs if q["mine"] == q["right"])
+    topics = {}
+    for q in qs:
+        t = topics.setdefault(q["topic"], [0, 0])
+        t[1] += 1
+        t[0] += q["mine"] == q["right"]
+    by_topic = sorted(((name, round(c / n * 100), c, n) for name, (c, n) in topics.items()), key=lambda x: x[1])
+    return render_template("test/exam_result.html", questions=qs, correct=correct, total=len(qs),
+                           pct=round(correct / len(qs) * 100), by_topic=by_topic,
+                           pass_min=m.PASS_MIN, solid_min=m.SOLID_MIN)

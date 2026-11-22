@@ -7,7 +7,7 @@
 {% endcall %}
 <div class="split" x-data="{ tab: 'limits' }">
   <nav class="card u-p-8">
-    {% for k, ic, l in [("limits", "target", "Test chegaralari"), ("count", "list", "Savollar soni"), ("ai", "sparkle", "AI va byudjet"), ("accounts", "users", "Akkauntlar"), ("notify", "bell", "Bildirishnomalar"), ("roles", "shield", "Rollar va huquqlar")] %}
+    {% for k, ic, l in [("limits", "target", "Test chegaralari"), ("count", "list", "Savollar soni"), ("accounts", "users", "Akkauntlar"), ("notify", "bell", "Bildirishnomalar"), ("roles", "shield", "Rollar va huquqlar")] %}
     <button class="nav-item u-w-100p u-b-0 u-bg-none u-cur-pointer" type="button" :class="tab === '{{ k }}' && 'active'" @click="tab = '{{ k }}'">{{ icon(ic) }}{{ l }}</button>
     {% endfor %}
   </nav>
@@ -37,17 +37,7 @@
       <div class="list">
         <div class="list-item"><div class="grow"><div>{{ _("Bosqichdagi minimal savollar") }}</div><div class="sub">{{ _("Kam bo‘lsa, kichik mavzular orasida navbat bilan to‘ldiriladi") }}</div></div><input class="input-num input num" value="10" aria-label="{{ _('Minimal savollar') }}"></div>
         <div class="list-item"><div class="grow"><div>{{ _("Diagnostikada har mavzudan") }}</div><div class="sub">{{ _("1-bosqich, oson savollar") }}</div></div><input class="input-num input num" value="2" aria-label="{{ _('Diagnostika savollari') }}"></div>
-        <div class="list-item"><div class="grow"><div>{{ _("Attestatsiya sinovi") }}</div><div class="sub">{{ _("Savollar soni va vaqt (daqiqa)") }}</div></div><div class="row row-sm"><input class="input num u-w-70 u-ta-right u-minh-40" value="35" aria-label="{{ _('Savollar') }}"><input class="input-num input num" value="105" aria-label="{{ _('Daqiqa') }}"></div></div>
-      </div>
-    </section>
-
-    <section class="card" x-show="tab === 'ai'" x-cloak>
-      <div class="card-head"><div class="strong">{{ _("AI va byudjet") }}</div><span class="small muted">{{ _("Shu oy: $210 / $500") }}</span></div>
-      <div class="card-pad stack">
-        {{ progress(42) }}
-        <div class="field"><label class="label" for="budget">{{ _("Oylik AI byudjeti ($)") }}</label><input class="input num" id="budget" value="500"><span class="hint">{{ _("Byudjet tugasa, AI tutor faqat keshdan javob beradi.") }}</span></div>
-        <div class="field"><span class="label">{{ _("Zaxira zanjiri") }}</span>
-          <div class="card list">{% for n, s in [("Gemini · bepul tarif", "Asosiy"), ("Pullik API kalit", "Limitga yetganda"), ("Keshdagi javob", "Oxirgi zaxira")] %}<div class="minh-48 list-item"><span class="list-ico strong u-w-28 u-h-28">{{ loop.index }}</span><span class="grow">{{ n }}</span><span class="xs muted">{{ s }}</span></div>{% endfor %}</div></div>
+        <div class="list-item"><div class="grow"><div>{{ _("Attestatsiya testi") }}</div><div class="sub">{{ _("Savollar soni va vaqt (daqiqa)") }}</div></div><div class="row row-sm"><input class="input num u-w-70 u-ta-right u-minh-40" value="35" aria-label="{{ _('Savollar') }}"><input class="input-num input num" value="120" aria-label="{{ _('Daqiqa') }}"></div></div>
       </div>
     </section>
 

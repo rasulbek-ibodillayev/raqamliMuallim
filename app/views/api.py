@@ -101,4 +101,5 @@ def finish(attempt_uuid):
         att = ATTEMPTS.setdefault(attempt_uuid, {"kind": kind, "answers": {}, "finished": False})
         att["finished"] = True
         answered = sum(1 for a in att["answers"].values() if a["v"] is not None)
-    return jsonify(ok=True, answered=answered, result_url=url_for("test.result"))
+    return jsonify(ok=True, answered=answered,
+                   result_url=url_for("test.exam_result") if kind == "exam" else url_for("test.result"))

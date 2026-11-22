@@ -2,33 +2,62 @@
 {% block title %}{{ _("Savollar banki") }}{% endblock %}
 {% block heading %}{{ _("Savollar banki") }}{% endblock %}
 {% block content %}
-{% call page_head(_("Savollar banki"), _("1 420 ta savol")) %}
+{# «Tekshiruv navbati» va «Savol yaratish» alohida bo'lim emas — shu sahifadagi kartalar #}
+{% call page_head(_("Savollar banki"), _("1 420 ta savol · mavzu va darslar «Mavzular va darslar» bo‘limidan avtomatik qo‘shiladi")) %}
 <button class="btn btn-outline btn-sm" type="button">{{ icon("download", "ico-sm") }}{{ _("Eksport") }}</button>
 <button class="btn btn-outline btn-sm" type="button">{{ icon("upload", "ico-sm") }}{{ _("Excel import") }}</button>
 <a class="btn btn-primary btn-sm" href="{{ url_for('expert.editor') }}">{{ icon("plus", "ico-sm") }}{{ _("Savol qo‘shish") }}</a>
 {% endcall %}
 <div class="stack">
+  <div class="grid-2 bank-cards">
+    <a class="card card-pad bank-card" href="{{ url_for('expert.queue') }}">
+      <span class="ai-mark">{{ icon("sparkle") }}</span>
+      <div class="grow">
+        <div class="row between"><span class="strong">{{ _("Tekshiruv navbati") }}</span><span class="badge badge-blue num">{{ queue_n }}</span></div>
+        <p class="small muted">{{ _("AI har bir mavzu va dars bo‘yicha tuzgan savollar. Tahrirlang, tasdiqlang yoki rad eting.") }}</p>
+      </div>
+      {{ icon("chevron-right", "ico-sm chev") }}
+    </a>
+    <a class="card card-pad bank-card" href="{{ url_for('expert.editor') }}">
+      <span class="list-ico">{{ icon("edit") }}</span>
+      <div class="grow">
+        <div class="strong">{{ _("Savol yaratish") }}</div>
+        <p class="small muted">{{ _("Mavzu, dars, qiyinlik, tur, vaqt va formatni belgilab, yangi savol qo‘shing.") }}</p>
+      </div>
+      {{ icon("chevron-right", "ico-sm chev") }}
+    </a>
+  </div>
+
   <div class="alert alert-red">{{ icon("alert") }}<span class="grow"><b>{{ _("3 ta mavzuda savollar yetarli emas.") }}</b> {{ _("Har kichik mavzu va daraja bo‘yicha testdagidan kamida 4 baravar ko‘p savol bo‘lishi kerak.") }}</span><a class="link nowrap" href="{{ url_for('expert.topics') }}">{{ _("Ko‘rish") }}</a></div>
   <div class="row wrap row-sm">
     <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" placeholder="{{ _('Savol qidirish') }}" aria-label="{{ _('Savol qidirish') }}"></div>
-    {% for l, opts in [("Mavzu", ["Barcha mavzular", "Sanoq sistemalari", "Tarmoqlar"]), ("Daraja", ["Barcha darajalar", "Oson", "O‘rta", "Qiyin"]), ("Turi", ["Barcha turlar", "Yopiq", "Ko‘p javobli", "Moslashtirish", "Ochiq"]), ("Holat", ["Barcha holatlar", "Tasdiqlangan", "Tekshiruvda", "Qoralama", "Arxivlangan"])] %}
+    <select class="w-auto select" aria-label="{{ _('Mavzu') }}"><option>{{ _("Barcha mavzular") }}</option>{% for t in content %}<option>{{ t.name }}</option>{% endfor %}</select>
+    <select class="w-auto select" aria-label="{{ _('Dars') }}"><option>{{ _("Barcha darslar") }}</option>{% for t in content %}{% for l in t.lessons %}<option>{{ l.name }}</option>{% endfor %}{% endfor %}</select>
+    {% for l, opts in [(_("Daraja"), [_("Barcha darajalar"), _("Oson"), _("O‘rta"), _("Qiyin")]), (_("Turi"), [_("Barcha turlar"), _("Yopiq"), _("Ko‘p javobli"), _("Moslashtirish"), _("Ochiq")]), (_("Holat"), [_("Barcha holatlar"), _("Tasdiqlangan"), _("Tekshiruvda"), _("Qoralama"), _("Arxivlangan")])] %}
     <select class="w-auto select" aria-label="{{ l }}">{% for o in opts %}<option>{{ o }}</option>{% endfor %}</select>
     {% endfor %}
   </div>
-  <div class="table-wrap">
+  <div class="table-wrap" x-data="{ gone: [] }">
     <table class="table">
       <thead><tr><th>{{ _("Savol") }}</th><th>{{ _("Mavzu") }}</th><th>{{ _("Daraja") }}</th><th>{{ _("Turi") }}</th><th>{{ _("Holat") }}</th><th>{{ _("To‘g‘ri %%") }}</th><th></th></tr></thead>
       <tbody>
         {% for q, topic, lvl, kind, st, pct, doubt in items %}
         {% set label, color = state[st] %}
-        <tr>
+        <tr x-show="!gone.includes({{ loop.index }})">
           <td class="q"><div class="maxw-360 truncate">{{ q }}</div>{% if doubt %}<span class="xs t-yellow row row-sm u-mt-2">{{ icon("alert", "ico-sm") }}{{ _("Daraja shubhali") }}</span>{% endif %}</td>
           <td class="nowrap">{{ topic }}</td>
           <td class="nowrap">{{ lvl }}</td>
           <td class="nowrap muted">{{ kind }}</td>
           <td>{{ status_dot(label, color) }}</td>
           <td class="num">{{ pct ~ "%" if pct is not none else "—" }}</td>
-          <td><a class="icon-btn" href="{{ url_for('expert.editor') }}" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</a></td>
+          <td class="nowrap">
+            <a class="icon-btn" href="{{ url_for('expert.editor') }}" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</a>
+            <form class="u-d-inline" action="{{ url_for('expert.question_delete', idx=loop.index) }}" method="post"
+                  x-data="rmForm({}, function () { gone.push({{ loop.index }}); rmToast('{{ _('Savol o‘chirildi') }}'); return false; })"
+                  @submit.prevent="if (confirm('{{ _('Savol o‘chirilsinmi?') }}')) submit($event)">
+              {{ csrf() }}<button class="icon-btn" type="submit" aria-label="{{ _('O‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

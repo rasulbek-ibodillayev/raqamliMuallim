@@ -7,7 +7,7 @@
   <div class="drawer-backdrop" x-show="menu" x-cloak x-transition.opacity @click="menu = false" aria-hidden="true"></div>
   <aside class="sidebar" id="panel-menu" aria-label="{{ _('Panel menyusi') }}">
     <div class="row between">
-      <a class="brand" href="{{ url_for('expert.queue' if panel == 'expert' else 'admin.stats') }}">
+      <a class="brand" href="{{ url_for('expert.questions' if panel == 'expert' else 'admin.stats') }}">
         <span class="brand-mark">{{ icon("sparkle") }}</span>{{ _("raqamliMuallim") }}
       </a>
       <button class="icon-btn drawer-close" type="button" @click="menu = false" aria-label="{{ _('Menyuni yopish') }}">{{ icon("x") }}</button>

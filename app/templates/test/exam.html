@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Attestatsiya sinovi") }}{% endblock %}
+{% block title %}{{ _("Attestatsiya testi") }}{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts-exam.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/exam.css') }}">
@@ -15,11 +15,12 @@
   window.RM_EXAM = {{ questions|tojson }};
   // sample=true — /ekranlar dagi namunaviy holat: alohida, serverga yuborilmaydigan sessiya
   window.RM_EXAM_STATE = { cur: {{ start if start_given else 'null' }}, seed: {{ answered|tojson }}, confirm: {{ 'true' if confirm else 'false' }},
-                           sample: {{ 'true' if sample else 'false' }}, resultUrl: {{ url_for('test.result')|tojson }} };
+                           sample: {{ 'true' if sample else 'false' }}, resultUrl: {{ url_for('test.exam_result')|tojson }} };
 </script>
+{% include "partials/rest.html" %}
 <div class="ex" x-data="exam()" x-init="init()" @keydown.window="key($event)" data-leave-guard>
   <header class="ex-top">
-    <a class="ex-logo" href="{{ url_for('user.tests') }}" aria-label="{{ _('Testlarimga qaytish') }}">
+    <a class="ex-logo" href="{{ url_for('user.tests') }}" aria-label="{{ _('Testlarga qaytish') }}">
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5 18.3 12.7 24.5 15 18.3 17.3 16 23.5 13.7 17.3 7.5 15 13.7 12.7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><rect x="2.5" y="2.5" width="27" height="27" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
     </a>
     <span class="grow"></span>
@@ -148,7 +149,7 @@
       </div>
       <div x-show="queued" x-cloak>
         <p class="ex-muted"><b>{{ _("Internet yo‘q.") }}</b> {{ _("Test yakunlandi, javoblaringiz qurilmada saqlandi. Internet tiklanganda ular avtomatik yuboriladi va natija «Natijalarim» bo‘limida chiqadi.") }}</p>
-        <div class="ex-dialog-foot"><a class="ex-primary" href="{{ url_for('user.tests') }}" data-safe-leave>{{ _("Testlarimga qaytish") }}</a></div>
+        <div class="ex-dialog-foot"><a class="ex-primary" href="{{ url_for('user.tests') }}" data-safe-leave>{{ _("Testlarga qaytish") }}</a></div>
       </div>
     </div>
   </div>

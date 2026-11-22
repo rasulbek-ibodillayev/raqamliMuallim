@@ -1,0 +1,39 @@
+{% extends "layouts/app.html" %}
+{% block title %}{{ r.name }}{% endblock %}
+{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.results') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{{ _("Natijalarim") }}</span>{% endblock %}
+{% block content %}
+{% set label, color = decision[r.decision] %}
+<div class="stack stack-xl">
+  <section class="card card-pad row wrap g-16 items-center">
+    {{ ring(r.pct, 96, "var(--" ~ color ~ ")") }}
+    <div class="grow stack stack-sm">
+      <span class="eyebrow">{{ test_types[r.type][0] }}</span>
+      <h1 class="text-h2l">{{ r.name }}</h1>
+      <p class="small muted">{{ r.when }} · {{ r.n }} {{ _("savol") }} · ≈ {{ r.min }} {{ _("daqiqa") }}{% if staged %} · {{ _("3 bosqich") }}{% endif %}</p>
+      <div>{{ status_dot(label, color) }}</div>
+    </div>
+  </section>
+
+  <section class="stack">
+    <div class="row between wrap">
+      <h2 class="eyebrow">{{ _("Savollar va javoblar") }}</h2>
+      <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("xato javobingiz") }} <span class="dot dot-green"></span>{{ _("to‘g‘ri javob") }}</span>
+    </div>
+    <p class="xs muted">{{ _("Namunada savollardan bir qismi ko‘rsatilgan.") }}</p>
+    {% include "partials/answer_review.html" %}
+  </section>
+
+  <section class="card card-pad stack stack-sm">
+    <div class="strong">{{ _("Testni qayta topshirish") }}</div>
+    <p class="small muted">{{ _("Aynan shu savollar emas — shu turdagi va shu mavzulardan yangi savollar beriladi. Natija «Natijalarim» bo‘limiga yangi qator bo‘lib qo‘shiladi.") }}</p>
+    <div class="row wrap">
+      {% if r.type == "exam" %}
+      <a class="btn btn-primary" href="{{ url_for('test.exam') }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta topshirish") }}</a>
+      {% else %}
+      <a class="btn btn-primary" href="{{ url_for('test.question', turi=slug, soni=r.n, qayta=r.id) }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta topshirish") }}</a>
+      {% endif %}
+      <a class="btn btn-ai" href="{{ url_for('user.tutor', q='Xatolarimni tushuntir: ' ~ r.name) }}">{{ icon("sparkle", "ico-sm") }}{{ _("Xatolarimni tushuntir") }}</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

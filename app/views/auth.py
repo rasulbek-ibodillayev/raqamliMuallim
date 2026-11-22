@@ -41,6 +41,7 @@ def login():
                        "pw": (pw, required)})
     if not errors:
         session["role"] = role
+        session.pop("motto", None)   # bosh sahifadagi motivatsion so'z har kirishda yangilanadi
     return respond(errors=errors, template="auth/login.html", redirect_to=url_for(HOME[role]),
                    message=_("Xush kelibsiz!"))
 
@@ -121,6 +122,7 @@ def google():
     if current_app.config.get("GOOGLE_CLIENT_ID"):
         return redirect(url_for("auth.login"))  # haqiqiy OAuth ulanadigan joy
     session["role"] = "user"
+    session.pop("motto", None)
     flash(_("Google akkaunti orqali kirdingiz (namuna)"))
     return redirect(url_for("user.home"))
 
@@ -141,9 +143,18 @@ def privacy():
 RESET_MAX_FAILS = 5
 
 
+# Namunada ro'yxatdan o'tgan telefon raqamlar. Backendda: Telegram bot foydalanuvchi ulashgan raqamni users.phone
+# bilan solishtiradi; topilmasa kod yuborilmaydi va «ro'yxatdan o'tilmagan» xabari chiqadi.
+def _registered_phones():
+    from .. import mock
+    return {"+998901234567"} | {norm_phone(u[2]) for u in mock.USERS if "@" not in u[2]}
+
+
 def _reset_ctx(**extra):
-    who = session.get("reset_who", "")
-    return {"sent": bool(who), "verified": bool(who) and bool(session.get("reset_verified")), "who": who, **extra}
+    who = extra.pop("who", None) or session.get("reset_who", "")
+    return {"sent": bool(session.get("reset_who")), "verified": bool(session.get("reset_who")) and bool(session.get("reset_verified")),
+            "who": who, "via": "email" if "@" in who else ("phone" if who else ""),
+            "bot_url": current_app.config.get("TELEGRAM_BOT_URL", "https://t.me/raqamliMuallimBot"), **extra}
 
 
 @bp.route("/parol-tiklash", methods=["GET", "POST"])
@@ -179,14 +190,16 @@ def reset_code():
     """Kod yuborish (va qayta yuborish). Har yangi yuborishda avvalgi tasdiq bekor bo'ladi."""
     who = field("who")
     errors = validate({"who": (who, check_login)})
+    if not errors and "@" not in who and norm_phone(who) not in _registered_phones():
+        errors = {"who": _("Bu raqam orqali ro‘yxatdan o‘tilmagan. Raqamni tekshiring yoki email orqali tiklang")}
     if not errors:
         session["reset_who"] = who
         session.pop("reset_verified", None)
         session.pop("reset_fails", None)
     msg = (_("Kod %(c)s manziliga yuborildi", c=who) if "@" in who
-           else _("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=fmt_phone(norm_phone(who)))) if not errors else None
+           else _("Telegram botni oching va raqamingizni ulashing: bot %(c)s raqamini tekshirib, kod yuboradi", c=fmt_phone(norm_phone(who)))) if not errors else None
     return respond(errors=errors, template="auth/reset.html", **_reset_ctx(who=who),
-                   redirect_to=url_for("auth.reset", kod=1), message=msg)
+                   redirect_to=url_for("auth.reset", kod=1), message=msg, data={"via": "email" if "@" in who else "phone"})
 
 
 @bp.post("/parol-tiklash/kod-tekshirish")
@@ -301,8 +314,8 @@ def recover_confirm():
 
 
 # --- Sertifikatni tekshirish (ommaviy, QR-koddan) ---
-# Namunada: INF-2026-000123 — haqiqiy, INF-2026-000099 — bekor qilingan, qolgani — topilmadi
-_CERT_STATES = {"INF-2026-000123": "valid", "INF-2026-000099": "revoked"}
+# Namunada: INF-2026-000123 — haqiqiy, INF-2023-000099 — muddati o‘tgan (sertifikat 3 yil amal qiladi), qolgani — topilmadi
+_CERT_STATES = {"INF-2026-000123": "valid", "INF-2023-000099": "expired"}
 
 
 @bp.get("/s/<cert_no>")

@@ -5,8 +5,8 @@
   Eslatmalar hozircha brauzer xotirasida saqlanadi (localStorage).
   Backend qo'shilganda save()/remove() funksiyalari API'ga so'rov yuboradigan bo'ladi.
 #}
-<script>window.RM_NOTES = {{ notes|tojson }}; window.RM_TOPICS = {{ topics|tojson }};</script>
-<div x-data="notesApp(window.RM_NOTES, window.RM_TOPICS)" x-init="init()" @rm-note-ok="save()">
+<script>window.RM_NOTES = {{ notes|tojson }}; window.RM_TOPICS = {{ topics|tojson }}; window.RM_CUR_TOPIC = {{ current_topic|tojson }};</script>
+<div x-data="notesApp(window.RM_NOTES, window.RM_TOPICS, window.RM_CUR_TOPIC)" x-init="init()" @rm-note-ok="save()">
   {% call page_head(_("Eslatmalar"), _("Darslardagi muhim qaydlaringiz. Oflayn ham ochiladi.")) %}
   <button class="btn btn-outline btn-sm no-print" type="button" onclick="window.print()" title="{{ _('Brauzerning «PDF sifatida saqlash» oynasi ochiladi') }}">{{ icon("download", "ico-sm") }}{{ _("PDF") }}</button>
   <button class="btn btn-primary btn-sm" type="button" @click="openNew()">{{ icon("plus", "ico-sm") }}{{ _("Eslatma yaratish") }}</button>
@@ -62,12 +62,11 @@
       <div class="sheet-grip"></div>
       <div class="row between"><h2 id="note-title" x-text="form.id ? 'Eslatmani tahrirlash' : 'Yangi eslatma'"></h2>
         <button class="icon-btn" type="button" @click="open = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
-      <div class="field">
-        <label class="label" for="n-topic">{{ _("Mavzu") }}</label>
-        <select class="select" id="n-topic" name="topic" x-model="form.topic" required>
-          <template x-for="t in topics" :key="t"><option :value="t" x-text="t"></option></template>
-        </select>
-      </div>
+      {# Mavzu so'ralmaydi: yangi eslatma foydalanuvchi hozir o'rganayotgan mavzuga saqlanadi
+         (dars/mavzu sahifasidan kelganda — o'sha mavzu), tahrirlashda esa eslatmaning o'z mavzusi qoladi #}
+      <input type="hidden" name="topic" :value="form.topic">
+      <p class="note-topic">{{ icon("book", "ico-sm") }}<span class="muted">{{ _("Mavzu:") }}</span> <b x-text="form.topic"></b>
+        <span class="xs muted" x-show="!form.id">{{ _("· hozir o‘rganayotgan mavzungiz") }}</span></p>
       <div class="field"><label class="label" for="n-title">{{ _("Sarlavha (ixtiyoriy)") }}</label><input class="input" id="n-title" name="title" maxlength="200" x-model="form.title" placeholder="{{ _('Masalan: elif qoidasi') }}"></div>
       <div class="field"><label class="label" for="n-text">{{ _("Qayd") }}</label><textarea class="textarea" id="n-text" name="text" maxlength="5000" x-model="form.text" required placeholder="Eslab qolmoqchi bo‘lgan narsangizni yozing…" aria-describedby="text-err" @input="clear('text')"></textarea>{{ field_error("text", errors) }}</div>
       <div class="field">
@@ -83,11 +82,24 @@
 </div>
 
 <script>
-function notesApp(seed, topics) {
+function notesApp(seed, topics, serverTopic) {
   var KEY = "rm-notes";
+  // Hozir o'rganilayotgan mavzu: ?mavzu=… (dars sahifasidagi tugmadan) → oxirgi ochilgan dars/mavzu → server
+  function currentTopic() {
+    var p = new URLSearchParams(location.search).get("mavzu");
+    if (p) return p;
+    try { return localStorage.getItem("rm-current-topic") || serverTopic; } catch (e) { return serverTopic; }
+  }
   return {
     notes: [], topics: topics, q: "", topic: "", open: false, form: {},
     init: function () {
+      var cur = currentTopic();
+      if (cur && this.topics.indexOf(cur) === -1) this.topics.unshift(cur);
+      if (new URLSearchParams(location.search).get("yangi")) {
+        this.openNew();
+        // Sahifa yangilansa oyna qayta ochilmasin
+        var u = new URL(location.href); u.searchParams.delete("yangi"); history.replaceState(null, "", u);
+      }
       try { var s = JSON.parse(localStorage.getItem(KEY)); this.notes = Array.isArray(s) ? s : seed; }
       catch (e) { this.notes = seed; }
       // Darsda belgilab saqlangan qaydlar
@@ -112,7 +124,7 @@ function notesApp(seed, topics) {
       });
       return Object.keys(out).map(function (k) { return { topic: k, items: out[k] }; });
     },
-    openNew: function () { this.form = { id: null, topic: this.topic || this.topics[0], title: "", text: "", code: "", withCode: false }; this.open = true; },
+    openNew: function () { this.form = { id: null, topic: currentTopic() || this.topics[0], title: "", text: "", code: "", withCode: false }; this.open = true; },
     edit: function (n) { this.form = Object.assign({ withCode: !!n.code }, n); this.open = true; },
     save: function () {
       var f = this.form, rec = { id: f.id || Date.now(), topic: f.topic, title: f.title.trim(), text: f.text.trim(), code: f.withCode ? f.code : "", when: "Bugun" };

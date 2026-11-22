@@ -29,7 +29,7 @@
       <div class="input-group">
         <input class="input" id="rc-secret" name="secret" :type="show ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required
                aria-describedby="secret-err secret-hint" :aria-invalid="!!err('secret')" @input="clear('secret')">
-        <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? '{{ _('Yashirish') }}' : '{{ _('Ko‘rsatish') }}'" aria-label="{{ _('Ko‘rsatish') }}">{{ icon("eye") }}</button>
+        {{ eye("show") }}
       </div>
       {{ field_error("secret", e) }}
       <span class="hint" id="secret-hint">{{ _("Katta-kichik harf farqlanmaydi. 5 ta urinish bor. Namunada: informatika") }}</span></div>
@@ -38,7 +38,7 @@
 
   <!-- 2-qadam: yangi telefon yoki email -->
   <form class="stack stack-lg" action="{{ url_for('auth.recover_contact') }}" method="post" novalidate data-stay x-show="step === 2" {{ 'x-cloak' if rstep != 2 }}
-        x-data="rmForm({}, function (j) { step = 3; rmToast(j.message); return false; })" x-init="initForm()"
+        x-data="rmForm(rmContact({{ (form.contact or '')|tojson|forceescape }}), function (j) { step = 3; rmToast(j.message); return false; })" x-init="initForm()"
         data-errors="{{ (errors if rstep == 2 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
     {% include "partials/form_open.html" %}
     <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span>{{ _("Maxfiy so‘z to‘g‘ri. Endi yangi telefon raqam yoki emailingizni kiriting — unga tasdiqlash kodi yuboramiz.") }}</span></div>
@@ -54,16 +54,16 @@
       <input class="input" id="rc-contact" name="contact" value="{{ form.contact }}" required
              :inputmode="method === 'phone' ? 'tel' : 'email'" :autocomplete="method === 'phone' ? 'tel' : 'email'"
              :placeholder="method === 'phone' ? '+998 90 123 45 67' : 'namuna@maktab.uz'" placeholder="+998 90 123 45 67"
-             aria-describedby="contact-err contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
+             x-model="contact" aria-describedby="contact-err contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
       {{ field_error("contact", errors if rstep == 2 else {}) }}
       <span class="hint" id="contact-hint" x-text="method === 'phone' ? '{{ _('Kod shu raqamga ulangan Telegram bot orqali keladi.') }}' : '{{ _('Kod shu manzilga xat bilan keladi.') }}'">{{ _("Kod shu raqamga ulangan Telegram bot orqali keladi.") }}</span>
     </div>
-    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Kod yuborish") }}</button>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy || kind !== method">{{ _("Kod yuborish") }}</button>
   </form>
 
   <!-- 3-qadam: kod + yangi parol -->
   <form class="stack stack-lg" action="{{ url_for('auth.recover_confirm') }}" method="post" novalidate x-show="step === 3" {{ 'x-cloak' if rstep != 3 }}
-        x-data="rmForm({ show: false })" x-init="initForm()" data-errors="{{ (errors if rstep == 3 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+        x-data="rmForm({ show: false, show2: false })" x-init="initForm()" data-errors="{{ (errors if rstep == 3 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
     {% include "partials/form_open.html" %}
     {% set e = errors if rstep == 3 else {} %}
     <p class="lead">{{ _("Yangi telefon yoki emailga kelgan kodni va yangi parolni kiriting. Shundan keyin akkauntingizga kirasiz.") }}</p>
@@ -75,12 +75,11 @@
       <span class="hint">{{ _("Namunada kod: 123456") }}</span>
     </div>
     <div class="field"><label class="label" for="rc-p1">{{ _("Yangi parol") }}</label>
-      <input class="input" id="rc-p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">
+      <div class="input-group"><input class="input" id="rc-p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">{{ eye("show") }}</div>
       {{ field_error("p1", e) }}</div>
     <div class="field"><label class="label" for="rc-p2">{{ _("Parolni takrorlang") }}</label>
-      <input class="input" id="rc-p2" name="p2" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">
+      <div class="input-group"><input class="input" id="rc-p2" name="p2" :type="show2 ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">{{ eye("show2") }}</div>
       {{ field_error("p2", e) }}</div>
-    <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Parolni ko‘rsatish") }}</span></label>
     <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Tasdiqlash va kirish") }}</button>
     <a class="link center small" href="{{ url_for('auth.recover', qayta=1) }}">{{ _("Boshqa telefon yoki email kiritish") }}</a>
   </form>

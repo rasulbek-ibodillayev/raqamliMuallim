@@ -4,7 +4,7 @@
 {% block content %}
 {# «Kod yuborish» alohida endpoint'ga (formaction) ketadi; JS bo'lsa sahifa qayta yuklanmaydi #}
 <form class="stack stack-lg" action="{{ url_for('auth.verify_email') }}" method="post" novalidate data-stay
-      x-data="rmForm({ sent: {{ 'true' if sent else 'false' }} }, function (j, form) { if (!this.sent) { this.sent = true; rmToast(j.message); return false; } })"
+      x-data="rmForm(rmMix(rmContact({{ (form.email or email)|tojson|forceescape }}, 'email'), { sent: {{ 'true' if sent else 'false' }} }), function (j, form) { if (!this.sent) { this.sent = true; rmToast(j.message); return false; } })"
       x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}"
       @submit.prevent="submit($event).then(j => { if (j && j.ok && sent && j.redirect && $event.submitter.dataset.final) location.href = j.redirect })">
   {% include "partials/form_open.html" %}
@@ -16,8 +16,10 @@
     <label class="label" for="email">{{ _("Email manzil") }}</label>
     <div class="row row-sm">
       <input class="input grow" id="email" name="email" type="email" value="{{ form.email or email }}" autocomplete="email" placeholder="{{ _('namuna@maktab.uz') }}" required
-             aria-describedby="email-err" :aria-invalid="!!err('email')" @input="clear('email')">
-      <button class="btn btn-outline" type="submit" formaction="{{ url_for('auth.send_email_code') }}" formnovalidate :disabled="busy" x-text="sent ? 'Qayta yuborish' : 'Kod yuborish'">{{ _("Kod yuborish") }}</button>
+             x-model="contact" aria-describedby="email-err" :aria-invalid="!!err('email')" @input="clear('email')">
+      {# Email to'g'ri kiritilgandagina faollashadi va asosiy rangga o'tadi #}
+      <button class="btn" :class="valid ? 'btn-primary' : 'btn-outline'" type="submit" formaction="{{ url_for('auth.send_email_code') }}" formnovalidate
+              :disabled="busy || !valid" x-text="sent ? '{{ _('Qayta yuborish') }}' : '{{ _('Kod yuborish') }}'">{{ _("Kod yuborish") }}</button>
     </div>
     {{ field_error("email", errors) }}
   </div>
