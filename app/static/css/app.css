@@ -164,7 +164,8 @@ svg.faint, .ico.faint, .faint > .ico { color: var(--faint); }
 /* ---------- Joylashuv yordamchilari ---------- */
 .stack { display: flex; flex-direction: column; gap: var(--gap, 16px); }
 .stack-sm { --gap: 8px; } .stack-lg { --gap: 24px; } .stack-xl { --gap: 40px; }
-.row { display: flex; align-items: center; gap: var(--gap, 12px); }
+/* --gap meros bo'ladi: qator o'z qiymatini belgilamasa, ota .stack-xl dagi 40px oraliqni olib qo'yardi */
+.row { --gap: 12px; display: flex; align-items: center; gap: var(--gap); }
 .row-sm { --gap: 8px; }
 .between { justify-content: space-between; }
 .wrap { flex-wrap: wrap; }
@@ -1181,3 +1182,80 @@ a.plan-test-row:hover { border-style: solid; }
 /* Natijalarim: test nomi to'liq ko'rinadi (qisqartirilmaydi); telefonda holat nom ostiga tushadi */
 .res-name > div:first-child { overflow-wrap: anywhere; }
 @media (max-width: 480px) { .res-item { flex-wrap: wrap; } .res-item .res-name { flex-basis: calc(100% - 90px); } .res-item > .status-dot, .res-item > .badge { margin-left: 56px; } }
+
+/* =========================================================
+   Telefon: barmoq bilan boshqarish va tor ekranlar
+   Ilovadan asosan telefonda foydalaniladi — bu qoidalar shu uchun.
+   ========================================================= */
+html { -webkit-tap-highlight-color: transparent; }
+/* Ikonka tugmasi qo'shni matn ko'payganda siqilib qolmasin (sarlavhadagi «Orqaga» 20px bo'lib qolardi) */
+.icon-btn { flex: none; }
+.sidebar, .sheet, .sheet-backdrop, .rest { overscroll-behavior: contain; }
+
+/* Sensorli ekranda hover yo'q: bosilganda darhol ko'rinadigan javob */
+@media (hover: none) {
+  .btn:active, .chip:active, .icon-btn:active, .tab:active, .send:active, .seg button:active, .seg a:active { transform: scale(.97); }
+  a.list-item:active, button.list-item:active, label.list-item:active, .card-link:active, .tree-item:active, .toc-link:active, .legend-btn:active { background: var(--surface-2); }
+}
+
+/* Barmoq uchun yetarli bosish maydoni (36px tugmalar 40–44px bo'ladi) va iOS'da maydon tanlanganda sahifa kattalashib ketmasligi uchun 16px shrift */
+@media (pointer: coarse) {
+  .btn-sm { min-height: 40px; }
+  .pager .btn-sm { min-width: 40px; }
+  .select-sm { min-height: 40px; font-size: 16px; }
+  .send { width: 40px; height: 40px; }
+  .seg a, .seg button { min-height: 36px; }
+  .seg-opt { min-height: 36px; }
+  .tree-item { min-height: var(--touch); }
+  .legend-btn { min-height: 40px; }
+  .code-head button { min-height: 36px; padding: 0 10px; }
+  .chip { height: 42px; }
+  label.ans-key { position: relative; }
+  label.ans-key::after { content: ""; position: absolute; inset: -10px; }
+  .ex-nav-btn, .ex-primary { height: var(--touch); }
+  .ex-select { height: 40px; font-size: 16px; }
+  .ex-textarea { font-size: 16px; }
+}
+
+/* Tor ekran: o'ngdagi nishon, sana yoki tanlov matnni tor ustunga siqmasin — ular matn ostiga tushadi */
+@media (max-width: 480px) {
+  .list-item:has(> .badge, > .seg, > .lang-switch, > .li-aside) { flex-wrap: wrap; row-gap: 8px; }
+  .list-item:has(> .badge, > .seg, > .lang-switch, > .li-aside) > .grow { flex: 1 1 calc(100% - 100px); }
+  .list-item:has(> .badge, > .seg, > .lang-switch, > .li-aside) > .chev { order: 1; }
+  .list-item > :is(.badge, .seg, .lang-switch, .li-aside) { order: 2; }
+  .list-item:has(> .list-ico) > :is(.badge, .seg, .lang-switch, .li-aside) { margin-left: 50px; }
+
+  /* Javoblar tahlili: «Sizning javobingiz» belgisi variant matni ostida */
+  .ans { flex-wrap: wrap; row-gap: 4px; }
+  .ans > .grow { flex: 1 1 calc(100% - 40px); }
+  .ans > .ans-tag { margin-left: 34px; }
+
+  /* AI kartasi: matn torayib ketmasin, tugma keyingi qatorga to'liq kenglikda o'tadi */
+  .ai-card.row.wrap > .grow { flex: 1 1 180px; }
+  .ai-card.row.wrap > .btn { width: 100%; }
+
+  /* Tayyorlik prognozi: sana yorlig'i ostida, bo'linib ketmaydi */
+  .forecast-legend { align-items: flex-start; }
+  .forecast-legend b { display: block; white-space: nowrap; }
+  .forecast-legend > span:last-child { text-align: right; }
+
+  /* AI tutor: javob matniga ko'proq joy */
+  .msg-ai { gap: 10px; }
+}
+
+/* Dam olish oynasi: tugmalar tor ekranda ustma-ust tushadi, oyna ekrandan chiqib ketmaydi */
+.rest { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+.rest-actions { flex-wrap: wrap; }
+.rest-actions .btn { flex: 1 1 140px; white-space: normal; }
+
+/* Ustunli grafik: 12 ta ustun 320px ekranga ham sig'adi */
+.bars > div { min-width: 0; }
+@media (max-width: 480px) { .bars { gap: 4px; } }
+
+/* O'quv rejadagi natija foizi — bosiladigan havola, barmoq uchun kattaroq maydon */
+.tap-pct { display: inline-flex; align-items: center; min-height: 32px; padding: 0 6px; margin: 0 -6px; }
+
+/* Filtrlar (ekspert va admin): tanlovlar bir qatorga ikkitadan joylashadi, har biri alohida qatorda emas */
+@media (max-width: 639px) {
+  .row.wrap > .select.w-auto { flex: 1 1 140px; min-width: 0; }
+}

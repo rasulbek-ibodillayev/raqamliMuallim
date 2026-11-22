@@ -38,7 +38,7 @@
       {% set mx = weak[0][2] %}
       {% for name, sec, n in weak %}
       <div class="list-item">
-        <div class="grow stack stack-sm"><div class="row between"><span>{{ name }}</span><span class="small num t-red">{{ n }} {{ _("ta xato") }}</span></div>
+        <div class="grow stack stack-sm"><div class="row between"><span>{{ name }}</span><span class="small num t-red nowrap">{{ n }} {{ _("ta xato") }}</span></div>
           <div class="progress thin progress-red"><span style="--v: {{ (n / mx * 100)|round }}%"></span></div>
           <span class="xs muted">{{ sec }}</span></div>
       </div>

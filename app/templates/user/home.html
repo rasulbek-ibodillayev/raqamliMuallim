@@ -52,7 +52,7 @@
       <p class="small c-text2">{{ text.format(m=r.margin_days) }}</p>
       <div class="forecast" role="img" aria-label="Prognoz: {{ r.forecast }}da tayyor bo‘lasiz, attestatsiya {{ r.exam }}">
         <div class="forecast-bar"><span style="--v: {{ r.pct }}%"></span><i class="forecast-ready"></i></div>
-        <div class="row between xs muted"><span>{{ _("Bugun") }}</span><span>{{ _("Tayyor:") }} <b class="c-text">{{ r.forecast }}</b></span><span>{{ _("Attestatsiya:") }} <b class="c-text">{{ r.exam }}</b></span></div>
+        <div class="row between xs muted forecast-legend"><span>{{ _("Bugun") }}</span><span>{{ _("Tayyor:") }} <b class="c-text">{{ r.forecast }}</b></span><span>{{ _("Attestatsiya:") }} <b class="c-text">{{ r.exam }}</b></span></div>
       </div>
     </div>
   </section>
@@ -91,7 +91,7 @@
   <section class="card" aria-labelledby="today-title">
     <div class="card-head">
       <div><h2 id="today-title" class="text-h3">{{ _("Bugun ·") }} {{ total }} {{ _("daqiqa") }}</h2><div class="xs muted">{{ _("«Python: shart operatorlari» mavzusini tugatish rejasi") }}</div></div>
-      <span class="small muted num">{{ done_min }} / {{ total }} {{ _("daq") }}</span>
+      <span class="small muted num nowrap">{{ done_min }} / {{ total }} {{ _("daq") }}</span>
     </div>
     <div class="today-progress">{{ progress((done_min / total * 100)|round, "green", "thin") }}</div>
     <div class="list">
@@ -109,7 +109,7 @@
   <a class="card weak-card" href="{{ url_for('user.errors') }}" aria-labelledby="weak-title">
     <div class="card-head">
       <div><h2 id="weak-title" class="text-h3">{{ _("Xato qilayotgan mavzularingiz") }}</h2><div class="xs muted">{{ _("Oldingi testlaringiz bo‘yicha xatolik foizi") }}</div></div>
-      <span class="small link row row-sm">{{ _("Xatolar analitikasi") }}{{ icon("chevron-right", "ico-sm") }}</span>
+      <span class="small link row row-sm nowrap">{{ _("Xatolar analitikasi") }}{{ icon("chevron-right", "ico-sm") }}</span>
     </div>
     <ul class="list-reset list">
       {% set mx = weak | map(attribute=2) | max %}

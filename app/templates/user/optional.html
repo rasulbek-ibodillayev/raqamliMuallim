@@ -11,8 +11,7 @@
       {% for name, qn, st, on in topics %}
       <label class="pointer list-item">
         <input class="u-w-18 u-h-18 u-accent-primary" type="checkbox" name="mavzu" value="{{ name }}" {{ 'checked' if on }}>
-        <div class="grow"><div>{{ name }}</div><div class="sub">{{ qn }} {{ _("ta savol") }}</div></div>
-        {% if st == "relearn" %}<span class="xs t-yellow">{{ _("Takrorlash tavsiya etiladi") }}</span>{% endif %}
+        <div class="grow"><div>{{ name }}</div><div class="sub">{{ qn }} {{ _("ta savol") }}{% if st == "relearn" %} · <span class="t-yellow">{{ _("Takrorlash tavsiya etiladi") }}</span>{% endif %}</div></div>
       </label>
       {% endfor %}
     </div>

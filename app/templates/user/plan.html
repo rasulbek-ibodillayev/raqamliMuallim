@@ -110,7 +110,7 @@
           </div>
         </div>
         <span class="time-chip num">≈ {{ p.min }} {{ _("daq") }}</span>
-        {% if state == "done" %}<a class="num small strong {{ pct_cls(p.pct) }}" href="{{ url_for('user.result_detail', rid=p.rid) if p.rid else '#' }}">{{ p.pct }}%</a>
+        {% if state == "done" %}<a class="num small strong tap-pct {{ pct_cls(p.pct) }}" href="{{ url_for('user.result_detail', rid=p.rid) if p.rid else '#' }}">{{ p.pct }}%</a>
         {% elif state == "due" %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi=test_slug[p.type]) }}">{{ _("Boshlash") }}</a>
         {% elif state == "started" %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi=test_slug[p.type]) }}">{{ _("Davom ettirish") }}</a>{% endif %}
       </div>
