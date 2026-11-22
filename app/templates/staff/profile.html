@@ -1,0 +1,36 @@
+{% extends "layouts/panel.html" %}
+{# Ekspert va admin profili: shaxsiy ma'lumotlar, telefon/email, parol, maxfiy so'z, til va mavzu.
+   Server: app/views/account.py (register). Parolni unutganda — /parol-tiklash. #}
+{% block title %}{{ _("Profil") }}{% endblock %}
+{% block heading %}{{ _("Profil") }}{% endblock %}
+{% block content %}
+<div class="stack stack-xl maxw-720" x-data="{ open: '{{ open or '' }}', saved: '' }" @rm-saved="open = ''; saved = $event.detail">
+  <div class="row">
+    <span class="avatar lg">{{ acct.initials }}</span>
+    <div><h1 class="text-h2l">{{ acct.first }} {{ acct.last }}</h1><p class="muted small">{{ acct.role }} · <span class="num">{{ acct.phone }}</span></p></div>
+  </div>
+
+  <div class="alert alert-green" x-show="saved" x-cloak x-transition role="status">{{ icon("check-circle") }}<span x-text="saved"></span></div>
+
+  <section class="stack stack-sm">
+    <h2 class="eyebrow">{{ _("Akkaunt") }}</h2>
+    <div class="card list">
+      {% include "partials/account.html" %}
+    </div>
+    <p class="xs muted">{{ _("Parolni unutsangiz: kirish sahifasidagi «Parolni unutdingizmi?» orqali telefon (Telegram) yoki emailga kelgan kod bilan yangi parol o‘rnatasiz.") }}</p>
+  </section>
+
+  <section class="stack stack-sm">
+    <h2 class="eyebrow">{{ _("Ko‘rinish") }}</h2>
+    <div class="card list">
+      <div class="list-item"><span class="list-ico">{{ icon("message") }}</span><span class="grow"><span class="d-block">{{ _("Interfeys tili") }}</span><span class="sub">{{ _("O‘zbek, rus va ingliz tillari") }}</span></span>{% include "partials/lang_switch.html" %}</div>
+      <button class="list-item u-b-0 u-bt-1 u-bg-none u-ta-left u-w-100p u-cur-pointer" type="button" data-theme-toggle><span class="list-ico">{{ icon("moon") }}</span><span class="grow">{{ _("Yorug‘ / qorong‘i mavzu") }}</span></button>
+    </div>
+  </section>
+
+  <div class="card list">
+    <a class="list-item" href="{{ url_for('auth.privacy') }}"><span class="list-ico">{{ icon("shield") }}</span><span class="grow">{{ _("Maxfiylik siyosati") }}</span>{{ icon("chevron-right", "ico-sm chev") }}</a>
+    <a class="list-item bt" href="{{ url_for('auth.logout') }}"><span class="list-ico">{{ icon("logout") }}</span><span class="grow">{{ _("Chiqish") }}</span></a>
+  </div>
+</div>
+{% endblock %}

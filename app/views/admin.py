@@ -6,13 +6,21 @@
 - Sozlamalar — tizim chegaralari, faol bo'lmagan akkauntlar siyosati.
 Kontent (mavzular, darslar, savollar) — ekspert vazifasi: app/views/expert.py.
 """
-from flask import Blueprint, abort, render_template, request, url_for
+from datetime import datetime
+
+from flask import Blueprint, abort, render_template, request, session, url_for
 from flask_babel import gettext as _
 
+from .. import invites
 from .. import mock as m
-from ..forms import (check_date, check_email, check_name, check_phone, field, required, respond, validate)
+from . import account
+from ..forms import (check_date, check_email, check_name, check_phone, field, fmt_phone, norm_phone, required, respond,
+                     validate)
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+# Profil: shaxsiy ma'lumotlar, telefon/email, parol, maxfiy so'z (app/views/account.py)
+account.register(bp, "admin")
 
 
 @bp.get("/")
@@ -49,24 +57,74 @@ def user_status(uid):
     return respond(redirect_to=target, message=msg)
 
 
+def _experts_ctx(**extra):
+    """Ekspertlar sahifasi: ro'yxat + javob kutayotgan taklifnomalar (namunada sessiyada; backendda expert_invites)."""
+    return {"experts": m.EXPERTS, "perms": m.EXPERT_PERMS, "areas": m.CONTENT_AREAS, "panel": "admin",
+            "invites": session.get("invites", []), **extra}
+
+
 @bp.get("/ekspertlar")
 def experts():
-    return render_template("admin/experts.html", experts=m.EXPERTS, perms=m.EXPERT_PERMS, areas=m.CONTENT_AREAS, panel="admin")
+    if request.args.get("namuna") and not session.get("invites"):   # /ekranlar: javob kutayotgan taklifnoma namunasi
+        _send_invite("Nodira Saidova", "+998935551122", ["Dasturlash"], ["questions", "review"])
+    return render_template("admin/experts.html", **_experts_ctx())
+
+
+def _send_invite(name, contact, areas, perms):
+    """Taklif havolasini yaratadi va «yuboradi» (namunada — faqat ro'yxatga yoziladi). → yuborilgan taklifnoma."""
+    for old in session.get("invites", []):          # qayta yuborilsa — eski havola ishlamaydi
+        if old["contact"] == contact:
+            invites.revoke(old["token"])
+    token = invites.make(name, contact, areas, perms)
+    inv = {"token": token, "name": name, "contact": contact, "via": invites.channel(contact),
+           "shown": contact if "@" in contact else fmt_phone(contact),
+           "link": url_for("auth.invite", token=token, _external=True), "sent": datetime.now().strftime("%d.%m.%Y %H:%M")}
+    # Backendda: email — xat; telefon — Telegram bot (ekspert botga /start qilgan bo'lsa), aks holda admin havolani o'zi yuboradi
+    session["invites"] = [i for i in session.get("invites", []) if i["contact"] != contact] + [inv]
+    return inv
+
+
+def _sent_message(inv):
+    return (_("Taklif havolasi Telegram orqali %(c)s raqamiga yuborildi. Havola 72 soat amal qiladi", c=fmt_phone(inv["contact"]))
+            if inv["via"] == "telegram" else
+            _("Taklif havolasi %(c)s manziliga yuborildi. Havola 72 soat amal qiladi", c=inv["contact"]))
 
 
 @bp.post("/ekspertlar")
 def expert_add():
-    contact = field("contact")
+    """Yangi ekspert: ism-familiya + telefon yoki email (login) → shu manzilga taklif havolasi.
+    Ekspert havolani ochib, parolni o'zi o'rnatadi (auth.invite) — admin parolni bilmaydi."""
+    raw = field("contact")
+    contact = raw.lower() if "@" in raw else norm_phone(raw)
+    known = {e["contact"].replace(" ", "").lower() for e in m.EXPERTS}
     errors = validate({
         "name": (field("name"), lambda v: check_name(v.split()[0] if v else "", "first") or
                  (None if len(v.split()) >= 2 else _("Ism va familiyani kiriting"))),
-        "contact": (contact, required, lambda v: check_email(v) if "@" in v else check_phone(v)),
+        "contact": (raw, required, lambda v: check_email(v) if "@" in v else check_phone(v),
+                    lambda v: _("Bu telefon yoki email bilan ekspert allaqachon bor") if contact in known else None),
         "areas": (request.form.getlist("areas"), lambda v: None if v else _("Kamida bitta yo‘nalishni tanlang")),
         "perms": (request.form.getlist("perms"), lambda v: None if v else _("Kamida bitta huquq bering")),
     })
-    return respond(errors=errors, template="admin/experts.html", experts=m.EXPERTS, perms=m.EXPERT_PERMS,
-                   areas=m.CONTENT_AREAS, panel="admin", add_open=True, redirect_to=url_for("admin.experts"),
-                   message=_("%(name)s ekspert sifatida qo‘shildi. Taklifnoma yuborildi", name=field("name")))
+    inv = None if errors else _send_invite(" ".join(field("name").split()), contact,
+                                           request.form.getlist("areas"), request.form.getlist("perms"))
+    return respond(errors=errors, template="admin/experts.html", **_experts_ctx(add_open=True),
+                   redirect_to=url_for("admin.experts"), message=inv and _sent_message(inv))
+
+
+@bp.post("/ekspertlar/taklif")
+def invite_action():
+    """Taklifnomani qayta yuborish (yangi havola, 72 soat qaytadan) yoki bekor qilish."""
+    action, contact = field("action"), field("contact")
+    inv = next((i for i in session.get("invites", []) if i["contact"] == contact), None)
+    if action not in {"resend", "cancel"} or not inv:
+        abort(400)
+    if action == "cancel":
+        invites.revoke(inv["token"])
+        session["invites"] = [i for i in session["invites"] if i["contact"] != contact]
+        return respond(redirect_to=url_for("admin.experts"), message=_("Taklifnoma bekor qilindi. Eski havola endi ishlamaydi"))
+    data = invites.read(inv["token"])[1] or {}
+    inv = _send_invite(inv["name"], contact, data.get("a", []), data.get("p", []))
+    return respond(redirect_to=url_for("admin.experts"), message=_sent_message(inv))
 
 
 @bp.post("/ekspertlar/<int:eid>")

@@ -53,8 +53,8 @@
           <td class="nowrap">
             <a class="icon-btn" href="{{ url_for('expert.editor') }}" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</a>
             <form class="u-d-inline" action="{{ url_for('expert.question_delete', idx=loop.index) }}" method="post"
-                  x-data="rmForm({}, function () { gone.push({{ loop.index }}); rmToast('{{ _('Savol o‘chirildi') }}'); return false; })"
-                  @submit.prevent="if (confirm('{{ _('Savol o‘chirilsinmi?') }}')) submit($event)">
+                  x-data="rmForm({}, function () { gone.push({{ loop.index }}); rmToast({{ _('Savol o‘chirildi')|tojson|forceescape }}); return false; })"
+                  @submit.prevent="if (confirm({{ _('Savol o‘chirilsinmi?')|tojson|forceescape }})) submit($event)">
               {{ csrf() }}<button class="icon-btn" type="submit" aria-label="{{ _('O‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
             </form>
           </td>

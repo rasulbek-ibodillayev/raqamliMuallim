@@ -11,11 +11,21 @@ ME = {
     "initials": "DK",
     "role": "Informatika fani o‘qituvchisi",
     "phone": "+998 90 *** ** 67",
+    "phone_raw": "+998901234567",
+    "email": "dilnoza.k@maktab.uz",
     "days_left": 38,
     "exam_date": "23-dekabr",
 }
 
 # Foydalanuvchi paneli navigatsiyasi: (endpoint, nom, ikonka, mobil pastki panelda)
+# Ekspert va admin profillari (namuna). Backendda: current_user
+STAFF = {
+    "expert": {"first": "Zuhra", "last": "Qodirova", "initials": "ZQ", "role": _l("Ekspert (metodist)"),
+               "phone": "+998 93 *** ** 45", "phone_raw": "+998931234545", "email": "zuhra.q@raqamlimuallim.uz"},
+    "admin": {"first": "Aziz", "last": "Rahimov", "initials": "AR", "role": _l("Administrator"),
+              "phone": "+998 97 *** ** 10", "phone_raw": "+998971234510", "email": "aziz.r@raqamlimuallim.uz"},
+}
+
 NAV = {
     "user": [
         ("user.home", _l("Bosh sahifa"), "home", True),

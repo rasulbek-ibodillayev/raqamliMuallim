@@ -18,10 +18,15 @@ def _url(app, endpoint, args):
 @pytest.mark.parametrize("endpoint,title,args", ALL, ids=[t for _, t, _ in ALL])
 def test_screen_renders(app, as_role, endpoint, title, args):
     role = REQUIRED.get(endpoint.split(".")[0], "user")
-    r = as_role(role).get(_url(app, endpoint, args))
-    # Topilmagan sertifikat sahifasi 404 qaytaradi; /xato/<kod> namunalari esa oddiy sahifa (200)
-    missing = endpoint == "auth.verify_certificate" and "topilmadi" in title
-    assert r.status_code == (404 if missing else 200)
+    r = as_role(role).get(_url(app, endpoint, args), follow_redirects=True)
+    # Topilmagan sertifikat va yaroqsiz taklif havolasi 404, muddati o'tgan havola 410 qaytaradi;
+    # /xato/<kod> namunalari esa oddiy sahifa (200)
+    expected = 200
+    if (endpoint == "auth.verify_certificate" and "topilmadi" in title) or "yaroqsiz" in title:
+        expected = 404
+    elif "muddati o‘tgan" in title and endpoint == "auth.invite_demo":
+        expected = 410
+    assert r.status_code == expected
     html = r.get_data(as_text=True)
     assert "<title>" in html and 'name="csrf-token"' in html
     # Jinja yoki tarjima xatosi sahifaga chiqib qolmasin

@@ -36,7 +36,7 @@
         {% if not must %}
         <form action="{{ url_for('user.test_cancel', key=t.key) }}" method="post"
               x-data="rmForm({}, function (j) { gone.push('{{ t.key }}'); rmToast(j.message); return false; })"
-              @submit.prevent="if (confirm('{{ _('Test bekor qilinsinmi? Saqlangan javoblar o‘chiriladi.') }}')) submit($event)">
+              @submit.prevent="if (confirm({{ _('Test bekor qilinsinmi? Saqlangan javoblar o‘chiriladi.')|tojson|forceescape }})) submit($event)">
           {{ csrf() }}<button class="btn btn-ghost t-red" type="submit" :disabled="busy">{{ icon("x", "ico-sm") }}{{ _("Bekor qilish") }}</button>
         </form>
         {% endif %}

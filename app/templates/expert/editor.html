@@ -8,7 +8,7 @@
   Server ham tekshiradi: expert.editor_save.
 #}
 {% call page_head(_("Savol qo‘shish"), _("Saqlangan savol savollar bankiga qo‘shiladi")) %}{% endcall %}
-<script>window.RM_CONTENT = {{ content|tojson }};</script>
+<script nonce="{{ csp_nonce }}">window.RM_CONTENT = {{ content|tojson }};</script>
 <form class="split u-cols-1fr" action="{{ url_for('expert.editor_save') }}" method="post" novalidate enctype="multipart/form-data"
       x-data="rmForm({
         topic: {{ (form.topic or '')|tojson|forceescape }}, lesson: {{ (form.lesson or '')|tojson|forceescape }},
@@ -82,7 +82,7 @@
       {# ---- 3. Javoblar: savol turiga mos ---- #}
       <div class="card card-pad stack">
         <template x-if="kind === 'yopiq' || kind === 'kop'"><div class="stack stack-sm">
-          <span class="label" x-text="kind === 'kop' ? '{{ _('Javob variantlari · to‘g‘rilarini belgilang (bir nechta)') }}' : '{{ _('Javob variantlari · to‘g‘risini belgilang (bitta)') }}'"></span>
+          <span class="label" x-text="kind === 'kop' ? {{ _('Javob variantlari · to‘g‘rilarini belgilang (bir nechta)')|tojson|forceescape }} : {{ _('Javob variantlari · to‘g‘risini belgilang (bitta)')|tojson|forceescape }}"></span>
           <template x-for="(o, i) in opts" :key="i">
             <div class="row row-sm">
               <label class="opt-mark" :class="right.includes(i) && 'on'">
@@ -127,7 +127,7 @@
       <div class="card card-pad stack stack-sm">
         <span class="eyebrow">{{ _("Oldindan ko‘rish") }}</span>
         <p class="xs muted" x-text="[topic, lesson, level].filter(Boolean).join(' · ')"></p>
-        <p class="strong" x-text="text || '{{ _('Savol matni shu yerda ko‘rinadi') }}'"></p>
+        <p class="strong" x-text="text || {{ _('Savol matni shu yerda ko‘rinadi')|tojson|forceescape }}"></p>
         <img class="q-img-preview" :src="img" x-show="fmt === 'rasm' && img" alt="">
         <div class="options" x-show="kind === 'yopiq' || kind === 'kop'">
           <template x-for="(o, i) in opts" :key="i"><div class="option u-minh-44 u-fs-15" :class="right.includes(i) && 'correct'"><span class="key" x-text="'ABCDEF'[i]"></span><span x-text="o || '…'"></span></div></template>

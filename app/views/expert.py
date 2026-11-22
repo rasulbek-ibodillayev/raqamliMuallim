@@ -11,9 +11,13 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from flask_babel import gettext as _
 
 from .. import mock as m
+from . import account
 from ..forms import field, required, respond, validate
 
 bp = Blueprint("expert", __name__, url_prefix="/ekspert")
+
+# Profil: shaxsiy ma'lumotlar, telefon/email, parol, maxfiy so'z (app/views/account.py)
+account.register(bp, "expert")
 
 QUEUE_PAGE = 5
 

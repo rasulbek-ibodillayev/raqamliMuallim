@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}{% endblock %}{% if self.title() %} · {% endif %}{{ _("raqamliMuallim") }}</title>
-  <meta name="description" content="Informatika o‘qituvchilarini attestatsiyaga moslashuvchan tayyorlash platformasi">
+  <meta name="description" content="{{ _('Informatika o‘qituvchilarini attestatsiyaga moslashuvchan tayyorlash platformasi') }}">
   <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0b0f17" media="(prefers-color-scheme: dark)">
   <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -20,10 +20,12 @@
   <link rel="preload" href="{{ url_for('static', filename='fonts/inter-latin-wght.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
-  <script>try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}</script>
-  {# app.js Alpine'dan oldin: undagi komponentlar (rmShell) Alpine ishga tushganda tayyor bo'lishi kerak #}
-  <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script nonce="{{ csp_nonce }}">try{var d=document.documentElement,t=localStorage.getItem("theme"),f=localStorage.getItem("fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}</script>
+  {# Skriptlar Alpine'dan oldin: undagi komponentlar (rmForm, rmShell…) Alpine ishga tushganda tayyor bo'lishi kerak.
+     core.js — hamma sahifada; layout_js — qobiqqa xos (o'qituvchi: learner.js + player.js); page_js — sahifaga xos. #}
+  <script defer src="{{ url_for('static', filename='js/core.js') }}"></script>
+  {% block layout_js %}{% endblock %}
+  {% block page_js %}{% endblock %}
   <script defer src="{{ url_for('static', filename='vendor/alpine-3.14.1.min.js') }}"></script>
   {% block head %}{% endblock %}
 </head>
@@ -31,6 +33,20 @@
   <a class="skip-link" href="#main">{{ _("Asosiy kontentga o‘tish") }}</a>
   {% include "partials/icons.html" %}
   {% block body %}{% endblock %}
+  {# JS (core.js va boshqa modullar) ichidagi matnlar tarjimasi: rmT("kalit") #}
+  <script type="application/json" id="rm-i18n">{{ {
+    "saving": _("Saqlanmoqda…"), "savedLocal": _("Qurilmada saqlandi"), "saved": _("Saqlandi"), "notSaved": _("Saqlanmadi"),
+    "badServer": _("Server javobini o‘qib bo‘lmadi"), "fixErrors": _("Xatolarni tuzating"),
+    "offline": _("Internetga ulanib bo‘lmadi. Ulanishni tekshirib, qayta yuboring."), "offlineShort": _("Internetga ulanib bo‘lmadi"),
+    "installHint": _("Brauzer menyusidan «Ilovani o‘rnatish»ni tanlang"),
+    "tutorDemo": _("Bu namunaviy javob. Backend ulanganda AI tutor «%(q)s» savoliga darslik asosida javob beradi.", q="{q}"),
+    "sections": _("Bo‘limlar"), "notes": _("Eslatmalar"), "copied": _("Nusxalandi"),
+    "resume": _("So‘nggi o‘qigan joyingiz:"), "fromStart": _("Boshidan"),
+    "selection": _("Belgilangan matn"), "toNote": _("Eslatmaga saqlash"), "askAi": _("AI’dan so‘rash"),
+    "general": _("Umumiy"), "today": _("Bugun"), "noteSaved": _("Eslatmalarga saqlandi"),
+    "explain": _("Tushuntirib bering: «%(t)s»", t="{t}"), "breakOver": _("Tanaffus tugadi. Davom etamiz!"),
+    "copyManually": _("Nusxalab oling:")
+  }|tojson }}</script>
   {% with msgs = get_flashed_messages() %}{% if msgs %}<div hidden data-flash="{{ msgs|tojson|forceescape }}"></div>{% endif %}{% endwith %}
 </body>
 </html>

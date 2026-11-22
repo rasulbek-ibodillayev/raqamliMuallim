@@ -12,14 +12,18 @@
       </a>
       <button class="icon-btn drawer-close" type="button" @click="menu = false" aria-label="{{ _('Menyuni yopish') }}">{{ icon("x") }}</button>
     </div>
-    <div class="pt-0 nav-label eyebrow">{{ "Ekspert paneli" if panel == "expert" else "Admin paneli" }}</div>
+    <div class="pt-0 nav-label eyebrow">{{ _("Ekspert paneli") if panel == "expert" else _("Admin paneli") }}</div>
     {% for e, label, ic, count in nav[panel] %}
       <a class="nav-item {{ 'active' if ep == e }}" href="{{ url_for(e) }}">{{ icon(ic) }}{{ label }}{% if count %}<span class="count num">{{ count }}</span>{% endif %}</a>
     {% endfor %}
+    <a class="nav-item {{ 'active' if ep == panel ~ '.profile' }}" href="{{ url_for(panel ~ '.profile') }}">{{ icon("user") }}{{ _("Profil") }}</a>
+    {% set staff = staff_of(panel) %}
     <div class="sidebar-foot">
       <div class="me">
-        <span class="avatar">{{ "AR" if panel == "admin" else "ZQ" }}</span>
-        <span class="grow"><span class="d-block strong small">{{ "Aziz Rahimov" if panel == "admin" else "Zuhra Qodirova" }}</span><span class="xs muted">{{ "Administrator" if panel == "admin" else "Ekspert (metodist)" }}</span></span>
+        <a class="row row-sm grow u-minw-0 c-inherit" href="{{ url_for(panel ~ '.profile') }}" title="{{ _('Profil') }}">
+          <span class="avatar">{{ staff.initials }}</span>
+          <span class="grow u-minw-0"><span class="d-block strong small truncate">{{ staff.first }} {{ staff.last }}</span><span class="xs muted">{{ staff.role }}</span></span>
+        </a>
         <a class="icon-btn" href="{{ url_for('auth.logout') }}" aria-label="{{ _('Chiqish') }}" title="{{ _('Chiqish') }}">{{ icon("logout", "ico-sm") }}</a>
       </div>
     </div>
@@ -28,7 +32,7 @@
     <header class="topbar bordered">
       <button class="icon-btn menu-btn" type="button" @click="menu = true" aria-label="{{ _('Menyuni ochish') }}" aria-controls="panel-menu" :aria-expanded="menu">{{ icon("menu") }}</button>
       <div class="topbar-title grow truncate">{% block heading %}{% endblock %}</div>
-      <span class="role-pill">{{ icon("shield", "ico-sm") }}{{ "Admin" if panel == "admin" else "Ekspert" }}</span>
+      <span class="role-pill">{{ icon("shield", "ico-sm") }}{{ _("Admin") if panel == "admin" else _("Ekspert") }}</span>
       <button class="icon-btn" type="button" data-theme-toggle aria-label="{{ _('Mavzu rangini almashtirish') }}">{{ icon("moon") }}</button>
     </header>
     <main id="main" tabindex="-1" class="pb-64 page page-wide">{% if request.args.get("yuklanmoqda") %}{% with skeleton_kind = "table" %}{% include "partials/skeleton.html" %}{% endwith %}{% else %}{% block content %}{% endblock %}{% endif %}</main>

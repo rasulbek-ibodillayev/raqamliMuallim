@@ -15,8 +15,8 @@
       {% if o.state == "review" %}
       <button class="icon-btn" type="button" @click="edit = !edit" :aria-pressed="edit" aria-label="{{ _('E’tirozni tahrirlash') }}" title="{{ _('E’tirozni tahrirlash') }}">{{ icon("edit", "ico-sm") }}</button>
       <form action="{{ url_for('user.objection_delete', oid=o.id) }}" method="post" class="u-d-inline"
-            x-data="rmForm({}, function () { gone.push({{ o.id }}); rmToast('{{ _('E’tiroz o‘chirildi') }}'); return false; })"
-            @submit.prevent="if (confirm('{{ _('E’tiroz o‘chirilsinmi? Uni ekspert hali ko‘rib chiqmagan.') }}')) submit($event).then(j => { if (j && !j.ok) rmToast(Object.values(j.errors || {})[0] || j.message) })">
+            x-data="rmForm({}, function () { gone.push({{ o.id }}); rmToast({{ _('E’tiroz o‘chirildi')|tojson|forceescape }}); return false; })"
+            @submit.prevent="if (confirm({{ _('E’tiroz o‘chirilsinmi? Uni ekspert hali ko‘rib chiqmagan.')|tojson|forceescape }})) submit($event).then(j => { if (j && !j.ok) rmToast(Object.values(j.errors || {})[0] || j.message) })">
         {{ csrf() }}
         <button class="icon-btn" type="submit" :disabled="busy" aria-label="{{ _('E’tirozni o‘chirish') }}" title="{{ _('E’tirozni o‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
       </form>

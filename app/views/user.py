@@ -2,9 +2,8 @@ from flask import Blueprint, render_template, request, url_for
 from flask_babel import gettext as _
 
 from .. import mock as m
-from ..forms import (fmt_phone, check_otp, check_phone, check_secret, norm_phone, otp_code,
-                     OBJECTION_REASONS, REGIONS, check_email, check_name, check_password, field, required, respond,
-                     validate)
+from . import account
+from ..forms import OBJECTION_REASONS, REGIONS, field, required, respond, validate
 
 bp = Blueprint("user", __name__, url_prefix="/app")
 
@@ -14,7 +13,7 @@ def home():
     import random
     from flask import session
     new_user = bool(request.args.get("yangi"))
-    done_steps = int(request.args.get("qadam", 0))  # namunada: nechta qadam bajarilgan
+    done_steps = request.args.get("qadam", 0, type=int) or 0  # namunada: nechta qadam bajarilgan (noto'g'ri qiymat — 0)
     # Motivatsion so'z har kirishda yangidan tanlanadi (kirishda sessiyadan o'chiriladi)
     if "motto" not in session:
         session["motto"] = random.randrange(len(m.MOTTOS))
@@ -209,7 +208,7 @@ def certificate_print():
 
 @bp.get("/profil")
 def profile():
-    return render_template("user/profile.html", **_profile())
+    return render_template(PROFILE_TPL, **account.context("user", "user"))
 
 
 @bp.get("/yana")
@@ -230,122 +229,44 @@ def offline():
 # ---------- Formalar (POST). Tekshiruv: app/forms.py ----------
 
 
+# Profil formalari (ism, telefon/email, parol, maxfiy so'z) — uchala rol uchun umumiy: app/views/account.py
+PROFILE_TPL = "user/profile.html"
+
+
 @bp.post("/profil/malumotlar")
 def profile_info():
-    email = field("email").lower()
-    errors = validate({
-        "fn": (field("fn"), lambda v: check_name(v, "first")),
-        "ln": (field("ln"), lambda v: check_name(v, "last")),
-        "email": (email, lambda v: check_email(v) if v else None),
-    })
-    return respond(errors=errors, template="user/profile.html", **_profile(open="info"),
-                   redirect_to=url_for("user.profile"), message=_("Shaxsiy ma’lumotlar saqlandi"))
-
-
-def _profile(**ctx):
-    """Profil sahifasi uchun umumiy kontekst (aloqani almashtirish holati sessiyadan)."""
-    from flask import session
-    cc = session.get("contact_change") or {}
-    return {"cc_pending": bool(cc), "cc_method": cc.get("method"), "cc_target": cc.get("target"), **ctx}
-
-
-# Namunada joriy parol. Backendda: users.password_hash bilan solishtiriladi, urinishlar audit_log'ga yoziladi.
-DEMO_PASSWORD = "parol1234"
-PW_MAX_FAILS = 5
-
-
-def _check_current_password(pw: str):
-    """Joriy parolni tekshiradi; 5 ta xato urinishdan keyin 15 daqiqa bloklanadi (namunada — sessiya oxirigacha)."""
-    from flask import session
-    fails = session.get("pw_fails", 0)
-    if fails >= PW_MAX_FAILS:
-        return _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring")
-    if not pw:
-        return _("Joriy parolni kiriting")
-    if pw != DEMO_PASSWORD:
-        session["pw_fails"] = fails + 1
-        left = PW_MAX_FAILS - fails - 1
-        return (_("Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=left) if left
-                else _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring"))
-    session.pop("pw_fails", None)
-    return None
+    return account.save_info("user", "user", PROFILE_TPL)
 
 
 @bp.post("/profil/parol-tekshirish")
 def password_check():
-    """Telefon/emailni almashtirishdan oldin joriy parolni tekshirish: to'g'ri bo'lsa «Kod yuborish» faollashadi."""
-    from flask import jsonify
-    err = _check_current_password(request.form.get("pw", ""))
-    if err:
-        return jsonify(ok=False, errors={"pw": err}), 422
-    return jsonify(ok=True, message=_("Parol to‘g‘ri"))
+    return account.password_check()
 
 
 @bp.post("/profil/aloqa/kod")
 def contact_code():
-    """Telefon yoki emailni almashtirish, 1-qadam: yangi qiymat + joriy parol → yangi qiymatga kod (telefon — Telegram bot).
-    Parol shu yerda ham qayta tekshiriladi: «Kod yuborish» tugmasini chetlab o'tib bo'lmaydi."""
-    from flask import session
-    method = field("method") if field("method") in ("phone", "email") else "phone"
-    value = field("contact")
-    current = {"phone": "+998901234567", "email": "dilnoza.k@maktab.uz"}[method]   # namuna: joriy qiymat
-    errors = validate({"contact": (value, required, check_phone if method == "phone" else (lambda v: check_email(v.lower())))})
-    target = norm_phone(value) if method == "phone" else value.lower()
-    if not errors and target == current:
-        errors = {"contact": _("Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting")}
-    pw_error = _check_current_password(request.form.get("pw", ""))
-    if pw_error:
-        errors = {**errors, "pw": pw_error}
-    if not errors:
-        session["contact_change"] = {"method": method, "target": target}
-    msg = (_("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=fmt_phone(target)) if method == "phone"
-           else _("Kod %(c)s manziliga yuborildi", c=target)) if not errors else None
-    return respond(errors=errors, template="user/profile.html", **_profile(open="contact", cc_method=method),
-                   redirect_to=url_for("user.profile"), message=msg, data={"target": fmt_phone(target) if method == "phone" else target})
+    return account.contact_code("user", "user", PROFILE_TPL)
 
 
 @bp.post("/profil/aloqa/tasdiq")
 def contact_confirm():
-    """2-qadam: kod to'g'ri bo'lsa yangi telefon/email saqlanadi (eskisi shu paytgacha amalda)."""
-    from flask import session
-    cc = session.get("contact_change")
-    if not cc:
-        return respond(errors={"otp": _("Avval yangi telefon yoki emailni kiriting")}, template="user/profile.html",
-                       **_profile(open="contact"))
-    errors = validate({"otp": (otp_code(), check_otp, lambda v: None if v == "123456" else _("Kod noto‘g‘ri. Namunada kod: 123456"))})
-    if not errors:
-        session.pop("contact_change", None)
-    msg = (_("Telefon raqam yangilandi") if cc["method"] == "phone" else _("Email yangilandi")) if not errors else None
-    return respond(errors=errors, template="user/profile.html", **_profile(open="contact"),
-                   redirect_to=url_for("user.profile"), message=msg)
+    return account.contact_confirm("user", "user", PROFILE_TPL)
 
 
 @bp.post("/profil/maxfiy-soz")
 def profile_secret():
-    pw = request.form.get("pw", "")
-    errors = validate({"pw": (pw, required), "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw))})
-    return respond(errors=errors, template="user/profile.html", **_profile(open="secret"),
-                   redirect_to=url_for("user.profile"), message=_("Maxfiy so‘z yangilandi"))
+    return account.save_secret("user", "user", PROFILE_TPL)
 
 
 @bp.post("/profil/parol")
 def profile_password():
-    new = request.form.get("new", "")
-    errors = validate({
-        "old": (request.form.get("old", ""), required),
-        "new": (new, check_password),
-        "new2": (request.form.get("new2", ""), lambda v: None if v == new else _("Parollar bir xil emas")),
-    })
-    if not errors and request.form.get("old") == new:
-        errors = {"new": _("Yangi parol joriy paroldan farq qilsin")}
-    return respond(errors=errors, template="user/profile.html", **_profile(open="pw"),
-                   redirect_to=url_for("user.profile"), message=_("Parol o‘zgartirildi"))
+    return account.change_password("user", "user", PROFILE_TPL)
 
 
 @bp.post("/profil/hudud")
 def profile_region():
     errors = validate({"region": (field("region"), lambda v: None if v in REGIONS else _("Viloyatni ro‘yxatdan tanlang"))})
-    return respond(errors=errors, template="user/profile.html", **_profile(open="reg"),
+    return respond(errors=errors, template=PROFILE_TPL, **account.context("user", "user", open="reg"),
                    redirect_to=url_for("user.profile"), message=_("Hudud saqlandi"))
 
 

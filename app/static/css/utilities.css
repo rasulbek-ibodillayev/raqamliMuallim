@@ -62,6 +62,7 @@
 .u-minh-4fcf5 { min-height: calc(100dvh - 60px - var(--tabbar-h) - 40px) !important; }
 .u-minh-52 { min-height: 52px !important; }
 .u-minh-80 { min-height: 80px !important; }
+.u-minw-0 { min-width: 0 !important; }
 .u-minw-130 { min-width: 130px !important; }
 .u-minw-200 { min-width: 200px !important; }
 .u-mt-16 { margin-top: 16px !important; }

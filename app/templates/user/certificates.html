@@ -18,7 +18,7 @@
       {% set verify_url = url_for('auth.verify_certificate', cert_no='INF-2026-000123', _external=True) %}
       <button class="btn btn-outline btn-sm" type="button" x-data="{ done: false }"
               @click="const u = '{{ verify_url }}'; if (navigator.share) { navigator.share({ title: 'raqamliMuallim sertifikati', url: u }).catch(() => {}) } else { navigator.clipboard.writeText(u).then(() => { done = true; setTimeout(() => done = false, 2000) }) }">
-        {{ icon("share", "ico-sm") }}<span x-text="done ? 'Havola nusxalandi ✓' : 'Havolani ulashish'">{{ _("Havolani ulashish") }}</span></button>
+        {{ icon("share", "ico-sm") }}<span x-text="done ? {{ _('Havola nusxalandi ✓')|tojson|forceescape }} : {{ _('Havolani ulashish')|tojson|forceescape }}">{{ _("Havolani ulashish") }}</span></button>
       <a class="btn btn-ghost btn-sm" href="{{ verify_url }}">{{ icon("shield", "ico-sm") }}{{ _("Tekshirish sahifasi") }}</a>
     </div>
   </article>

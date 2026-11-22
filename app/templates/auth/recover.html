@@ -50,13 +50,13 @@
       </div>
     </fieldset>
     <div class="field">
-      <label class="label" for="rc-contact" x-text="method === 'phone' ? '{{ _('Yangi telefon raqam') }}' : '{{ _('Yangi email') }}'">{{ _("Yangi telefon raqam") }}</label>
+      <label class="label" for="rc-contact" x-text="method === 'phone' ? {{ _('Yangi telefon raqam')|tojson|forceescape }} : {{ _('Yangi email')|tojson|forceescape }}">{{ _("Yangi telefon raqam") }}</label>
       <input class="input" id="rc-contact" name="contact" value="{{ form.contact }}" required
              :inputmode="method === 'phone' ? 'tel' : 'email'" :autocomplete="method === 'phone' ? 'tel' : 'email'"
              :placeholder="method === 'phone' ? '+998 90 123 45 67' : 'namuna@maktab.uz'" placeholder="+998 90 123 45 67"
              x-model="contact" aria-describedby="contact-err contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
       {{ field_error("contact", errors if rstep == 2 else {}) }}
-      <span class="hint" id="contact-hint" x-text="method === 'phone' ? '{{ _('Kod shu raqamga ulangan Telegram bot orqali keladi.') }}' : '{{ _('Kod shu manzilga xat bilan keladi.') }}'">{{ _("Kod shu raqamga ulangan Telegram bot orqali keladi.") }}</span>
+      <span class="hint" id="contact-hint" x-text="method === 'phone' ? {{ _('Kod shu raqamga ulangan Telegram bot orqali keladi.')|tojson|forceescape }} : {{ _('Kod shu manzilga xat bilan keladi.')|tojson|forceescape }}">{{ _("Kod shu raqamga ulangan Telegram bot orqali keladi.") }}</span>
     </div>
     <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy || kind !== method">{{ _("Kod yuborish") }}</button>
   </form>

@@ -20,11 +20,19 @@ def test_unknown_language_ignored(client):
     assert '<html lang="uz"' in client.get("/kirish?til=fr").get_data(as_text=True)
 
 
-def test_english_and_karakalpak(client):
+def test_english(client):
     html = client.get("/app/?til=en").get_data(as_text=True)
     assert '<html lang="en"' in html and "Study plan" in html and "My results" in html
-    html = client.get("/app/?til=kaa").get_data(as_text=True)
-    assert '<html lang="kaa"' in html and "Oqıw rejesi" in html
+
+
+def test_karakalpak_removed(client):
+    assert '<html lang="uz"' in client.get("/app/?til=kaa").get_data(as_text=True)
+
+
+def test_language_select(client):
+    html = client.get("/kirish?til=ru").get_data(as_text=True)
+    assert '<select class="select select-sm" name="til"' in html
+    assert '<option value="ru" lang="ru" selected>' in html and 'value="kaa"' not in html
 
 
 def test_form_errors_translated(client):

@@ -1,0 +1,75 @@
+{% extends "layouts/auth.html" %}
+{# Ekspert taklifnomasi (admin yuborgan havola): ekspert parol va maxfiy so'zni o'zi o'rnatib, akkauntini faollashtiradi.
+   state: valid | expired | used | invalid. Server: auth.invite, app/invites.py #}
+{% block title %}{{ _("Ekspert taklifnomasi") }}{% endblock %}
+{% block content %}
+{% if state == "valid" %}
+<form class="stack stack-lg" action="{{ request.path }}" method="post" novalidate
+      x-data="rmForm({ show: false, show2: false, show3: false })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
+  <div class="stack stack-sm">
+    <span class="ai-mark lg">{{ icon("shield") }}</span>
+    <h1>{{ _("Ekspert sifatida taklif qilindingiz") }}</h1>
+    <p class="lead">{{ _("Akkauntingizni faollashtirish uchun parol o‘rnating. Parolni faqat siz bilasiz — administrator uni ko‘rmaydi.") }}</p>
+  </div>
+
+  <dl class="card list u-m-0">
+    <div class="list-item"><dt class="grow muted small">{{ _("Ism va familiya") }}</dt><dd class="strong u-m-0">{{ inv.n }}</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Login") }}</dt><dd class="u-m-0 num row row-sm">{{ icon("telegram" if via == "telegram" else "mail", "ico-sm") }} {{ contact }}</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Yo‘nalishlar") }}</dt><dd class="u-m-0 small u-ta-right">{{ inv.a|join(", ") }}</dd></div>
+  </dl>
+
+  <div class="field">
+    <label class="label" for="iv-pw">{{ _("Yangi parol") }}</label>
+    <div class="input-group">
+      <input class="input" id="iv-pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required
+             aria-describedby="pw-err iv-pw-hint" :aria-invalid="!!err('pw')" @input="clear('pw')">
+      {{ eye("show") }}
+    </div>
+    {{ field_error("pw", errors) }}
+    <span class="hint" id="iv-pw-hint">{{ _("Kamida 8 ta belgi, harf va raqam aralash bo‘lsin.") }}</span>
+  </div>
+  <div class="field"><label class="label" for="iv-pw2">{{ _("Parolni takrorlang") }}</label>
+    <div class="input-group">
+      <input class="input" id="iv-pw2" name="pw2" :type="show2 ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="pw2-err" :aria-invalid="!!err('pw2')" @input="clear('pw2')">
+      {{ eye("show2") }}
+    </div>
+    {{ field_error("pw2", errors) }}</div>
+  <div class="field">
+    <label class="label" for="iv-secret">{{ _("Maxfiy so‘z") }}</label>
+    <div class="input-group">
+      <input class="input" id="iv-secret" name="secret" :type="show3 ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required
+             placeholder="{{ _('Masalan: birinchi maktabim nomi') }}" aria-describedby="secret-err iv-secret-hint" :aria-invalid="!!err('secret')" @input="clear('secret')">
+      {{ eye("show3") }}
+    </div>
+    {{ field_error("secret", errors) }}
+    <span class="hint" id="iv-secret-hint">{{ _("Telefon yoki emailingizga kira olmasangiz, akkauntni shu so‘z orqali tiklaysiz. Katta-kichik harf farqlanmaydi.") }}</span>
+  </div>
+  <div class="field">
+    <label class="check"><input type="checkbox" name="agree" value="1" required aria-describedby="agree-err" @change="clear('agree')" {{ 'checked' if form.agree }}><span>{{ _("Shaxsiy ma’lumotlarimni qayta ishlashga roziman va") }} <a class="link" href="{{ url_for('auth.privacy') }}" target="_blank" rel="noopener">{{ _("maxfiylik siyosati") }}</a>{{ _("ni qabul qilaman.") }}</span></label>
+    {{ field_error("agree", errors) }}
+  </div>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Akkauntni faollashtirish") }}</button>
+  <p class="xs muted u-ta-center">{{ _("Havola 72 soat amal qiladi va faqat bir marta ishlatiladi.") }}</p>
+</form>
+
+{% else %}
+<div class="empty u-p-8-0">
+  <span class="empty-ico">{{ icon("check-circle" if state == "used" else "alert", "ico-lg") }}</span>
+  <h1 class="u-fs-22">
+    {% if state == "used" %}{{ _("Akkaunt allaqachon faollashtirilgan") }}
+    {% elif state == "expired" %}{{ _("Taklif havolasining muddati o‘tgan") }}
+    {% else %}{{ _("Taklif havolasi yaroqsiz") }}{% endif %}
+  </h1>
+  <p class="maxw-360 muted">
+    {% if state == "used" %}{{ _("Bu havola orqali parol o‘rnatilgan. Telefon raqam yoki email va parolingiz bilan kiring.") }}
+    {% elif state == "expired" %}{{ _("Havola 72 soat amal qiladi. Administratordan taklifnomani qayta yuborishni so‘rang.") }}
+    {% else %}{{ _("Havola to‘liq nusxalanmagan yoki bekor qilingan. Xabardagi havolani qayta oching yoki administratorga murojaat qiling.") }}{% endif %}
+  </p>
+  <div class="justify-center row wrap mt-16">
+    <a class="btn btn-primary" href="{{ url_for('auth.login') }}">{{ _("Kirish sahifasi") }}</a>
+    {% if state == "used" %}<a class="btn btn-ghost" href="{{ url_for('auth.reset') }}">{{ _("Parolni unutdingizmi?") }}</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

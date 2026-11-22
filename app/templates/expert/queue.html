@@ -25,7 +25,7 @@
            x-data="{ edit: false, opts: {{ q.options|tojson|forceescape }}, right: {{ q.right|tojson|forceescape }}, text: {{ q.text|tojson|forceescape }} }">
     <form action="{{ url_for('expert.queue_decide', qid=q.id) }}" method="post" novalidate
           x-data="rmForm({}, function (j) { gone.push({{ q.id }}); rmToast(j.message); return false; })" x-init="initForm()"
-          @submit.prevent="if ($event.submitter.value !== 'reject' || confirm('{{ _('Savol rad etilib, o‘chirilsinmi?') }}')) submit($event)">
+          @submit.prevent="if ($event.submitter.value !== 'reject' || confirm({{ _('Savol rad etilib, o‘chirilsinmi?')|tojson|forceescape }})) submit($event)">
       {{ csrf() }}<input type="hidden" name="type" value="{{ q.type }}">
       <div class="card-head">
         {# Savol qaysi mavzu va qaysi darsga tegishli — aniq ko'rsatiladi #}
@@ -37,19 +37,19 @@
           </div>
           <span class="xs muted">{{ _("AI yaratgan") }} · {{ q.created }} · {{ q.level }} · {{ kinds[q.type] }}</span>
         </div>
-        <button class="btn btn-ghost btn-sm" type="button" @click="edit = !edit" :aria-pressed="edit">{{ icon("edit", "ico-sm") }}<span x-text="edit ? '{{ _('Ko‘rish') }}' : '{{ _('Tahrirlash') }}'">{{ _("Tahrirlash") }}</span></button>
+        <button class="btn btn-ghost btn-sm" type="button" @click="edit = !edit" :aria-pressed="edit">{{ icon("edit", "ico-sm") }}<span x-text="edit ? {{ _('Ko‘rish')|tojson|forceescape }} : {{ _('Tahrirlash')|tojson|forceescape }}">{{ _("Tahrirlash") }}</span></button>
       </div>
       <div class="card-pad stack stack-sm">
         <p class="strong" x-show="!edit" x-text="text">{{ q.text }}</p>
-        <textarea class="textarea" name="text" x-show="edit" x-cloak x-model="text" aria-label="{{ _('Savol matni') }}" aria-describedby="text-err"></textarea>
-        {{ field_error("text") }}
+        <textarea class="textarea" name="text" x-show="edit" x-cloak x-model="text" aria-label="{{ _('Savol matni') }}" aria-describedby="q{{ q.id }}-text-err"></textarea>
+        {{ field_error("text", {}, "q" ~ q.id ~ "-") }}
         <ul class="list-reset ans-list">
           <template x-for="(o, i) in opts" :key="i">
             <li class="ans" :class="right.includes(i) && 'ans-right'">
               {% if q.type == "ochiq" %}
               <span class="ans-key">{{ icon("check", "ico-sm") }}</span>
               {% else %}
-              <label class="ans-key u-cur-pointer" :title="'{{ _('To‘g‘ri javob') }}'">
+              <label class="ans-key u-cur-pointer" :title="{{ _('To‘g‘ri javob')|tojson|forceescape }}">
                 <input class="sr-only" type="{{ 'checkbox' if q.type in ['kop', 'moslash'] else 'radio' }}" name="right" :value="i" :checked="right.includes(i)" :disabled="!edit"
                        @change="{{ 'right = right.includes(i) ? right.filter(x => x !== i) : right.concat([i])' if q.type in ['kop', 'moslash'] else 'right = [i]' }}">
                 <span x-text="'ABCDEF'[i]"></span>
@@ -61,7 +61,7 @@
             </li>
           </template>
         </ul>
-        {{ field_error("opt") }}
+        {{ field_error("opt", {}, "q" ~ q.id ~ "-") }}
         <p class="xs muted" x-show="edit" x-cloak>{{ _("Harf ustiga bosib to‘g‘ri javobni belgilang.") }}</p>
       </div>
       <div class="card-foot row justify-end wrap">

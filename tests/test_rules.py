@@ -38,10 +38,9 @@ def test_translation_routes_through_russian_when_uzbek_unsupported():
     spec = importlib.util.spec_from_file_location("translate_script", path)
     tr = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(tr)
-    tr._SUPPORTED = {"ru": {"en"}, "en": {"ru"}}          # LibreTranslate: uz va kaa yo'q
+    tr._SUPPORTED = {"ru": {"en"}, "en": {"ru"}}          # LibreTranslate: uz yo'q
     assert tr.route("en", "Saqlash", {"Saqlash": "Сохранить"}) == ("Сохранить", "ru")
     assert tr.route("en", "Saqlash", {}) == (None, None)
-    assert tr.route("kaa", "Saqlash", {"Saqlash": "Сохранить"}) == (None, None)
 
 
 def test_plan_lesson_results_add_up_to_topic_test():

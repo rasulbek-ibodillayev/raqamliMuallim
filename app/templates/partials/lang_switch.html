@@ -1,6 +1,9 @@
-{# Interfeys tili. ?til=uz|ru|en|kaa sessiyada eslab qolinadi (app/i18n.py). Tarjimalar: scripts/translate.py #}
-<div class="seg lang-switch" role="group" aria-label="{{ _('Interfeys tili') }}">
-  {% for code, name in langs.items() %}
-  <a class="{{ 'active' if current_lang == code }}" href="?til={{ code }}" hreflang="{{ code }}" lang="{{ code }}" title="{{ name }}" {{ 'aria-current=true' if current_lang == code }}>{{ lang_short[code] }}<span class="sr-only"> — {{ name }}</span></a>
-  {% endfor %}
-</div>
+{# Interfeys tili (ochiladigan ro'yxat). ?til=uz|ru|en sessiyada eslab qolinadi (app/i18n.py). Tarjimalar: scripts/translate.py #}
+<form class="lang-switch" method="get" action="">
+  <select class="select select-sm" name="til" aria-label="{{ _('Interfeys tili') }}" data-autosubmit>
+    {% for code, name in langs.items() %}
+    <option value="{{ code }}" lang="{{ code }}" {{ 'selected' if current_lang == code }}>{{ name }}</option>
+    {% endfor %}
+  </select>
+  <noscript><button class="btn btn-ghost btn-sm" type="submit">{{ _("Saqlash") }}</button></noscript>
+</form>

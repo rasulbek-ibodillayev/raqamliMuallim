@@ -33,7 +33,7 @@ Namunada rol kirishdagi login’dan aniqlanadi: `admin@…` — admin, `ekspert@
 
 ## Tillar
 
-Asosiy til o‘zbekcha; rus, ingliz va qoraqalpoq tillari — `?til=ru|en|kaa` yoki UZ/RU/EN/QQ tugmalari. Matnlar `{{ _("...") }}` ichida.
+Asosiy til o‘zbekcha; rus va ingliz tillari — `?til=ru|en` yoki yuqoridagi til tanlash ro'yxati. Matnlar `{{ _("...") }}` ichida.
 
 Kataloglarni yangilash va tarjima qilish uchun dastur — `scripts/translate.py`:
 
@@ -41,7 +41,7 @@ Kataloglarni yangilash va tarjima qilish uchun dastur — `scripts/translate.py`
 .venv/Scripts/python scripts/translate.py --extract   # yangi matnlarni yig'ish + lug'atdan to'ldirish + kompilyatsiya
 ```
 
-Lug'atlar: `app/translations/ru_core.py`, `core_en.py`, `core_kaa.py`. Qolgan satrlar uchun `RM_TRANSLATE_URL`
+Lug'atlar: `app/translations/ru_core.py`, `core_en.py`. Qolgan satrlar uchun `RM_TRANSLATE_URL`
 (LibreTranslate bilan mos API) va `RM_TRANSLATE_KEY` berilsa, mashina tarjimasi qo'shiladi va «mashina tarjimasi» deb belgilanadi.
 Tarjima qilinmagan satr o‘zbekcha ko‘rinadi.
 
@@ -59,7 +59,9 @@ app/
     auth/ user/ test/ expert/ admin/ meta/
   static/
     css/app.css        dizayn tizimi (tokenlar, komponentlar, yorug‘/qorong‘i rejim)
-    js/app.js          kichik yordamchilar (taymer, OTP, kod ranglash, nusxa olish)
+    js/core.js         har sahifada: formalar (rmForm), tarjima (rmT), toast, OTP, kod ranglash, nusxa olish
+    js/learner.js      o'qituvchi qobig'i: menyu/qidiruv, ilovani o'rnatish, dam olish taymeri
+    js/lesson.js       dars sahifasi · js/tutor.js — AI tutor · js/test.js — test va attestatsiya
 design/stitch-reference/   Google Stitch eksporti: 82 ekran bo‘limlarga ajratilgan + DESIGN.md
 docs/usability-test-plan.md  5 nafar o‘qituvchi bilan sinov rejasi (vazifalar, kuzatuv varag‘i, SUS)
 ```

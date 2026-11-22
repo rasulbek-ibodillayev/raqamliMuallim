@@ -36,10 +36,10 @@
              x-model="contact" aria-describedby="who-err who-hint" :aria-invalid="!!err('who')" @input="clear('who'); if (sent) { sent = false; verified = false }">
       {# Format to'g'ri bo'lmaguncha tugma o'chiq va kulrang; to'g'ri bo'lsa asosiy rangga o'tadi #}
       <button class="btn" :class="valid ? 'btn-primary' : 'btn-outline'" type="submit" data-act="send" formaction="{{ url_for('auth.reset_code') }}" formnovalidate
-              :disabled="busy || !valid" x-text="sent ? '{{ _('Qayta yuborish') }}' : '{{ _('Kod yuborish') }}'">{{ _("Qayta yuborish") if sent else _("Kod yuborish") }}</button>
+              :disabled="busy || !valid" x-text="sent ? {{ _('Qayta yuborish')|tojson|forceescape }} : {{ _('Kod yuborish')|tojson|forceescape }}">{{ _("Qayta yuborish") if sent else _("Kod yuborish") }}</button>
     </div>
     {{ field_error("who", errors) }}
-    <span class="hint" id="who-hint" x-show="!sent" x-text="kind === 'phone' ? '{{ _('Kod Telegram bot orqali keladi: bot raqamingizni ulashishni so‘raydi.') }}' : (kind === 'email' ? '{{ _('Kod shu emailga xat bilan keladi.') }}' : '{{ _('Masalan: +998 90 123 45 67 yoki email@maktab.uz') }}')">{{ _("Masalan: +998 90 123 45 67 yoki email@maktab.uz") }}</span>
+    <span class="hint" id="who-hint" x-show="!sent" x-text="kind === 'phone' ? {{ _('Kod Telegram bot orqali keladi: bot raqamingizni ulashishni so‘raydi.')|tojson|forceescape }} : (kind === 'email' ? {{ _('Kod shu emailga xat bilan keladi.')|tojson|forceescape }} : {{ _('Masalan: +998 90 123 45 67 yoki email@maktab.uz')|tojson|forceescape }})">{{ _("Masalan: +998 90 123 45 67 yoki email@maktab.uz") }}</span>
   </div>
 
   <!-- 1b) Telefon: Telegram bot orqali -->

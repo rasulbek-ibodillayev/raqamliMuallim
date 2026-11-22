@@ -130,7 +130,49 @@ def google():
 @bp.get("/chiqish")
 def logout():
     session.clear()
-    return redirect(url_for("auth.login"))
+    resp = redirect(url_for("auth.login"))
+    # Umumiy (maktab) kompyuterlarida keyingi foydalanuvchi oldingisining keshlangan sahifalari, AI suhbati
+    # va eslatmalarini ko'rmasin: brauzer kesh va saytning lokal xotirasini (Service Worker ham) tozalaydi
+    resp.headers["Clear-Site-Data"] = '"cache", "storage"'
+    return resp
+
+
+@bp.route("/taklif/<token>", methods=["GET", "POST"])
+def invite(token):
+    """Ekspert taklifnomasi: admin yuborgan havola orqali ekspert parolni o'zi o'rnatadi va akkaunt yaratiladi.
+    Havola faqat taklif qilingan telefon (Telegram) yoki emailga yuborilgani uchun egalik shu bilan tasdiqlanadi."""
+    from .. import invites
+    state, data = invites.read(token)
+    ctx = {"state": state, "inv": data, "via": invites.channel(data["c"]) if data else None,
+           "contact": (fmt_phone(data["c"]) if data and "@" not in data["c"] else (data or {}).get("c"))}
+    if request.method == "GET" or state != "valid":
+        return render_template("auth/invite.html", **ctx), (200 if state == "valid" else 410 if state in ("expired", "used") else 404)
+    pw = request.form.get("pw", "")
+    errors = validate({
+        "pw": (pw, check_password),
+        "pw2": (request.form.get("pw2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
+        "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw)),
+        "agree": (request.form.get("agree"), lambda v: None if v else _("Shartlarga rozilik bildiring")),
+    })
+    if not errors:
+        # Backendda: users (role=expert, areas, perms) yaratiladi, taklifnoma used_at bilan yopiladi, audit_log
+        invites.mark_used(token)
+        session["role"] = "expert"
+    return respond(errors=errors, template="auth/invite.html", **ctx, redirect_to=url_for("expert.questions"),
+                   message=_("Akkauntingiz yaratildi. Xush kelibsiz, %(name)s!", name=data["n"].split()[0]))
+
+
+@bp.get("/taklif/namuna")
+def invite_demo():
+    """/ekranlar uchun: namunaviy taklifnoma (yangi token) yoki ?holat=eskirgan|yaroqsiz holatlari."""
+    from .. import invites
+    holat = request.args.get("holat")
+    if holat == "eskirgan":
+        return render_template("auth/invite.html", state="expired", inv=None, via=None, contact=None), 410
+    if holat == "yaroqsiz":
+        return redirect(url_for("auth.invite", token="buzilgan-havola"))
+    token = invites.make("Nodira Saidova", "+998935551122", ["Dasturlash", "Algoritmlar"], ["questions", "review"])
+    return redirect(url_for("auth.invite", token=token))
 
 
 @bp.get("/maxfiylik")

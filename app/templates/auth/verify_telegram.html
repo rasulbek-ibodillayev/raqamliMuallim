@@ -39,7 +39,7 @@
 
     <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy || expired">{{ _("Tasdiqlash") }}</button>
     <button class="btn btn-outline btn-block" type="button" x-show="expired" x-cloak
-            @click="start(); $root.querySelectorAll('input[name=otp]').forEach(i => i.value = ''); rmToast('{{ _('Yangi kod Telegram bot orqali yuborildi') }}')">{{ icon("refresh", "ico-sm") }}{{ _("Kodni qayta yuborish") }}</button>
+            @click="start(); $root.querySelectorAll('input[name=otp]').forEach(i => i.value = ''); rmToast({{ _('Yangi kod Telegram bot orqali yuborildi')|tojson|forceescape }})">{{ icon("refresh", "ico-sm") }}{{ _("Kodni qayta yuborish") }}</button>
   </div>
 </form>
 {% endblock %}

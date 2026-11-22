@@ -44,6 +44,33 @@ def create_app() -> Flask:
             return jsonify(ok=False, error="Server xatosi"), 500
         return render_template("errors/error.html", code=500), 500
 
+    # Content-Security-Policy: sahifada faqat o'z fayllarimiz va nonce'li inline skriptlar ishlaydi.
+    # 'unsafe-eval' — Alpine.js ifodalari (x-data, @click) uchun shart; inline onclick/onchange taqiqlangan,
+    # ular o'rniga data-* atributlari ishlatiladi (static/js/core.js). style-src 'unsafe-inline' — style="" atributlari.
+    import secrets
+    from flask import g
+
+    @app.before_request
+    def make_nonce():
+        g.csp_nonce = secrets.token_urlsafe(16)
+
+    @app.context_processor
+    def inject_nonce():
+        return {"csp_nonce": g.get("csp_nonce", "")}
+
+    @app.after_request
+    def security_headers(resp):
+        if resp.mimetype == "text/html" and g.get("csp_nonce"):
+            resp.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                f"script-src 'self' 'nonce-{g.csp_nonce}' 'unsafe-eval'; "
+                "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; "
+                "connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; "
+                "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'")
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        return resp
+
     from . import mock
 
     from flask import get_template_attribute
@@ -58,19 +85,22 @@ def create_app() -> Flask:
         # errors/form — forma xatolari va kiritilgan qiymatlar (forms.respond beradi), standart: bo'sh
         from .views.test import TYPE_SLUGS
         return {"errors": {}, "form": {}, "me": mock.ME, "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
-                "search_index": _search_index, **ui}
+                "search_index": _search_index, "staff_of": lambda r: mock.STAFF.get(r, {}), **ui}
 
     def _search_index():
         """Tezkor qidiruv (Ctrl+K) uchun sahifalar va mavzular ro'yxati."""
         from flask import url_for
-        items = [{"g": "Bo‘limlar", "t": str(label), "u": url_for(e), "i": ic} for e, label, ic, _ in mock.NAV["user"]]
+        from flask_babel import gettext as tr
+        # Guruh nomlari tanlangan tilda: learner.js ham shu matnni rmT("sections") orqali oladi
+        sec, top = tr("Bo‘limlar"), tr("Mavzular")
+        items = [{"g": sec, "t": str(label), "u": url_for(e), "i": ic} for e, label, ic, _ in mock.NAV["user"]]
         for _, group in mock.NAV["user_groups"]:
-            items += [{"g": "Bo‘limlar", "t": str(label), "u": url_for(e), "i": ic} for e, label, ic in group]
-        items += [{"g": "Bo‘limlar", "t": str(label), "u": url_for(e), "i": ic} for e, label, ic in [
+            items += [{"g": sec, "t": str(label), "u": url_for(e), "i": ic} for e, label, ic in group]
+        items += [{"g": sec, "t": tr(label), "u": url_for(e), "i": ic} for e, label, ic in [
             ("user.profile", "Profil va sozlamalar", "user"), ("user.optional", "Ixtiyoriy test", "settings"),
             ("user.diagnostic", "Diagnostika", "target")]]
         for s in mock.SECTIONS:
-            items += [{"g": "Mavzular", "t": t["name"], "s": s["name"], "u": url_for("user.topic", topic_id=t["id"]), "i": "book"}
+            items += [{"g": top, "t": t["name"], "s": s["name"], "u": url_for("user.topic", topic_id=t["id"]), "i": "book"}
                       for t in s["topics"]]
         return items
 

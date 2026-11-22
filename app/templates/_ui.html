@@ -67,7 +67,8 @@
 <a class="icon-btn" href="{{ href }}" aria-label="{{ label }}">{{ icon("arrow-left") }}</a>
 {%- endmacro %}
 
-{% macro composer(placeholder="AI tutorga savol bering…", action=None, note=True) -%}
+{% macro composer(placeholder=None, action=None, note=True) -%}
+{%- set placeholder = placeholder or _("AI tutorga savol bering…") -%}
 <form class="composer" action="{{ action or url_for('user.tutor') }}" method="get">
   <label class="sr-only" for="q">{{ placeholder }}</label>
   <textarea id="q" name="q" rows="1" placeholder="{{ placeholder }}" data-autosize></textarea>
@@ -81,16 +82,17 @@
 {%- endmacro %}
 
 {# Maydon xatosi: server (JS'siz) va rmForm (JS bilan) uchun bitta element.
-   Ishlatish: <input name="pw" aria-describedby="pw-err" :class="err('pw') && 'invalid'"> {{ field_error("pw", errors) }} #}
-{% macro field_error(name, errors={}) -%}
-<p class="field-error" id="{{ name }}-err" role="alert" x-show="err('{{ name }}')" x-text="err('{{ name }}')"{% if not errors.get(name) %} x-cloak{% endif %}>{{ errors.get(name, "") }}</p>
+   Ishlatish: <input name="pw" aria-describedby="pw-err" :class="err('pw') && 'invalid'"> {{ field_error("pw", errors) }}
+   Bir sahifada bir xil nomli maydon bir necha formada bo'lsa, prefix bilan id noyob qilinadi: field_error("pw", e, "sc-") → id="sc-pw-err" #}
+{% macro field_error(name, errors={}, prefix="") -%}
+<p class="field-error" id="{{ prefix }}{{ name }}-err" role="alert" x-show="err('{{ name }}')" x-text="err('{{ name }}')"{% if not errors.get(name) %} x-cloak{% endif %}>{{ errors.get(name, "") }}</p>
 {%- endmacro %}
 
 {# Parol maydoni yonidagi «ko'z» tugmasi: var — Alpine holati (true bo'lsa matn ko'rinadi).
    Ishlatish: <div class="input-group" x-data="{ s1: false }"><input :type="s1 ? 'text' : 'password'" …>{{ eye("s1") }}</div> #}
 {% macro eye(var="show") -%}
 <button class="icon-btn" type="button" @click="{{ var }} = !{{ var }}" :aria-pressed="{{ var }}"
-        :aria-label="{{ var }} ? '{{ _('Yashirish') }}' : '{{ _('Ko‘rsatish') }}'" aria-label="{{ _('Ko‘rsatish') }}">
+        :aria-label="{{ var }} ? {{ _('Yashirish')|tojson|forceescape }} : {{ _('Ko‘rsatish')|tojson|forceescape }}" aria-label="{{ _('Ko‘rsatish') }}">
   <svg class="ico" aria-hidden="true"><use href="#i-eye" :href="{{ var }} ? '#i-eye-off' : '#i-eye'"/></svg>
 </button>
 {%- endmacro %}
