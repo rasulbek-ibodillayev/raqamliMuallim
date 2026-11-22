@@ -13,6 +13,9 @@ from app.services.content_import import ContentError, check_question, load
 
 SEED = json.loads(SEED_CONTENT.read_text(encoding="utf-8"))
 
+# Bu testlar o'z kontentini yaratadi: namunaviy kontentsiz boshlanadi (conftest.fresh_content)
+pytestmark = pytest.mark.usefixtures("fresh_content")
+
 
 def _count(model):
     return db.session.scalar(select(func.count()).select_from(model))

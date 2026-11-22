@@ -130,9 +130,16 @@ def create_app(config: dict | None = None) -> Flask:
         items += [{"g": sec, "t": tr(label), "u": url_for(e), "i": ic} for e, label, ic in [
             ("user.profile", "Profil va sozlamalar", "user"), ("user.optional", "Ixtiyoriy test", "settings"),
             ("user.diagnostic", "Diagnostika", "target")]]
-        for s in mock.SECTIONS:
-            items += [{"g": top, "t": t["name"], "s": s["name"], "u": url_for("user.topic", topic_id=t["id"]), "i": "book"}
-                      for t in s["topics"]]
+        from .services.catalog import topic_titles
+        items += [{"g": top, "t": t["name"], "s": t["section"], "u": url_for("user.topic", topic_id=t["id"]), "i": "book"}
+                  for t in topic_titles()]
         return items
+
+    import base64
+
+    @app.template_filter("b64")
+    def b64(value: str) -> str:
+        """Oldindan tayyorlangan SVG sxemani <img src="data:..."> uchun (partials/blocks.html)."""
+        return base64.b64encode((value or "").encode()).decode()
 
     return app

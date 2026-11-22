@@ -6,29 +6,44 @@
   <div class="pt-8 stack stack-sm">
     <span class="xs muted">{{ t.section }}</span>
     <h1>{{ t.name }}</h1>
-    <div class="row row-sm wrap">{{ status_dot(status[t.status][0], status[t.status][1]) }}<span class="small muted">{{ _("Oxirgi natija:") }} {{ t.last }}</span></div>
+    <div class="row row-sm wrap">{{ status_dot(status[t.status][0], status[t.status][1]) }}
+      <span class="small muted">{% if t.best_pct is not none %}{{ _("Eng yaxshi natija: %(p)s%%", p=t.best_pct) }}{% else %}{{ _("Mavzu testi hali topshirilmagan") }}{% endif %}</span></div>
   </div>
 
   <div class="card">
-    <div class="card-head"><span class="strong">{{ _("Kichik mavzular") }}</span><span class="small muted">{{ _("3 / 4 tayyor") }}</span></div>
+    <div class="card-head"><span class="strong">{{ _("Kichik mavzular") }}</span>
+      {% if t.scored %}<span class="small muted">{{ _("%(a)s / %(b)s tayyor", a=t.ready, b=t.subtopics|length) }}</span>{% endif %}</div>
     <div class="list">
-      {% for name, p in t.subtopics %}
+      {% for s in t.subtopics %}
       <div class="list-item">
-        <span class="{{ 't-green' if p >= 70 else 't-red' }}">{{ icon("check-circle" if p >= 70 else "x-circle") }}</span>
-        <div class="grow stack stack-sm"><span>{{ name }}</span>{{ progress(p, "green" if p >= 70 else "red", "thin") }}</div>
-        <span class="num small">{{ p }}%</span>
+        {% if s.pct is none %}
+        <span class="muted">{{ icon("info") }}</span>
+        <div class="grow stack stack-sm"><span>{{ s.name }}</span></div>
+        <span class="small muted">—</span>
+        {% else %}
+        {% set ok = s.pct >= pass_pct %}
+        <span class="{{ 't-green' if ok else 't-red' }}">{{ icon("check-circle" if ok else "x-circle") }}</span>
+        <div class="grow stack stack-sm"><span>{{ s.name }}</span>{{ progress(s.pct, "green" if ok else "red", "thin") }}</div>
+        <span class="num small">{{ s.pct }}%</span>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
 
+  {% if t.weak %}
   <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
-    <p class="grow">{{ _("«elif zanjiri» bo‘yicha 40%%. Avval shu qismni sxema orqali qayta ko‘rib chiqing, keyin takrorlash testini topshiring.") }}</p>
+    <p class="grow">{{ _("«%(name)s» bo‘yicha %(p)s%%. Avval shu qismni qayta ko‘rib chiqing, keyin takrorlash testini topshiring.", name=t.weak.name, p=t.weak.pct) }}</p>
   </div>
+  {% endif %}
 
   <div class="grid-2">
-    <a class="btn btn-primary btn-block" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("book") }}{{ _("Darsni ochish") }}</a>
+    {% if t.has_blocks %}
+    <a class="btn btn-primary btn-block" href="{{ url_for('user.lesson_topic', topic_id=t.id) }}">{{ icon("book") }}{{ _("Darsni ochish") }}</a>
+    {% else %}
+    <span class="btn btn-outline btn-block" aria-disabled="true">{{ icon("book") }}{{ _("Dars tayyorlanmoqda") }}</span>
+    {% endif %}
     <a class="btn btn-outline btn-block" href="{{ url_for('test.question') }}">{{ icon("refresh") }}{{ _("Takrorlash testi") }}</a>
   </div>
 </div>

@@ -51,10 +51,11 @@ SCREENS = [
         ("user.plan", "O‘quv reja (diagnostika asosida)", {}),
         ("user.plan", "O‘quv reja — diagnostikasiz (umumiy ish reja)", {"diagnostika": "yoq"}),
         ("user.plan", "O‘quv reja — oylik test vaqti kelgan", {"oylik": 1}),
-        ("user.topic", "Mavzu tafsiloti", {"topic_id": 1}),
+        ("meta.sample_topic", "Mavzu tafsiloti (bazadan; avval `flask kontent-yuklash`)", {"kind": "mavzu"}),
     ]),
     ("Dars va AI tutor", [
-        ("user.lesson", "Dars sahifasi", {}),
+        ("meta.sample_topic", "Dars — bazadagi bloklardan", {"kind": "dars"}),
+        ("user.lesson", "Dars sahifasi (namuna)", {}),
         ("user.lesson", "Dars — qayta o‘qitish", {"holat": "qayta"}),
         ("user.lesson", "Dars — audio pleyer", {"audio": 1}),
         ("user.tutor", "AI tutor", {}),
@@ -162,6 +163,25 @@ def as_role(role):
         abort(404)
     login_user(demo_user(role))
     return redirect(safe_next(request.args.get("next")) or url_for(HOME[role]))
+
+
+@bp.get("/_namuna/<kind>")
+def sample_topic(kind):
+    """Faqat ishlab chiqish uchun: bazadagi darsi bor birinchi mavzuning sahifasi yoki darsi (/ekranlar havolalari).
+    Mavzu ID'lari kontent qayta yuklanganda o'zgaradi, shuning uchun ro'yxatda qattiq raqam yozilmaydi."""
+    from flask import abort, redirect, url_for
+    from sqlalchemy import select
+
+    from ..extensions import db
+    from ..models import ContentBlock, Subtopic, Topic
+    _dev_tools_only()
+    if kind not in ("mavzu", "dars"):
+        abort(404)
+    tid = db.session.scalar(select(Topic.id).join(Subtopic).join(ContentBlock)
+                            .where(Topic.is_published.is_(True)).order_by(Topic.id).limit(1))
+    if tid is None:
+        abort(404)
+    return redirect(url_for("user.topic" if kind == "mavzu" else "user.lesson_topic", topic_id=tid))
 
 
 @bp.get("/ekranlar")

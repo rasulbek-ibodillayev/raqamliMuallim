@@ -62,7 +62,7 @@
 
   <nav class="tabbar" aria-label="{{ _('Pastki menyu') }}">
     <a class="tab {{ 'active' if ep == 'user.home' }}" href="{{ url_for('user.home') }}">{{ icon("home") }}{{ _("Bosh sahifa") }}</a>
-    <a class="tab {{ 'active' if ep in ['user.plan', 'user.lesson', 'user.topic'] }}" href="{{ url_for('user.plan') }}">{{ icon("route") }}{{ _("Reja") }}</a>
+    <a class="tab {{ 'active' if ep in ['user.plan', 'user.lesson', 'user.lesson_topic', 'user.topic'] }}" href="{{ url_for('user.plan') }}">{{ icon("route") }}{{ _("Reja") }}</a>
     <a class="tab tab-ai {{ 'active' if ep == 'user.tutor' }}" href="{{ url_for('user.tutor') }}"><span class="tab-ai-dot">{{ icon("sparkle") }}</span>{{ _("AI tutor") }}</a>
     <a class="tab {{ 'active' if ep in ['user.tests', 'user.optional'] }}" href="{{ url_for('user.tests') }}">{{ icon("clipboard") }}{{ _("Testlar") }}</a>
     {# «Yana» alohida sahifa emas — chap menyuni ochadi (JS o'chiq bo'lsa, eski sahifaga o'tadi) #}

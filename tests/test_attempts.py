@@ -12,6 +12,9 @@ from app.models import (AttemptItem, Course, Question, QuestionVersion, Section,
                         UserSeenQuestion)
 from app.services import attempts as tb
 
+# Bu testlar o'z kontentini yaratadi: namunaviy kontentsiz boshlanadi (conftest.fresh_content)
+pytestmark = pytest.mark.usefixtures("fresh_content")
+
 
 @pytest.fixture()
 def ctx(app):

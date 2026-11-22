@@ -1,0 +1,54 @@
+{% extends "layouts/focus.html" %}
+{% from "partials/blocks.html" import render_block with context %}
+{# Bazadagi dars: mavzuning kichik mavzulari va ularning bloklari (content_blocks). Namunaviy dars: user/lesson.html #}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/lesson.js') }}"></script>{% endblock %}
+{% block title %}{{ lesson.name }}{% endblock %}
+{% block bar %}
+<a class="icon-btn" href="{{ url_for('user.topic', topic_id=lesson.id) }}" aria-label="{{ _('Mavzuga qaytish') }}">{{ icon("x") }}</a>
+<div class="grow"><div class="strong truncate">{{ lesson.name }}</div><div class="xs muted">{{ lesson.section }} · {{ _("%(n)s ta kichik mavzu", n=lesson.parts|length) }}</div></div>
+<button class="icon-btn fs-btn" type="button" data-fs-cycle aria-label="{{ _('Matn o‘lchamini o‘zgartirish') }}" title="{{ _('Matn o‘lchami') }}">{{ _("Aa") }}</button>
+{% endblock %}
+
+{% block head %}<style>.focus-body { max-width: 1080px; }</style>{% endblock %}
+{% block content %}
+<div class="lesson-layout">
+  <nav class="lesson-toc" aria-label="{{ _('Dars mundarijasi') }}">
+    <div class="eyebrow toc-title">{{ _("Mundarija") }}</div>
+    <ol class="list-reset toc-list">
+      {% for p in lesson.parts %}
+      <li><a class="toc-link" href="#{{ p.anchor }}" data-toc-link="{{ p.anchor }}"><span class="toc-mark">{{ loop.index }}</span>{{ p.name }}</a></li>
+      {% endfor %}
+    </ol>
+  </nav>
+
+<article class="stack stack-xl lesson-body" data-select-menu data-topic="{{ lesson.name }}" data-resume="dars-{{ lesson.id }}"
+         data-notes-url="{{ url_for('user.notes') }}" data-tutor-url="{{ url_for('user.tutor', mavzu=lesson.name) }}">
+  <p class="hint row row-sm no-print">{{ icon("info", "ico-sm") }}{{ _("Matnni belgilang — eslatmaga saqlash yoki AI’dan so‘rash mumkin.") }}</p>
+  {% for p in lesson.parts %}
+  <section id="{{ p.anchor }}" class="stack stack-lg" data-toc-section>
+    <div class="prose">
+      <span class="eyebrow">{{ _("Kichik mavzu %(n)s", n=loop.index) }}</span>
+      {% if loop.first %}<h1 class="lesson-h1">{{ p.name }}</h1>{% else %}<h2>{{ p.name }}</h2>{% endif %}
+    </div>
+    {% for b in p.blocks %}{{ render_block(b, p.name) }}{% endfor %}
+  </section>
+  {% endfor %}
+
+  <div class="items-start ai-card row">
+    <span class="ai-mark">{{ icon("sparkle") }}</span>
+    <p class="grow">{{ _("Tushunmagan joyingiz bormi? Shu mavzu bo‘yicha AI tutordan so‘rang.") }}
+      <a href="{{ url_for('user.tutor', mavzu=lesson.name) }}">{{ _("AI tutorni ochish") }}</a></p>
+  </div>
+</article>
+</div>
+{% endblock %}
+
+{% block foot %}
+<footer class="focus-foot">
+  <div class="focus-foot-inner">
+    <a class="btn btn-primary grow" href="{{ url_for('test.question') }}">{{ _("Mavzu testini boshlash") }}</a>
+  </div>
+</footer>
+{% endblock %}
+
+{% block overlay %}{% with fab_ctx = "focus", fab_topic = lesson.name %}{% include "partials/study_fab.html" %}{% endwith %}{% endblock %}

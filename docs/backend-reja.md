@@ -12,7 +12,8 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 2 | ✅ Kirish | Flask-Login, ro'yxatdan o'tish, parolni tiklash, profil, rollar | — |
 | 3 | ✅ Testlar yadrosi | Ixcham `attempt_items`, `user_seen_questions`, test yig'ish servisi (`app/services/attempts.py`) | — |
 | 4 | ✅ Kontentni yuklash | JSON formati ([kontent-formati.md](kontent-formati.md)), tekshiruv, `flask kontent-yuklash`, namunaviy kontent (`app/seed/namuna_kontent.json`) | — |
-| 5 | ⏳ O'qituvchi ekranlari bazadan | O'quv reja, mavzu, dars, progress; `mock.py` o'rniga servislar | 4 |
+| 5 | ✅ O'qituvchi ekranlari bazadan (1-qism) | Mavzu sahifasi (kichik mavzular bo'yicha foizlar javoblardan), dars sahifasi `/app/dars/<id>` (bloklar bazadan), tezkor qidiruv, eslatmalar uchun mavzular ro'yxati, hududni saqlash (`app/services/catalog.py`) | — |
+| 5b | ⏳ O'qituvchi ekranlari (2-qism) | O'quv reja, bosh sahifa, diagnostika natijasi, «Natijalarim»: ular test natijalari va baholashga tayanadi, shuning uchun 6-bosqich bilan birga | B1 |
 | 6 | ⏳ Test o'ynatgichi bazada | Testni boshlash, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), yakunlash, natija, qaror (90/80/70) | B1 |
 | 7 | ⏳ Ekspert paneli | Savollarni yaratish va tahrirlash (versiyalar bilan), ko'rib chiqish, e'tirozlarga javob | 5 |
 | 8 | ⏳ Admin paneli | Foydalanuvchilar, sozlamalar (`settings`), imtihon sanasi, `expert_invites` jadvali, `audit_log`, Excel/CSV import va eksport | 5 |

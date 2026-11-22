@@ -48,7 +48,27 @@ def knowledge():
 
 @bp.get("/bilim/<int:topic_id>")
 def topic(topic_id):
-    return render_template("user/topic.html", t=m.TOPIC, status=m.STATUS)
+    """Mavzu: kichik mavzular va foydalanuvchining ular bo'yicha natijasi (bazadan)."""
+    from flask import abort
+    from flask_login import current_user
+
+    from ..services import catalog
+    t = catalog.topic_view(topic_id, current_user.id)
+    if t is None:
+        abort(404)
+    return render_template("user/topic.html", t=t, status=m.STATUS, pass_pct=catalog.PASS_PCT)
+
+
+@bp.get("/dars/<int:topic_id>")
+def lesson_topic(topic_id):
+    """Mavzu darsi: kichik mavzular va ularning bloklari bazadan (content_blocks)."""
+    from flask import abort
+
+    from ..services import catalog
+    lesson = catalog.lesson_view(topic_id)
+    if lesson is None or not lesson["parts"]:
+        abort(404)
+    return render_template("user/lesson_topic.html", lesson=lesson)
 
 
 @bp.get("/reja")
@@ -145,8 +165,8 @@ def errors():
 def notes():
     seed = [{"id": i + 1, "topic": t, "title": "", "text": text, "code": src or "", "when": when}
             for i, (t, text, src, when) in enumerate(m.NOTES)]
-    topics = list(dict.fromkeys([n["topic"] for n in seed] +
-                                [t["name"] for s in m.SECTIONS for t in s["topics"]]))
+    from ..services import catalog
+    topics = list(dict.fromkeys([n["topic"] for n in seed] + [t["name"] for t in catalog.topic_titles()]))
     return render_template("user/notes.html", notes=seed, topics=topics, current_topic=m.CURRENT_TOPIC)
 
 
@@ -266,6 +286,12 @@ def profile_password():
 @bp.post("/profil/hudud")
 def profile_region():
     errors = validate({"region": (field("region"), lambda v: None if v in REGIONS else _("Viloyatni ro‘yxatdan tanlang"))})
+    if not errors:
+        from flask_login import current_user
+
+        from ..extensions import db
+        current_user.region = field("region")
+        db.session.commit()
     return respond(errors=errors, template=PROFILE_TPL, **account.context("user", "user", open="reg"),
                    redirect_to=url_for("user.profile"), message=_("Hudud saqlandi"))
 
