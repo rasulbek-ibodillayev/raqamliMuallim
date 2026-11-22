@@ -6,7 +6,7 @@ from sqlalchemy import (Boolean, CheckConstraint, DateTime, Float, ForeignKey, I
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..extensions import db
-from ._base import JSONB, PK, Timestamps, one_of, pk
+from ._base import JSONB, PK, QID, Timestamps, one_of, pk
 
 TOPIC_STATUS = ("none", "learn", "relearn", "done", "solid")   # TZ 7-bo'lim
 
@@ -42,7 +42,7 @@ class ErrorItem(db.Model):
     id: Mapped[int] = pk()
     user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"))
     subtopic_id: Mapped[int] = mapped_column(PK, ForeignKey("subtopics.id", ondelete="CASCADE"))
-    question_id: Mapped[int] = mapped_column(PK, ForeignKey("questions.id", ondelete="CASCADE"))
+    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"))
     last_attempt_id: Mapped[int | None] = mapped_column(PK, ForeignKey("test_attempts.id", ondelete="SET NULL"))
     wrong_count: Mapped[int] = mapped_column(SmallInteger, default=1, server_default="1")
     last_wrong_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

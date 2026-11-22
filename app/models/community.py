@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, Str
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
-from ._base import JSONB, PK, Timestamps, created_at, one_of, pk
+from ._base import JSONB, PK, QID, Timestamps, created_at, one_of, pk
 
 OBJ_STATUS = ("review", "accepted", "rejected")
 
@@ -19,7 +19,7 @@ class Objection(Timestamps, db.Model):
 
     id: Mapped[int] = pk()
     user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    question_id: Mapped[int] = mapped_column(PK, ForeignKey("questions.id", ondelete="CASCADE"), index=True)
+    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"), index=True)
     question_version: Mapped[int] = mapped_column(Integer)
     attempt_id: Mapped[int | None] = mapped_column(PK, ForeignKey("test_attempts.id", ondelete="SET NULL"))
     text: Mapped[str] = mapped_column(Text)
@@ -37,7 +37,7 @@ class Discussion(db.Model):
     __table_args__ = (Index("ix_discussions_question_created", "question_id", "created_at"),)
 
     id: Mapped[int] = pk()
-    question_id: Mapped[int] = mapped_column(PK, ForeignKey("questions.id", ondelete="CASCADE"))
+    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"))
     objection_id: Mapped[int | None] = mapped_column(PK, ForeignKey("objections.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"))
     parent_id: Mapped[int | None] = mapped_column(PK, ForeignKey("discussions.id", ondelete="CASCADE"))

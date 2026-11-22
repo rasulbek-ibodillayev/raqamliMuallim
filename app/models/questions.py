@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, Index, Integer, SmallInteger, Strin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
-from ._base import JSONB, PK, Timestamps, created_at, one_of, pk
+from ._base import JSONB, PK, QID, Timestamps, created_at, one_of, pk, qid_pk
 
 Q_TYPES = ("single", "multiple", "open", "matching")
 Q_DIFFICULTY = ("easy", "medium", "hard")           # 1, 2, 3-bosqich (chegaralar 90/80/70 — settings'da)
@@ -25,7 +25,7 @@ class Question(Timestamps, db.Model):
         Index("ix_questions_pick", "subtopic_id", "difficulty", "status"),
     )
 
-    id: Mapped[int] = pk()
+    id: Mapped[int] = qid_pk()
     subtopic_id: Mapped[int] = mapped_column(PK, ForeignKey("subtopics.id", ondelete="RESTRICT"))
     type: Mapped[str] = mapped_column(String(10))
     difficulty: Mapped[str] = mapped_column(String(6))
@@ -56,7 +56,7 @@ class QuestionVersion(db.Model):
     __table_args__ = (UniqueConstraint("question_id", "version"),)
 
     id: Mapped[int] = pk()
-    question_id: Mapped[int] = mapped_column(PK, ForeignKey("questions.id", ondelete="CASCADE"))
+    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"))
     version: Mapped[int] = mapped_column(Integer)
     snapshot: Mapped[dict] = mapped_column(JSONB)       # type, difficulty, text, data, answer, explanation
     changed_by: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))

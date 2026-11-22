@@ -11,6 +11,7 @@
 | questions | 6.1-bo'limdagi maydonlar, versiyalar bilan |
 | test_attempts | Har bir boshlangan test: turi, holati, bosqich, natija, qaror, boshlangan paytdagi sozlamalar nusxasi |
 | attempt_items | Har bir berilgan savol: javob, ball, vaqt (ixcham) |
+| user_seen_questions | Foydalanuvchiga berilgan savollar (bir savol ikki marta berilmasligi uchun) |
 | user_topic_progress | Mavzu holati, belgilar, dars progressi, ketma-ket muvaffaqiyatsizliklar |
 | error_items | Xatolar analitikasi va xatolar ro'yxati (kichik mavzu darajasida) |
 | review_schedule | Takrorlash jadvali (spaced repetition) |
@@ -37,8 +38,24 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   6.1 kelgach moslashtiriladi.
 - **Versiyalar.** `questions` joriy holatni saqlaydi, har tahrir `question_versions`ga to'liq
   nusxa (JSONB) sifatida yoziladi. `attempt_items` va `objections` savolning aniq versiyasiga ishora qiladi.
-- **attempt_items ixcham.** Alohida `id` yo'q: kalit `(attempt_id, position)`.
+- **attempt_items ixcham.** Bu eng katta jadval bo'ladi, shuning uchun:
+  - alohida `id` yo'q: kalit `(attempt_id, position)`;
+  - savol matni nusxalanmaydi, faqat `(question_id, question_version)` havolasi saqlanadi;
+  - ustunlar tekislash tartibida joylashgan (`bigint`, `int`, `int`, `int`, `smallint`, `smallint`, `jsonb`),
+    shuning uchun qatorda bo'sh to'ldiruvchi bayt yo'q;
+  - ball `smallint` turida, 0–100 foiz (`float8` o'rniga);
+  - `question_id` bo'yicha alohida indeks yo'q.
+
   Arxivlangan urinishda tafsilotlar `test_attempts.items_archive`ga (zlib + JSON) siqiladi.
+- **Savol identifikatorlari 4 baytli.** `questions.id` va unga havola qiluvchi barcha ustunlar `integer`
+  (`question_versions`, `attempt_items`, `objections`, `discussions`, `error_items`, `user_seen_questions`).
+  Savollar 2 milliarddan oshmaydi.
+- **Bir savol bir foydalanuvchiga ikki marta berilmaydi.** Bu qoida `user_seen_questions (user_id, question_id, seen_on)`
+  jadvaliga tayanadi. `attempt_items` arxivlanganda ham bu jadval qoladi.
+  - Testlar `app/services/attempts.py` orqali yig'iladi: kichik mavzular `weight`i bo'yicha, faqat `approved` savollardan.
+  - Har bir kichik mavzuda avval ko'rilmagan savollar tasodifiy tartibda olinadi.
+  - Ular tugasa, eng oldin ko'rilgan savollar qaytariladi. Nechtasi takrorlangani
+    `settings_snapshot.repeated` ga yoziladi: bu kichik mavzuga yangi savol kerakligini ko'rsatadi.
 - **Oflayn sinxronlash.** `test_attempts.client_uuid`: IndexedDB'dan qayta yuborilgan javoblar ikki marta yozilmaydi.
 - **Attestatsiya sanasi** `users.exam_date`da, uni admin kiritadi.
 - **Vektor o'lchami** 768 (Gemini `text-embedding-004`), `app/models/rag.py`dagi `EMBED_DIM`.

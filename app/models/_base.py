@@ -1,11 +1,11 @@
 """Modellar uchun umumiy yordamchilar."""
 from datetime import datetime
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, Identity, func
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, Identity, Integer, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-__all__ = ["JSONB", "PK", "Timestamps", "created_at", "one_of", "pk"]
+__all__ = ["JSONB", "PK", "QID", "Timestamps", "created_at", "one_of", "pk", "qid_pk"]
 
 
 def pk() -> Mapped[int]:
@@ -13,6 +13,14 @@ def pk() -> Mapped[int]:
 
 
 PK = BigInteger  # tashqi kalitlar uchun ham shu tur
+
+# Savollar 2 milliarddan oshmaydi: questions.id va unga havola qiluvchi ustunlar 4 baytli. Eng katta jadvallar
+# (attempt_items, user_seen_questions) har qatorda 4 bayt tejaydi.
+QID = Integer
+
+
+def qid_pk() -> Mapped[int]:
+    return mapped_column(Integer, Identity(), primary_key=True)
 
 
 def created_at() -> Mapped[datetime]:
