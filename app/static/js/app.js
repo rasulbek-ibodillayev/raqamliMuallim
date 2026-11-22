@@ -1,5 +1,83 @@
 /* raqamliMuallim — kichik yordamchi skriptlar (Alpine.js bilan birga ishlaydi) */
 
+/* AI tutor suhbati qurilmada (localStorage) saqlanadi.
+   Tozalanadi: yangi mavzu boshlanganda (rm-current-topic o'zgarsa) yoki yozilganiga 24 soat bo'lganda. */
+window.rmTutorStore = (function () {
+  var KEY = "rm-tutor-chat", TTL = 24 * 3600 * 1000;
+  function read() {
+    try {
+      var d = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (!d || !Array.isArray(d.msgs)) return null;
+      if (Date.now() - d.savedAt > TTL) { localStorage.removeItem(KEY); return null; }   // 24 soat o'tdi
+      return d;
+    } catch (e) { return null; }
+  }
+  return {
+    load: function (topic) {
+      var d = read();
+      if (d && topic && d.topic !== topic) { this.clear(); return null; }                   // boshqa mavzu
+      return d;
+    },
+    save: function (topic, msgs) {
+      // savedAt — birinchi yozilgan vaqt: 24 soat shundan hisoblanadi
+      var d = read(), at = d && d.topic === topic ? d.savedAt : Date.now();
+      try { localStorage.setItem(KEY, JSON.stringify({ topic: topic, savedAt: at, msgs: msgs })); } catch (e) {}
+    },
+    clear: function () { try { localStorage.removeItem(KEY); } catch (e) {} }
+  };
+})();
+
+/* AI tutor sahifasi: suhbatni tiklash, yangi savolni qo'shish va saqlash.
+   msgs — [{ role: "user" | "ai", html }] (namunadagi boshlang'ich suhbat serverdan keladi). */
+window.rmTutor = function (topic) {
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  return {
+    msgs: [], restored: false, typing: false,
+    init: function () {
+      var self = this, saved = rmTutorStore.load(topic);
+      if (saved && saved.msgs.length) { this.msgs = saved.msgs; this.restored = true; }
+      else {
+        // Boshlang'ich (namunaviy) suhbat — shablondagi elementlardan
+        this.msgs = Array.prototype.map.call(this.$refs.seed.children, function (el) {
+          return { role: el.dataset.role, html: el.innerHTML };
+        });
+      }
+      var q = new URLSearchParams(location.search).get("q");
+      if (q) {
+        this.ask(q);
+        // URL'dan savolni olib tashlaymiz: sahifa yangilansa savol qayta qo'shilmasin
+        history.replaceState(null, "", location.pathname + location.search.replace(/([?&])q=[^&]*&?/, "$1").replace(/[?&]$/, ""));
+      } else this.persist();
+      this.$nextTick(function () { self.scroll(); });
+    },
+    ask: function (text) {
+      var self = this;
+      text = (text || "").trim();
+      if (!text) return;
+      this.msgs.push({ role: "user", html: esc(text) });
+      this.persist(); this.typing = true; this.scroll();
+      // Namunada AI javobi soxta; backendda /api/tutor oqim (stream) bilan javob qaytaradi
+      setTimeout(function () {
+        self.typing = false;
+        self.msgs.push({ role: "ai", html: "<p>" + esc("Bu namunaviy javob. Backend ulanganda AI tutor «" + text.slice(0, 80) + "» savoliga darslik asosida javob beradi.") + "</p>" });
+        self.persist(); self.scroll();
+      }, 900);
+    },
+    send: function (ev) {
+      var ta = ev.target.querySelector("textarea");
+      this.ask(ta.value); ta.value = ""; ta.style.height = "auto";
+    },
+    reset: function () {
+      rmTutorStore.clear();
+      this.msgs = []; this.restored = false;
+    },
+    persist: function () { rmTutorStore.save(topic, this.msgs); },
+    scroll: function () {
+      this.$nextTick(function () { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); });
+    }
+  };
+};
+
 /* PWA o'rnatish taklifi.
    Android/desktop Chrome: brauzerning beforeinstallprompt hodisasi saqlanadi va tugma bosilganda ko'rsatiladi.
    iPhone/iPad Safari: bunday hodisa yo'q, shuning uchun «Ulashish → Bosh ekranga» yo'riqnomasi chiqadi.
@@ -57,7 +135,7 @@ window.rmTestQuestion = function (cfg) {
       RMPlayer.open({ id: cfg.id, kind: cfg.kind, total: cfg.total, duration: cfg.duration }).then(function (s) {
         self.s = s;
         var a = s.answers[cfg.pos];
-        if (a) { RMPlayer.writeForm(form, cfg.mode, a.v); self.st = "synced"; }
+        if (a) { RMPlayer.writeForm(form, cfg.mode, a.v); self.st = "synced"; window.dispatchEvent(new CustomEvent("rm-q-restored")); }
         s.setPos(cfg.pos);
         self.left = s.remaining();
         setInterval(function () { self.left = s.remaining(); }, 1000);
@@ -79,6 +157,29 @@ window.rmTestQuestion = function (cfg) {
       if (this.st === "synced") return "Saqlandi";
       if (this.st === "error") return "Saqlanmadi";
       return "";
+    }
+  };
+};
+
+/* Moslashtirish savoli: bitta javob faqat bitta atamaga. Biror atamaga tanlangan ta'rif boshqa atamalarning
+   ro'yxatidan olib tashlanadi (yashiriladi va o'chiriladi); tanlov bekor qilinsa yana paydo bo'ladi. */
+window.rmMatch = function () {
+  return {
+    init: function () {
+      var self = this;
+      this.sync();
+      window.addEventListener("rm-q-restored", function () { self.sync(); });
+    },
+    sync: function () {
+      var sels = Array.prototype.slice.call(this.$el.querySelectorAll("select"));
+      var taken = sels.map(function (s) { return s.value; });
+      sels.forEach(function (s, i) {
+        Array.prototype.forEach.call(s.options, function (o) {
+          if (!o.value) return;
+          var used = taken.some(function (v, j) { return j !== i && v === o.value; });
+          o.hidden = used; o.disabled = used;
+        });
+      });
     }
   };
 };
@@ -127,7 +228,52 @@ window.rmForm = function (extra, onOk) {
       });
     }
   };
-  return Object.assign(base, extra || {});
+  return window.rmMix(base, extra);
+};
+
+/* Telefon/email formatini brauzerda tekshirish (server bilan bir xil qoida: forms.py PHONE_RE, EMAIL_RE).
+   «Kod yuborish» tugmasi faqat format to'g'ri bo'lganda faollashadi. only: "phone" | "email" | undefined (ikkalasi) */
+window.rmIsEmail = function (v) { return /^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$/.test((v || "").trim()); };
+window.rmIsPhone = function (v) {
+  if (/[^\d\s+()\-]/.test(v || "")) return false;
+  var d = (v || "").replace(/\D/g, "");
+  if (d.length === 9) d = "998" + d;
+  return /^998\d{9}$/.test(d);
+};
+/* Bir nechta obyektni getter'larini saqlagan holda birlashtiradi (Object.assign getter'ni qiymatga aylantiradi) */
+window.rmMix = function () {
+  var out = {};
+  Array.prototype.forEach.call(arguments, function (o) {
+    if (o) Object.defineProperties(out, Object.getOwnPropertyDescriptors(o));
+  });
+  return out;
+};
+window.rmContact = function (initial, only) {
+  return {
+    contact: initial || "",
+    get kind() {
+      var v = this.contact.trim();
+      if (only !== "phone" && v.indexOf("@") !== -1) return rmIsEmail(v) ? "email" : "";
+      if (only !== "email" && rmIsPhone(v)) return "phone";
+      return "";
+    },
+    get valid() { return !!this.kind; }
+  };
+};
+
+/* Kod amal qilish muddati (masalan, 5 daqiqa): orqaga sanaydi, tugagach «Kodni qayta yuborish» ko'rinadi */
+window.rmCodeTimer = function (seconds) {
+  return {
+    left: seconds, total: seconds, t: null,
+    start: function () {
+      var self = this;
+      clearInterval(this.t); this.left = this.total;
+      this.t = setInterval(function () { if (self.left > 0) self.left--; else clearInterval(self.t); }, 1000);
+    },
+    get expired() { return this.left <= 0; },
+    get mmss() { return Math.floor(this.left / 60) + ":" + String(this.left % 60).padStart(2, "0"); },
+    get pct() { return Math.round(this.left / this.total * 100); }
+  };
 };
 
 /* Joriy parolni tasdiqlash "darvozasi" (rmForm bilan birga): parol serverda tekshiriladi, to'g'ri bo'lsa pwOk = true
@@ -367,6 +513,19 @@ window.rmShell = function () {
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lessonNav); else lessonNav();
 
+  // Dars yoki mavzu sahifasi ochilganda shu mavzu «hozir o'rganilayotgan» deb eslab qolinadi
+  // (yangi eslatma shu mavzuga saqlanadi). Yangi mavzu boshlansa — AI tutor suhbati tozalanadi.
+  (function () {
+    var el = document.querySelector("[data-current-topic]");
+    if (!el) return;
+    var topic = el.dataset.currentTopic;
+    try {
+      var prev = localStorage.getItem("rm-current-topic");
+      localStorage.setItem("rm-current-topic", topic);
+      if (prev && prev !== topic && window.rmTutorStore) window.rmTutorStore.clear();
+    } catch (e) {}
+  })();
+
   // Darsda matnni belgilaganda: «Eslatmaga saqlash» va «AI’dan so‘rash»
   // Eslatmalar hozircha brauzer xotirasiga (rm-notes-inbox) yoziladi, «Eslatmalar» sahifasi uni o'qib oladi.
   var selMenu = null;
@@ -435,6 +594,82 @@ window.rmShell = function () {
       if (e.target.closest("[data-safe-leave]") && document.fullscreenElement) document.exitFullscreen().catch(function () {});
     });
     if (!canFs()) document.querySelectorAll("[data-fs-toggle]").forEach(function (b) { b.hidden = true; });
+  })();
+
+  // ---------- Dam olish: 45 daqiqadan keyin ko'z uchun tanaffus (partials/rest.html) ----------
+  (function () {
+    var root = document.getElementById("rm-rest");
+    if (!root) return;
+    var MIN = 60 * 1000, LIMIT = 45 * MIN, BREAK = 5 * MIN, AWAY = 5 * MIN, REASK = 10 * MIN, TICK = 5000, KEY = "rm-rest";
+    var html = document.documentElement;
+    var inTest = !!document.querySelector("[data-leave-guard]");   // test paytida tavsiya chiqmaydi
+    var $ = function (s) { return root.querySelector(s); };
+    var prompt = $("[data-rest-prompt]"), brk = $("[data-rest-break]"), clock = $("[data-rest-clock]"), warn = $("[data-rest-warn]");
+    var t = {}; try { t = JSON.parse(document.getElementById("rm-rest-i18n").textContent); } catch (e) {}
+
+    function fresh() { return { acc: 0, last: Date.now(), declines: 0, nextAt: LIMIT, breakUntil: 0, forced: false }; }
+    function load() { try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return fresh(); } }
+    function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
+    function level(s) { return s.declines >= 3 ? 2 : (s.declines >= 1 ? 1 : 0); }
+    function paint(s) { var l = level(s); if (l) html.dataset.strain = l; else delete html.dataset.strain; }
+
+    var s = load(), now = Date.now();
+    // 5 daqiqadan uzoq tizimdan chiqib qaytgan bo'lsa — hisob va rang asl holiga qaytadi
+    if (!s.breakUntil && now - s.last > AWAY) s = fresh();
+    var demo = new URLSearchParams(location.search).get("dam");
+    if (demo && !inTest) { s.acc = LIMIT; s.nextAt = LIMIT; s.breakUntil = 0; if (demo === "majburiy") s.declines = 4; }
+    s.last = now; save(s); paint(s);
+
+    function show(el) { root.hidden = false; prompt.hidden = el !== prompt; brk.hidden = el !== brk; document.body.classList.add("rest-open"); }
+    function hide() { root.hidden = true; prompt.hidden = brk.hidden = true; document.body.classList.remove("rest-open"); }
+
+    function startBreak(forced) {
+      s = load(); s.breakUntil = Date.now() + BREAK; s.forced = !!forced; save(s);
+      runBreak();
+    }
+    function runBreak() {
+      $("[data-rest-forced]").hidden = !s.forced;
+      show(brk);
+      (function step() {
+        var left = Math.max(0, load().breakUntil - Date.now());
+        clock.textContent = Math.floor(left / MIN) + ":" + String(Math.floor(left % MIN / 1000)).padStart(2, "0");
+        if (left > 0) return setTimeout(step, 500);
+        // Tanaffus tugadi: rang va hisob asl holatga
+        s = fresh(); save(s); paint(s); hide();
+        if (window.rmToast) window.rmToast("Tanaffus tugadi. Davom etamiz!");
+      })();
+    }
+    function ask() {
+      if (s.declines >= 4) return startBreak(true);   // 5-safar — majburiy
+      warn.hidden = !s.declines;
+      if (s.declines) warn.textContent = (t.warn1 || "").replace("{n}", s.declines) + (s.declines === 3 ? " " + (t.warnLast || "") : "");
+      show(prompt);
+      $("[data-rest-accept]").focus();
+    }
+    $("[data-rest-accept]").addEventListener("click", function () { startBreak(false); });
+    $("[data-rest-decline]").addEventListener("click", function () {
+      s = load(); s.declines += 1; s.nextAt = s.acc + REASK; save(s); paint(s); hide();
+    });
+
+    function tick() {
+      var cur = load(), n = Date.now();
+      if (cur.breakUntil) {            // tanaffus davom etmoqda (boshqa oynada boshlangan bo'lishi ham mumkin)
+        s = cur;
+        if (brk.hidden && !inTest) runBreak();   // test paytida tanaffus oynasi chiqmaydi
+        return;
+      }
+      var gap = n - cur.last;
+      if (gap > AWAY) cur = fresh();   // uzoq tanaffus — hammasi qaytadan
+      else cur.acc += gap;
+      cur.last = n; s = cur; save(s); paint(s);
+      if (!inTest && root.hidden && s.acc >= s.nextAt) ask();
+    }
+    if (s.breakUntil && s.breakUntil > now) { if (!inTest) runBreak(); }
+    else if (s.breakUntil) { s = fresh(); save(s); paint(s); }
+    else if (!inTest && s.acc >= s.nextAt) ask();   // masalan, test tugagach hisob 45 daqiqadan oshgan bo'lsa
+    setInterval(tick, TICK);
+    // Tanaffus paytida Esc va Tab bilan chiqib ketib bo'lmaydi
+    document.addEventListener("keydown", function (e) { if (!brk.hidden && (e.key === "Escape" || e.key === "Tab")) e.preventDefault(); }, true);
   })();
 
   // Serverdan kelgan flash xabarlar (JS'siz yuborilgan formalar) → toast

@@ -17,7 +17,14 @@ def test_russian_and_remembered(client):
 
 
 def test_unknown_language_ignored(client):
-    assert '<html lang="uz"' in client.get("/kirish?til=en").get_data(as_text=True)
+    assert '<html lang="uz"' in client.get("/kirish?til=fr").get_data(as_text=True)
+
+
+def test_english_and_karakalpak(client):
+    html = client.get("/app/?til=en").get_data(as_text=True)
+    assert '<html lang="en"' in html and "Study plan" in html and "My results" in html
+    html = client.get("/app/?til=kaa").get_data(as_text=True)
+    assert '<html lang="kaa"' in html and "Oqıw rejesi" in html
 
 
 def test_form_errors_translated(client):
@@ -29,4 +36,4 @@ def test_form_errors_translated(client):
 def test_percent_signs_render(client):
     # Jinja newstyle gettext: "%%" → "%" bo'lishi kerak
     html = client.get("/test/natija?holat=qaytarildi").get_data(as_text=True)
-    assert "80%" in html and "80%%" not in html
+    assert "70%" in html and "70%%" not in html

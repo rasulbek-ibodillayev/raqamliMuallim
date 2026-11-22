@@ -1,44 +1,171 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ _("O‘quv reja") }}{% endblock %}
+{#
+  Shaxsiy o'quv reja. Dastlabki diagnostika asosida tuziladi: umumiy ish rejadan ≥ 90% o'zlashtirilgan mavzular
+  chiqarib yuboriladi (diagnostika rad etilgan bo'lsa — umumiy ish reja).
+  Tuzilma: mavzu → (bosilganda) darslar → (dars bosilganda) shu dars bo'yicha mavzu testidagi savollar va natija.
+  Mavzu, dars va test bir-biridan rang va belgi bilan farqlanadi; har birida o'zlashtirish foizi. Chegaralar: < 70% — keyingi mavzu yopiq; 70–89% — qayta o'zlashtirish
+  tavsiya etiladi; ≥ 90% — tavsiya yo'q, lekin qayta o'zlashtirish mumkin. Qulflangan mavzularda — qaysi kuni
+  o'zlashtirish kerakligi. Namunada ?diagnostika=yoq — diagnostika o'tkazilmagan holat.
+#}
+{% set colors = {"none": "var(--border-strong)", "learn": "#f59e0b", "relearn": "var(--red)", "done": "var(--blue)", "solid": "var(--green)"} %}
+{% macro pct_cls(p) -%}{{ 'muted' if p is none else ('t-green' if p >= 90 else ('t-yellow' if p >= 70 else 't-red')) }}{%- endmacro %}
 {% block content %}
-{% call page_head(_("O‘quv reja"), _("Reja holatlaringizga qarab o‘zgaradi, joriy mavzu esa o‘z joyida qoladi.")) %}{% endcall %}
+{% call page_head(_("O‘quv reja"), _("Shaxsiy reja: bilim darajangizga qarab tuzilgan va natijalaringiz bilan yangilanadi.")) %}{% endcall %}
 
-<div class="mb-28 grid-3">
-  <div class="card stat"><div class="xs muted">{{ _("Bajarildi") }}</div><div class="stat-value num">14 / 42</div></div>
-  <div class="card stat"><div class="xs muted">{{ _("Nazoratgacha") }}</div><div class="stat-value num">{{ _("2 mavzu") }}</div></div>
-  <div class="card stat"><div class="xs muted">{{ _("Kuniga kerak") }}</div><div class="stat-value num">{{ _("≈ 1 mavzu") }}</div><div class="stat-sub">{{ _("23-dekabrgacha tugatish uchun") }}</div></div>
+{# ---------- Umumiy holat kartasi ---------- #}
+<section class="card card-pad stack mb-24 plan-summary" aria-labelledby="ps-title">
+  <div class="row between wrap items-start">
+    <div><h2 id="ps-title" class="text-h3">{{ _("O‘zlashtirish holati") }}</h2>
+      <p class="xs muted">{{ s.done }} / {{ s.total }} {{ _("mavzu o‘zlashtirildi · o‘rtacha") }} {{ s.avg }}%</p></div>
+    <span class="small muted row row-sm">{{ icon("calendar", "ico-sm") }}{{ _("Attestatsiya") }} {{ s.exam }} · {{ s.days_left }} {{ _("kun") }}</span>
+  </div>
+  <div class="stacked-bar" aria-hidden="true">{% for k, v in dist %}<span style="--v: {{ v }}%; --d: {{ colors[k] }}"></span>{% endfor %}</div>
+  <div class="row wrap g-6">
+    {% for k, v in dist %}<span class="legend-btn u-cur-default"><span class="dot" style="--d: {{ colors[k] }}"></span>{{ status[k][0] }} <span class="muted num">{{ v }}%</span></span>{% endfor %}
+  </div>
+  <div class="grid-3 plan-stats">
+    <div class="stat-mini"><div class="xs muted">{{ _("O‘zlashtirildi") }}</div><div class="strong num">{{ s.done }} / {{ s.total }}</div></div>
+    <div class="stat-mini"><div class="xs muted">{{ _("Oraliq sinovgacha") }}</div><div class="strong num">{{ s.next_control }}</div></div>
+    <div class="stat-mini"><div class="xs muted">{{ _("Kuniga kerak") }}</div><div class="strong num">{{ s.per_day }}</div></div>
+  </div>
+  {% if diag %}
+  <details class="plan-source">
+    <summary class="small pointer">{{ icon("target", "ico-sm") }}{{ _("Reja dastlabki diagnostika asosida tuzilgan:") }} <b>{{ excluded|length }} {{ _("ta mavzu") }}</b> {{ _("90%% dan yuqori o‘zlashtirilgani uchun chiqarildi") }}</summary>
+    <ul class="list-reset stack stack-sm mt-8">
+      {% for n, p in excluded %}<li class="row between small"><span>{{ n }}</span><span class="num t-green">{{ p }}%</span></li>{% endfor %}
+    </ul>
+  </details>
+  {% else %}
+  <p class="plan-source small">{{ icon("info", "ico-sm") }}{{ _("Dastlabki diagnostika o‘tkazilmagan, shuning uchun informatika bo‘yicha umumiy ish reja ishlatilmoqda.") }}
+    <a class="link" href="{{ url_for('user.diagnostic') }}">{{ _("Diagnostikadan o‘tish") }}</a></p>
+  {% endif %}
+</section>
+
+<div class="plan-key mb-16" aria-label="{{ _('Belgilar') }}">
+  <span class="pk pk-topic">{{ icon("book", "ico-sm") }}{{ _("Mavzu") }}</span>
+  <span class="pk pk-lesson">{{ icon("note", "ico-sm") }}{{ _("Dars") }}</span>
+  <span class="pk pk-test">{{ icon("clipboard", "ico-sm") }}{{ _("Test") }}</span>
+  <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("70%% dan past — keyingi mavzu yopiq") }}</span>
+  <span class="xs muted row row-sm"><span class="dot dot-yellow"></span>{{ _("70–89%% — qayta o‘zlashtirish tavsiya") }}</span>
+  <span class="xs muted row row-sm"><span class="dot dot-green"></span>{{ _("90%% va yuqori") }}</span>
 </div>
 
+{# Dars qatori: bosilganda shu dars bo'yicha test natijasi ochiladi #}
+{% macro lesson_row(t, l, topic_state) %}
+<details class="plan-lesson">
+  <summary class="pointer summary-plain">
+    {{ icon("note", "ico-sm") }}<span class="grow">{{ l.name }}</span>
+    {% if l.pct is not none %}<span class="lesson-bar">{{ progress(l.pct, "green" if l.pct >= 90 else ("yellow" if l.pct >= 70 else "red"), "thin") }}</span>{% endif %}
+    <span class="num small {{ pct_cls(l.pct) }}">{{ l.pct ~ "%" if l.pct is not none else "—" }}</span>
+    {{ icon("chevron-down", "ico-sm faint chev-rot") }}
+  </summary>
+  <div class="plan-lesson-body">
+    {% if t.test and l.n %}
+    <a class="plan-test-row" href="{{ url_for('user.result_detail', rid=t.test.rid) }}">
+      {{ icon("clipboard", "ico-sm") }}
+      <span class="grow"><span class="d-block small">{{ _("Mavzu testi · shu dars savollari") }}</span>
+        <span class="xs muted">{{ t.test.when }} · {{ l.ok }} / {{ l.n }} {{ _("to‘g‘ri javob") }}</span></span>
+      <b class="num {{ pct_cls((l.ok / l.n * 100)|round) }}">{{ (l.ok / l.n * 100)|round|int }}%</b>{{ icon("chevron-right", "ico-sm chev") }}
+    </a>
+    {% elif topic_state == "current" %}
+    <p class="xs muted">{% if l.pct is none %}{{ _("Dars hali o‘qilmagan.") }}{% else %}{{ _("Dars o‘qilmoqda.") }}{% endif %} {{ _("Test natijasi mavzu testidan keyin shu yerda chiqadi.") }}{% if l.min %} · ≈ {{ l.min }} {{ _("daq") }}{% endif %}</p>
+    {% else %}
+    <p class="xs muted">{{ _("Dars ochilgach o‘qiladi, test natijasi mavzu testidan keyin chiqadi.") }}</p>
+    {% endif %}
+    {% if topic_state == "done" %}
+    <a class="btn btn-ghost btn-sm u-as-flex-start" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("refresh", "ico-sm") }}{{ _("Darsni qayta o‘zlashtirish") }}</a>
+    {% elif topic_state == "current" %}
+    <a class="btn btn-ghost btn-sm u-as-flex-start" href="{{ url_for('user.lesson') }}">{{ icon("book", "ico-sm") }}{{ _("Darsni ochish") }}</a>
+    {% endif %}
+  </div>
+</details>
+{% endmacro %}
+
 <ol class="list-reset timeline">
+  {% set n = namespace(i=0) %}
   {% for p in plan %}
   {% set state = p.state %}
-  <li class="tl-item {{ state }}">
+  {% if p.kind == "topic" %}{% set n.i = n.i + 1 %}{% endif %}
+  <li class="tl-item {{ state }} {{ 'is-test' if p.kind == 'test' else 'is-topic' }}">
     <span class="tl-mark">
       {% if state == "done" %}{{ icon("check", "ico-sm") }}
       {% elif state == "locked" %}{{ icon("lock", "ico-sm") }}
-      {% elif state == "control" %}{{ icon("flag", "ico-sm") }}
-      {% else %}{{ loop.index }}{% endif %}
+      {% elif p.kind == "test" %}{{ icon(test_types[p.type][1], "ico-sm") }}
+      {% else %}{{ n.i }}{% endif %}
     </span>
-    {% if state == "current" %}
-    <div class="card card-primary card-pad stack stack-sm">
-      <span class="eyebrow t-blue">{{ _("Hozirgi mavzu") }}</span>
-      <h3>{{ p.name }}</h3>
-      <p class="small muted">{{ p.note }} · ≈ {{ p.min }} {{ _("daqiqa qoldi") }}</p>
-      {{ progress(60, cls="thin") }}
-      <a class="self-start btn btn-primary btn-sm mt-8" href="{{ url_for('user.lesson') }}">{{ _("Davom ettirish") }}{{ icon("arrow-right", "ico-sm") }}</a>
-    </div>
-    {% else %}
-    <div class="card u-p-14-18">
+
+    {% if p.kind == "test" %}
+    {# ---- Test (majburiy yoki ixtiyoriy) ---- #}
+    <div class="card plan-test-card u-p-14-18">
       <div class="row between wrap">
-        <div class="grow"><div class="{{ 'strong' if state in ['confirm', 'control'] }}">{{ p.name }}</div><div class="small muted">{{ p.note }}</div></div>
-        {% if p.min %}<span class="time-chip num">≈ {{ p.min }} {{ _("daq") }}</span>{% endif %}
-        {% if state == "done" %}<span class="num small t-green">{{ p.note }}</span>
-        {% elif state == "confirm" %}<a class="btn btn-outline btn-sm" href="{{ url_for('test.question') }}">{{ _("Testni topshirish") }}</a>
-        {% elif state == "control" %}<a class="btn btn-outline btn-sm" href="{{ url_for('user.control') }}">{{ _("Ko‘rish") }}</a>{% endif %}
+        <div class="grow">
+          <div class="row row-sm wrap"><span class="pk pk-test">{{ icon("clipboard", "ico-sm") }}{{ _("Test") }}</span><span class="{{ 'strong' if state != 'locked' }}">{{ p.name }}</span>
+            {% if p.type in ["topic", "interim", "final", "daily", "monthly"] %}{{ badge(_("Majburiy"), "blue") }}{% else %}{{ badge(_("Ixtiyoriy"), "gray") }}{% endif %}</div>
+          <div class="small muted">
+            {% if state == "locked" %}{{ _("Rejadagi sana:") }} <b class="c-text2">{{ p.date }}</b>{% if p.note %} · {{ p.note }}{% endif %}
+            {% elif state == "due" %}{{ _("Bugun ochiq") }}{% if p.note %} · {{ p.note }}{% endif %}
+            {% elif state == "started" %}<span class="t-red">{{ p.note }}</span>
+            {% else %}{{ _("Topshirildi") }}{% endif %}
+          </div>
+        </div>
+        <span class="time-chip num">≈ {{ p.min }} {{ _("daq") }}</span>
+        {% if state == "done" %}<a class="num small strong {{ pct_cls(p.pct) }}" href="{{ url_for('user.result_detail', rid=p.rid) if p.rid else '#' }}">{{ p.pct }}%</a>
+        {% elif state == "due" %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi=test_slug[p.type]) }}">{{ _("Boshlash") }}</a>
+        {% elif state == "started" %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi=test_slug[p.type]) }}">{{ _("Davom ettirish") }}</a>{% endif %}
       </div>
     </div>
+
+    {% else %}
+    {# ---- Mavzu: bosilganda darslari ochiladi ---- #}
+    <details class="card plan-topic {{ 'is-locked' if state == 'locked' }} {{ 'is-current' if state == 'current' }}" {{ 'open' if state == 'current' }}>
+      <summary class="u-p-14-18 pointer summary-plain">
+        <div class="row between wrap">
+          <div class="grow">
+            <div class="row row-sm wrap"><span class="pk pk-topic">{{ icon("book", "ico-sm") }}{{ _("Hozirgi mavzu") if state == "current" else _("Mavzu") }}</span><span class="{{ 'strong' if state == 'current' }}">{{ p.name }}</span></div>
+            <div class="small muted">
+              {% if state == "locked" %}{{ _("O‘zlashtirish kuni:") }} <b class="c-text2">{{ p.date }}</b> · {{ p.lessons|length }} {{ _("ta dars") }}
+              {% elif state == "current" %}{{ p.lessons|selectattr("pct")|list|length }} / {{ p.lessons|length }} {{ _("dars boshlangan") }} · ≈ {{ p.min }} {{ _("daqiqa qoldi") }}
+              {% elif p.pct < pass_min %}<span class="t-red">{{ _("Keyingi mavzuga o‘tish yopiq: kamida 70%% kerak") }}</span>
+              {% elif p.pct < solid_min %}<span class="t-yellow">{{ _("Qayta o‘zlashtirish tavsiya etiladi") }}</span>
+              {% else %}{{ p.lessons|length }} {{ _("ta dars · o‘zlashtirilgan") }}{% endif %}
+            </div>
+          </div>
+          {% if state == "locked" %}<span class="time-chip num">≈ {{ p.min }} {{ _("daq") }}</span>
+          {% elif state == "current" %}<span class="num strong t-blue">{{ p.read }}%</span>
+          {% else %}<span class="num strong {{ pct_cls(p.pct) }}">{{ p.pct }}%</span>{% endif %}
+          {{ icon("chevron-down", "ico-sm faint chev-rot") }}
+        </div>
+        {% if state == "current" %}<div class="mt-8">{{ progress(p.read, cls="thin") }}</div>{% endif %}
+      </summary>
+      <div class="plan-topic-body">
+        {% for l in p.lessons %}{{ lesson_row(p, l, state) }}{% endfor %}
+        {% if p.test %}
+        <a class="plan-test-row" href="{{ url_for('user.result_detail', rid=p.test.rid) }}">
+          {{ icon("clipboard", "ico-sm") }}
+          <span class="grow"><span class="d-block small strong">{{ _("Mavzu testi") }}</span>
+            <span class="xs muted">{{ p.test.when }} · {{ p.test.n }} {{ _("savol") }}{% if p.test.tries %} · {{ p.test.tries }}-{{ _("urinish") }}{% endif %}</span></span>
+          <b class="num {{ pct_cls(p.test.pct) }}">{{ p.test.pct }}%</b>{{ icon("chevron-right", "ico-sm chev") }}
+        </a>
+        {% elif state == "current" %}
+        <div class="plan-test-row is-pending">{{ icon("clipboard", "ico-sm") }}<span class="grow small">{{ _("Mavzu testi (majburiy) — darslar tugagach ochiladi. 70%% dan kam bo‘lsa, keyingi mavzuga o‘tilmaydi.") }}</span></div>
+        {% endif %}
+        <div class="row wrap row-sm">
+          {% if state == "current" %}
+          <a class="btn btn-primary btn-sm" href="{{ url_for('user.lesson') }}">{{ _("Darsni davom ettirish") }}{{ icon("arrow-right", "ico-sm") }}</a>
+          {% elif state == "done" %}
+          <a class="btn {{ 'btn-primary' if p.pct < solid_min else 'btn-outline' }} btn-sm" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("refresh", "ico-sm") }}{{ _("Mavzuni qayta o‘zlashtirish") }}</a>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('test.question', turi='mavzu') }}">{{ _("Mavzu testini qayta topshirish") }}</a>
+          {% else %}
+          <span class="xs muted">{{ _("Avvalgi mavzular o‘zlashtirilgach ochiladi. Attestatsiyaga ulgurish uchun shu kuni o‘zlashtiring.") }}</span>
+          {% endif %}
+        </div>
+        {% if state == "done" %}<p class="xs muted">{{ _("Qayta o‘zlashtirib, testni qayta topshirsangiz, foiz yangi natija bo‘yicha yangilanadi.") }}</p>{% endif %}
+      </div>
+    </details>
     {% endif %}
   </li>
   {% endfor %}
 </ol>
+<p class="xs muted mt-16">{{ _("Kunlik 5 ta test, haftalik (yakshanba, ixtiyoriy) va oylik (har 30 kun, majburiy) testlar vaqti kelganda rejaga avtomatik qo‘shiladi. Oylik test yakunlanmaguncha keyingi mavzular ochilmaydi.") }}</p>
 {% endblock %}

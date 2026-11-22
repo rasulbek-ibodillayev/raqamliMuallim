@@ -33,10 +33,10 @@
         <label class="label" for="cc-pw">{{ _("Joriy parol") }}</label>
         <div class="row row-sm">
           <div class="input-group grow">
-            <input class="input" id="cc-pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required
+            <input class="input" id="cc-pw" name="pw" :type="show ? 'text' : 'password'" type="password" {{ no_autofill() }} required
                    aria-describedby="pw-err pw-ok cc-pw-hint" :aria-invalid="!!err('pw')" @input="pwInput()" @change="checkPw()"
                    @keydown.enter.prevent="checkPw()">
-            <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? '{{ _('Yashirish') }}' : '{{ _('Ko‘rsatish') }}'" aria-label="{{ _('Ko‘rsatish') }}">{{ icon("eye") }}</button>
+            {{ eye("show") }}
           </div>
           <button class="btn btn-outline" type="button" @click="checkPw()" :disabled="pwChecking || pwOk" x-cloak x-show="!pwOk">{{ _("Tasdiqlash") }}</button>
         </div>
@@ -52,7 +52,7 @@
           x-data="rmForm({}, function (j, f) { f.reset(); step = 1; f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()"
           data-errors="{{ (errors if open == 'contact' and cc_pending else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
       {% include "partials/form_open.html" %}
-      <p class="small">{{ _("Kod yuborildi:") }} <b class="num" x-text="target">{{ cc_target }}</b>. {{ _("Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi.") }}</p>
+      <p class="small">{{ _("Kod yuborildi:") }} <b class="num" x-text="target">{{ cc_target or "" }}</b>. {{ _("Kod tasdiqlanmaguncha eski ma’lumot amalda qoladi.") }}</p>
       <div class="field">
         <label class="label" for="cc-otp1">{{ _("Tasdiqlash kodi") }}</label>
         <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">{% for i in range(6) %}<input id="cc-otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
@@ -68,7 +68,7 @@
 </div>
 
 <!-- Maxfiy so'z: akkauntni telefon/emailsiz tiklash uchun -->
-<div class="bt" x-data="{ show: false }">
+<div class="bt" x-data="{ s1: false, s2: false }">
   <button class="row-btn list-item" type="button" @click="open = open === 'secret' ? '' : 'secret'" :aria-expanded="open === 'secret'">
     <span class="list-ico">{{ icon("shield") }}</span><span class="grow"><span class="d-block">{{ _("Maxfiy so‘z") }}</span><span class="sub">{{ _("Telefon yoki emailga kira olmaganda akkauntni tiklash uchun") }}</span></span>
     <svg class="ico ico-sm chev" :style="open === 'secret' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
@@ -79,13 +79,12 @@
     {% include "partials/form_open.html" %}
     {% set e = errors if open == 'secret' else {} %}
     <div class="field"><label class="label" for="sc-pw">{{ _("Joriy parol") }}</label>
-      <input class="input" id="sc-pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required aria-describedby="pw-err" :aria-invalid="!!err('pw')" @input="clear('pw')">
+      <div class="input-group"><input class="input" id="sc-pw" name="pw" :type="s1 ? 'text' : 'password'" type="password" {{ no_autofill() }} required aria-describedby="pw-err" :aria-invalid="!!err('pw')" @input="clear('pw')">{{ eye("s1") }}</div>
       {{ field_error("pw", e) }}</div>
     <div class="field"><label class="label" for="sc-new">{{ _("Yangi maxfiy so‘z") }}</label>
-      <input class="input" id="sc-new" name="secret" :type="show ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required aria-describedby="secret-err" :aria-invalid="!!err('secret')" @input="clear('secret')">
+      <div class="input-group"><input class="input" id="sc-new" name="secret" :type="s2 ? 'text' : 'password'" type="password" autocomplete="off" maxlength="64" required aria-describedby="secret-err" :aria-invalid="!!err('secret')" @input="clear('secret')">{{ eye("s2") }}</div>
       {{ field_error("secret", e) }}
       <span class="hint">{{ _("Katta-kichik harf farqlanmaydi. Uni hech kimga aytmang: u parol kabi akkauntingizga kirish imkonini beradi.") }}</span></div>
-    <label class="check"><input type="checkbox" x-model="show"><span>{{ _("Ko‘rsatish") }}</span></label>
     <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
   </form>
 </div>

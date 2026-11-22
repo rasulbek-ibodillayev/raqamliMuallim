@@ -49,14 +49,15 @@ def create_app() -> Flask:
     from flask import get_template_attribute
 
     ui_macros = ("icon", "badge", "status_dot", "status_badge", "progress", "pct_color", "ring",
-                 "code", "spark", "page_head", "back", "composer", "field_error", "csrf")
+                 "code", "spark", "page_head", "back", "composer", "field_error", "csrf", "eye", "no_autofill")
 
     @app.context_processor
     def inject_globals():
         # _ui.html makroslari barcha shablonlarda importsiz ishlaydi
         ui = {name: get_template_attribute("_ui.html", name) for name in ui_macros}
         # errors/form — forma xatolari va kiritilgan qiymatlar (forms.respond beradi), standart: bo'sh
-        return {"errors": {}, "form": {}, "me": mock.ME, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
+        from .views.test import TYPE_SLUGS
+        return {"errors": {}, "form": {}, "me": mock.ME, "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
                 "search_index": _search_index, **ui}
 
     def _search_index():

@@ -3,10 +3,33 @@
 {% block content %}
 {% call page_head(_("Xatolar analitikasi"), _("Qayerda ko‘p xato qilayotganingiz va ularni tuzatish yo‘li")) %}{% endcall %}
 <div class="stack stack-xl">
-  <section class="ai-card row wrap">
+  {# «Testga o'tish» — avval nechta savol ishlashni so'raydi. Natija «Natijalarim»ga qo'shiladi va shu sahifadagi
+     xatolik foizlariga ta'sir qiladi #}
+  <section class="ai-card row wrap" x-data="{ pick: false, n: 10 }">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
-    <div class="grow"><div class="strong">{{ _("Bugungi mashq") }}</div><div class="small muted">{{ _("Xatolaringizga o‘xshash 5 ta yangi savol") }}</div></div>
-    <a class="btn btn-primary btn-sm" href="{{ url_for('test.question') }}">{{ _("Boshlash") }}</a>
+    <div class="grow"><div class="strong">{{ _("Xatolar ustida ishlash") }}</div><div class="small muted">{{ _("Xatolaringizga o‘xshash testlar bajarish") }}</div></div>
+    <button class="btn btn-primary btn-sm" type="button" @click="pick = true">{{ _("Testga o‘tish") }}{{ icon("arrow-right", "ico-sm") }}</button>
+
+    <div class="sheet-backdrop" x-show="pick" x-cloak @click.self="pick = false" @keydown.escape.window="pick = false">
+      <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="pick-title" action="{{ url_for('test.question') }}" method="get">
+        <input type="hidden" name="manba" value="xatolar">
+        <div class="sheet-grip"></div>
+        <div class="row between"><h2 id="pick-title">{{ _("Nechta test ishlaysiz?") }}</h2>
+          <button class="icon-btn" type="button" @click="pick = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
+        <p class="small muted">{{ _("Savollar eng ko‘p xato qilayotgan mavzularingizdan tanlanadi.") }}</p>
+        <fieldset class="fieldset-reset">
+          <legend class="sr-only">{{ _("Savollar soni") }}</legend>
+          <div class="seg u-w-100p" role="radiogroup">
+            {% for v in [5, 10, 15, 20, 30] %}
+            <label class="seg-opt grow"><input class="sr-only" type="radio" name="soni" value="{{ v }}" x-model.number="n" {{ 'checked' if v == 10 }}>{{ v }}</label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <p class="small c-text2">{{ _("Taxminiy vaqt:") }} <b class="num" x-text="'≈ ' + Math.ceil(n * 0.8) + ' daqiqa'">≈ 8 daqiqa</b></p>
+        <p class="xs muted">{{ _("Natija «Natijalarim» bo‘limiga qo‘shiladi va xatolik foizlarini yangilaydi.") }}</p>
+        <button class="btn btn-primary btn-block" type="submit">{{ _("Testni boshlash") }}</button>
+      </form>
+    </div>
   </section>
 
   <section class="stack">

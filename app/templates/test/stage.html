@@ -1,8 +1,9 @@
 {% extends "layouts/focus.html" %}
 {% block title %}{{ _("1-bosqichdan o‘tdingiz") }}{% endblock %}
+{# «Bosqichlar orasi» faqat bosqichli testlarda: diagnostika, oraliq sinov, haftalik, ixtiyoriy, oylik test, yakuniy diagnostika #}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.tests') }}" aria-label="{{ _('Chiqish') }}">{{ icon("x") }}</a>
-<div class="grow"></div>
+<div class="grow strong small">{{ tname }}</div>
 {% endblock %}
 {% block content %}
 <div class="stack stack-xl center u-ai-center u-pt-24">
@@ -26,7 +27,7 @@
 <footer class="focus-foot">
   <div class="focus-foot-inner">
     <a class="btn btn-outline" href="{{ url_for('user.tests') }}">{{ _("Keyinroq") }}</a>
-    <a class="btn btn-primary grow" href="{{ url_for('test.question', tur='kop') }}">{{ _("2-bosqichni boshlash") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question', tur='kop', turi=slug) }}">{{ _("2-bosqichni boshlash") }}</a>
   </div>
 </footer>
 {% endblock %}

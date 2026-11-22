@@ -1,0 +1,36 @@
+{#
+  Ko'z uchun dam olish (o'qituvchi sahifalari, dars va test sahifalari). Mantiq: static/js/app.js → «Dam olish».
+  - Tizimdan 45 daqiqa foydalanilgach dam olish tavsiyasi chiqadi (test paytida chiqmaydi, lekin test vaqti hisobga qo'shiladi;
+    test tugagach hisob 45 daqiqadan oshgan bo'lsa — darhol chiqadi).
+  - Qabul qilsa: 5 daqiqalik tanaffus. Rad etsa: interfeys rangi o'zgaradi (1–2 rad — och sariq, 3–4 rad — och qizil),
+    tavsiya 10 daqiqadan keyin qayta chiqadi; 5-safar tanaffus majburiy.
+  - Tanaffusdan keyin yoki 5 daqiqadan uzoq tizimdan chiqib qaytganda rang va hisob asl holatiga qaytadi.
+  Namunada: ?dam=1 — tavsiyani hozir ko'rsatish, ?dam=majburiy — majburiy tanaffus.
+#}
+<div class="rest" id="rm-rest" hidden>
+  <div class="rest-prompt" role="alertdialog" aria-modal="true" aria-labelledby="rest-title" aria-describedby="rest-text" data-rest-prompt hidden>
+    <span class="rest-ico">{{ icon("coffee", "ico-lg") }}</span>
+    <h2 id="rest-title">{{ _("Ko‘zlaringizga dam bering") }}</h2>
+    <p id="rest-text">{{ _("Siz tizimdan 45 daqiqa foydalandingiz. Endi 5 daqiqa davomida ko‘zlaringizga dam bering: kamida 20 soniya davomida taxminan 6 metr uzoqlikdagi narsaga qarang. Bu ko‘z mushaklarini bo‘shashtiradi va ko‘z charchashi, qurishi hamda bosh og‘rig‘ining oldini oladi.") }}</p>
+    <p class="rest-warn small" data-rest-warn hidden></p>
+    <div class="rest-actions">
+      <button class="btn btn-ghost" type="button" data-rest-decline>{{ _("Keyinroq") }}</button>
+      <button class="btn btn-primary" type="button" data-rest-accept>{{ icon("coffee", "ico-sm") }}{{ _("5 daqiqa dam olish") }}</button>
+    </div>
+  </div>
+
+  <div class="rest-break" role="dialog" aria-modal="true" aria-labelledby="rest-break-title" data-rest-break hidden>
+    <div class="rest-glow" aria-hidden="true"></div>
+    <div class="rest-break-card">
+      <span class="eyebrow" data-rest-forced hidden>{{ _("Majburiy tanaffus") }}</span>
+      <h2 id="rest-break-title">{{ _("Tanaffus") }}</h2>
+      <div class="rest-clock num" role="timer" aria-live="off" data-rest-clock>5:00</div>
+      <p>{{ _("Ekrandan uzoqlashing va 6 metr uzoqlikdagi narsaga qarang. Bir necha marta ko‘zingizni yumib-oching.") }}</p>
+      <p class="xs rest-sub">{{ _("Tanaffus tugagach tizim avtomatik ochiladi.") }}</p>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="rm-rest-i18n">{{ {
+  "warn1": _("Siz tavsiyani %(n)s marta rad etdingiz.", n="{n}"),
+  "warnLast": _("Keyingi safar tanaffus majburiy bo‘ladi."),
+}|tojson }}</script>

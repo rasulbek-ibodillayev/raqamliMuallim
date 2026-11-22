@@ -1,68 +1,144 @@
 {% extends "layouts/panel.html" %}
-{% block title %}{{ _("Savol muharriri") }}{% endblock %}
-{% block heading %}{{ _("Savol muharriri") }}{% endblock %}
+{% block title %}{{ _("Savol qo‘shish") }}{% endblock %}
+{% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('expert.questions') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{{ _("Savollar banki") }}</span>{% endblock %}
 {% block content %}
-{% call page_head(_("Savolni tekshirish"), _("ID #Q-84920 · AI generatsiyasi · versiya 1")) %}
-<span class="badge badge-yellow">{{ _("Tekshiruvda") }}</span>
-{% endcall %}
-<div class="split u-cols-1fr" x-data="{ lvl: 'O‘rta', right: 1 }">
+{#
+  Yangi savol: mavzu → dars, qiyinlik, savol turi (yopiq, ko'p javobli, moslashtirish, ochiq), vaqt,
+  format (matnli, chizmali, jadvalli, rasmli). Har bir tur va format uchun o'z kiritish bo'limi ochiladi.
+  Server ham tekshiradi: expert.editor_save.
+#}
+{% call page_head(_("Savol qo‘shish"), _("Saqlangan savol savollar bankiga qo‘shiladi")) %}{% endcall %}
+<script>window.RM_CONTENT = {{ content|tojson }};</script>
+<form class="split u-cols-1fr" action="{{ url_for('expert.editor_save') }}" method="post" novalidate enctype="multipart/form-data"
+      x-data="rmForm({
+        topic: {{ (form.topic or '')|tojson|forceescape }}, lesson: {{ (form.lesson or '')|tojson|forceescape }},
+        level: {{ (form.level or 'O‘rta')|tojson|forceescape }}, kind: {{ (form.kind or 'yopiq')|tojson|forceescape }},
+        fmt: {{ (form.format or 'matn')|tojson|forceescape }}, text: '',
+        opts: ['', '', '', ''], right: [0], pairs: [['', ''], ['', ''], ['', '']],
+        rows: 3, cols: 3, img: '',
+        lessons() { const t = window.RM_CONTENT.find(t => t.name === this.topic); return t ? t.lessons : []; },
+        mark(i) { if (this.kind === 'kop') this.right = this.right.includes(i) ? this.right.filter(x => x !== i) : this.right.concat([i]); else this.right = [i]; },
+        preview(e) { const f = e.target.files[0]; this.img = f ? URL.createObjectURL(f) : ''; }
+      })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
   <div class="grid u-cols-4a70e u-ai-start">
     <div class="stack stack-lg">
+      {# ---- 1. Joylashuv va parametrlar ---- #}
       <div class="card card-pad stack">
         <div class="grid-2">
-          <div class="field"><label class="label" for="t">{{ _("Mavzu") }}</label><select class="select" id="t"><option>{{ _("Sanoq sistemalari") }}</option><option>{{ _("Mantiq asoslari") }}</option></select></div>
-          <div class="field"><label class="label" for="st">{{ _("Kichik mavzu") }}</label><select class="select" id="st"><option>{{ _("Ikkilik va o‘nlik") }}</option><option>{{ _("O‘n oltilik") }}</option></select></div>
+          <div class="field"><label class="label" for="e-topic">{{ _("Mavzu") }}</label>
+            <select class="select" id="e-topic" name="topic" x-model="topic" @change="lesson = ''; clear('topic')" aria-describedby="topic-err">
+              <option value="">{{ _("Tanlang") }}</option>{% for t in content %}<option>{{ t.name }}</option>{% endfor %}</select>
+            {{ field_error("topic", errors) }}</div>
+          <div class="field"><label class="label" for="e-lesson">{{ _("Dars") }}</label>
+            <select class="select" id="e-lesson" name="lesson" x-model="lesson" :disabled="!topic" @change="clear('lesson')" aria-describedby="lesson-err">
+              <option value="">{{ _("Tanlang") }}</option><template x-for="l in lessons()" :key="l.id"><option :value="l.name" x-text="l.name"></option></template></select>
+            {{ field_error("lesson", errors) }}</div>
         </div>
         <div class="grid-2">
-          <div class="field"><span class="label">{{ _("Daraja") }}</span>
-            <div class="seg">{% for l in ["Oson", "O‘rta", "Qiyin"] %}<button type="button" :class="lvl === '{{ l }}' && 'active'" @click="lvl = '{{ l }}'">{{ l }}</button>{% endfor %}</div></div>
-          <div class="field"><label class="label" for="kind">{{ _("Savol turi") }}</label><select class="select" id="kind"><option>{{ _("Yopiq test") }}</option><option>{{ _("Bir nechta javob") }}</option><option>{{ _("Moslashtirish") }}</option><option>{{ _("Ochiq javob") }}</option></select></div>
+          <div class="field"><span class="label">{{ _("Qiyinlik darajasi") }}</span>
+            <input type="hidden" name="level" :value="level">
+            <div class="seg" role="radiogroup">{% for l in levels %}<button type="button" role="radio" :aria-checked="level === '{{ l }}'" :class="level === '{{ l }}' && 'active'" @click="level = '{{ l }}'">{{ _(l) }}</button>{% endfor %}</div>
+            {{ field_error("level", errors) }}</div>
+          <div class="field"><label class="label" for="e-time">{{ _("Savolga ajratilgan vaqt (soniya)") }}</label>
+            <input class="input num" id="e-time" name="time" inputmode="numeric" value="{{ form.time or 60 }}" aria-describedby="time-err" @input="clear('time')">
+            {{ field_error("time", errors) }}</div>
+        </div>
+        <div class="field"><span class="label">{{ _("Savol turi") }}</span>
+          <input type="hidden" name="kind" :value="kind">
+          <div class="seg seg-wrap" role="radiogroup">{% for k, l in kinds.items() %}<button type="button" role="radio" :aria-checked="kind === '{{ k }}'" :class="kind === '{{ k }}' && 'active'" @click="kind = '{{ k }}'; right = [0]; clear('opt')">{{ l }}</button>{% endfor %}</div>
+        </div>
+        <div class="field"><span class="label">{{ _("Savol formati") }}</span>
+          <input type="hidden" name="format" :value="fmt">
+          <div class="seg seg-wrap" role="radiogroup">{% for k, l in formats.items() %}<button type="button" role="radio" :aria-checked="fmt === '{{ k }}'" :class="fmt === '{{ k }}' && 'active'" @click="fmt = '{{ k }}'">{{ icon({"matn": "note", "chizma": "graph", "jadval": "table", "rasm": "image"}[k], "ico-sm") }}{{ l }}</button>{% endfor %}</div>
         </div>
       </div>
 
+      {# ---- 2. Savol ---- #}
       <div class="card card-pad stack">
-        <div class="row between"><span class="label">{{ _("Savol matni") }}</span>
-          <div class="row u-gap-2">{% for i, l in [("bold","Qalin"),("code","Kod"),("table","Jadval"),("graph","Sxema"),("sigma","Formula"),("image","Rasm")] %}<button class="icon-btn u-w-34 u-h-34" type="button" aria-label="{{ l }}">{{ icon(i, "ico-sm") }}</button>{% endfor %}</div></div>
-        <textarea class="textarea" aria-label="Savol matni">101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?</textarea>
-        <span class="label">{{ _("Javob variantlari · to‘g‘risini belgilang") }}</span>
-        <div class="stack stack-sm">
-          {% for v in ["43", "45", "47", "53"] %}
-          <div class="row row-sm">
-            <button type="button" class="icon-btn" @click="right = {{ loop.index0 }}" :class="right === {{ loop.index0 }} && 't-green'" aria-label="{{ _('To‘g‘ri javob sifatida belgilash') }}">
-              <svg class="ico" x-show="right === {{ loop.index0 }}"><use href="#i-check-circle"/></svg><svg class="ico" x-show="right !== {{ loop.index0 }}"><use href="#i-target"/></svg></button>
-            <span class="strong small u-w-16">{{ "ABCD"[loop.index0] }}</span>
-            <input class="input grow" value="{{ v }}" aria-label="{{ 'ABCD'[loop.index0] }} variant">
+        <div class="field"><label class="label" for="e-text">{{ _("Savol matni") }}</label>
+          <textarea class="textarea" id="e-text" name="text" x-model="text" maxlength="3000" aria-describedby="text-err" @input="clear('text')" placeholder="{{ _('Masalan: 101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.') }}"></textarea>
+          {{ field_error("text", errors) }}</div>
+
+        <div class="field" x-show="fmt === 'rasm'" x-cloak><label class="label" for="e-img">{{ _("Rasm") }}</label>
+          <input class="input" id="e-img" name="image" type="file" accept="image/*" @change="preview($event)">
+          <img class="q-img-preview" :src="img" x-show="img" alt="">
+          <input class="input" name="image_alt" placeholder="{{ _('Rasm tavsifi (ko‘zi ojizlar uchun)') }}" aria-label="{{ _('Rasm tavsifi') }}"></div>
+
+        <div class="field" x-show="fmt === 'chizma'" x-cloak><label class="label" for="e-diagram">{{ _("Chizma (blok-sxema, Mermaid)") }}</label>
+          <textarea class="textarea textarea-code" id="e-diagram" name="diagram" spellcheck="false" placeholder="flowchart TD; A[Boshlash] --> B{x > 0?}"></textarea>
+          <span class="hint">{{ _("Yoki chizmani rasm sifatida yuklang:") }}</span><input class="input" name="diagram_file" type="file" accept="image/*,.svg" aria-label="{{ _('Chizma fayli') }}"></div>
+
+        <div class="field" x-show="fmt === 'jadval'" x-cloak><span class="label">{{ _("Jadval") }}</span>
+          <div class="row row-sm small">
+            <label>{{ _("Qator") }} <input class="input-num input num" type="number" min="1" max="10" x-model.number="rows" name="rows"></label>
+            <label>{{ _("Ustun") }} <input class="input-num input num" type="number" min="1" max="8" x-model.number="cols" name="cols"></label>
           </div>
-          {% endfor %}
-          <button class="self-start btn btn-ghost btn-sm" type="button">{{ icon("plus", "ico-sm") }}{{ _("Variant qo‘shish") }}</button>
-        </div>
-        <div class="field"><label class="label" for="why">{{ _("Izoh") }}</label><textarea class="textarea u-minh-80" id="why">1·2⁵ + 0·2⁴ + 1·2³ + 1·2² + 0·2¹ + 1·2⁰ = 32 + 8 + 4 + 1 = 45.</textarea></div>
-        <div class="grid-2">
-          <div class="field"><label class="label" for="time">{{ _("Vaqt (soniya)") }}</label><input class="input num" id="time" value="60"></div>
-          <div class="field"><label class="label" for="tags">{{ _("Teglar") }}</label><input class="input" id="tags" value="ikkilik→o‘nlik, daraja yoyish"></div>
-        </div>
+          <div class="table-wrap"><table class="table q-grid"><tbody>
+            <template x-for="r in rows" :key="r"><tr><template x-for="c in cols" :key="c"><td><input class="input" :name="'cell_' + r + '_' + c" :aria-label="r + '-qator, ' + c + '-ustun'"></td></template></tr></template>
+          </tbody></table></div></div>
+      </div>
+
+      {# ---- 3. Javoblar: savol turiga mos ---- #}
+      <div class="card card-pad stack">
+        <template x-if="kind === 'yopiq' || kind === 'kop'"><div class="stack stack-sm">
+          <span class="label" x-text="kind === 'kop' ? '{{ _('Javob variantlari · to‘g‘rilarini belgilang (bir nechta)') }}' : '{{ _('Javob variantlari · to‘g‘risini belgilang (bitta)') }}'"></span>
+          <template x-for="(o, i) in opts" :key="i">
+            <div class="row row-sm">
+              <label class="opt-mark" :class="right.includes(i) && 'on'">
+                <input class="sr-only" :type="kind === 'kop' ? 'checkbox' : 'radio'" name="right" :value="i" :checked="right.includes(i)" @change="mark(i); clear('opt')">
+                <svg class="ico"><use :href="right.includes(i) ? '#i-check-circle' : '#i-target'"/></svg>
+              </label>
+              <span class="strong small u-w-16" x-text="'ABCDEF'[i]"></span>
+              <input class="input grow" name="opt" x-model="opts[i]" :aria-label="'Variant ' + 'ABCDEF'[i]" @input="clear('opt')">
+              <button class="icon-btn" type="button" x-show="opts.length > 2" @click="opts.splice(i, 1); right = right.filter(x => x !== i).map(x => x > i ? x - 1 : x)" aria-label="{{ _('Variantni o‘chirish') }}">{{ icon("x", "ico-sm") }}</button>
+            </div>
+          </template>
+          <button class="self-start btn btn-ghost btn-sm" type="button" x-show="opts.length < 6" @click="opts.push('')">{{ icon("plus", "ico-sm") }}{{ _("Variant qo‘shish") }}</button>
+        </div></template>
+
+        <template x-if="kind === 'moslash'"><div class="stack stack-sm">
+          <span class="label">{{ _("Juftliklar · atama va unga mos ta’rif") }}</span>
+          <template x-for="(p, i) in pairs" :key="i">
+            <div class="row row-sm">
+              <input class="input" name="left" x-model="p[0]" :aria-label="(i + 1) + '-atama'" placeholder="{{ _('Atama') }}" @input="clear('pairs')">
+              {{ icon("arrow-right", "ico-sm faint") }}
+              <input class="input grow" name="right_txt" x-model="p[1]" :aria-label="(i + 1) + '-ta’rif'" placeholder="{{ _('Ta’rif') }}" @input="clear('pairs')">
+              <button class="icon-btn" type="button" x-show="pairs.length > 2" @click="pairs.splice(i, 1)" aria-label="{{ _('Juftlikni o‘chirish') }}">{{ icon("x", "ico-sm") }}</button>
+            </div>
+          </template>
+          <button class="self-start btn btn-ghost btn-sm" type="button" x-show="pairs.length < 8" @click="pairs.push(['', ''])">{{ icon("plus", "ico-sm") }}{{ _("Juftlik qo‘shish") }}</button>
+          <span class="hint">{{ _("Testda ta’riflar aralashtirib beriladi.") }}</span>
+        </div></template>
+
+        <template x-if="kind === 'ochiq'"><div class="stack stack-sm">
+          <label class="label" for="e-answer">{{ _("To‘g‘ri javob") }}</label>
+          <input class="input" id="e-answer" name="answer" @input="clear('answer')" aria-describedby="answer-err">
+          <label class="label" for="e-alt">{{ _("Qabul qilinadigan boshqa yozilishlar (vergul bilan)") }}</label>
+          <input class="input" id="e-alt" name="answer_alt" placeholder="{{ _('Masalan: 45, qirq besh') }}">
+        </div></template>
+        {{ field_error("opt", errors) }}{{ field_error("pairs", errors) }}{{ field_error("answer", errors) }}
+
+        <div class="field"><label class="label" for="e-why">{{ _("Izoh (xato qilganda ko‘rsatiladi)") }}</label><textarea class="textarea u-minh-80" id="e-why" name="why"></textarea></div>
       </div>
     </div>
 
     <aside class="stack stack-lg u-pos-sticky u-top-76">
       <div class="card card-pad stack stack-sm">
         <span class="eyebrow">{{ _("Oldindan ko‘rish") }}</span>
-        <p class="strong">{{ _("101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?") }}</p>
-        <div class="options">{% for v in ["43", "45", "47", "53"] %}<div class="option u-minh-44 u-fs-15" :class="right === {{ loop.index0 }} && 'correct'"><span class="key">{{ "ABCD"[loop.index0] }}</span>{{ v }}</div>{% endfor %}</div>
-      </div>
-      <div class="ai-card stack stack-sm">
-        <div class="row row-sm strong"><span class="ai-mark u-w-22 u-h-22 u-r-7">{{ icon("sparkle", "ico-sm") }}</span>{{ _("AI tekshiruvi") }}</div>
-        <ul class="small stack stack-sm u-m-0 u-pl-18 u-c-text2">
-          <li>{{ _("To‘g‘ri javob hisob bilan mos keladi.") }}</li>
-          <li>{{ _("Bankda o‘xshash savol bor: #Q-81102 (87%% o‘xshash).") }}</li>
-        </ul>
+        <p class="xs muted" x-text="[topic, lesson, level].filter(Boolean).join(' · ')"></p>
+        <p class="strong" x-text="text || '{{ _('Savol matni shu yerda ko‘rinadi') }}'"></p>
+        <img class="q-img-preview" :src="img" x-show="fmt === 'rasm' && img" alt="">
+        <div class="options" x-show="kind === 'yopiq' || kind === 'kop'">
+          <template x-for="(o, i) in opts" :key="i"><div class="option u-minh-44 u-fs-15" :class="right.includes(i) && 'correct'"><span class="key" x-text="'ABCDEF'[i]"></span><span x-text="o || '…'"></span></div></template>
+        </div>
+        <div class="stack stack-sm small" x-show="kind === 'moslash'"><template x-for="p in pairs"><div class="row row-sm"><b x-text="p[0] || '…'"></b>→<span x-text="p[1] || '…'"></span></div></template></div>
       </div>
       <div class="card card-pad stack stack-sm">
-        <button class="btn btn-primary btn-block" type="button">{{ icon("check") }}{{ _("Tasdiqlash") }}</button>
-        <button class="btn btn-outline btn-block" type="button">{{ _("Qoralama sifatida saqlash") }}</button>
-        <button class="btn btn-ghost btn-block t-red" type="button">{{ _("Rad etish") }}</button>
+        <button class="btn btn-primary btn-block" type="submit" :disabled="busy">{{ icon("check") }}{{ _("Saqlash") }}</button>
+        <a class="btn btn-ghost btn-block" href="{{ url_for('expert.questions') }}">{{ _("Bekor qilish") }}</a>
       </div>
     </aside>
   </div>
-</div>
+</form>
 {% endblock %}

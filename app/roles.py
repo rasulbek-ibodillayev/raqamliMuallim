@@ -18,7 +18,7 @@ from flask import abort, request, session
 
 ROLES = ("user", "expert", "admin")
 REQUIRED = {"user": "user", "test": "user", "api": "user", "expert": "expert", "admin": "admin"}
-HOME = {"user": "user.home", "expert": "expert.queue", "admin": "admin.stats"}
+HOME = {"user": "user.home", "expert": "expert.questions", "admin": "admin.stats"}
 LABEL = {"user": "O‘qituvchi", "expert": "Ekspert", "admin": "Administrator"}
 
 

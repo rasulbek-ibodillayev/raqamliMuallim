@@ -3,7 +3,7 @@
 - Statistika — sayt ko'rsatkichlari;
 - Foydalanuvchilar — ro'yxat va har bir o'qituvchining to'liq ma'lumoti (o'zlashtirgan mavzulari, testlari, faolligi);
 - Ekspertlar — qo'shish, huquqlarini berish, faoliyatini nazorat qilish, bloklash;
-- Sozlamalar — tizim chegaralari, AI byudjeti, faol bo'lmagan akkauntlar siyosati.
+- Sozlamalar — tizim chegaralari, faol bo'lmagan akkauntlar siyosati.
 Kontent (mavzular, darslar, savollar) — ekspert vazifasi: app/views/expert.py.
 """
 from flask import Blueprint, abort, render_template, request, url_for

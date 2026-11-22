@@ -1,28 +1,112 @@
 {% extends "layouts/app.html" %}
-{% block title %}{{ _("Testlarim") }}{% endblock %}
+{% block title %}{{ _("Testlar") }}{% endblock %}
+{#
+  «Testlar»:
+  1) Barcha turdagi yakunlanmagan testlar. Majburiy test yakunlanmaguncha keyingi mavzu va keyingi majburiy test yopiq.
+     Ixtiyoriy testni davom ettirish yoki bekor qilish mumkin.
+  2) Ixtiyoriy testlar — shu yerdan boshlanadi (Attestatsiya, Haftalik — faqat yakshanba, Ixtiyoriy, Xatolar ustida ishlash).
+  3) Majburiy testlar — taxminiy sana bilan qulflangan; navbati kelganda ochiladi va o'quv rejaga qo'shiladi.
+  Namunada: ?oylik=1 — yakunlanmagan majburiy (oylik) test, ?kun=boshqa — yakshanba emas.
+#}
 {% block content %}
-{% call page_head(_("Testlarim"), _("To‘xtatilgan testlar va boshlash mumkin bo‘lganlari")) %}{% endcall %}
-<div class="stack stack-xl">
+{% call page_head(_("Testlar"), _("Tugatilmagan testlar, ixtiyoriy testlar va majburiy testlar jadvali")) %}{% endcall %}
+<div class="stack stack-xl" x-data="{ gone: [] }">
+
+  {% if blocker %}
+  <div class="alert alert-red" role="alert">{{ icon("lock") }}<span><b>{{ _("Majburiy test yakunlanmagan:") }}</b> «{{ blocker.name }}».
+    {{ _("Uni yakunlamaguncha keyingi mavzuga o‘tish va keyingi majburiy testni ishlash mumkin emas.") }}</span></div>
+  {% endif %}
+
+  {# ---------- 1. Yakunlanmagan testlar ---------- #}
   <section class="stack">
-    <h2 class="eyebrow">{{ _("Davom ettirish") }}</h2>
-    <div class="card card-pad stack">
+    <h2 class="eyebrow">{{ _("Tugatilmagan testlar") }}</h2>
+    {% for t in unfinished %}
+    {% set must = t.type in mandatory %}
+    <div class="card card-pad stack {{ 'test-must' if must }}" x-show="!gone.includes('{{ t.key }}')" x-transition.opacity>
       <div class="row between wrap">
-        <div><div class="strong">{{ _("Nazorat testi · 3 ta mavzu") }}</div><div class="small muted">{{ _("2-bosqich · 6 / 12 savol · javoblar saqlangan") }}</div></div>
-        {{ status_dot(_("To‘xtatilgan"), "yellow") }}
+        <div class="row">
+          <span class="list-ico">{{ icon(test_types[t.type][1]) }}</span>
+          <div><div class="strong">{{ t.name }}</div><div class="small muted">{{ test_types[t.type][0] }} · {{ t.note }}</div></div>
+        </div>
+        {% if must %}{{ badge(_("Majburiy"), "red") }}{% else %}{{ badge(_("Ixtiyoriy"), "gray") }}{% endif %}
       </div>
-      {{ progress(50) }}
-      <a class="btn btn-primary btn-block" href="{{ url_for('test.question') }}">{{ _("Davom ettirish") }}</a>
+      {{ progress(t.pct) }}
+      <div class="row wrap row-sm">
+        <a class="btn {{ 'btn-primary' if must or loop.first else 'btn-outline' }} grow" href="{{ url_for('test.question', turi=test_slug[t.type]) }}">{{ _("Davom ettirish") }}</a>
+        {% if not must %}
+        <form action="{{ url_for('user.test_cancel', key=t.key) }}" method="post"
+              x-data="rmForm({}, function (j) { gone.push('{{ t.key }}'); rmToast(j.message); return false; })"
+              @submit.prevent="if (confirm('{{ _('Test bekor qilinsinmi? Saqlangan javoblar o‘chiriladi.') }}')) submit($event)">
+          {{ csrf() }}<button class="btn btn-ghost t-red" type="submit" :disabled="busy">{{ icon("x", "ico-sm") }}{{ _("Bekor qilish") }}</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="card card-pad small muted">{{ _("Tugatilmagan test yo‘q.") }}</div>
+    {% endfor %}
+  </section>
+
+  {# ---------- 2. Ixtiyoriy testlar ---------- #}
+  <section class="stack">
+    <h2 class="eyebrow">{{ _("Ixtiyoriy testlar") }}</h2>
+    <div class="card list">
+      <a class="list-item" href="{{ url_for('test.exam') }}">
+        <span class="list-ico">{{ icon("clock") }}</span>
+        <div class="grow"><div class="strong">{{ _("Attestatsiya testi") }}</div><div class="sub">{{ _("35 ta savol · 120 daqiqa · real attestatsiya interfeysi") }}</div></div>
+        {{ badge(_("Istalgan payt"), "blue") }}{{ icon("chevron-right", "ico-sm chev") }}
+      </a>
+      {% if sunday %}
+      <a class="list-item" href="{{ url_for('test.question', turi='haftalik') }}">
+        <span class="list-ico">{{ icon("calendar") }}</span>
+        <div class="grow"><div class="strong">{{ _("Haftalik test") }}</div><div class="sub">{{ _("Bugun yakshanba · o‘zlashtirilgan mavzulardan · 3 bosqich") }}</div></div>
+        {{ badge(_("Bugun ochiq"), "green") }}{{ icon("chevron-right", "ico-sm chev") }}
+      </a>
+      {% else %}
+      <div class="list-item u-op-_6" aria-disabled="true">
+        <span class="list-ico">{{ icon("calendar") }}</span>
+        <div class="grow"><div>{{ _("Haftalik test") }}</div><div class="sub">{{ _("Faqat yakshanba ochiladi · keyingisi: 29-noyabr") }}</div></div>
+        {{ icon("lock", "ico-sm faint") }}
+      </div>
+      {% endif %}
+      <a class="list-item" href="{{ url_for('user.optional') }}">
+        <span class="list-ico">{{ icon("settings") }}</span>
+        <div class="grow"><div class="strong">{{ _("Ixtiyoriy test") }}</div><div class="sub">{{ _("Mavzular va savollar sonini o‘zingiz tanlaysiz · o‘zlashtirish foiziga ta’sir qilmaydi") }}</div></div>
+        {{ icon("chevron-right", "ico-sm chev") }}
+      </a>
+      <a class="list-item" href="{{ url_for('user.errors') }}">
+        <span class="list-ico">{{ icon("target") }}</span>
+        <div class="grow"><div class="strong">{{ _("Xatolar ustida ishlash") }}</div><div class="sub">{{ _("Xatolaringizga o‘xshash testlar · savollar sonini tanlaysiz") }}</div></div>
+        {{ icon("chevron-right", "ico-sm chev") }}
+      </a>
     </div>
   </section>
 
+  {# ---------- 3. Majburiy testlar jadvali ---------- #}
   <section class="stack">
-    <h2 class="eyebrow">{{ _("Boshlash mumkin") }}</h2>
+    <div class="row between wrap"><h2 class="eyebrow">{{ _("Majburiy testlar") }}</h2><a class="xs link" href="{{ url_for('user.plan') }}">{{ _("O‘quv rejada ko‘rish") }}</a></div>
     <div class="card list">
-      <a class="list-item" href="{{ url_for('test.question') }}"><span class="list-ico">{{ icon("zap") }}</span><div class="grow"><div>{{ _("Kunlik 5 ta savol") }}</div><div class="sub">{{ _("3 daqiqa · takrorlash") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <a class="list-item" href="{{ url_for('user.optional') }}"><span class="list-ico">{{ icon("settings") }}</span><div class="grow"><div>{{ _("Ixtiyoriy test") }}</div><div class="sub">{{ _("O‘tilgan mavzulardan, rejaga ta’sir qilmaydi") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <a class="list-item" href="{{ url_for('test.exam') }}"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>{{ _("Attestatsiya sinovi") }}</div><div class="sub">{{ _("35 ta savol · 105 daqiqa · real format") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <div class="list-item u-op-_6"><span class="list-ico">{{ icon("lock") }}</span><div class="grow"><div>{{ _("Yakuniy diagnostika") }}</div><div class="sub">{{ _("Barcha mavzular o‘tilgach ochiladi") }}</div></div></div>
+      {% for t in schedule %}
+      <div class="list-item {{ 'u-op-_6' if t.state == 'locked' }}">
+        <span class="list-ico">{{ icon("check" if t.state == "done" else test_types[t.type][1]) }}</span>
+        <div class="grow"><div>{{ t.name }}</div>
+          <div class="sub">{% if t.state == "locked" %}{{ _("Taxminiy sana:") }} <b>{{ t.date }}</b> · {% endif %}{{ t.note }}
+            {% if blocker and t.state == "locked" %}· <span class="t-red">{{ _("avval yakunlanmagan majburiy testni tugating") }}</span>{% endif %}</div></div>
+        {% if t.state == "done" %}{{ status_dot(_("Topshirildi"), "green") }}{% else %}{{ icon("lock", "ico-sm faint") }}{% endif %}
+      </div>
+      {% endfor %}
     </div>
+    <p class="xs muted">{{ _("Majburiy test navbati kelganda ochiladi va «O‘quv reja»ga qo‘shiladi. Barcha natijalar «Natijalarim» bo‘limiga tushadi.") }}</p>
   </section>
+
+  <details class="card">
+    <summary class="card-head pointer summary-plain"><span class="strong">{{ _("Test turlari haqida") }}</span>{{ icon("chevron-down", "ico-sm faint") }}</summary>
+    <ul class="list-reset list">
+      {% for k, text in info %}
+      <li class="list-item"><span class="list-ico">{{ icon(test_types[k][1], "ico-sm") }}</span><div class="grow"><div class="small strong">{{ test_types[k][0] }}
+        <span class="xs muted">· {{ _("majburiy") if k in mandatory else _("ixtiyoriy") }}</span></div><div class="sub">{{ text }}</div></div></li>
+      {% endfor %}
+    </ul>
+  </details>
 </div>
 {% endblock %}

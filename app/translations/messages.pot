@@ -1,14 +1,14 @@
-# Translations template for raqamliMuallim.
-# Copyright (C) 2026 raqamliMuallim
-# This file is distributed under the same license as the raqamliMuallim project.
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: raqamliMuallim VERSION\n"
+"Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-17 21:02+0500\n"
+"POT-Creation-Date: 2026-11-22 15:26+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,225 +91,329 @@ msgstr ""
 
 #: app/mock.py:21 app/templates/errors/error.html:21
 #: app/templates/layouts/app.html:58 app/templates/test/result.html:4
-#: app/templates/test/result.html:68 app/templates/user/home.html:2
+#: app/templates/test/result.html:56 app/templates/user/home.html:2
 msgid "Bosh sahifa"
 msgstr ""
 
-#: app/mock.py:22 app/templates/user/plan.html:2 app/templates/user/plan.html:4
+#: app/mock.py:22 app/templates/test/exam_result.html:92
+#: app/templates/user/diagnostic_result.html:15 app/templates/user/plan.html:2
+#: app/templates/user/plan.html:14 app/templates/user/topic.html:3
 msgid "O‘quv reja"
 msgstr ""
 
-#: app/mock.py:23 app/templates/user/knowledge.html:2
-#: app/templates/user/knowledge.html:13 app/templates/user/topic.html:3
-msgid "Bilim darajasi"
-msgstr ""
-
-#: app/mock.py:24 app/templates/user/more.html:10
-#: app/templates/user/results.html:2 app/templates/user/results.html:4
+#: app/mock.py:23 app/templates/test/exam_result.html:91
+#: app/templates/user/more.html:10 app/templates/user/result_detail.html:3
+#: app/templates/user/results.html:2 app/templates/user/results.html:8
 msgid "Natijalarim"
 msgstr ""
 
-#: app/mock.py:28
+#: app/mock.py:27
 msgid "O‘qish"
 msgstr ""
 
-#: app/mock.py:29 app/templates/auth/guest.html:22
+#: app/mock.py:28 app/templates/auth/guest.html:22
 #: app/templates/layouts/app.html:60 app/templates/partials/study_fab.html:8
 #: app/templates/partials/study_fab.html:9 app/templates/user/tutor.html:2
 #: app/templates/user/tutor.html:3
 msgid "AI tutor"
 msgstr ""
 
-#: app/mock.py:30 app/templates/partials/study_fab.html:5
+#: app/mock.py:29 app/templates/partials/study_fab.html:5
 #: app/templates/partials/study_fab.html:6 app/templates/user/notes.html:2
 #: app/templates/user/notes.html:10
 msgid "Eslatmalar"
 msgstr ""
 
-#: app/mock.py:31 app/templates/user/discussions.html:2
+#: app/mock.py:30 app/templates/user/discussions.html:2
 #: app/templates/user/discussions.html:4
 msgid "Muhokamalar"
 msgstr ""
 
-#: app/mock.py:33
+#: app/mock.py:32
 msgid "Test va natijalar"
 msgstr ""
 
-#: app/mock.py:34 app/templates/user/tests.html:2
-#: app/templates/user/tests.html:4
-msgid "Testlarim"
+#: app/mock.py:33 app/templates/layouts/app.html:61
+#: app/templates/user/tests.html:2 app/templates/user/tests.html:12
+msgid "Testlar"
 msgstr ""
 
-#: app/mock.py:35 app/templates/admin/settings.html:40
-#: app/templates/test/exam.html:2 app/templates/user/tests.html:23
-msgid "Attestatsiya sinovi"
-msgstr ""
-
-#: app/mock.py:36 app/templates/user/errors.html:2
-#: app/templates/user/errors.html:4
+#: app/mock.py:34 app/templates/user/errors.html:2
+#: app/templates/user/errors.html:4 app/templates/user/home.html:112
 msgid "Xatolar analitikasi"
 msgstr ""
 
-#: app/mock.py:37 app/templates/user/objections.html:2
-#: app/templates/user/objections.html:4
+#: app/mock.py:35 app/templates/user/objections.html:2
+#: app/templates/user/objections.html:7
 msgid "E’tirozlarim"
 msgstr ""
 
-#: app/mock.py:38 app/templates/user/certificate_print.html:46
+#: app/mock.py:36 app/templates/user/certificate_print.html:46
 #: app/templates/user/certificates.html:2
 #: app/templates/user/certificates.html:4
 msgid "Sertifikatlarim"
 msgstr ""
 
-#: app/mock.py:43 app/templates/admin/experts.html:13
-#: app/templates/expert/queue.html:2 app/templates/expert/queue.html:3
-#: app/templates/expert/queue.html:5
-msgid "Tekshiruv navbati"
-msgstr ""
-
-#: app/mock.py:44 app/templates/expert/questions.html:2
-#: app/templates/expert/questions.html:3 app/templates/expert/questions.html:5
+#: app/mock.py:41 app/templates/expert/editor.html:3
+#: app/templates/expert/questions.html:2 app/templates/expert/questions.html:3
+#: app/templates/expert/questions.html:6 app/templates/expert/queue.html:3
 msgid "Savollar banki"
 msgstr ""
 
-#: app/mock.py:45
-msgid "Savol yaratish"
-msgstr ""
-
-#: app/mock.py:46 app/templates/expert/topics.html:2
-#: app/templates/expert/topics.html:3
+#: app/mock.py:42 app/templates/expert/topics.html:2
+#: app/templates/expert/topics.html:3 app/templates/expert/topics.html:13
 msgid "Mavzular va darslar"
 msgstr ""
 
-#: app/mock.py:47 app/templates/expert/objections.html:2
+#: app/mock.py:43 app/templates/expert/objections.html:2
 #: app/templates/expert/objections.html:3
 #: app/templates/expert/objections.html:5
 msgid "E’tirozlar"
 msgstr ""
 
-#: app/mock.py:51 app/templates/admin/stats.html:2
+#: app/mock.py:47 app/templates/admin/stats.html:2
 #: app/templates/admin/stats.html:3 app/templates/admin/stats.html:5
 msgid "Statistika"
 msgstr ""
 
-#: app/mock.py:52 app/templates/admin/users.html:2
+#: app/mock.py:48 app/templates/admin/users.html:2
 #: app/templates/admin/users.html:3 app/templates/admin/users.html:6
 msgid "Foydalanuvchilar"
 msgstr ""
 
-#: app/mock.py:53 app/templates/admin/experts.html:2
+#: app/mock.py:49 app/templates/admin/experts.html:2
 #: app/templates/admin/experts.html:3 app/templates/admin/experts.html:7
 msgid "Ekspertlar"
 msgstr ""
 
-#: app/mock.py:54 app/templates/admin/settings.html:2
+#: app/mock.py:50 app/templates/admin/settings.html:2
 #: app/templates/admin/settings.html:3 app/templates/admin/settings.html:5
 msgid "Sozlamalar"
 msgstr ""
 
-#: app/mock.py:60
+#: app/mock.py:56
 msgid "O‘zlashtirilmagan"
 msgstr ""
 
-#: app/mock.py:61
+#: app/mock.py:57
 msgid "O‘rganilmoqda"
 msgstr ""
 
-#: app/mock.py:62
+#: app/mock.py:58
 msgid "Qayta o‘zlashtirish kerak"
 msgstr ""
 
-#: app/mock.py:63
+#: app/mock.py:59
 msgid "O‘zlashtirilgan"
 msgstr ""
 
-#: app/mock.py:64
+#: app/mock.py:60
 msgid "Mustahkam"
 msgstr ""
 
-#: app/mock.py:117
+#: app/mock.py:222
 msgid "O‘tdi"
 msgstr ""
 
-#: app/mock.py:117
+#: app/mock.py:222
 msgid "Tavsiya bilan"
 msgstr ""
 
-#: app/mock.py:117
+#: app/mock.py:222
 msgid "Qaytarildi"
 msgstr ""
 
-#: app/mock.py:160
+#: app/mock.py:225
+msgid "Tizimga birinchi kirganda (ixtiyoriy). O‘quv reja shu natijadan tuziladi."
+msgstr ""
+
+#: app/mock.py:226
+msgid "Har mavzu so‘ngida (majburiy). Mavzuni qay darajada o‘zlashtirganingizni aniqlaydi."
+msgstr ""
+
+#: app/mock.py:227
+msgid "Har kuni 5 ta savol (majburiy): ko‘p xato qilayotgan mavzulardan."
+msgstr ""
+
+#: app/mock.py:228
+msgid "Har 3 ta o‘zlashtirilgan mavzudan keyin (majburiy)."
+msgstr ""
+
+#: app/mock.py:229
+msgid "Har yakshanba (ixtiyoriy): shu paytgacha o‘zlashtirilgan mavzulardan."
+msgstr ""
+
+#: app/mock.py:230
+msgid "Har 30 kunda (majburiy). Topshirilmaguncha keyingi mavzular ochilmaydi."
+msgstr ""
+
+#: app/mock.py:231
+msgid "O‘zlashtirgan mavzularingizdan, savollar sonini o‘zingiz tanlaysiz. O‘zlashtirish foiziga ta’sir qilmaydi."
+msgstr ""
+
+#: app/mock.py:232
+msgid "35 ta savol, 120 daqiqa, real attestatsiya interfeysida (ixtiyoriy, istalgan paytda)."
+msgstr ""
+
+#: app/mock.py:233
+msgid "Barcha mavzular o‘zlashtirilgach. Natijasi bo‘yicha sertifikat beriladi."
+msgstr ""
+
+#: app/mock.py:281
 msgid "Ko‘rib chiqilmoqda"
 msgstr ""
 
-#: app/mock.py:160
+#: app/mock.py:281
 msgid "Qabul qilindi"
 msgstr ""
 
-#: app/mock.py:160
+#: app/mock.py:281
 msgid "Rad etildi"
 msgstr ""
 
-#: app/mock.py:180
+#: app/mock.py:301
 msgid "Reja bo‘yicha"
 msgstr ""
 
-#: app/mock.py:180
+#: app/mock.py:301
 #, python-brace-format
 msgid "Hozirgi sur’atda attestatsiyadan {m} kun oldin tayyor bo‘lasiz."
 msgstr ""
 
-#: app/mock.py:181
+#: app/mock.py:302
 msgid "Biroz ortda"
 msgstr ""
 
-#: app/mock.py:181
+#: app/mock.py:302
 msgid "Sur’at sekinlashdi: attestatsiyaga zo‘rg‘a ulgurasiz. Kuniga 15 daqiqa qo‘shing."
 msgstr ""
 
-#: app/mock.py:182
+#: app/mock.py:303
 msgid "Ortda qolmoqda"
 msgstr ""
 
-#: app/mock.py:182
+#: app/mock.py:303
 msgid "Hozirgi sur’atda attestatsiyaga ulgurmaysiz. Rejani tezlashtiring."
 msgstr ""
 
-#: app/mock.py:268
+#: app/mock.py:308
+msgid "Bugun kichik qadam — ertaga katta natija."
+msgstr ""
+
+#: app/mock.py:309
+msgid "Har bir to‘g‘ri javob sizni maqsadga yaqinlashtiradi."
+msgstr ""
+
+#: app/mock.py:310
+msgid "Bilim — eng ishonchli sarmoya."
+msgstr ""
+
+#: app/mock.py:311
+msgid "Xato qilish — o‘rganishning bir qismi."
+msgstr ""
+
+#: app/mock.py:312
+msgid "Izchillik iqtidordan kuchliroq."
+msgstr ""
+
+#: app/mock.py:313
+msgid "Bugun o‘rgangan narsangiz ertangi darsingizni boyitadi."
+msgstr ""
+
+#: app/mock.py:314
+msgid "Oz-ozdan, lekin har kuni."
+msgstr ""
+
+#: app/mock.py:315
+msgid "Siz uddalaysiz — attestatsiya yaqin!"
+msgstr ""
+
+#: app/mock.py:404
+msgid "Yopiq (bitta javob)"
+msgstr ""
+
+#: app/mock.py:404 app/templates/expert/questions.html:36
+msgid "Ko‘p javobli"
+msgstr ""
+
+#: app/mock.py:404 app/templates/expert/questions.html:36
+msgid "Moslashtirish"
+msgstr ""
+
+#: app/mock.py:404
+msgid "Ochiq javob"
+msgstr ""
+
+#: app/mock.py:405
+msgid "Matnli"
+msgstr ""
+
+#: app/mock.py:405
+msgid "Chizmali"
+msgstr ""
+
+#: app/mock.py:405
+msgid "Jadvalli"
+msgstr ""
+
+#: app/mock.py:405
+msgid "Rasmli"
+msgstr ""
+
+#: app/mock.py:436 app/templates/expert/topics.html:115
+msgid "Matn"
+msgstr ""
+
+#: app/mock.py:436 app/templates/expert/editor.html:63
+msgid "Rasm"
+msgstr ""
+
+#: app/mock.py:436 app/templates/expert/editor.html:72
+#: app/templates/expert/topics.html:118
+msgid "Jadval"
+msgstr ""
+
+#: app/mock.py:437
+msgid "Video"
+msgstr ""
+
+#: app/mock.py:437 app/templates/expert/topics.html:116
+msgid "Chizma"
+msgstr ""
+
+#: app/mock.py:464 app/templates/expert/questions.html:36
 msgid "Tasdiqlangan"
 msgstr ""
 
-#: app/mock.py:268 app/templates/expert/editor.html:6
+#: app/mock.py:464 app/templates/expert/questions.html:36
 msgid "Tekshiruvda"
 msgstr ""
 
-#: app/mock.py:269
+#: app/mock.py:465 app/templates/expert/questions.html:36
 msgid "Qoralama"
 msgstr ""
 
-#: app/mock.py:269
+#: app/mock.py:465 app/templates/expert/questions.html:36
 msgid "Arxivlangan"
 msgstr ""
 
-#: app/mock.py:269 app/templates/admin/experts.html:31
-#: app/templates/user/tests.html:11
+#: app/mock.py:465 app/templates/admin/experts.html:31
 msgid "To‘xtatilgan"
 msgstr ""
 
-#: app/mock.py:311
+#: app/mock.py:507
 msgid "Savol yaratish va tahrirlash"
 msgstr ""
 
-#: app/mock.py:311
+#: app/mock.py:507
 msgid "Savollarni tekshirish va tasdiqlash"
 msgstr ""
 
-#: app/mock.py:312
+#: app/mock.py:508
 msgid "Mavzular va darslarni tahrirlash"
 msgstr ""
 
-#: app/mock.py:312
+#: app/mock.py:508
 msgid "E’tirozlarni ko‘rib chiqish"
 msgstr ""
 
@@ -325,8 +429,8 @@ msgstr ""
 msgid "Ovozli savol"
 msgstr ""
 
-#: app/templates/_ui.html:77 app/templates/test/exam.html:122
-#: app/templates/test/result.html:100 app/templates/user/discussion.html:43
+#: app/templates/_ui.html:77 app/templates/test/exam.html:123
+#: app/templates/test/result.html:88 app/templates/user/discussion.html:43
 msgid "Yuborish"
 msgstr ""
 
@@ -334,17 +438,35 @@ msgstr ""
 msgid "AI javobini darslik bilan tekshiring. Shaxsiy ma’lumotlaringizni yozmang."
 msgstr ""
 
-#: app/templates/admin/_exam_date_sheet.html:10
-#: app/templates/admin/experts.html:67 app/templates/test/exam.html:113
-#: app/templates/test/exam.html:139 app/templates/test/result.html:89
-#: app/templates/test/result.html:106 app/templates/user/notes.html:64
-msgid "Yopish"
+#: app/templates/_ui.html:93
+msgid "Yashirish"
+msgstr ""
+
+#: app/templates/_ui.html:93
+msgid "Ko‘rsatish"
+msgstr ""
+
+#: app/templates/base.html:6 app/templates/layouts/app.html:12
+#: app/templates/layouts/auth.html:6 app/templates/layouts/panel.html:11
+msgid "raqamliMuallim"
+msgstr ""
+
+#: app/templates/base.html:31
+msgid "Asosiy kontentga o‘tish"
 msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:10
 #: app/templates/admin/user_detail.html:67 app/templates/admin/users.html:15
-#: app/templates/admin/users.html:20 app/templates/user/profile.html:84
+#: app/templates/admin/users.html:20 app/templates/user/profile.html:83
 msgid "Attestatsiya sanasi"
+msgstr ""
+
+#: app/templates/admin/_exam_date_sheet.html:10
+#: app/templates/admin/experts.html:67 app/templates/test/exam.html:114
+#: app/templates/test/exam.html:140 app/templates/test/result.html:77
+#: app/templates/test/result.html:94 app/templates/user/errors.html:18
+#: app/templates/user/notes.html:64
+msgid "Yopish"
 msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:13
@@ -361,18 +483,25 @@ msgid "O‘qituvchiga Telegram orqali xabar yuborish"
 msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:19
-#: app/templates/admin/experts.html:85 app/templates/test/exam.html:122
+#: app/templates/admin/experts.html:85 app/templates/expert/editor.html:139
+#: app/templates/expert/topics.html:23 app/templates/expert/topics.html:56
+#: app/templates/expert/topics.html:61 app/templates/expert/topics.html:80
+#: app/templates/expert/topics.html:92 app/templates/test/exam.html:123
 #: app/templates/user/_contact_change.html:47
-#: app/templates/user/_contact_change.html:89 app/templates/user/notes.html:78
-#: app/templates/user/profile.html:33 app/templates/user/profile.html:55
-#: app/templates/user/profile.html:77
+#: app/templates/user/_contact_change.html:88 app/templates/user/notes.html:77
+#: app/templates/user/objections.html:44 app/templates/user/profile.html:33
+#: app/templates/user/profile.html:54 app/templates/user/profile.html:76
+#: app/templates/user/tests.html:40
 msgid "Bekor qilish"
 msgstr ""
 
 #: app/templates/admin/_exam_date_sheet.html:19
-#: app/templates/admin/settings.html:6 app/templates/expert/topics.html:7
-#: app/templates/user/_contact_change.html:89 app/templates/user/notes.html:79
-#: app/templates/user/profile.html:33 app/templates/user/profile.html:77
+#: app/templates/admin/settings.html:6 app/templates/expert/editor.html:138
+#: app/templates/expert/topics.html:24 app/templates/expert/topics.html:57
+#: app/templates/expert/topics.html:93 app/templates/expert/topics.html:148
+#: app/templates/user/_contact_change.html:88 app/templates/user/notes.html:78
+#: app/templates/user/objections.html:45 app/templates/user/profile.html:33
+#: app/templates/user/profile.html:76
 msgid "Saqlash"
 msgstr ""
 
@@ -386,6 +515,11 @@ msgstr ""
 
 #: app/templates/admin/experts.html:8 app/templates/admin/experts.html:67
 msgid "Ekspert qo‘shish"
+msgstr ""
+
+#: app/templates/admin/experts.html:13 app/templates/expert/questions.html:16
+#: app/templates/expert/queue.html:2 app/templates/expert/queue.html:9
+msgid "Tekshiruv navbati"
 msgstr ""
 
 #: app/templates/admin/experts.html:13
@@ -416,8 +550,18 @@ msgstr ""
 msgid "Shu oy tasdiqlangan"
 msgstr ""
 
-#: app/templates/admin/experts.html:16
+#: app/templates/admin/experts.html:16 app/templates/expert/topics.html:73
+#: app/templates/user/plan.html:147 app/templates/user/result_detail.html:12
+#: app/templates/user/results.html:44
 msgid "savol"
+msgstr ""
+
+#: app/templates/admin/experts.html:21 app/templates/admin/settings.html:69
+msgid "Ekspert"
+msgstr ""
+
+#: app/templates/admin/experts.html:21 app/templates/admin/experts.html:76
+msgid "Yo‘nalishlar"
 msgstr ""
 
 #: app/templates/admin/experts.html:21
@@ -428,26 +572,18 @@ msgstr ""
 msgid "Tekshirgan"
 msgstr ""
 
+#: app/templates/admin/experts.html:21 app/templates/test/exam.html:41
+msgid "E’tiroz"
+msgstr ""
+
 #: app/templates/admin/experts.html:21
 msgid "Javob vaqti"
 msgstr ""
 
-#: app/templates/admin/experts.html:21 app/templates/admin/experts.html:76
-msgid "Yo‘nalishlar"
-msgstr ""
-
-#: app/templates/admin/experts.html:21 app/templates/admin/settings.html:79
-#: app/templates/expert/queue.html:13
-msgid "Ekspert"
-msgstr ""
-
 #: app/templates/admin/experts.html:21 app/templates/admin/users.html:16
-#: app/templates/admin/users.html:20 app/templates/expert/questions.html:20
+#: app/templates/admin/users.html:20 app/templates/expert/questions.html:36
+#: app/templates/expert/questions.html:42
 msgid "Holat"
-msgstr ""
-
-#: app/templates/admin/experts.html:21 app/templates/test/exam.html:40
-msgid "E’tiroz"
 msgstr ""
 
 #: app/templates/admin/experts.html:31 app/templates/admin/user_detail.html:16
@@ -519,7 +655,7 @@ msgstr ""
 msgid "O‘zgarishlar faqat yangi boshlangan testlarga ta’sir qiladi."
 msgstr ""
 
-#: app/templates/admin/settings.html:17
+#: app/templates/admin/settings.html:17 app/templates/user/plan.html:146
 msgid "Mavzu testi"
 msgstr ""
 
@@ -563,7 +699,8 @@ msgstr ""
 msgid "Qiyin bosqichdan o‘tgan mavzu uchun to‘liq test majburiy"
 msgstr ""
 
-#: app/templates/admin/settings.html:36 app/templates/user/optional.html:19
+#: app/templates/admin/settings.html:36 app/templates/user/errors.html:21
+#: app/templates/user/optional.html:21
 msgid "Savollar soni"
 msgstr ""
 
@@ -591,153 +728,138 @@ msgstr ""
 msgid "Diagnostika savollari"
 msgstr ""
 
+#: app/templates/admin/settings.html:40 app/templates/test/exam.html:2
+#: app/templates/user/tests.html:56
+msgid "Attestatsiya testi"
+msgstr ""
+
 #: app/templates/admin/settings.html:40
 msgid "Savollar soni va vaqt (daqiqa)"
+msgstr ""
+
+#: app/templates/admin/settings.html:40
+msgid "Savollar"
 msgstr ""
 
 #: app/templates/admin/settings.html:40
 msgid "Daqiqa"
 msgstr ""
 
-#: app/templates/admin/settings.html:40 app/templates/test/result.html:41
-msgid "Savollar"
-msgstr ""
-
-#: app/templates/admin/settings.html:45
-msgid "AI va byudjet"
-msgstr ""
-
-#: app/templates/admin/settings.html:45
-msgid "Shu oy: $210 / $500"
-msgstr ""
-
-#: app/templates/admin/settings.html:48
-msgid "Oylik AI byudjeti ($)"
-msgstr ""
-
-#: app/templates/admin/settings.html:48
-msgid "Byudjet tugasa, AI tutor faqat keshdan javob beradi."
-msgstr ""
-
-#: app/templates/admin/settings.html:49
-msgid "Zaxira zanjiri"
-msgstr ""
-
-#: app/templates/admin/settings.html:55
-msgid "Ro‘yxatdan o‘tishda va maxfiylik siyosatida foydalanuvchiga ko‘rsatiladi"
-msgstr ""
-
-#: app/templates/admin/settings.html:55 app/templates/admin/stats.html:81
+#: app/templates/admin/settings.html:45 app/templates/admin/stats.html:81
 msgid "Faol bo‘lmagan akkauntlar"
 msgstr ""
 
-#: app/templates/admin/settings.html:57
+#: app/templates/admin/settings.html:45
+msgid "Ro‘yxatdan o‘tishda va maxfiylik siyosatida foydalanuvchiga ko‘rsatiladi"
+msgstr ""
+
+#: app/templates/admin/settings.html:47
 msgid "Avtomatik o‘chirish muddati"
 msgstr ""
 
-#: app/templates/admin/settings.html:57
+#: app/templates/admin/settings.html:47
 msgid "Shuncha vaqt kirilmasa akkaunt ma’lumotlari bilan o‘chiriladi"
 msgstr ""
 
-#: app/templates/admin/settings.html:58
+#: app/templates/admin/settings.html:48
 msgid "O‘chirish muddati"
 msgstr ""
 
-#: app/templates/admin/settings.html:58
+#: app/templates/admin/settings.html:48
 msgid "3 oy"
 msgstr ""
 
-#: app/templates/admin/settings.html:58
-msgid "12 oy"
-msgstr ""
-
-#: app/templates/admin/settings.html:58
-msgid "O‘chirilmasin"
-msgstr ""
-
-#: app/templates/admin/settings.html:58 app/templates/auth/details.html:49
-#: app/templates/user/home.html:27
+#: app/templates/admin/settings.html:48 app/templates/auth/details.html:55
+#: app/templates/user/home.html:22
 msgid "6 oy"
 msgstr ""
 
-#: app/templates/admin/settings.html:59
+#: app/templates/admin/settings.html:48
+msgid "12 oy"
+msgstr ""
+
+#: app/templates/admin/settings.html:48
+msgid "O‘chirilmasin"
+msgstr ""
+
+#: app/templates/admin/settings.html:49
 msgid "Oldindan ogohlantirish"
 msgstr ""
 
-#: app/templates/admin/settings.html:59
+#: app/templates/admin/settings.html:49
 msgid "Telegram va email orqali"
 msgstr ""
 
-#: app/templates/admin/settings.html:60
+#: app/templates/admin/settings.html:50
 msgid "Ogohlantirish"
 msgstr ""
 
-#: app/templates/admin/settings.html:60
+#: app/templates/admin/settings.html:50
 msgid "1 hafta"
 msgstr ""
 
-#: app/templates/admin/settings.html:60
+#: app/templates/admin/settings.html:50
 msgid "2 hafta"
 msgstr ""
 
-#: app/templates/admin/settings.html:60
+#: app/templates/admin/settings.html:50
 msgid "1 oy"
 msgstr ""
 
-#: app/templates/admin/settings.html:61
+#: app/templates/admin/settings.html:51
 msgid "Sertifikat olganlarni istisno qilish"
 msgstr ""
 
-#: app/templates/admin/settings.html:61
+#: app/templates/admin/settings.html:51
 msgid "Sertifikat tekshiruv sahifasi ishlashda davom etadi"
 msgstr ""
 
-#: app/templates/admin/settings.html:66 app/templates/layouts/app.html:67
+#: app/templates/admin/settings.html:56 app/templates/layouts/app.html:67
 #: app/templates/layouts/app.html:69
 msgid "Bildirishnomalar"
 msgstr ""
 
-#: app/templates/admin/settings.html:71
+#: app/templates/admin/settings.html:61
 msgid "Kunlik eslatma vaqti"
 msgstr ""
 
-#: app/templates/admin/settings.html:71
+#: app/templates/admin/settings.html:61
 msgid "Foydalanuvchi profilida o‘zgartira oladi"
 msgstr ""
 
-#: app/templates/admin/settings.html:71
+#: app/templates/admin/settings.html:61
 msgid "Eslatma vaqti"
 msgstr ""
 
-#: app/templates/admin/settings.html:76
+#: app/templates/admin/settings.html:66
 msgid "Rollar va huquqlar"
 msgstr ""
 
-#: app/templates/admin/settings.html:76
+#: app/templates/admin/settings.html:66
 msgid "Har bir rol faqat o‘z paneliga kiradi"
 msgstr ""
 
-#: app/templates/admin/settings.html:79
+#: app/templates/admin/settings.html:69
 msgid "Bo‘lim"
 msgstr ""
 
-#: app/templates/admin/settings.html:79
+#: app/templates/admin/settings.html:69
 msgid "O‘qituvchi"
 msgstr ""
 
-#: app/templates/admin/settings.html:79
+#: app/templates/admin/settings.html:69
 msgid "Admin"
 msgstr ""
 
-#: app/templates/admin/settings.html:85
+#: app/templates/admin/settings.html:75
 msgid "ruxsat bor"
 msgstr ""
 
-#: app/templates/admin/settings.html:85
+#: app/templates/admin/settings.html:75
 msgid "ruxsat yo‘q"
 msgstr ""
 
-#: app/templates/admin/settings.html:90
+#: app/templates/admin/settings.html:80
 msgid "Ekspertlarning ichki huquqlari (savol yaratish, tekshirish, mavzular, e’tirozlar) «Ekspertlar» bo‘limida beriladi."
 msgstr ""
 
@@ -749,6 +871,10 @@ msgstr ""
 msgid "Davr"
 msgstr ""
 
+#: app/templates/admin/stats.html:6 app/templates/user/errors.html:36
+msgid "Oxirgi 30 kun"
+msgstr ""
+
 #: app/templates/admin/stats.html:6
 msgid "Oxirgi 7 kun"
 msgstr ""
@@ -757,13 +883,10 @@ msgstr ""
 msgid "Shu yil"
 msgstr ""
 
-#: app/templates/admin/stats.html:6 app/templates/user/discussions.html:7
-#: app/templates/user/errors.html:29
+#: app/templates/admin/stats.html:6 app/templates/test/exam_result.html:56
+#: app/templates/user/discussions.html:7 app/templates/user/errors.html:52
+#: app/templates/user/results.html:24
 msgid "Hammasi"
-msgstr ""
-
-#: app/templates/admin/stats.html:6 app/templates/user/errors.html:13
-msgid "Oxirgi 30 kun"
 msgstr ""
 
 #: app/templates/admin/stats.html:7
@@ -795,7 +918,6 @@ msgid "ta · haftasiga o‘rtacha"
 msgstr ""
 
 #: app/templates/admin/stats.html:33 app/templates/admin/user_detail.html:37
-#: app/templates/test/result.html:41
 msgid "ta"
 msgstr ""
 
@@ -828,12 +950,12 @@ msgstr ""
 msgid "foydalanuvchilar"
 msgstr ""
 
-#: app/templates/admin/stats.html:71
-msgid "PWA o‘rnatgan:"
-msgstr ""
-
 #: app/templates/admin/stats.html:71 app/templates/admin/user_detail.html:74
 msgid "Qurilmalar"
+msgstr ""
+
+#: app/templates/admin/stats.html:71
+msgid "PWA o‘rnatgan:"
 msgstr ""
 
 #: app/templates/admin/stats.html:75
@@ -868,15 +990,6 @@ msgstr ""
 msgid "Reja va prognoz sanasiz hisoblanmaydi"
 msgstr ""
 
-#: app/templates/admin/stats.html:94
-#, python-format
-msgid "AI byudjetining 42%% sarflandi"
-msgstr ""
-
-#: app/templates/admin/stats.html:94
-msgid "Oy oxirigacha prognoz: $430 / $500"
-msgstr ""
-
 #: app/templates/admin/user_detail.html:3
 msgid "Foydalanuvchilarga qaytish"
 msgstr ""
@@ -892,12 +1005,12 @@ msgid "Bloklangan"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:17
-msgid ", staj"
+#: app/templates/user/certificate_print.html:150
+msgid "ID"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:17
-#: app/templates/user/certificate_print.html:150
-msgid "ID"
+msgid ", staj"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:22
@@ -905,11 +1018,11 @@ msgid "orqali kiradi"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:27 app/templates/auth/reset.html:2
-#: app/templates/auth/reset.html:25
+#: app/templates/auth/reset.html:27
 msgid "Parolni tiklash"
 msgstr ""
 
-#: app/templates/admin/user_detail.html:36 app/templates/user/home.html:56
+#: app/templates/admin/user_detail.html:36 app/templates/user/home.html:51
 msgid "Attestatsiyaga tayyorlik"
 msgstr ""
 
@@ -946,12 +1059,12 @@ msgid "kun · AI so‘rovlari"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:45
-msgid "bo‘limlar bo‘yicha"
+#: app/templates/user/diagnostic_result.html:15
+msgid "Mavzular holati"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:45
-#: app/templates/user/diagnostic_result.html:15
-msgid "Mavzular holati"
+msgid "bo‘limlar bo‘yicha"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:62 app/templates/user/profile.html:15
@@ -982,7 +1095,7 @@ msgstr ""
 msgid "Ko‘p xato qilinadigan mavzular"
 msgstr ""
 
-#: app/templates/admin/user_detail.html:80 app/templates/user/errors.html:18
+#: app/templates/admin/user_detail.html:80 app/templates/user/errors.html:41
 msgid "ta xato"
 msgstr ""
 
@@ -994,22 +1107,24 @@ msgstr ""
 msgid "ta oxirgi"
 msgstr ""
 
-#: app/templates/admin/user_detail.html:90
+#: app/templates/admin/user_detail.html:90 app/templates/user/plan.html:48
+#: app/templates/user/plan.html:103
 msgid "Test"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:90
-msgid "Qaror"
-msgstr ""
-
-#: app/templates/admin/user_detail.html:90
-#: app/templates/expert/questions.html:20 app/templates/expert/queue.html:17
+#: app/templates/expert/questions.html:36
+#: app/templates/expert/questions.html:42
 msgid "Turi"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:90 app/templates/test/result.html:2
 #: app/templates/test/result.html:5 app/templates/user/lesson.html:75
 msgid "Natija"
+msgstr ""
+
+#: app/templates/admin/user_detail.html:90
+msgid "Qaror"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:100
@@ -1021,7 +1136,7 @@ msgid "E’tirozlari"
 msgstr ""
 
 #: app/templates/admin/user_detail.html:115
-#: app/templates/admin/user_detail.html:119 app/templates/user/profile.html:128
+#: app/templates/admin/user_detail.html:119 app/templates/user/profile.html:127
 msgid "Akkauntni o‘chirish"
 msgstr ""
 
@@ -1045,8 +1160,14 @@ msgstr ""
 msgid "Ism, telefon yoki email"
 msgstr ""
 
-#: app/templates/admin/users.html:13 app/templates/expert/queue.html:10
+#: app/templates/admin/users.html:13 app/templates/expert/queue.html:13
+#: app/templates/expert/topics.html:30
 msgid "Qidirish"
+msgstr ""
+
+#: app/templates/admin/users.html:14 app/templates/admin/users.html:20
+#: app/templates/auth/details.html:48 app/templates/user/profile.html:69
+msgid "Viloyat"
 msgstr ""
 
 #: app/templates/admin/users.html:14
@@ -1061,11 +1182,6 @@ msgstr ""
 msgid "Samarqand"
 msgstr ""
 
-#: app/templates/admin/users.html:14 app/templates/admin/users.html:20
-#: app/templates/auth/details.html:42 app/templates/user/profile.html:70
-msgid "Viloyat"
-msgstr ""
-
 #: app/templates/admin/users.html:15
 msgid "Sana: barchasi"
 msgstr ""
@@ -1078,7 +1194,7 @@ msgstr ""
 msgid "Shu oyda"
 msgstr ""
 
-#: app/templates/admin/users.html:16
+#: app/templates/admin/users.html:16 app/templates/expert/questions.html:36
 msgid "Barcha holatlar"
 msgstr ""
 
@@ -1098,8 +1214,7 @@ msgstr ""
 msgid "Oldingi"
 msgstr ""
 
-#: app/templates/admin/users.html:40 app/templates/test/exam.html:75
-#: app/templates/user/knowledge.html:47
+#: app/templates/admin/users.html:40 app/templates/test/exam.html:76
 msgid "Keyingi"
 msgstr ""
 
@@ -1136,70 +1251,66 @@ msgid "Parol"
 msgstr ""
 
 #: app/templates/auth/details.html:22 app/templates/auth/recover.html:78
-#: app/templates/auth/reset.html:62
+#: app/templates/auth/reset.html:76
 msgid "Kamida 8 ta belgi, harf va raqam"
 msgstr ""
 
-#: app/templates/auth/details.html:24 app/templates/auth/login.html:27
-#: app/templates/auth/recover.html:83 app/templates/auth/reset.html:67
-msgid "Parolni ko‘rsatish"
-msgstr ""
-
 #: app/templates/auth/details.html:28 app/templates/auth/recover.html:80
-#: app/templates/auth/reset.html:64
+#: app/templates/auth/reset.html:78
 msgid "Parolni takrorlang"
 msgstr ""
 
-#: app/templates/auth/details.html:32 app/templates/auth/recover.html:28
+#: app/templates/auth/details.html:35 app/templates/auth/recover.html:28
 #: app/templates/user/_contact_change.html:73
 msgid "Maxfiy so‘z"
 msgstr ""
 
-#: app/templates/auth/details.html:34
+#: app/templates/auth/details.html:38
 msgid "Masalan: birinchi maktabim nomi"
 msgstr ""
 
-#: app/templates/auth/details.html:36
+#: app/templates/auth/details.html:42
 msgid "Telefon raqamingiz o‘zgarsa yoki emailingizga kira olmasangiz, akkauntni shu so‘z orqali tiklaysiz. Eslab qoladigan, lekin boshqalar bilmaydigan so‘z tanlang. Katta-kichik harf farqlanmaydi."
 msgstr ""
 
-#: app/templates/auth/details.html:40
+#: app/templates/auth/details.html:46
 msgid "Hudud (ixtiyoriy)"
 msgstr ""
 
-#: app/templates/auth/details.html:43 app/templates/auth/details.html:45
+#: app/templates/auth/details.html:49 app/templates/auth/details.html:51
+#: app/templates/expert/editor.html:31 app/templates/expert/editor.html:35
 msgid "Tanlang"
 msgstr ""
 
-#: app/templates/auth/details.html:45
+#: app/templates/auth/details.html:51
 msgid "Tuman"
 msgstr ""
 
-#: app/templates/auth/details.html:49
+#: app/templates/auth/details.html:55
 msgid "Muhim:"
 msgstr ""
 
-#: app/templates/auth/details.html:49
+#: app/templates/auth/details.html:55
 msgid "akkauntingizga"
 msgstr ""
 
-#: app/templates/auth/details.html:49
+#: app/templates/auth/details.html:55
 msgid "davomida kirilmasa, u ma’lumotlari bilan birga avtomatik o‘chiriladi. O‘chirishdan 2 hafta oldin Telegram va email orqali ogohlantiramiz."
 msgstr ""
 
-#: app/templates/auth/details.html:51
+#: app/templates/auth/details.html:57
 msgid "Shaxsiy ma’lumotlarimni qayta ishlashga roziman va"
 msgstr ""
 
-#: app/templates/auth/details.html:51
+#: app/templates/auth/details.html:57
 msgid "maxfiylik siyosati"
 msgstr ""
 
-#: app/templates/auth/details.html:51
+#: app/templates/auth/details.html:57
 msgid "ni qabul qilaman."
 msgstr ""
 
-#: app/templates/auth/details.html:54 app/templates/auth/guest.html:11
+#: app/templates/auth/details.html:60 app/templates/auth/guest.html:11
 #: app/templates/auth/login.html:34 app/templates/auth/register.html:2
 #: app/templates/auth/register.html:8
 msgid "Ro‘yxatdan o‘tish"
@@ -1231,14 +1342,14 @@ msgid "Kirish"
 msgstr ""
 
 #: app/templates/auth/guest.html:16
-msgid "Raqam bo‘yicha sertifikat haqiqiyligini bilib oling"
-msgstr ""
-
-#: app/templates/auth/guest.html:16
 #: app/templates/auth/verify_certificate.html:4
 #: app/templates/auth/verify_certificate.html:10
 #: app/templates/auth/verify_certificate.html:13
 msgid "Sertifikatni tekshirish"
+msgstr ""
+
+#: app/templates/auth/guest.html:16
+msgid "Raqam bo‘yicha sertifikat haqiqiyligini bilib oling"
 msgstr ""
 
 #: app/templates/auth/guest.html:20 app/templates/user/diagnostic.html:2
@@ -1269,7 +1380,7 @@ msgstr ""
 msgid "urinish qoldi, keyin akkaunt 15 daqiqaga bloklanadi."
 msgstr ""
 
-#: app/templates/auth/login.html:17 app/templates/auth/reset.html:31
+#: app/templates/auth/login.html:17 app/templates/auth/reset.html:33
 msgid "Telefon raqam yoki email"
 msgstr ""
 
@@ -1281,6 +1392,10 @@ msgstr ""
 msgid "Parolingiz"
 msgstr ""
 
+#: app/templates/auth/login.html:27
+msgid "Parolni ko‘rsatish"
+msgstr ""
+
 #: app/templates/auth/login.html:32 app/templates/auth/register.html:22
 msgid "yoki"
 msgstr ""
@@ -1290,14 +1405,16 @@ msgid "Akkauntingiz yo‘qmi?"
 msgstr ""
 
 #: app/templates/auth/privacy.html:2 app/templates/auth/privacy.html:16
-#: app/templates/layouts/auth.html:21 app/templates/user/profile.html:125
+#: app/templates/layouts/auth.html:21 app/templates/user/profile.html:124
 msgid "Maxfiylik siyosati"
 msgstr ""
 
 #: app/templates/auth/privacy.html:9 app/templates/auth/recover.html:3
 #: app/templates/auth/reset.html:3 app/templates/auth/verify_email.html:3
 #: app/templates/auth/verify_telegram.html:3 app/templates/errors/error.html:22
-#: app/templates/user/discussion.html:3 app/templates/user/topic.html:3
+#: app/templates/expert/editor.html:3 app/templates/expert/queue.html:3
+#: app/templates/user/discussion.html:3 app/templates/user/result_detail.html:3
+#: app/templates/user/topic.html:3
 msgid "Orqaga"
 msgstr ""
 
@@ -1478,8 +1595,8 @@ msgstr ""
 msgid "Telefon raqamingiz o‘zgargan yoki emailingizga kira olmasangiz: ro‘yxatdan o‘tishda bergan maxfiy so‘zingizni kiriting."
 msgstr ""
 
-#: app/templates/auth/recover.html:22 app/views/auth.py:246
-#: app/views/auth.py:255
+#: app/templates/auth/recover.html:22 app/views/auth.py:259
+#: app/views/auth.py:268
 msgid "Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing"
 msgstr ""
 
@@ -1487,19 +1604,8 @@ msgstr ""
 msgid "Akkauntdagi eski telefon raqam yoki email"
 msgstr ""
 
-#: app/templates/auth/recover.html:25 app/templates/auth/reset.html:33
+#: app/templates/auth/recover.html:25 app/templates/auth/reset.html:35
 msgid "+998 90 123 45 67 yoki email@maktab.uz"
-msgstr ""
-
-#: app/templates/auth/recover.html:32
-#: app/templates/user/_contact_change.html:39
-msgid "Yashirish"
-msgstr ""
-
-#: app/templates/auth/recover.html:32
-#: app/templates/user/_contact_change.html:39
-#: app/templates/user/_contact_change.html:88
-msgid "Ko‘rsatish"
 msgstr ""
 
 #: app/templates/auth/recover.html:35
@@ -1545,8 +1651,8 @@ msgstr ""
 msgid "Kod shu manzilga xat bilan keladi."
 msgstr ""
 
-#: app/templates/auth/recover.html:61 app/templates/auth/reset.html:36
-#: app/templates/auth/verify_email.html:20
+#: app/templates/auth/recover.html:61 app/templates/auth/reset.html:39
+#: app/templates/auth/verify_email.html:22
 #: app/templates/user/_contact_change.html:47
 msgid "Kod yuborish"
 msgstr ""
@@ -1559,16 +1665,16 @@ msgstr ""
 msgid "Kod yuborilgan manzil:"
 msgstr ""
 
-#: app/templates/auth/recover.html:72 app/templates/auth/reset.html:43
-#: app/templates/auth/verify_email.html:25
-#: app/templates/auth/verify_telegram.html:22
+#: app/templates/auth/recover.html:72 app/templates/auth/reset.html:57
+#: app/templates/auth/verify_email.html:27
+#: app/templates/auth/verify_telegram.html:24
 #: app/templates/user/_contact_change.html:57
 msgid "Tasdiqlash kodi"
 msgstr ""
 
-#: app/templates/auth/recover.html:73 app/templates/auth/reset.html:45
-#: app/templates/auth/verify_email.html:26
-#: app/templates/auth/verify_telegram.html:23
+#: app/templates/auth/recover.html:73 app/templates/auth/reset.html:59
+#: app/templates/auth/verify_email.html:28
+#: app/templates/auth/verify_telegram.html:25
 #: app/templates/user/_contact_change.html:58
 msgid "6 xonali kod"
 msgstr ""
@@ -1578,20 +1684,20 @@ msgstr ""
 msgid "Namunada kod: 123456"
 msgstr ""
 
-#: app/templates/auth/recover.html:77 app/templates/auth/reset.html:61
+#: app/templates/auth/recover.html:77 app/templates/auth/reset.html:75
 #: app/templates/user/profile.html:50
 msgid "Yangi parol"
 msgstr ""
 
-#: app/templates/auth/recover.html:84
+#: app/templates/auth/recover.html:83
 msgid "Tasdiqlash va kirish"
 msgstr ""
 
-#: app/templates/auth/recover.html:85
+#: app/templates/auth/recover.html:84
 msgid "Boshqa telefon yoki email kiritish"
 msgstr ""
 
-#: app/templates/auth/recover.html:88
+#: app/templates/auth/recover.html:87
 msgid "Maxfiy so‘zni ham eslay olmasangiz, yordam xizmatiga yozing: shaxsingizni tasdiqlab, akkauntni qo‘lda tiklaymiz."
 msgstr ""
 
@@ -1624,39 +1730,67 @@ msgstr ""
 msgid "Akkauntingiz bormi?"
 msgstr ""
 
-#: app/templates/auth/reset.html:26
+#: app/templates/auth/reset.html:28
 msgid "Telefon raqam yoki emailingizni kiriting, kodni Telegram yoki email orqali yuboramiz."
 msgstr ""
 
-#: app/templates/auth/reset.html:36
+#: app/templates/auth/reset.html:39 app/templates/auth/verify_email.html:22
 msgid "Qayta yuborish"
 msgstr ""
 
-#: app/templates/auth/reset.html:51 app/templates/auth/verify_email.html:32
-#: app/templates/auth/verify_telegram.html:32
-#: app/templates/expert/editor.html:61
+#: app/templates/auth/reset.html:42
+msgid "Kod Telegram bot orqali keladi: bot raqamingizni ulashishni so‘raydi."
+msgstr ""
+
+#: app/templates/auth/reset.html:42
+msgid "Kod shu emailga xat bilan keladi."
+msgstr ""
+
+#: app/templates/auth/reset.html:42
+msgid "Masalan: +998 90 123 45 67 yoki email@maktab.uz"
+msgstr ""
+
+#: app/templates/auth/reset.html:48 app/templates/auth/verify_telegram.html:14
+msgid "Telegram botni oching"
+msgstr ""
+
+#: app/templates/auth/reset.html:49
+msgid "«Telefon raqamni ulashish» tugmasini bosing — bot raqam ro‘yxatdan o‘tganini tekshiradi"
+msgstr ""
+
+#: app/templates/auth/reset.html:50 app/templates/auth/verify_telegram.html:16
+msgid "Bot yuborgan 6 xonali kodni kiriting"
+msgstr ""
+
+#: app/templates/auth/reset.html:52 app/templates/auth/verify_telegram.html:19
+msgid "Telegram botni ochish"
+msgstr ""
+
+#: app/templates/auth/reset.html:65 app/templates/auth/verify_email.html:34
+#: app/templates/auth/verify_telegram.html:40
+#: app/templates/expert/queue.html:69
 #: app/templates/user/_contact_change.html:41
 #: app/templates/user/_contact_change.html:64
 msgid "Tasdiqlash"
 msgstr ""
 
-#: app/templates/auth/reset.html:52
+#: app/templates/auth/reset.html:66
 msgid "Kod tasdiqlandi"
 msgstr ""
 
-#: app/templates/auth/reset.html:55
+#: app/templates/auth/reset.html:69
 msgid "Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing. Namunada kod: 123456"
 msgstr ""
 
-#: app/templates/auth/reset.html:68
+#: app/templates/auth/reset.html:81
 msgid "Parolni saqlash"
 msgstr ""
 
-#: app/templates/auth/reset.html:73
+#: app/templates/auth/reset.html:86
 msgid "Boshqa usul"
 msgstr ""
 
-#: app/templates/auth/reset.html:74
+#: app/templates/auth/reset.html:87
 msgid "Telefon raqamingiz o‘zgarganmi yoki emailingizga kira olmayapsizmi? «Boshqa usul» orqali maxfiy so‘z bilan tiklang."
 msgstr ""
 
@@ -1693,7 +1827,7 @@ msgid "Umumiy natija"
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:25
-#: app/templates/user/optional.html:7
+#: app/templates/user/optional.html:9
 msgid "Mavzular"
 msgstr ""
 
@@ -1705,51 +1839,52 @@ msgstr ""
 msgid "Sertifikat davlat attestatsiyasi hujjati hisoblanmaydi. U kursni to‘liq o‘zlashtirib, yakuniy diagnostikadan o‘tganlikni tasdiqlaydi."
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:31
-msgid "Sertifikat bekor qilingan."
-msgstr ""
-
-#: app/templates/auth/verify_certificate.html:31
-msgid "05.01.2027 dan boshlab amal qilmaydi."
+#: app/templates/auth/verify_certificate.html:32
+msgid "Sertifikat muddati o‘tgan."
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:32
+msgid "05.01.2026 dan boshlab amal qilmaydi."
+msgstr ""
+
+#: app/templates/auth/verify_certificate.html:33
+#: app/templates/user/objections.html:29
 msgid "Sabab:"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:32
-msgid "yakuniy diagnostika natijasi e’tiroz ko‘rib chiqilgandan keyin qayta hisoblandi."
-msgstr ""
-
-#: app/templates/auth/verify_certificate.html:35
-msgid "Bunday raqamli sertifikat topilmadi."
-msgstr ""
-
-#: app/templates/auth/verify_certificate.html:35
-msgid "Raqamni tekshirib, qayta kiriting."
+#: app/templates/auth/verify_certificate.html:33
+msgid "sertifikat berilgan kundan boshlab 3 yil amal qiladi (berilgan sana: 05.01.2023)."
 msgstr ""
 
 #: app/templates/auth/verify_certificate.html:36
+msgid "Bunday raqamli sertifikat topilmadi."
+msgstr ""
+
+#: app/templates/auth/verify_certificate.html:36
+msgid "Raqamni tekshirib, qayta kiriting."
+msgstr ""
+
+#: app/templates/auth/verify_certificate.html:37
 msgid "Raqamni qayta kiritish"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:42
+#: app/templates/auth/verify_certificate.html:43
 msgid "Sertifikat raqami"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:44
+#: app/templates/auth/verify_certificate.html:45
 msgid "INF-2026-000123"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:45
+#: app/templates/auth/verify_certificate.html:46
 msgid "Masalan: INF-2026-000123"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:47
+#: app/templates/auth/verify_certificate.html:48
 msgid "Tekshirish"
 msgstr ""
 
-#: app/templates/auth/verify_certificate.html:50
+#: app/templates/auth/verify_certificate.html:51
 msgid "Raqam sertifikatning yuqori o‘ng burchagida: INF-2026-000123 ko‘rinishida."
 msgstr ""
 
@@ -1770,7 +1905,7 @@ msgstr ""
 msgid "namuna@maktab.uz"
 msgstr ""
 
-#: app/templates/auth/verify_email.html:30
+#: app/templates/auth/verify_email.html:32
 msgid "Kod 15 daqiqa amal qiladi. Xat kelmasa, «Spam» papkasini tekshiring."
 msgstr ""
 
@@ -1786,52 +1921,45 @@ msgstr ""
 msgid "raqami uchun uch qadam:"
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:14
-msgid "Telegram botni oching"
-msgstr ""
-
 #: app/templates/auth/verify_telegram.html:15
 msgid "«Telefon raqamni ulashish» tugmasini bosing"
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:16
-msgid "Bot yuborgan 6 xonali kodni kiriting"
+#: app/templates/auth/verify_telegram.html:31
+msgid "Kod amal qiladi:"
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:19
-msgid "Telegram botni ochish"
+#: app/templates/auth/verify_telegram.html:35
+msgid "Kodning amal qilish muddati (5 daqiqa) tugadi. Yangi kod so‘rang."
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:27
-msgid "Kod 5 daqiqa amal qiladi. 5 ta urinish bor. Namunada kod: 123456"
+#: app/templates/auth/verify_telegram.html:36
+msgid "5 ta urinish bor. Namunada kod: 123456"
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:30
+#: app/templates/auth/verify_telegram.html:38
 msgid "Telegram boshqa raqamga ulanganmi? Bot sizga"
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:30
+#: app/templates/auth/verify_telegram.html:38
 msgid "Telegram’dagi raqam bilan davom etish"
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:30
+#: app/templates/auth/verify_telegram.html:38
 msgid "ni taklif qiladi."
 msgstr ""
 
-#: app/templates/auth/verify_telegram.html:34
+#: app/templates/auth/verify_telegram.html:42
+msgid "Yangi kod Telegram bot orqali yuborildi"
+msgstr ""
+
+#: app/templates/auth/verify_telegram.html:42
 msgid "Kodni qayta yuborish"
 msgstr ""
 
-#: app/templates/base.html:6 app/templates/layouts/app.html:12
-#: app/templates/layouts/auth.html:6 app/templates/layouts/panel.html:11
-msgid "raqamliMuallim"
-msgstr ""
-
-#: app/templates/base.html:31
-msgid "Asosiy kontentga o‘tish"
-msgstr ""
-
-#: app/templates/errors/error.html:14 app/templates/test/result.html:46
+#: app/templates/errors/error.html:14
+#: app/templates/partials/answer_review.html:10
+#: app/templates/test/exam_result.html:66
 msgid "Xato"
 msgstr ""
 
@@ -1839,126 +1967,145 @@ msgstr ""
 msgid "Qayta urinish"
 msgstr ""
 
-#: app/templates/expert/editor.html:2 app/templates/expert/editor.html:3
-msgid "Savol muharriri"
+#: app/templates/expert/editor.html:2 app/templates/expert/editor.html:10
+#: app/templates/expert/questions.html:9
+msgid "Savol qo‘shish"
 msgstr ""
 
-#: app/templates/expert/editor.html:5
-msgid "Savolni tekshirish"
+#: app/templates/expert/editor.html:10
+msgid "Saqlangan savol savollar bankiga qo‘shiladi"
 msgstr ""
 
-#: app/templates/expert/editor.html:5
-msgid "ID #Q-84920 · AI generatsiyasi · versiya 1"
-msgstr ""
-
-#: app/templates/expert/editor.html:13 app/templates/expert/questions.html:20
-#: app/templates/expert/queue.html:11 app/templates/expert/queue.html:17
-#: app/templates/meta/screens.html:9 app/templates/user/notes.html:66
+#: app/templates/expert/editor.html:29 app/templates/expert/questions.html:34
+#: app/templates/expert/questions.html:42 app/templates/expert/queue.html:14
+#: app/templates/expert/queue.html:35 app/templates/expert/topics.html:87
+#: app/templates/meta/screens.html:9 app/templates/user/plan.html:46
+#: app/templates/user/plan.html:125
 msgid "Mavzu"
 msgstr ""
 
-#: app/templates/expert/editor.html:13 app/templates/expert/queue.html:11
-msgid "Sanoq sistemalari"
-msgstr ""
-
-#: app/templates/expert/editor.html:13 app/templates/expert/queue.html:11
-msgid "Mantiq asoslari"
-msgstr ""
-
-#: app/templates/expert/editor.html:14
-msgid "Kichik mavzu"
-msgstr ""
-
-#: app/templates/expert/editor.html:14
-msgid "Ikkilik va o‘nlik"
-msgstr ""
-
-#: app/templates/expert/editor.html:14
-msgid "O‘n oltilik"
-msgstr ""
-
-#: app/templates/expert/editor.html:17 app/templates/expert/questions.html:20
-#: app/templates/expert/queue.html:12 app/templates/expert/queue.html:17
-#: app/templates/user/certificate_print.html:150
-msgid "Daraja"
-msgstr ""
-
-#: app/templates/expert/editor.html:19
-msgid "Savol turi"
-msgstr ""
-
-#: app/templates/expert/editor.html:19
-msgid "Yopiq test"
-msgstr ""
-
-#: app/templates/expert/editor.html:19
-msgid "Bir nechta javob"
-msgstr ""
-
-#: app/templates/expert/editor.html:19
-msgid "Moslashtirish"
-msgstr ""
-
-#: app/templates/expert/editor.html:19
-msgid "Ochiq javob"
-msgstr ""
-
-#: app/templates/expert/editor.html:24
-msgid "Savol matni"
-msgstr ""
-
-#: app/templates/expert/editor.html:27
-msgid "Javob variantlari · to‘g‘risini belgilang"
-msgstr ""
-
-#: app/templates/expert/editor.html:31
-msgid "To‘g‘ri javob sifatida belgilash"
-msgstr ""
-
-#: app/templates/expert/editor.html:37
-msgid "Variant qo‘shish"
+#: app/templates/expert/editor.html:33 app/templates/expert/questions.html:35
+#: app/templates/expert/queue.html:15 app/templates/expert/queue.html:36
+#: app/templates/user/plan.html:47
+msgid "Dars"
 msgstr ""
 
 #: app/templates/expert/editor.html:39
-msgid "Izoh"
+msgid "Qiyinlik darajasi"
 msgstr ""
 
-#: app/templates/expert/editor.html:41
-msgid "Vaqt (soniya)"
+#: app/templates/expert/editor.html:43
+msgid "Savolga ajratilgan vaqt (soniya)"
 msgstr ""
 
-#: app/templates/expert/editor.html:42
-msgid "Teglar"
+#: app/templates/expert/editor.html:47
+msgid "Savol turi"
 msgstr ""
 
-#: app/templates/expert/editor.html:49
+#: app/templates/expert/editor.html:51
+msgid "Savol formati"
+msgstr ""
+
+#: app/templates/expert/editor.html:59 app/templates/expert/queue.html:44
+msgid "Savol matni"
+msgstr ""
+
+#: app/templates/expert/editor.html:60
+msgid "Masalan: 101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing."
+msgstr ""
+
+#: app/templates/expert/editor.html:66
+msgid "Rasm tavsifi (ko‘zi ojizlar uchun)"
+msgstr ""
+
+#: app/templates/expert/editor.html:66
+msgid "Rasm tavsifi"
+msgstr ""
+
+#: app/templates/expert/editor.html:68
+msgid "Chizma (blok-sxema, Mermaid)"
+msgstr ""
+
+#: app/templates/expert/editor.html:70
+msgid "Yoki chizmani rasm sifatida yuklang:"
+msgstr ""
+
+#: app/templates/expert/editor.html:70
+msgid "Chizma fayli"
+msgstr ""
+
+#: app/templates/expert/editor.html:74
+msgid "Qator"
+msgstr ""
+
+#: app/templates/expert/editor.html:75
+msgid "Ustun"
+msgstr ""
+
+#: app/templates/expert/editor.html:85
+msgid "Javob variantlari · to‘g‘rilarini belgilang (bir nechta)"
+msgstr ""
+
+#: app/templates/expert/editor.html:85
+msgid "Javob variantlari · to‘g‘risini belgilang (bitta)"
+msgstr ""
+
+#: app/templates/expert/editor.html:94
+msgid "Variantni o‘chirish"
+msgstr ""
+
+#: app/templates/expert/editor.html:97
+msgid "Variant qo‘shish"
+msgstr ""
+
+#: app/templates/expert/editor.html:101
+msgid "Juftliklar · atama va unga mos ta’rif"
+msgstr ""
+
+#: app/templates/expert/editor.html:104
+msgid "Atama"
+msgstr ""
+
+#: app/templates/expert/editor.html:106
+msgid "Ta’rif"
+msgstr ""
+
+#: app/templates/expert/editor.html:107
+msgid "Juftlikni o‘chirish"
+msgstr ""
+
+#: app/templates/expert/editor.html:110
+msgid "Juftlik qo‘shish"
+msgstr ""
+
+#: app/templates/expert/editor.html:111
+msgid "Testda ta’riflar aralashtirib beriladi."
+msgstr ""
+
+#: app/templates/expert/editor.html:115 app/templates/expert/queue.html:52
+#: app/templates/partials/answer_review.html:22
+#: app/templates/test/exam_result.html:77 app/templates/user/discussion.html:11
+msgid "To‘g‘ri javob"
+msgstr ""
+
+#: app/templates/expert/editor.html:117
+msgid "Qabul qilinadigan boshqa yozilishlar (vergul bilan)"
+msgstr ""
+
+#: app/templates/expert/editor.html:118
+msgid "Masalan: 45, qirq besh"
+msgstr ""
+
+#: app/templates/expert/editor.html:122
+msgid "Izoh (xato qilganda ko‘rsatiladi)"
+msgstr ""
+
+#: app/templates/expert/editor.html:128
 msgid "Oldindan ko‘rish"
 msgstr ""
 
-#: app/templates/expert/editor.html:50 app/templates/expert/objections.html:21
-#: app/templates/user/discussion.html:8
-msgid "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?"
-msgstr ""
-
-#: app/templates/expert/editor.html:54
-msgid "AI tekshiruvi"
-msgstr ""
-
-#: app/templates/expert/editor.html:56
-msgid "To‘g‘ri javob hisob bilan mos keladi."
-msgstr ""
-
-#: app/templates/expert/editor.html:57
-#, python-format
-msgid "Bankda o‘xshash savol bor: #Q-81102 (87%% o‘xshash)."
-msgstr ""
-
-#: app/templates/expert/editor.html:62
-msgid "Qoralama sifatida saqlash"
-msgstr ""
-
-#: app/templates/expert/editor.html:63
-msgid "Rad etish"
+#: app/templates/expert/editor.html:130
+msgid "Savol matni shu yerda ko‘rinadi"
 msgstr ""
 
 #: app/templates/expert/objections.html:5
@@ -1981,6 +2128,10 @@ msgstr ""
 msgid "Testlarda vaqtincha to‘xtatilgan"
 msgstr ""
 
+#: app/templates/expert/objections.html:21 app/templates/user/discussion.html:8
+msgid "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?"
+msgstr ""
+
 #: app/templates/expert/objections.html:26
 msgid "· to‘g‘ri deb belgilangan"
 msgstr ""
@@ -1994,7 +2145,7 @@ msgid "sabablari"
 msgstr ""
 
 #: app/templates/expert/objections.html:42
-#: app/templates/user/objections.html:13
+#: app/templates/user/objections.html:51
 msgid "Ekspert xulosasi"
 msgstr ""
 
@@ -2010,156 +2161,365 @@ msgstr ""
 msgid "O‘rinli deb topilsa, savolning yangi versiyasi yaratiladi va natijalar faqat foydalanuvchi foydasiga qayta hisoblanadi."
 msgstr ""
 
-#: app/templates/expert/questions.html:5
-msgid "1 420 ta savol"
-msgstr ""
-
 #: app/templates/expert/questions.html:6
-msgid "Eksport"
+msgid "1 420 ta savol · mavzu va darslar «Mavzular va darslar» bo‘limidan avtomatik qo‘shiladi"
 msgstr ""
 
 #: app/templates/expert/questions.html:7
-msgid "Excel import"
+msgid "Eksport"
 msgstr ""
 
 #: app/templates/expert/questions.html:8
-msgid "Savol qo‘shish"
+msgid "Excel import"
 msgstr ""
 
-#: app/templates/expert/questions.html:11
+#: app/templates/expert/questions.html:17
+msgid "AI har bir mavzu va dars bo‘yicha tuzgan savollar. Tahrirlang, tasdiqlang yoki rad eting."
+msgstr ""
+
+#: app/templates/expert/questions.html:24
+msgid "Savol yaratish"
+msgstr ""
+
+#: app/templates/expert/questions.html:25
+msgid "Mavzu, dars, qiyinlik, tur, vaqt va formatni belgilab, yangi savol qo‘shing."
+msgstr ""
+
+#: app/templates/expert/questions.html:31
 msgid "3 ta mavzuda savollar yetarli emas."
 msgstr ""
 
-#: app/templates/expert/questions.html:11
+#: app/templates/expert/questions.html:31
 msgid "Har kichik mavzu va daraja bo‘yicha testdagidan kamida 4 baravar ko‘p savol bo‘lishi kerak."
 msgstr ""
 
-#: app/templates/expert/questions.html:11 app/templates/expert/topics.html:6
-#: app/templates/user/plan.html:37
+#: app/templates/expert/questions.html:31 app/templates/expert/queue.html:40
 msgid "Ko‘rish"
 msgstr ""
 
-#: app/templates/expert/questions.html:13
+#: app/templates/expert/questions.html:33
 msgid "Savol qidirish"
 msgstr ""
 
-#: app/templates/expert/questions.html:20
+#: app/templates/expert/questions.html:34 app/templates/expert/queue.html:14
+#: app/templates/user/notes.html:22
+msgid "Barcha mavzular"
+msgstr ""
+
+#: app/templates/expert/questions.html:35 app/templates/expert/queue.html:15
+msgid "Barcha darslar"
+msgstr ""
+
+#: app/templates/expert/questions.html:36
+#: app/templates/expert/questions.html:42 app/templates/expert/queue.html:16
+#: app/templates/user/certificate_print.html:150
+msgid "Daraja"
+msgstr ""
+
+#: app/templates/expert/questions.html:36 app/templates/expert/queue.html:16
+msgid "Barcha darajalar"
+msgstr ""
+
+#: app/templates/expert/questions.html:36 app/templates/test/stage.html:11
+msgid "Oson"
+msgstr ""
+
+#: app/templates/expert/questions.html:36 app/templates/test/stage.html:12
+msgid "O‘rta"
+msgstr ""
+
+#: app/templates/expert/questions.html:36 app/templates/test/stage.html:13
+msgid "Qiyin"
+msgstr ""
+
+#: app/templates/expert/questions.html:36
+msgid "Barcha turlar"
+msgstr ""
+
+#: app/templates/expert/questions.html:36
+msgid "Yopiq"
+msgstr ""
+
+#: app/templates/expert/questions.html:36
+msgid "Ochiq"
+msgstr ""
+
+#: app/templates/expert/questions.html:42 app/templates/test/question.html:2
+#: app/templates/test/question.html:6
+msgid "Savol"
+msgstr ""
+
+#: app/templates/expert/questions.html:42
 #, python-format
 msgid "To‘g‘ri %%"
 msgstr ""
 
-#: app/templates/expert/questions.html:20 app/templates/expert/queue.html:17
-#: app/templates/test/question.html:2 app/templates/test/question.html:5
-msgid "Savol"
-msgstr ""
-
-#: app/templates/expert/questions.html:25
+#: app/templates/expert/questions.html:47
 msgid "Daraja shubhali"
 msgstr ""
 
-#: app/templates/expert/questions.html:31 app/templates/expert/topics.html:35
+#: app/templates/expert/questions.html:54 app/templates/expert/queue.html:40
+#: app/templates/expert/topics.html:48 app/templates/expert/topics.html:75
 #: app/templates/user/notes.html:38
 msgid "Tahrirlash"
 msgstr ""
 
-#: app/templates/expert/queue.html:5
-msgid "12 ta savol tasdiqlashni kutmoqda. O‘zingiz yozgan savolni tasdiqlay olmaysiz."
+#: app/templates/expert/questions.html:56 app/views/expert.py:119
+msgid "Savol o‘chirildi"
 msgstr ""
 
-#: app/templates/expert/queue.html:6
-msgid "Yangi savol"
+#: app/templates/expert/questions.html:57
+msgid "Savol o‘chirilsinmi?"
 msgstr ""
 
-#: app/templates/expert/queue.html:10
-msgid "Savol matni bo‘yicha qidirish"
-msgstr ""
-
-#: app/templates/expert/queue.html:11
-msgid "Algoritmlar"
-msgstr ""
-
-#: app/templates/expert/queue.html:11 app/templates/user/notes.html:22
-msgid "Barcha mavzular"
-msgstr ""
-
-#: app/templates/expert/queue.html:12
-msgid "Barcha darajalar"
-msgstr ""
-
-#: app/templates/expert/queue.html:12 app/templates/test/stage.html:10
-msgid "Oson"
-msgstr ""
-
-#: app/templates/expert/queue.html:12 app/templates/test/stage.html:11
-msgid "O‘rta"
-msgstr ""
-
-#: app/templates/expert/queue.html:12 app/templates/test/stage.html:12
-msgid "Qiyin"
-msgstr ""
-
-#: app/templates/expert/queue.html:13
-msgid "Manba"
-msgstr ""
-
-#: app/templates/expert/queue.html:13
-msgid "Barcha manbalar"
-msgstr ""
-
-#: app/templates/expert/queue.html:13 app/templates/expert/queue.html:25
-msgid "AI"
-msgstr ""
-
-#: app/templates/expert/queue.html:17
-msgid "Muallif"
-msgstr ""
-
-#: app/templates/expert/queue.html:26
-msgid "Ko‘rib chiqish"
-msgstr ""
-
-#: app/templates/expert/queue.html:32
-msgid "AI yaratgan savollar faqat ekspert tasdiqlagandan keyin testlarga tushadi."
-msgstr ""
-
-#: app/templates/expert/topics.html:5
-msgid "Mavzular va dars muharriri"
-msgstr ""
-
-#: app/templates/expert/topics.html:5
-msgid "Informatika kursi · 42 mavzu"
-msgstr ""
-
-#: app/templates/expert/topics.html:11
-msgid "Mavzu qidirish"
-msgstr ""
-
-#: app/templates/expert/topics.html:20
-msgid "Mavzu qo‘shish"
-msgstr ""
-
-#: app/templates/expert/topics.html:25
-msgid "Tahrirlanmoqda"
-msgstr ""
-
-#: app/templates/expert/topics.html:26
-msgid "4 ta kichik mavzu · 6 ta blok · bog‘liqlik: Python asoslari · 14 ta tasdiqlangan savol"
-msgstr ""
-
-#: app/templates/expert/topics.html:34
-msgid "bloki · kichik mavzu: if operatori"
-msgstr ""
-
-#: app/templates/expert/topics.html:36 app/templates/user/notes.html:39
+#: app/templates/expert/questions.html:58 app/templates/expert/topics.html:49
+#: app/templates/expert/topics.html:62 app/templates/expert/topics.html:76
+#: app/templates/expert/topics.html:81 app/templates/user/notes.html:39
 msgid "O‘chirish"
 msgstr ""
 
-#: app/templates/expert/topics.html:43
+#: app/templates/expert/queue.html:9
+msgid "ta AI savoli tekshiruvni kutmoqda. Tasdiqlangani bankka qo‘shiladi, rad etilgani o‘chiriladi."
+msgstr ""
+
+#: app/templates/expert/queue.html:13
+msgid "Savol matni bo‘yicha qidirish"
+msgstr ""
+
+#: app/templates/expert/queue.html:15
+msgid "Avval mavzuni tanlang"
+msgstr ""
+
+#: app/templates/expert/queue.html:17
+msgid "Filtrlash"
+msgstr ""
+
+#: app/templates/expert/queue.html:20
+msgid "Topildi:"
+msgstr ""
+
+#: app/templates/expert/queue.html:20
+msgid "Filtrni tozalash"
+msgstr ""
+
+#: app/templates/expert/queue.html:28
+msgid "Savol rad etilib, o‘chirilsinmi?"
+msgstr ""
+
+#: app/templates/expert/queue.html:38
+msgid "AI yaratgan"
+msgstr ""
+
+#: app/templates/expert/queue.html:65
+msgid "Harf ustiga bosib to‘g‘ri javobni belgilang."
+msgstr ""
+
+#: app/templates/expert/queue.html:68
+msgid "Rad etish"
+msgstr ""
+
+#: app/templates/expert/queue.html:74
+msgid "Navbat bo‘sh"
+msgstr ""
+
+#: app/templates/expert/queue.html:74
+msgid "Barcha AI savollari ko‘rib chiqildi."
+msgstr ""
+
+#: app/templates/expert/queue.html:78
+msgid "Sahifalar"
+msgstr ""
+
+#: app/templates/expert/queue.html:79
+msgid "Oldingi sahifa"
+msgstr ""
+
+#: app/templates/expert/queue.html:83
+msgid "Keyingi sahifa"
+msgstr ""
+
+#: app/templates/expert/topics.html:13
+msgid "Avval mavzu yarating, so‘ng uning ichida darslar qo‘shing"
+msgstr ""
+
+#: app/templates/expert/topics.html:14 app/templates/expert/topics.html:155
+msgid "Mavzu yaratish"
+msgstr ""
+
+#: app/templates/expert/topics.html:19
+msgid "Yangi mavzu nomi"
+msgstr ""
+
+#: app/templates/expert/topics.html:20
+msgid "Masalan: Python: sikllar"
+msgstr ""
+
+#: app/templates/expert/topics.html:30
+msgid "Mavzu yoki dars qidirish"
+msgstr ""
+
+#: app/templates/expert/topics.html:34
+msgid "dars"
+msgstr ""
+
+#: app/templates/expert/topics.html:38
+msgid "Hali mavzu yo‘q"
+msgstr ""
+
+#: app/templates/expert/topics.html:39
+msgid "Mavzu qo‘shish"
+msgstr ""
+
+#: app/templates/expert/topics.html:53
+msgid "Mavzu nomi"
+msgstr ""
+
+#: app/templates/expert/topics.html:60
+msgid "Mavzu va uning barcha darslari o‘chirilsinmi?"
+msgstr ""
+
+#: app/templates/expert/topics.html:64
+msgid "ta dars · savollar bankiga avtomatik qo‘shilgan"
+msgstr ""
+
+#: app/templates/expert/topics.html:73
+msgid "blok"
+msgstr ""
+
+#: app/templates/expert/topics.html:73
+msgid "havola"
+msgstr ""
+
+#: app/templates/expert/topics.html:79
+msgid "«"
+msgstr ""
+
+#: app/templates/expert/topics.html:79
+msgid "» darsi o‘chirilsinmi?"
+msgstr ""
+
+#: app/templates/expert/topics.html:85
+msgid "Dars qo‘shish"
+msgstr ""
+
+#: app/templates/expert/topics.html:88
+msgid "Yangi dars nomi"
+msgstr ""
+
+#: app/templates/expert/topics.html:89
+msgid "Masalan: for sikli"
+msgstr ""
+
+#: app/templates/expert/topics.html:101
+msgid "Darslar ro‘yxati"
+msgstr ""
+
+#: app/templates/expert/topics.html:102
+msgid "Dars nomi"
+msgstr ""
+
+#: app/templates/expert/topics.html:110
+msgid "bloki"
+msgstr ""
+
+#: app/templates/expert/topics.html:111
+msgid "Sarlavha"
+msgstr ""
+
+#: app/templates/expert/topics.html:111
+msgid "Blok sarlavhasi"
+msgstr ""
+
+#: app/templates/expert/topics.html:112
+msgid "Yuqoriga"
+msgstr ""
+
+#: app/templates/expert/topics.html:113
+msgid "Blokni o‘chirish"
+msgstr ""
+
+#: app/templates/expert/topics.html:115
+msgid "Dars matni…"
+msgstr ""
+
+#: app/templates/expert/topics.html:118
+msgid "Ustun 1 | Ustun 2 (har qator yangi satrda)"
+msgstr ""
+
+#: app/templates/expert/topics.html:124
+msgid "Rasm yuklash"
+msgstr ""
+
+#: app/templates/expert/topics.html:126
+msgid "Namunada rasm brauzerda saqlanadi (1 MB gacha)."
+msgstr ""
+
+#: app/templates/expert/topics.html:128
+msgid "YouTube yoki video fayl havolasi"
+msgstr ""
+
+#: app/templates/expert/topics.html:128
+msgid "Video havolasi"
+msgstr ""
+
+#: app/templates/expert/topics.html:133
 msgid "Blok qo‘shish:"
 msgstr ""
 
-#: app/templates/expert/topics.html:45
-msgid "AI bilan qoralama"
+#: app/templates/expert/topics.html:138
+msgid "Qo‘shimcha ma’lumot uchun havolalar"
+msgstr ""
+
+#: app/templates/expert/topics.html:141
+msgid "Nomi"
+msgstr ""
+
+#: app/templates/expert/topics.html:141
+msgid "Havola nomi"
+msgstr ""
+
+#: app/templates/expert/topics.html:142
+msgid "Havola manzili"
+msgstr ""
+
+#: app/templates/expert/topics.html:143
+msgid "Havolani o‘chirish"
+msgstr ""
+
+#: app/templates/expert/topics.html:146
+msgid "Havola biriktirish"
+msgstr ""
+
+#: app/templates/expert/topics.html:148
+msgid "Dars saqlandi"
+msgstr ""
+
+#: app/templates/expert/topics.html:154
+msgid "Mavzu tanlang yoki yarating"
+msgstr ""
+
+#: app/templates/expert/topics.html:162
+msgid "Nomini kiriting"
+msgstr ""
+
+#: app/templates/expert/topics.html:162
+msgid "Bunday mavzu allaqachon bor"
+msgstr ""
+
+#: app/templates/expert/topics.html:163
+msgid "Bu mavzuda bunday dars allaqachon bor"
+msgstr ""
+
+#: app/templates/expert/topics.html:163
+msgid "Mavzu saqlandi"
+msgstr ""
+
+#: app/templates/expert/topics.html:163
+msgid "Dars qo‘shildi"
+msgstr ""
+
+#: app/templates/expert/topics.html:164
+msgid "O‘chirildi"
 msgstr ""
 
 #: app/templates/layouts/app.html:9
@@ -2174,7 +2534,7 @@ msgstr ""
 msgid "Attestatsiyagacha"
 msgstr ""
 
-#: app/templates/layouts/app.html:32
+#: app/templates/layouts/app.html:32 app/templates/user/plan.html:21
 msgid "kun"
 msgstr ""
 
@@ -2192,10 +2552,6 @@ msgstr ""
 
 #: app/templates/layouts/app.html:59
 msgid "Reja"
-msgstr ""
-
-#: app/templates/layouts/app.html:61
-msgid "Bilim"
 msgstr ""
 
 #: app/templates/layouts/app.html:63 app/templates/user/more.html:2
@@ -2246,8 +2602,8 @@ msgstr ""
 msgid "Panel menyusi"
 msgstr ""
 
-#: app/templates/layouts/panel.html:23 app/templates/test/exam.html:132
-#: app/templates/test/stage.html:4 app/templates/user/profile.html:126
+#: app/templates/layouts/panel.html:23 app/templates/test/exam.html:133
+#: app/templates/test/stage.html:5 app/templates/user/profile.html:125
 msgid "Chiqish"
 msgstr ""
 
@@ -2263,6 +2619,32 @@ msgstr ""
 msgid "Frontend prototipi. Panel sahifalari tegishli rol (o‘qituvchi, ekspert, admin) bilan ochiladi."
 msgstr ""
 
+#: app/templates/partials/answer_review.html:8
+#: app/templates/test/exam_result.html:65
+msgid "-savol"
+msgstr ""
+
+#: app/templates/partials/answer_review.html:9 app/templates/test/exam.html:143
+#: app/templates/test/exam_result.html:66
+msgid "Javobsiz"
+msgstr ""
+
+#: app/templates/partials/answer_review.html:10
+#: app/templates/test/exam_result.html:66
+msgid "To‘g‘ri"
+msgstr ""
+
+#: app/templates/partials/answer_review.html:20
+#: app/templates/partials/answer_review.html:21
+#: app/templates/test/exam_result.html:75
+#: app/templates/test/exam_result.html:76
+msgid "Sizning javobingiz"
+msgstr ""
+
+#: app/templates/partials/answer_review.html:26
+msgid "Izoh."
+msgstr ""
+
 #: app/templates/partials/google_btn.html:4
 msgid "Google orqali kirish"
 msgstr ""
@@ -2276,7 +2658,8 @@ msgid "Bosh ekrandan bir bosishda ochiladi, internet bo‘lmaganda ham darslar v
 msgstr ""
 
 #: app/templates/partials/install_card.html:10
-#: app/templates/partials/install_card.html:19 app/templates/test/stage.html:28
+#: app/templates/partials/install_card.html:19
+#: app/templates/partials/rest.html:17 app/templates/test/stage.html:29
 msgid "Keyinroq"
 msgstr ""
 
@@ -2317,8 +2700,45 @@ msgid "O‘rnatish"
 msgstr ""
 
 #: app/templates/partials/lang_switch.html:2
-#: app/templates/user/profile.html:119
+#: app/templates/user/profile.html:118
 msgid "Interfeys tili"
+msgstr ""
+
+#: app/templates/partials/rest.html:13
+msgid "Ko‘zlaringizga dam bering"
+msgstr ""
+
+#: app/templates/partials/rest.html:14
+msgid "Siz tizimdan 45 daqiqa foydalandingiz. Endi 5 daqiqa davomida ko‘zlaringizga dam bering: kamida 20 soniya davomida taxminan 6 metr uzoqlikdagi narsaga qarang. Bu ko‘z mushaklarini bo‘shashtiradi va ko‘z charchashi, qurishi hamda bosh og‘rig‘ining oldini oladi."
+msgstr ""
+
+#: app/templates/partials/rest.html:18
+msgid "5 daqiqa dam olish"
+msgstr ""
+
+#: app/templates/partials/rest.html:25
+msgid "Majburiy tanaffus"
+msgstr ""
+
+#: app/templates/partials/rest.html:26
+msgid "Tanaffus"
+msgstr ""
+
+#: app/templates/partials/rest.html:28
+msgid "Ekrandan uzoqlashing va 6 metr uzoqlikdagi narsaga qarang. Bir necha marta ko‘zingizni yumib-oching."
+msgstr ""
+
+#: app/templates/partials/rest.html:29
+msgid "Tanaffus tugagach tizim avtomatik ochiladi."
+msgstr ""
+
+#: app/templates/partials/rest.html:34
+#, python-format
+msgid "Siz tavsiyani %(n)s marta rad etdingiz."
+msgstr ""
+
+#: app/templates/partials/rest.html:35
+msgid "Keyingi safar tanaffus majburiy bo‘ladi."
 msgstr ""
 
 #: app/templates/partials/skeleton.html:6
@@ -2333,166 +2753,228 @@ msgstr ""
 msgid "Rasmni kattalashtirish"
 msgstr ""
 
-#: app/templates/test/exam.html:22 app/templates/test/exam.html:151
-msgid "Testlarimga qaytish"
+#: app/templates/test/exam.html:23 app/templates/test/exam.html:152
+#: app/templates/test/exam_result.html:8
+msgid "Testlarga qaytish"
 msgstr ""
 
-#: app/templates/test/exam.html:30 app/templates/test/question.html:7
+#: app/templates/test/exam.html:31 app/templates/test/question.html:8
 msgid "To‘liq ekran"
 msgstr ""
 
-#: app/templates/test/exam.html:38 app/templates/test/exam.html:95
+#: app/templates/test/exam.html:39 app/templates/test/exam.html:96
 msgid "Informatika"
 msgstr ""
 
-#: app/templates/test/exam.html:41 app/templates/test/exam.html:43
-#: app/templates/test/question.html:8
+#: app/templates/test/exam.html:42 app/templates/test/exam.html:44
+#: app/templates/test/question.html:9
 msgid "Qolgan vaqt"
 msgstr ""
 
-#: app/templates/test/exam.html:63
+#: app/templates/test/exam.html:64
 msgid "Javobni tanlang"
 msgstr ""
 
-#: app/templates/test/exam.html:74
+#: app/templates/test/exam.html:75
 msgid "Ortga"
 msgstr ""
 
-#: app/templates/test/exam.html:79
+#: app/templates/test/exam.html:80
 msgid "Savollar paneli"
 msgstr ""
 
-#: app/templates/test/exam.html:81 app/templates/test/question.html:85
+#: app/templates/test/exam.html:82 app/templates/test/question.html:89
 msgid "To‘xtatish"
 msgstr ""
 
-#: app/templates/test/exam.html:82 app/templates/test/exam.html:147
+#: app/templates/test/exam.html:83 app/templates/test/exam.html:148
 msgid "Yakunlash"
 msgstr ""
 
-#: app/templates/test/exam.html:85
+#: app/templates/test/exam.html:86
 msgid "Saqlanmoqda…"
 msgstr ""
 
-#: app/templates/test/exam.html:86
+#: app/templates/test/exam.html:87
 msgid "Javoblar saqlandi"
 msgstr ""
 
-#: app/templates/test/exam.html:87
+#: app/templates/test/exam.html:88
 msgid "Qurilmada saqlandi"
 msgstr ""
 
-#: app/templates/test/exam.html:88
+#: app/templates/test/exam.html:89
 msgid "Saqlab bo‘lmadi. Qurilma xotirasini tekshiring"
 msgstr ""
 
-#: app/templates/test/exam.html:90
+#: app/templates/test/exam.html:91
 msgid "Test tili"
 msgstr ""
 
-#: app/templates/test/exam.html:92
+#: app/templates/test/exam.html:93
 msgid "O‘zbekcha"
 msgstr ""
 
-#: app/templates/test/exam.html:93
+#: app/templates/test/exam.html:94
 msgid "Русский"
 msgstr ""
 
-#: app/templates/test/exam.html:102
+#: app/templates/test/exam.html:103
 msgid "Javob berilgan:"
 msgstr ""
 
-#: app/templates/test/exam.html:102
+#: app/templates/test/exam.html:103
 msgid "Qolgan:"
 msgstr ""
 
-#: app/templates/test/exam.html:113 app/templates/test/result.html:55
-#: app/templates/test/result.html:89
+#: app/templates/test/exam.html:114 app/templates/test/result.html:47
+#: app/templates/test/result.html:77
 msgid "E’tiroz bildirish"
 msgstr ""
 
-#: app/templates/test/exam.html:130
+#: app/templates/test/exam.html:131
 msgid "Test to‘xtatildi"
 msgstr ""
 
-#: app/templates/test/exam.html:131
+#: app/templates/test/exam.html:132
 msgid "Javoblaringiz qurilmada saqlandi. Mashq rejimida vaqt to‘xtatib turiladi, sahifani yopsangiz ham shu joydan davom etasiz."
 msgstr ""
 
-#: app/templates/test/exam.html:132 app/templates/user/plan.html:28
-#: app/templates/user/tests.html:7 app/templates/user/tests.html:14
+#: app/templates/test/exam.html:133 app/templates/user/plan.html:115
+#: app/templates/user/tests.html:35
 msgid "Davom ettirish"
 msgstr ""
 
-#: app/templates/test/exam.html:139
+#: app/templates/test/exam.html:140
 msgid "Testni yakunlaysizmi?"
 msgstr ""
 
-#: app/templates/test/exam.html:141
+#: app/templates/test/exam.html:142
 msgid "Javob berilgan"
 msgstr ""
 
-#: app/templates/test/exam.html:142
-msgid "Javobsiz"
-msgstr ""
-
-#: app/templates/test/exam.html:145
+#: app/templates/test/exam.html:146
 msgid "Javob berilmagan savollar 0 ball hisoblanadi. Yakunlagandan keyin javoblarni o‘zgartirib bo‘lmaydi."
 msgstr ""
 
-#: app/templates/test/exam.html:146
+#: app/templates/test/exam.html:147
 msgid "Savollarga qaytish"
 msgstr ""
 
-#: app/templates/test/exam.html:150
+#: app/templates/test/exam.html:151
 msgid "Internet yo‘q."
 msgstr ""
 
-#: app/templates/test/exam.html:150
+#: app/templates/test/exam.html:151
 msgid "Test yakunlandi, javoblaringiz qurilmada saqlandi. Internet tiklanganda ular avtomatik yuboriladi va natija «Natijalarim» bo‘limida chiqadi."
+msgstr ""
+
+#: app/templates/test/exam_result.html:2 app/templates/test/exam_result.html:9
+msgid "Attestatsiya testi natijasi"
+msgstr ""
+
+#: app/templates/test/exam_result.html:17
+#: app/templates/user/certificate_print.html:80
+msgid "natija"
+msgstr ""
+
+#: app/templates/test/exam_result.html:19
+msgid "ball"
+msgstr ""
+
+#: app/templates/test/exam_result.html:20
+msgid "35 ta savoldan"
+msgstr ""
+
+#: app/templates/test/exam_result.html:20
+msgid "tasiga to‘g‘ri javob berdingiz."
+msgstr ""
+
+#: app/templates/test/exam_result.html:21
+msgid "ta xato,"
+msgstr ""
+
+#: app/templates/test/exam_result.html:21
+msgid "ta javobsiz."
+msgstr ""
+
+#: app/templates/test/exam_result.html:27
+msgid "Mavzular bo‘yicha o‘zlashtirish"
+msgstr ""
+
+#: app/templates/test/exam_result.html:27
+msgid "savol tushgan mavzular"
+msgstr ""
+
+#: app/templates/test/exam_result.html:43
+msgid "Tavsiya"
+msgstr ""
+
+#: app/templates/test/exam_result.html:44
+#, python-format
+msgid "Qayta o‘zlashtirish kerak (70%% dan past):"
+msgstr ""
+
+#: app/templates/test/exam_result.html:45
+#, python-format
+msgid "Takrorlash tavsiya etiladi (70–89%%):"
+msgstr ""
+
+#: app/templates/test/exam_result.html:46
+msgid "O‘quv rejada ochish"
+msgstr ""
+
+#: app/templates/test/exam_result.html:54
+#: app/templates/user/diagnostic_result.html:47
+msgid "Savollar va javoblaringiz"
+msgstr ""
+
+#: app/templates/test/exam_result.html:57
+msgid "Xato va javobsiz"
 msgstr ""
 
 #: app/templates/test/question.html:4
 msgid "To‘xtatish va chiqish (javoblar saqlanadi)"
 msgstr ""
 
-#: app/templates/test/question.html:5
+#: app/templates/test/question.html:6
 msgid "1-bosqich · Oson"
 msgstr ""
 
-#: app/templates/test/question.html:7
+#: app/templates/test/question.html:8
 msgid "To‘liq ekran (faqat test oynasi)"
 msgstr ""
 
-#: app/templates/test/question.html:16
+#: app/templates/test/question.html:17
 msgid "Internet yo‘q. Javoblaringiz qurilmada saqlanmoqda va internet tiklanganda yuboriladi."
 msgstr ""
 
-#: app/templates/test/question.html:27
+#: app/templates/test/question.html:30 app/templates/user/notes.html:68
+#: app/templates/user/tutor.html:4
 msgid "Mavzu:"
 msgstr ""
 
-#: app/templates/test/question.html:41
+#: app/templates/test/question.html:44
 msgid "Bitta javobni tanlang"
 msgstr ""
 
-#: app/templates/test/question.html:49
+#: app/templates/test/question.html:52
 msgid "Bir nechta javobni belgilang"
 msgstr ""
 
-#: app/templates/test/question.html:60
+#: app/templates/test/question.html:64
 msgid "Tanlang…"
 msgstr ""
 
-#: app/templates/test/question.html:68
+#: app/templates/test/question.html:72
 msgid "Javobingiz"
 msgstr ""
 
-#: app/templates/test/question.html:71
+#: app/templates/test/question.html:75
 msgid "Raqamli klaviatura"
 msgstr ""
 
-#: app/templates/test/question.html:86
+#: app/templates/test/question.html:90
 msgid "Keyingisi"
 msgstr ""
 
@@ -2506,7 +2988,7 @@ msgstr ""
 
 #: app/templates/test/result.html:16
 #, python-format
-msgid "2-bosqichdan o‘tish uchun 80%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz."
+msgid "Keyingi mavzuga o‘tish uchun kamida 70%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz."
 msgstr ""
 
 #: app/templates/test/result.html:18
@@ -2534,80 +3016,72 @@ msgstr ""
 msgid "Mavzular bo‘yicha"
 msgstr ""
 
-#: app/templates/test/result.html:45
-msgid "-savol"
+#: app/templates/test/result.html:42 app/templates/user/result_detail.html:19
+msgid "Savollar va javoblar"
 msgstr ""
 
-#: app/templates/test/result.html:46
-msgid "To‘g‘ri"
+#: app/templates/test/result.html:43
+#: app/templates/user/diagnostic_result.html:48
+#: app/templates/user/result_detail.html:20
+msgid "xato javobingiz"
 msgstr ""
 
-#: app/templates/test/result.html:49
-msgid "Sizning javobingiz:"
+#: app/templates/test/result.html:43
+#: app/templates/user/diagnostic_result.html:48 app/templates/user/plan.html:68
+#: app/templates/user/result_detail.html:20
+msgid "to‘g‘ri javob"
 msgstr ""
 
-#: app/templates/test/result.html:50
-msgid "To‘g‘ri javob:"
-msgstr ""
-
-#: app/templates/test/result.html:52
-msgid "Izoh."
-msgstr ""
-
-#: app/templates/test/result.html:54
-msgid "Xatoimni tushuntir"
+#: app/templates/test/result.html:46 app/templates/user/result_detail.html:35
+msgid "Xatolarimni tushuntir"
 msgstr ""
 
 #: app/templates/test/result.html:58
-msgid "(Mavzu:"
-msgstr ""
-
-#: app/templates/test/result.html:70
 msgid "Darsga qaytish"
 msgstr ""
 
-#: app/templates/test/result.html:72
+#: app/templates/test/result.html:60 app/templates/user/home.html:65
 msgid "Keyingi mavzu"
 msgstr ""
 
-#: app/templates/test/result.html:92
+#: app/templates/test/result.html:80 app/templates/user/objections.html:36
 msgid "Sabab"
 msgstr ""
 
-#: app/templates/test/result.html:98
+#: app/templates/test/result.html:86
 msgid "Izoh (ixtiyoriy)"
 msgstr ""
 
-#: app/templates/test/result.html:99
+#: app/templates/test/result.html:87
 msgid "Shoshilinch: xato yaqqol ko‘rinib turibdi"
 msgstr ""
 
-#: app/templates/test/result.html:104
+#: app/templates/test/result.html:92
 msgid "E’tirozingiz qabul qilindi"
 msgstr ""
 
-#: app/templates/test/result.html:105
+#: app/templates/test/result.html:93
 msgid "Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi."
 msgstr ""
 
-#: app/templates/test/stage.html:2 app/templates/test/stage.html:16
+#: app/templates/test/stage.html:2 app/templates/test/stage.html:17
 msgid "1-bosqichdan o‘tdingiz"
 msgstr ""
 
-#: app/templates/test/stage.html:17
+#: app/templates/test/stage.html:18
 #, python-format
 msgid "O‘tish uchun 90%% kerak edi."
 msgstr ""
 
-#: app/templates/test/stage.html:20
+#: app/templates/test/stage.html:21
 msgid "Keyingi bosqich"
 msgstr ""
 
-#: app/templates/test/stage.html:21
+#: app/templates/test/stage.html:22
 msgid "10 ta o‘rta darajadagi savol, 15 daqiqa. Savollar biroz murakkabroq bo‘ladi, shoshilmang."
 msgstr ""
 
-#: app/templates/test/stage.html:29
+#: app/templates/test/stage.html:30
 msgid "2-bosqichni boshlash"
 msgstr ""
 
@@ -2641,7 +3115,7 @@ msgstr ""
 msgid "Joriy parol"
 msgstr ""
 
-#: app/templates/user/_contact_change.html:44 app/views/user.py:190
+#: app/templates/user/_contact_change.html:44 app/views/user.py:281
 msgid "Parol to‘g‘ri"
 msgstr ""
 
@@ -2686,12 +3160,12 @@ msgid "Chop etish"
 msgstr ""
 
 #: app/templates/user/certificate_print.html:49
-msgid "&nbsp;yuklab olish"
+#: app/templates/user/notes.html:11
+msgid "PDF"
 msgstr ""
 
 #: app/templates/user/certificate_print.html:49
-#: app/templates/user/notes.html:11
-msgid "PDF"
+msgid "&nbsp;yuklab olish"
 msgstr ""
 
 #: app/templates/user/certificate_print.html:54
@@ -2725,10 +3199,6 @@ msgid ""
 "        to‘liq o‘zlashtirgani va yakuniy diagnostikadan muvaffaqiyatli o‘tganini tasdiqlaydi."
 msgstr ""
 
-#: app/templates/user/certificate_print.html:80
-msgid "natija"
-msgstr ""
-
 #: app/templates/user/certificate_print.html:81
 #: app/templates/user/certificate_print.html:141
 msgid "mavzular"
@@ -2751,12 +3221,12 @@ msgid "$ verify"
 msgstr ""
 
 #: app/templates/user/certificate_print.html:110
-msgid "QR-kodni skanerlab haqiqiyligini tekshiring"
+#: app/templates/user/certificate_print.html:170
+msgid "raqamlimuallim.uz/s/"
 msgstr ""
 
 #: app/templates/user/certificate_print.html:110
-#: app/templates/user/certificate_print.html:170
-msgid "raqamlimuallim.uz/s/"
+msgid "QR-kodni skanerlab haqiqiyligini tekshiring"
 msgstr ""
 
 #: app/templates/user/certificate_print.html:113
@@ -2976,10 +3446,6 @@ msgstr ""
 msgid ", kuniga 35 daqiqa."
 msgstr ""
 
-#: app/templates/user/diagnostic_result.html:15
-msgid "Bilim xaritasi"
-msgstr ""
-
 #: app/templates/user/diagnostic_result.html:24
 msgid "Bo‘limlar bo‘yicha"
 msgstr ""
@@ -2988,20 +3454,26 @@ msgstr ""
 msgid "Rejaning boshlanishi"
 msgstr ""
 
-#: app/templates/user/diagnostic_result.html:39 app/templates/user/home.html:91
-#: app/templates/user/home.html:99 app/templates/user/plan.html:34
+#: app/templates/user/diagnostic_result.html:39 app/templates/user/home.html:94
+#: app/templates/user/home.html:102 app/templates/user/plan.html:72
+#: app/templates/user/plan.html:112 app/templates/user/plan.html:134
 msgid "daq"
 msgstr ""
 
 #: app/templates/user/diagnostic_result.html:42
-msgid "Bilgan mavzularingiz rejada «O‘zlashtirilgan» bo‘lib turadi. Ularni tasdiqlash testi bilan mustahkamlashingiz mumkin."
+#, python-format
+msgid "90%% va undan yuqori o‘zlashtirgan mavzularingiz rejadan chiqarildi:"
 msgstr ""
 
-#: app/templates/user/diagnostic_result.html:46
+#: app/templates/user/diagnostic_result.html:49
+msgid "Diagnostika bosqichma-bosqich: oson → o‘rta → qiyin. Namunada savollarning bir qismi ko‘rsatilgan."
+msgstr ""
+
+#: app/templates/user/diagnostic_result.html:54
 msgid "Rejani ko‘rish"
 msgstr ""
 
-#: app/templates/user/diagnostic_result.html:47
+#: app/templates/user/diagnostic_result.html:55
 msgid "Bosh sahifaga"
 msgstr ""
 
@@ -3011,10 +3483,6 @@ msgstr ""
 
 #: app/templates/user/discussion.html:7
 msgid "14-savol · Sanoq sistemalari"
-msgstr ""
-
-#: app/templates/user/discussion.html:11
-msgid "To‘g‘ri javob"
 msgstr ""
 
 #: app/templates/user/discussion.html:17
@@ -3061,28 +3529,47 @@ msgstr ""
 msgid "Qayerda ko‘p xato qilayotganingiz va ularni tuzatish yo‘li"
 msgstr ""
 
-#: app/templates/user/errors.html:8
-msgid "Bugungi mashq"
+#: app/templates/user/errors.html:10 app/templates/user/tests.html:79
+msgid "Xatolar ustida ishlash"
 msgstr ""
 
-#: app/templates/user/errors.html:8
-msgid "Xatolaringizga o‘xshash 5 ta yangi savol"
+#: app/templates/user/errors.html:10
+msgid "Xatolaringizga o‘xshash testlar bajarish"
 msgstr ""
 
-#: app/templates/user/errors.html:9 app/templates/user/home.html:33
-#: app/templates/user/home.html:43
-msgid "Boshlash"
+#: app/templates/user/errors.html:11
+msgid "Testga o‘tish"
 msgstr ""
 
-#: app/templates/user/errors.html:13
-msgid "Eng zaif qismlar"
+#: app/templates/user/errors.html:17
+msgid "Nechta test ishlaysiz?"
 msgstr ""
 
-#: app/templates/user/errors.html:28
-msgid "Xato qilingan savollar · 21"
+#: app/templates/user/errors.html:19
+msgid "Savollar eng ko‘p xato qilayotgan mavzularingizdan tanlanadi."
+msgstr ""
+
+#: app/templates/user/errors.html:28 app/templates/user/optional.html:23
+msgid "Taxminiy vaqt:"
 msgstr ""
 
 #: app/templates/user/errors.html:29
+msgid "Natija «Natijalarim» bo‘limiga qo‘shiladi va xatolik foizlarini yangilaydi."
+msgstr ""
+
+#: app/templates/user/errors.html:30 app/templates/user/optional.html:26
+msgid "Testni boshlash"
+msgstr ""
+
+#: app/templates/user/errors.html:36
+msgid "Eng zaif qismlar"
+msgstr ""
+
+#: app/templates/user/errors.html:51
+msgid "Xato qilingan savollar · 21"
+msgstr ""
+
+#: app/templates/user/errors.html:52
 msgid "Qayta xato"
 msgstr ""
 
@@ -3119,7 +3606,7 @@ msgstr ""
 msgid "Telegram bot va email manzili namunaviy: ishga tushirishdan oldin haqiqiysiga almashtiriladi."
 msgstr ""
 
-#: app/templates/user/home.html:13
+#: app/templates/user/home.html:13 app/templates/user/plan.html:21
 msgid "Attestatsiya"
 msgstr ""
 
@@ -3127,151 +3614,116 @@ msgstr ""
 msgid "kun qoldi"
 msgstr ""
 
-#: app/templates/user/home.html:14
+#: app/templates/user/home.html:15
 msgid "Salom,"
 msgstr ""
 
-#: app/templates/user/home.html:14
-msgid "Bugun nimani o‘rganamiz?"
-msgstr ""
-
-#: app/templates/user/home.html:16
-msgid "AI tutorga savol bering…"
-msgstr ""
-
-#: app/templates/user/home.html:18
-msgid "elif va else farqi nima?"
-msgstr ""
-
-#: app/templates/user/home.html:19
-msgid "Xatolarimni tahlil qil"
-msgstr ""
-
-#: app/templates/user/home.html:20
-msgid "Sikllarga masala ber"
-msgstr ""
-
-#: app/templates/user/home.html:27
+#: app/templates/user/home.html:22
 msgid "Eslatma:"
 msgstr ""
 
-#: app/templates/user/home.html:27
+#: app/templates/user/home.html:22
 msgid "akkauntga"
 msgstr ""
 
-#: app/templates/user/home.html:27
+#: app/templates/user/home.html:22
 msgid "davomida kirilmasa, u avtomatik o‘chiriladi. Undan 2 hafta oldin ogohlantiramiz."
 msgstr ""
 
-#: app/templates/user/home.html:28
+#: app/templates/user/home.html:23
 msgid "Tushunarli"
 msgstr ""
 
-#: app/templates/user/home.html:33
+#: app/templates/user/home.html:28 app/templates/user/home.html:38
+#: app/templates/user/plan.html:114
+msgid "Boshlash"
+msgstr ""
+
+#: app/templates/user/home.html:28
 msgid "3 qadamda tayyorgarlikni boshlang"
 msgstr ""
 
-#: app/templates/user/home.html:47
+#: app/templates/user/home.html:42
 msgid "Uchala qadam bajarilgach, bu yerda shaxsiy rejangiz va tayyorlik ko‘rsatkichi chiqadi."
 msgstr ""
 
-#: app/templates/user/home.html:60
+#: app/templates/user/home.html:55
 msgid "Bugun"
 msgstr ""
 
-#: app/templates/user/home.html:60
+#: app/templates/user/home.html:55
 msgid "Tayyor:"
 msgstr ""
 
-#: app/templates/user/home.html:60
+#: app/templates/user/home.html:55
 msgid "Attestatsiya:"
 msgstr ""
 
-#: app/templates/user/home.html:69
-msgid "Keyingi qadam"
+#: app/templates/user/home.html:64 app/templates/user/plan.html:155
+msgid "Darsni davom ettirish"
 msgstr ""
 
-#: app/templates/user/home.html:70
-msgid "≈ 12 daqiqa"
-msgstr ""
-
-#: app/templates/user/home.html:73 app/templates/user/lesson.html:5
+#: app/templates/user/home.html:64 app/templates/user/lesson.html:5
 msgid "Python: shart operatorlari"
 msgstr ""
 
-#: app/templates/user/home.html:74
+#: app/templates/user/home.html:64
 #, python-format
 msgid "Dasturlash · 3 / 4 kichik mavzu · 60%% o‘qilgan"
 msgstr ""
 
-#: app/templates/user/home.html:79
+#: app/templates/user/home.html:64
 msgid "Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring."
 msgstr ""
 
-#: app/templates/user/home.html:81
-msgid "Darsni davom ettirish"
+#: app/templates/user/home.html:65
+msgid "Python: sikllar (for, while)"
 msgstr ""
 
-#: app/templates/user/home.html:90
-msgid "Bugun ·"
+#: app/templates/user/home.html:65
+msgid "Dasturlash · 3 kichik mavzu · yangi mavzu"
 msgstr ""
 
-#: app/templates/user/home.html:90
-msgid "Darslar orasidagi qisqa vaqtga mo‘ljallangan"
+#: app/templates/user/home.html:65
+#, python-format
+msgid "«Shart operatorlari» mavzusi 92%% bilan o‘zlashtirildi. Endi sikllarga o‘tamiz: for va while farqidan boshlang."
 msgstr ""
 
-#: app/templates/user/home.html:90 app/templates/user/optional.html:21
+#: app/templates/user/home.html:66
+msgid "Majburiy nazorat testini boshlash"
+msgstr ""
+
+#: app/templates/user/home.html:66
+msgid "Oraliq sinov testi: 4–6 mavzular"
+msgstr ""
+
+#: app/templates/user/home.html:66
+msgid "3 ta mavzu · 3 bosqich · 30 savol"
+msgstr ""
+
+#: app/templates/user/home.html:66
+msgid "Navbatdagi mavzuga o‘tishdan oldin oxirgi 3 ta mavzu bo‘yicha majburiy nazorat topshiriladi."
+msgstr ""
+
+#: app/templates/user/home.html:73 app/templates/user/home.html:93
+#: app/templates/user/optional.html:23 app/templates/user/result_detail.html:12
 msgid "daqiqa"
 msgstr ""
 
-#: app/templates/user/knowledge.html:13
-#, python-format
-msgid "42 mavzu · 74%% tayyorgarlik"
+#: app/templates/user/home.html:93
+msgid "Bugun ·"
 msgstr ""
 
-#: app/templates/user/knowledge.html:15
-msgid "Ro‘yxat"
+#: app/templates/user/home.html:93
+msgid "«Python: shart operatorlari» mavzusini tugatish rejasi"
 msgstr ""
 
-#: app/templates/user/knowledge.html:16
-msgid "Xarita"
+#: app/templates/user/home.html:111
+msgid "Xato qilayotgan mavzularingiz"
 msgstr ""
 
-#: app/templates/user/knowledge.html:22
-msgid "Holat bo‘yicha filtrlash"
-msgstr ""
-
-#: app/templates/user/knowledge.html:28
-msgid "Filtrni olib tashlash"
-msgstr ""
-
-#: app/templates/user/knowledge.html:34
-msgid "Dasturlash"
-msgstr ""
-
-#: app/templates/user/knowledge.html:34
-msgid "Chiziqlar — o‘rganish tartibi"
-msgstr ""
-
-#: app/templates/user/knowledge.html:54
-#, python-format
-msgid "Keyingi tavsiya: Sikllar · 68%%"
-msgstr ""
-
-#: app/templates/user/knowledge.html:54
-msgid "Tasdiqlash mumkin — darsni o‘tkazib, testni topshiring"
-msgstr ""
-
-#: app/templates/user/knowledge.html:55 app/templates/user/optional.html:23
-msgid "Testni boshlash"
-msgstr ""
-
-#: app/templates/user/knowledge.html:63
-msgid "ta mavzu ·"
-msgstr ""
-
-#: app/templates/user/knowledge.html:72
-msgid "Keyingi tavsiya etilgan mavzu"
+#: app/templates/user/home.html:111
+msgid "Oldingi testlaringiz bo‘yicha xatolik foizi"
 msgstr ""
 
 #: app/templates/user/lesson.html:2
@@ -3291,12 +3743,12 @@ msgid "Matn o‘lchamini o‘zgartirish"
 msgstr ""
 
 #: app/templates/user/lesson.html:6 app/templates/user/profile.html:104
-msgid "Aa"
+#: app/templates/user/profile.html:105
+msgid "Matn o‘lchami"
 msgstr ""
 
-#: app/templates/user/lesson.html:6 app/templates/user/profile.html:105
-#: app/templates/user/profile.html:106
-msgid "Matn o‘lchami"
+#: app/templates/user/lesson.html:6 app/templates/user/profile.html:103
+msgid "Aa"
 msgstr ""
 
 #: app/templates/user/lesson.html:7
@@ -3491,27 +3943,75 @@ msgstr ""
 msgid "Darsdagi muhim joylarni saqlang yoki o‘zingiz yangi qayd yarating."
 msgstr ""
 
-#: app/templates/user/notes.html:71
+#: app/templates/user/notes.html:69
+msgid "· hozir o‘rganayotgan mavzungiz"
+msgstr ""
+
+#: app/templates/user/notes.html:70
 msgid "Sarlavha (ixtiyoriy)"
 msgstr ""
 
-#: app/templates/user/notes.html:71
+#: app/templates/user/notes.html:70
 msgid "Masalan: elif qoidasi"
 msgstr ""
 
-#: app/templates/user/notes.html:72
+#: app/templates/user/notes.html:71
 msgid "Qayd"
 msgstr ""
 
-#: app/templates/user/objections.html:4
-msgid "Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi."
+#: app/templates/user/objections.html:6
+msgid "To‘g‘ri javob noto‘g‘ri ko‘rsatilgan"
 msgstr ""
 
-#: app/templates/user/objections.html:15
+#: app/templates/user/objections.html:6
+msgid "Mening javobim ham to‘g‘ri"
+msgstr ""
+
+#: app/templates/user/objections.html:6
+msgid "Savol tushunarsiz"
+msgstr ""
+
+#: app/templates/user/objections.html:6
+msgid "Rasm yoki jadvalda xato"
+msgstr ""
+
+#: app/templates/user/objections.html:6
+msgid "Boshqa"
+msgstr ""
+
+#: app/templates/user/objections.html:7
+msgid "Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi. Ko‘rib chiqilmaguncha uni tahrirlash yoki o‘chirish mumkin."
+msgstr ""
+
+#: app/templates/user/objections.html:16
+msgid "E’tirozni tahrirlash"
+msgstr ""
+
+#: app/templates/user/objections.html:18 app/views/user.py:197
+msgid "E’tiroz o‘chirildi"
+msgstr ""
+
+#: app/templates/user/objections.html:19
+msgid "E’tiroz o‘chirilsinmi? Uni ekspert hali ko‘rib chiqmagan."
+msgstr ""
+
+#: app/templates/user/objections.html:21
+msgid "E’tirozni o‘chirish"
+msgstr ""
+
+#: app/templates/user/objections.html:30
+msgid "Izoh:"
+msgstr ""
+
+#: app/templates/user/objections.html:41
+msgid "Izoh"
+msgstr ""
+
+#: app/templates/user/objections.html:53
 msgid "Natijangiz qayta hisoblandi:"
 msgstr ""
 
-#: app/templates/user/objections.html:18
+#: app/templates/user/objections.html:56
 msgid "Muhokamani ko‘rish"
 msgstr ""
 
@@ -3536,7 +4036,7 @@ msgid "Eslatmalarni ochish"
 msgstr ""
 
 #: app/templates/user/optional.html:2 app/templates/user/optional.html:4
-#: app/templates/user/tests.html:22
+#: app/templates/user/tests.html:74
 msgid "Ixtiyoriy test"
 msgstr ""
 
@@ -3544,60 +4044,194 @@ msgstr ""
 msgid "Bu test o‘quv rejangizga ta’sir qilmaydi."
 msgstr ""
 
-#: app/templates/user/optional.html:7
-msgid "5 ta tanlandi"
+#: app/templates/user/optional.html:9
+msgid "ta tanlandi"
 msgstr ""
 
-#: app/templates/user/optional.html:12
+#: app/templates/user/optional.html:14
 msgid "ta savol"
 msgstr ""
 
-#: app/templates/user/optional.html:13
+#: app/templates/user/optional.html:15
 msgid "Takrorlash tavsiya etiladi"
 msgstr ""
 
-#: app/templates/user/optional.html:21
-msgid "Taxminiy vaqt:"
+#: app/templates/user/optional.html:25
+msgid "Kamida bitta mavzuni tanlang"
 msgstr ""
 
-#: app/templates/user/plan.html:4
-msgid "Reja holatlaringizga qarab o‘zgaradi, joriy mavzu esa o‘z joyida qoladi."
+#: app/templates/user/plan.html:14
+msgid "Shaxsiy reja: bilim darajangizga qarab tuzilgan va natijalaringiz bilan yangilanadi."
 msgstr ""
 
-#: app/templates/user/plan.html:7
-msgid "Bajarildi"
+#: app/templates/user/plan.html:19
+msgid "O‘zlashtirish holati"
 msgstr ""
 
-#: app/templates/user/plan.html:8
-msgid "Nazoratgacha"
+#: app/templates/user/plan.html:20
+msgid "mavzu o‘zlashtirildi · o‘rtacha"
 msgstr ""
 
-#: app/templates/user/plan.html:8
-msgid "2 mavzu"
+#: app/templates/user/plan.html:28
+msgid "O‘zlashtirildi"
 msgstr ""
 
-#: app/templates/user/plan.html:9
+#: app/templates/user/plan.html:29
+msgid "Oraliq sinovgacha"
+msgstr ""
+
+#: app/templates/user/plan.html:30
 msgid "Kuniga kerak"
 msgstr ""
 
-#: app/templates/user/plan.html:9
-msgid "≈ 1 mavzu"
+#: app/templates/user/plan.html:34
+msgid "Reja dastlabki diagnostika asosida tuzilgan:"
 msgstr ""
 
-#: app/templates/user/plan.html:9
-msgid "23-dekabrgacha tugatish uchun"
+#: app/templates/user/plan.html:34
+msgid "ta mavzu"
 msgstr ""
 
-#: app/templates/user/plan.html:24
+#: app/templates/user/plan.html:34
+#, python-format
+msgid "90%% dan yuqori o‘zlashtirilgani uchun chiqarildi"
+msgstr ""
+
+#: app/templates/user/plan.html:40
+msgid "Dastlabki diagnostika o‘tkazilmagan, shuning uchun informatika bo‘yicha umumiy ish reja ishlatilmoqda."
+msgstr ""
+
+#: app/templates/user/plan.html:41
+msgid "Diagnostikadan o‘tish"
+msgstr ""
+
+#: app/templates/user/plan.html:45
+msgid "Belgilar"
+msgstr ""
+
+#: app/templates/user/plan.html:49
+#, python-format
+msgid "70%% dan past — keyingi mavzu yopiq"
+msgstr ""
+
+#: app/templates/user/plan.html:50
+#, python-format
+msgid "70–89%% — qayta o‘zlashtirish tavsiya"
+msgstr ""
+
+#: app/templates/user/plan.html:51
+#, python-format
+msgid "90%% va yuqori"
+msgstr ""
+
+#: app/templates/user/plan.html:67
+msgid "Mavzu testi · shu dars savollari"
+msgstr ""
+
+#: app/templates/user/plan.html:72
+msgid "Dars hali o‘qilmagan."
+msgstr ""
+
+#: app/templates/user/plan.html:72
+msgid "Dars o‘qilmoqda."
+msgstr ""
+
+#: app/templates/user/plan.html:72
+msgid "Test natijasi mavzu testidan keyin shu yerda chiqadi."
+msgstr ""
+
+#: app/templates/user/plan.html:74
+msgid "Dars ochilgach o‘qiladi, test natijasi mavzu testidan keyin chiqadi."
+msgstr ""
+
+#: app/templates/user/plan.html:77
+msgid "Darsni qayta o‘zlashtirish"
+msgstr ""
+
+#: app/templates/user/plan.html:79 app/templates/user/topic.html:31
+msgid "Darsni ochish"
+msgstr ""
+
+#: app/templates/user/plan.html:104 app/templates/user/tests.html:31
+msgid "Majburiy"
+msgstr ""
+
+#: app/templates/user/plan.html:104 app/templates/user/tests.html:31
+msgid "Ixtiyoriy"
+msgstr ""
+
+#: app/templates/user/plan.html:106
+msgid "Rejadagi sana:"
+msgstr ""
+
+#: app/templates/user/plan.html:107 app/templates/user/tests.html:63
+msgid "Bugun ochiq"
+msgstr ""
+
+#: app/templates/user/plan.html:109 app/templates/user/tests.html:95
+msgid "Topshirildi"
+msgstr ""
+
+#: app/templates/user/plan.html:125
 msgid "Hozirgi mavzu"
 msgstr ""
 
-#: app/templates/user/plan.html:26
+#: app/templates/user/plan.html:127
+msgid "O‘zlashtirish kuni:"
+msgstr ""
+
+#: app/templates/user/plan.html:127
+msgid "ta dars"
+msgstr ""
+
+#: app/templates/user/plan.html:128
+msgid "dars boshlangan"
+msgstr ""
+
+#: app/templates/user/plan.html:128
 msgid "daqiqa qoldi"
 msgstr ""
 
-#: app/templates/user/plan.html:36
-msgid "Testni topshirish"
+#: app/templates/user/plan.html:129
+#, python-format
+msgid "Keyingi mavzuga o‘tish yopiq: kamida 70%% kerak"
+msgstr ""
+
+#: app/templates/user/plan.html:130
+msgid "Qayta o‘zlashtirish tavsiya etiladi"
+msgstr ""
+
+#: app/templates/user/plan.html:131
+msgid "ta dars · o‘zlashtirilgan"
+msgstr ""
+
+#: app/templates/user/plan.html:147
+msgid "urinish"
+msgstr ""
+
+#: app/templates/user/plan.html:151
+#, python-format
+msgid "Mavzu testi (majburiy) — darslar tugagach ochiladi. 70%% dan kam bo‘lsa, keyingi mavzuga o‘tilmaydi."
+msgstr ""
+
+#: app/templates/user/plan.html:157
+msgid "Mavzuni qayta o‘zlashtirish"
+msgstr ""
+
+#: app/templates/user/plan.html:158
+msgid "Mavzu testini qayta topshirish"
+msgstr ""
+
+#: app/templates/user/plan.html:160
+msgid "Avvalgi mavzular o‘zlashtirilgach ochiladi. Attestatsiyaga ulgurish uchun shu kuni o‘zlashtiring."
+msgstr ""
+
+#: app/templates/user/plan.html:163
+msgid "Qayta o‘zlashtirib, testni qayta topshirsangiz, foiz yangi natija bo‘yicha yangilanadi."
+msgstr ""
+
+#: app/templates/user/plan.html:170
+msgid "Kunlik 5 ta test, haftalik (yakshanba, ixtiyoriy) va oylik (har 30 kun, majburiy) testlar vaqti kelganda rejaga avtomatik qo‘shiladi. Oylik test yakunlanmaguncha keyingi mavzular ochilmaydi."
 msgstr ""
 
 #: app/templates/user/profile.html:2
@@ -3632,161 +4266,238 @@ msgstr ""
 msgid "Yangi parolni takrorlang"
 msgstr ""
 
-#: app/templates/user/profile.html:52
-msgid "Parollarni ko‘rsatish"
-msgstr ""
-
-#: app/templates/user/profile.html:54
+#: app/templates/user/profile.html:53
 msgid "Joriy parolni unutdingizmi?"
 msgstr ""
 
-#: app/templates/user/profile.html:55
+#: app/templates/user/profile.html:54
 msgid "Parolni yangilash"
 msgstr ""
 
-#: app/templates/user/profile.html:63
+#: app/templates/user/profile.html:62
 msgid "Viloyat va tuman"
 msgstr ""
 
-#: app/templates/user/profile.html:63
+#: app/templates/user/profile.html:62
 msgid "Toshkent shahri · Yunusobod tumani"
 msgstr ""
 
-#: app/templates/user/profile.html:73
+#: app/templates/user/profile.html:72
 msgid "Tuman (shahar)"
 msgstr ""
 
-#: app/templates/user/profile.html:76
+#: app/templates/user/profile.html:75
 msgid "Ixtiyoriy. Faqat umumiy hududiy statistika uchun ishlatiladi."
 msgstr ""
 
-#: app/templates/user/profile.html:84
+#: app/templates/user/profile.html:83
 msgid "Administrator tomonidan kiritiladi"
 msgstr ""
 
-#: app/templates/user/profile.html:88
+#: app/templates/user/profile.html:87
 msgid "Sana noto‘g‘ri bo‘lsa,"
 msgstr ""
 
-#: app/templates/user/profile.html:88
+#: app/templates/user/profile.html:87
 msgid "yordam xizmatiga"
 msgstr ""
 
-#: app/templates/user/profile.html:88
+#: app/templates/user/profile.html:87
 msgid "yozing — administrator uni yangilaydi."
 msgstr ""
 
-#: app/templates/user/profile.html:92
+#: app/templates/user/profile.html:91
 msgid "Telegram bildirishnomalari"
 msgstr ""
 
-#: app/templates/user/profile.html:101
+#: app/templates/user/profile.html:100
 msgid "Ko‘rinish"
 msgstr ""
 
-#: app/templates/user/profile.html:105
+#: app/templates/user/profile.html:104
 msgid "Darslar, testlar va sahifalardagi matn"
 msgstr ""
 
-#: app/templates/user/profile.html:107
+#: app/templates/user/profile.html:106
 msgid "Oddiy"
 msgstr ""
 
-#: app/templates/user/profile.html:108
+#: app/templates/user/profile.html:107
 msgid "Katta"
 msgstr ""
 
-#: app/templates/user/profile.html:109
+#: app/templates/user/profile.html:108
 msgid "Juda katta"
 msgstr ""
 
-#: app/templates/user/profile.html:115
+#: app/templates/user/profile.html:114
 msgid "Ilovani o‘rnatish"
 msgstr ""
 
-#: app/templates/user/profile.html:117
+#: app/templates/user/profile.html:116
 msgid "Ilova o‘rnatilgan"
 msgstr ""
 
-#: app/templates/user/profile.html:119
-msgid "Rus tili tarjimasi to‘ldirilmoqda"
+#: app/templates/user/profile.html:118
+msgid "O‘zbek, rus, ingliz va qoraqalpoq tillari"
 msgstr ""
 
-#: app/templates/user/profile.html:120
+#: app/templates/user/profile.html:119
 msgid "Yorug‘ / qorong‘i mavzu"
 msgstr ""
 
-#: app/templates/user/results.html:4
-msgid "Barcha testlar natijalari va dinamikasi"
+#: app/templates/user/result_detail.html:12
+msgid "3 bosqich"
+msgstr ""
+
+#: app/templates/user/result_detail.html:22
+msgid "Namunada savollardan bir qismi ko‘rsatilgan."
+msgstr ""
+
+#: app/templates/user/result_detail.html:27
+msgid "Testni qayta topshirish"
+msgstr ""
+
+#: app/templates/user/result_detail.html:28
+msgid "Aynan shu savollar emas — shu turdagi va shu mavzulardan yangi savollar beriladi. Natija «Natijalarim» bo‘limiga yangi qator bo‘lib qo‘shiladi."
+msgstr ""
+
+#: app/templates/user/result_detail.html:31
+#: app/templates/user/result_detail.html:33
+msgid "Qayta topshirish"
 msgstr ""
 
 #: app/templates/user/results.html:8
+msgid "Dastlabki diagnostikadan boshlab barcha testlar natijalari"
+msgstr ""
+
+#: app/templates/user/results.html:12
 msgid "Hali natijalar yo‘q"
 msgstr ""
 
-#: app/templates/user/results.html:9
+#: app/templates/user/results.html:13
 msgid "Birinchi testni topshirganingizdan keyin natijalar shu yerda ko‘rinadi."
 msgstr ""
 
-#: app/templates/user/results.html:10
+#: app/templates/user/results.html:14
 msgid "O‘quv rejaga o‘tish"
 msgstr ""
 
-#: app/templates/user/results.html:15
+#: app/templates/user/results.html:19
 msgid "Yuklanish holati namunasi"
 msgstr ""
 
-#: app/templates/user/results.html:22
+#: app/templates/user/results.html:23 app/templates/user/results.html:30
+msgid "Test turi bo‘yicha saralash"
+msgstr ""
+
+#: app/templates/user/results.html:31
+msgid "Barcha testlar"
+msgstr ""
+
+#: app/templates/user/results.html:35
 msgid "Natijalar dinamikasi"
 msgstr ""
 
-#: app/templates/user/results.html:22
+#: app/templates/user/results.html:35
 msgid "O‘rtacha:"
 msgstr ""
 
-#: app/templates/user/results.html:24
+#: app/templates/user/results.html:37
 #, python-format
 msgid "Maqsad chiziqlari: 70%% — mavzudan o‘tish, 90%% — to‘liq o‘zlashtirish."
 msgstr ""
 
-#: app/templates/user/tests.html:4
-msgid "To‘xtatilgan testlar va boshlash mumkin bo‘lganlari"
+#: app/templates/user/results.html:50
+msgid "Testni qayta topshirsangiz, xuddi shu savollar emas, shu turdagi yangi savollar beriladi va natija bu ro‘yxatga qo‘shiladi."
 msgstr ""
 
-#: app/templates/user/tests.html:10
-msgid "Nazorat testi · 3 ta mavzu"
+#: app/templates/user/tests.html:12
+msgid "Tugatilmagan testlar, ixtiyoriy testlar va majburiy testlar jadvali"
 msgstr ""
 
-#: app/templates/user/tests.html:10
-msgid "2-bosqich · 6 / 12 savol · javoblar saqlangan"
+#: app/templates/user/tests.html:16
+msgid "Majburiy test yakunlanmagan:"
 msgstr ""
 
-#: app/templates/user/tests.html:19
-msgid "Boshlash mumkin"
-msgstr ""
-
-#: app/templates/user/tests.html:21
-msgid "Kunlik 5 ta savol"
-msgstr ""
-
-#: app/templates/user/tests.html:21
-msgid "3 daqiqa · takrorlash"
+#: app/templates/user/tests.html:17
+msgid "Uni yakunlamaguncha keyingi mavzuga o‘tish va keyingi majburiy testni ishlash mumkin emas."
 msgstr ""
 
 #: app/templates/user/tests.html:22
-msgid "O‘tilgan mavzulardan, rejaga ta’sir qilmaydi"
+msgid "Tugatilmagan testlar"
 msgstr ""
 
-#: app/templates/user/tests.html:23
-msgid "35 ta savol · 105 daqiqa · real format"
+#: app/templates/user/tests.html:39
+msgid "Test bekor qilinsinmi? Saqlangan javoblar o‘chiriladi."
 msgstr ""
 
-#: app/templates/user/tests.html:24
-msgid "Yakuniy diagnostika"
+#: app/templates/user/tests.html:46
+msgid "Tugatilmagan test yo‘q."
 msgstr ""
 
-#: app/templates/user/tests.html:24
-msgid "Barcha mavzular o‘tilgach ochiladi"
+#: app/templates/user/tests.html:52
+msgid "Ixtiyoriy testlar"
+msgstr ""
+
+#: app/templates/user/tests.html:56
+msgid "35 ta savol · 120 daqiqa · real attestatsiya interfeysi"
+msgstr ""
+
+#: app/templates/user/tests.html:57
+msgid "Istalgan payt"
+msgstr ""
+
+#: app/templates/user/tests.html:62 app/templates/user/tests.html:68
+msgid "Haftalik test"
+msgstr ""
+
+#: app/templates/user/tests.html:62
+msgid "Bugun yakshanba · o‘zlashtirilgan mavzulardan · 3 bosqich"
+msgstr ""
+
+#: app/templates/user/tests.html:68
+msgid "Faqat yakshanba ochiladi · keyingisi: 29-noyabr"
+msgstr ""
+
+#: app/templates/user/tests.html:74
+msgid "Mavzular va savollar sonini o‘zingiz tanlaysiz · o‘zlashtirish foiziga ta’sir qilmaydi"
+msgstr ""
+
+#: app/templates/user/tests.html:79
+msgid "Xatolaringizga o‘xshash testlar · savollar sonini tanlaysiz"
+msgstr ""
+
+#: app/templates/user/tests.html:87
+msgid "Majburiy testlar"
+msgstr ""
+
+#: app/templates/user/tests.html:87
+msgid "O‘quv rejada ko‘rish"
+msgstr ""
+
+#: app/templates/user/tests.html:93
+msgid "Taxminiy sana:"
+msgstr ""
+
+#: app/templates/user/tests.html:94
+msgid "avval yakunlanmagan majburiy testni tugating"
+msgstr ""
+
+#: app/templates/user/tests.html:99
+msgid "Majburiy test navbati kelganda ochiladi va «O‘quv reja»ga qo‘shiladi. Barcha natijalar «Natijalarim» bo‘limiga tushadi."
+msgstr ""
+
+#: app/templates/user/tests.html:103
+msgid "Test turlari haqida"
+msgstr ""
+
+#: app/templates/user/tests.html:107
+msgid "majburiy"
+msgstr ""
+
+#: app/templates/user/tests.html:107
+msgid "ixtiyoriy"
 msgstr ""
 
 #: app/templates/user/topic.html:9
@@ -3806,139 +4517,147 @@ msgstr ""
 msgid "«elif zanjiri» bo‘yicha 40%%. Avval shu qismni sxema orqali qayta ko‘rib chiqing, keyin takrorlash testini topshiring."
 msgstr ""
 
-#: app/templates/user/topic.html:31
-msgid "Darsni ochish"
-msgstr ""
-
 #: app/templates/user/topic.html:32
 msgid "Takrorlash testi"
 msgstr ""
 
-#: app/templates/user/tutor.html:4
-msgid "Mavzu: Shart operatorlari"
-msgstr ""
-
-#: app/templates/user/tutor.html:8
+#: app/templates/user/tutor.html:13
 msgid "elif bilan else farqi nima?"
 msgstr ""
 
-#: app/templates/user/tutor.html:13
+#: app/templates/user/tutor.html:15
 msgid "(else if)"
 msgstr ""
 
-#: app/templates/user/tutor.html:13
+#: app/templates/user/tutor.html:15
 msgid "yangi shartni"
 msgstr ""
 
-#: app/templates/user/tutor.html:13
+#: app/templates/user/tutor.html:15
 msgid "tekshiradi va faqat oldingi shartlar yolg‘on bo‘lganda ishlaydi."
 msgstr ""
 
-#: app/templates/user/tutor.html:13
+#: app/templates/user/tutor.html:15
 msgid "esa"
 msgstr ""
 
-#: app/templates/user/tutor.html:13
+#: app/templates/user/tutor.html:15
 msgid "shartsiz"
 msgstr ""
 
-#: app/templates/user/tutor.html:13
+#: app/templates/user/tutor.html:15
 msgid "yakuniy blok: yuqoridagi shartlarning hech biri bajarilmasa ishga tushadi."
 msgstr ""
 
-#: app/templates/user/tutor.html:17
+#: app/templates/user/tutor.html:19
 msgid "Shart kerakmi"
 msgstr ""
 
-#: app/templates/user/tutor.html:17
+#: app/templates/user/tutor.html:19
 msgid "Ha, yangi shart"
 msgstr ""
 
-#: app/templates/user/tutor.html:17
+#: app/templates/user/tutor.html:19
 msgid "Yo‘q"
 msgstr ""
 
-#: app/templates/user/tutor.html:18
+#: app/templates/user/tutor.html:20
 msgid "Nechta bo‘ladi"
 msgstr ""
 
-#: app/templates/user/tutor.html:18
+#: app/templates/user/tutor.html:20
 msgid "Bir nechta"
 msgstr ""
 
-#: app/templates/user/tutor.html:18
+#: app/templates/user/tutor.html:20
 msgid "Ko‘pi bilan bitta"
 msgstr ""
 
-#: app/templates/user/tutor.html:19
+#: app/templates/user/tutor.html:21
 msgid "Joylashuvi"
 msgstr ""
 
-#: app/templates/user/tutor.html:19
+#: app/templates/user/tutor.html:21
 msgid "dan keyin"
 msgstr ""
 
-#: app/templates/user/tutor.html:19
+#: app/templates/user/tutor.html:21
 msgid "Eng oxirida"
 msgstr ""
 
-#: app/templates/user/tutor.html:23
+#: app/templates/user/tutor.html:24
 msgid "Manba: 9-sinf darsligi, 4-bob"
 msgstr ""
 
-#: app/templates/user/tutor.html:25
-msgid "Nusxa olish"
-msgstr ""
-
 #: app/templates/user/tutor.html:26
-msgid "Eslatmaga saqlash"
-msgstr ""
-
-#: app/templates/user/tutor.html:27
-msgid "Foydali"
-msgstr ""
-
-#: app/templates/user/tutor.html:28
-msgid "Qayta javob"
-msgstr ""
-
-#: app/templates/user/tutor.html:34
 msgid "Misol keltir"
 msgstr ""
 
-#: app/templates/user/tutor.html:39
+#: app/templates/user/tutor.html:28
 msgid "Baho hisoblash misolida ko‘ring: shartlar yuqoridan pastga tekshiriladi, birinchi rost chiqqani bajariladi."
 msgstr ""
 
-#: app/templates/user/tutor.html:41
+#: app/templates/user/tutor.html:30
 msgid "O‘zingiz sinab ko‘ring:"
 msgstr ""
 
-#: app/templates/user/tutor.html:41
+#: app/templates/user/tutor.html:30
 msgid "bo‘lsa nima chiqadi?"
 msgstr ""
 
+#: app/templates/user/tutor.html:36
+msgid "Avvalgi suhbat tiklandi (qurilmada saqlangan)"
+msgstr ""
+
+#: app/templates/user/tutor.html:36
+msgid "Suhbat qurilmada saqlanadi"
+msgstr ""
+
+#: app/templates/user/tutor.html:36
+msgid "yangi mavzuda yoki 24 soatdan keyin tozalanadi"
+msgstr ""
+
+#: app/templates/user/tutor.html:37
+msgid "Suhbat tozalansinmi?"
+msgstr ""
+
+#: app/templates/user/tutor.html:37
+msgid "Suhbatni tozalash"
+msgstr ""
+
+#: app/templates/user/tutor.html:48
+msgid "Nusxa olish"
+msgstr ""
+
+#: app/templates/user/tutor.html:48
+msgid "Nusxalandi"
+msgstr ""
+
 #: app/templates/user/tutor.html:49
-msgid "AI javob yozmoqda"
-msgstr ""
-
-#: app/templates/user/tutor.html:55
-msgid "Soddaroq tushuntir"
-msgstr ""
-
-#: app/templates/user/tutor.html:56
-msgid "Masala ber"
-msgstr ""
-
-#: app/templates/user/tutor.html:57
-msgid "Sxema bilan ko‘rsat"
+msgid "Foydali"
 msgstr ""
 
 #: app/templates/user/tutor.html:58
+msgid "AI javob yozmoqda"
+msgstr ""
+
+#: app/templates/user/tutor.html:64
+msgid "Soddaroq tushuntir"
+msgstr ""
+
+#: app/templates/user/tutor.html:65
+msgid "Masala ber"
+msgstr ""
+
+#: app/templates/user/tutor.html:66
+msgid "Sxema bilan ko‘rsat"
+msgstr ""
+
+#: app/templates/user/tutor.html:67
 msgid "Ko‘p uchraydigan xatolar"
 msgstr ""
 
-#: app/templates/user/tutor.html:60
+#: app/templates/user/tutor.html:69
 msgid "Savolingizni yozing…"
 msgstr ""
 
@@ -4021,182 +4740,279 @@ msgstr ""
 msgid "Urinish yakunlangan, javoblarni o‘zgartirib bo‘lmaydi"
 msgstr ""
 
-#: app/views/auth.py:19 app/views/user.py:224
+#: app/views/auth.py:19 app/views/user.py:315
 msgid "Kod noto‘g‘ri. Namunada kod: 123456"
 msgstr ""
 
-#: app/views/auth.py:45
+#: app/views/auth.py:46
 msgid "Xush kelibsiz!"
 msgstr ""
 
-#: app/views/auth.py:78
+#: app/views/auth.py:79
 #, python-format
 msgid "Kod %(email)s manziliga yuborildi"
 msgstr ""
 
-#: app/views/auth.py:102 app/views/auth.py:168 app/views/auth.py:293
-#: app/views/user.py:246
+#: app/views/auth.py:103 app/views/auth.py:179 app/views/auth.py:306
+#: app/views/user.py:337
 msgid "Parollar bir xil emas"
 msgstr ""
 
-#: app/views/auth.py:104 app/views/user.py:256
+#: app/views/auth.py:105 app/views/user.py:347
 msgid "Viloyatni ro‘yxatdan tanlang"
 msgstr ""
 
-#: app/views/auth.py:105
+#: app/views/auth.py:106
 msgid "Davom etish uchun rozilik kerak"
 msgstr ""
 
-#: app/views/auth.py:113
+#: app/views/auth.py:114
 msgid "Ro‘yxatdan o‘tdingiz. Eslatma: 6 oy kirilmasa akkaunt avtomatik o‘chiriladi"
 msgstr ""
 
-#: app/views/auth.py:124
+#: app/views/auth.py:126
 msgid "Google akkaunti orqali kirdingiz (namuna)"
 msgstr ""
 
-#: app/views/auth.py:161
+#: app/views/auth.py:172
 msgid "Avval tasdiqlash kodini kiriting"
 msgstr ""
 
-#: app/views/auth.py:163 app/views/auth.py:199
+#: app/views/auth.py:174 app/views/auth.py:212
 msgid "Telefon/email o‘zgardi. Yangisiga kodni qayta yuboring"
 msgstr ""
 
-#: app/views/auth.py:174
+#: app/views/auth.py:185
 msgid "Parol yangilandi. Yangi parol bilan kiring"
 msgstr ""
 
-#: app/views/auth.py:186 app/views/auth.py:276 app/views/user.py:211
+#: app/views/auth.py:194
+msgid "Bu raqam orqali ro‘yxatdan o‘tilmagan. Raqamni tekshiring yoki email orqali tiklang"
+msgstr ""
+
+#: app/views/auth.py:199 app/views/auth.py:289 app/views/user.py:302
 #, python-format
 msgid "Kod %(c)s manziliga yuborildi"
 msgstr ""
 
-#: app/views/auth.py:187 app/views/auth.py:275 app/views/user.py:210
+#: app/views/auth.py:200
 #, python-format
-msgid "Kod Telegram bot orqali %(c)s raqamiga yuborildi"
-msgstr ""
-
-#: app/views/auth.py:197
-msgid "Avval telefon raqam yoki emailga kod yuboring"
-msgstr ""
-
-#: app/views/auth.py:208
-msgid "Kod 5 marta noto‘g‘ri kiritildi. Yangi kod so‘rang"
+msgid "Telegram botni oching va raqamingizni ulashing: bot %(c)s raqamini tekshirib, kod yuboradi"
 msgstr ""
 
 #: app/views/auth.py:210
+msgid "Avval telefon raqam yoki emailga kod yuboring"
+msgstr ""
+
+#: app/views/auth.py:221
+msgid "Kod 5 marta noto‘g‘ri kiritildi. Yangi kod so‘rang"
+msgstr ""
+
+#: app/views/auth.py:223
 #, python-format
 msgid "Kod noto‘g‘ri. Yana %(n)s ta urinish qoldi"
 msgstr ""
 
-#: app/views/auth.py:214
+#: app/views/auth.py:227
 msgid "Kod tasdiqlandi. Endi yangi parolni kiriting"
 msgstr ""
 
-#: app/views/auth.py:254
+#: app/views/auth.py:267
 #, python-format
 msgid "Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi"
 msgstr ""
 
-#: app/views/auth.py:300
+#: app/views/auth.py:288 app/views/user.py:301
+#, python-format
+msgid "Kod Telegram bot orqali %(c)s raqamiga yuborildi"
+msgstr ""
+
+#: app/views/auth.py:313
 msgid "Akkaunt tiklandi: yangi telefon raqam yoki email saqlandi, endi yangi parol bilan kirasiz"
 msgstr ""
 
-#: app/views/auth.py:324
+#: app/views/auth.py:337
 msgid "Raqam formati: 3 harf, yil va 6 raqam. Masalan: INF-2026-000123"
 msgstr ""
 
-#: app/views/user.py:151
-msgid "Shaxsiy ma’lumotlar saqlandi"
+#: app/views/expert.py:63
+msgid "Savol rad etildi va o‘chirildi"
 msgstr ""
 
-#: app/views/user.py:171 app/views/user.py:178
-msgid "Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring"
+#: app/views/expert.py:64 app/views/expert.py:92
+msgid "Savol matnini kiriting"
 msgstr ""
 
-#: app/views/user.py:173
-msgid "Joriy parolni kiriting"
+#: app/views/expert.py:67 app/views/expert.py:108
+msgid "Kamida 2 ta javob varianti bo‘lsin"
+msgstr ""
+
+#: app/views/expert.py:69 app/views/expert.py:110
+msgid "To‘g‘ri javobni belgilang"
+msgstr ""
+
+#: app/views/expert.py:72
+msgid "Savol tasdiqlandi va savollar bankiga qo‘shildi"
+msgstr ""
+
+#: app/views/expert.py:86
+msgid "Mavzuni tanlang"
+msgstr ""
+
+#: app/views/expert.py:87
+msgid "Darsni tanlang"
+msgstr ""
+
+#: app/views/expert.py:88
+msgid "Qiyinlik darajasini tanlang"
+msgstr ""
+
+#: app/views/expert.py:89
+msgid "Savol turini tanlang"
+msgstr ""
+
+#: app/views/expert.py:90
+msgid "Savol formatini tanlang"
+msgstr ""
+
+#: app/views/expert.py:91
+msgid "Vaqt 10–1800 soniya oralig‘ida bo‘lsin"
+msgstr ""
+
+#: app/views/expert.py:98
+msgid "To‘g‘ri javobni kiriting"
+msgstr ""
+
+#: app/views/expert.py:103
+msgid "Kamida 2 ta to‘liq juftlik kiriting"
+msgstr ""
+
+#: app/views/expert.py:112
+msgid "Ko‘p javobli savolda kamida 2 ta to‘g‘ri javob bo‘lsin"
+msgstr ""
+
+#: app/views/expert.py:114
+msgid "Savol saqlandi va savollar bankiga qo‘shildi"
+msgstr ""
+
+#: app/views/user.py:94
+msgid "Test topilmadi"
+msgstr ""
+
+#: app/views/user.py:98
+msgid "Majburiy testni bekor qilib bo‘lmaydi — uni yakunlang"
+msgstr ""
+
+#: app/views/user.py:101
+msgid "Test bekor qilindi"
+msgstr ""
+
+#: app/views/user.py:175 app/views/user.py:193
+msgid "E’tiroz topilmadi"
 msgstr ""
 
 #: app/views/user.py:177
+msgid "Ko‘rib chiqilgan e’tirozni o‘zgartirib bo‘lmaydi"
+msgstr ""
+
+#: app/views/user.py:179 app/views/user.py:357
+msgid "Sababni tanlang"
+msgstr ""
+
+#: app/views/user.py:180 app/views/user.py:358
+msgid "Izoh 1000 belgidan oshmasin"
+msgstr ""
+
+#: app/views/user.py:183 app/views/user.py:361
+msgid "«Boshqa» sababini izohda yozing"
+msgstr ""
+
+#: app/views/user.py:184
+msgid "E’tiroz yangilandi"
+msgstr ""
+
+#: app/views/user.py:195
+msgid "Ko‘rib chiqilgan e’tirozni o‘chirib bo‘lmaydi"
+msgstr ""
+
+#: app/views/user.py:242
+msgid "Shaxsiy ma’lumotlar saqlandi"
+msgstr ""
+
+#: app/views/user.py:262 app/views/user.py:269
+msgid "Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring"
+msgstr ""
+
+#: app/views/user.py:264
+msgid "Joriy parolni kiriting"
+msgstr ""
+
+#: app/views/user.py:268
 #, python-format
 msgid "Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi"
 msgstr ""
 
-#: app/views/user.py:204
+#: app/views/user.py:295
 msgid "Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting"
 msgstr ""
 
-#: app/views/user.py:222
+#: app/views/user.py:313
 msgid "Avval yangi telefon yoki emailni kiriting"
 msgstr ""
 
-#: app/views/user.py:227
+#: app/views/user.py:318
 msgid "Telefon raqam yangilandi"
 msgstr ""
 
-#: app/views/user.py:227
+#: app/views/user.py:318
 msgid "Email yangilandi"
 msgstr ""
 
-#: app/views/user.py:237
+#: app/views/user.py:328
 msgid "Maxfiy so‘z yangilandi"
 msgstr ""
 
-#: app/views/user.py:249
+#: app/views/user.py:340
 msgid "Yangi parol joriy paroldan farq qilsin"
 msgstr ""
 
-#: app/views/user.py:251
+#: app/views/user.py:342
 msgid "Parol o‘zgartirildi"
 msgstr ""
 
-#: app/views/user.py:258
+#: app/views/user.py:349
 msgid "Hudud saqlandi"
 msgstr ""
 
-#: app/views/user.py:266
-msgid "Sababni tanlang"
-msgstr ""
-
-#: app/views/user.py:267
-msgid "Izoh 1000 belgidan oshmasin"
-msgstr ""
-
-#: app/views/user.py:270
-msgid "«Boshqa» sababini izohda yozing"
-msgstr ""
-
-#: app/views/user.py:273
+#: app/views/user.py:364
 msgid "E’tirozingiz qabul qilindi. Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi"
 msgstr ""
 
-#: app/views/user.py:279
+#: app/views/user.py:370
 msgid "Xabarni yozing"
 msgstr ""
 
-#: app/views/user.py:280
+#: app/views/user.py:371
 msgid "Xabar 2000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:282
+#: app/views/user.py:373
 msgid "Fikringiz qo‘shildi"
 msgstr ""
 
-#: app/views/user.py:291
+#: app/views/user.py:382
 msgid "Qaydni yozing"
 msgstr ""
 
-#: app/views/user.py:291
+#: app/views/user.py:382
 msgid "Qayd 5000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:292
+#: app/views/user.py:383
 msgid "Kod 5000 belgidan oshmasin"
 msgstr ""
 
-#: app/views/user.py:295
+#: app/views/user.py:386
 msgid "Eslatma saqlandi"
 msgstr ""
 

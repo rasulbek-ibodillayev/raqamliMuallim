@@ -1,0 +1,95 @@
+{% extends "layouts/focus.html" %}
+{% block title %}{{ _("Attestatsiya testi natijasi") }}{% endblock %}
+{#
+  Attestatsiya testi yakuni: to'plangan ball; har bir savol va foydalanuvchi javobi (xato — qizil, to'g'ri javob — yashil);
+  savol tushgan har bir mavzu bo'yicha o'zlashtirish foizi va qaysi mavzularni qayta o'zlashtirish kerakligi.
+#}
+{% block bar %}
+<a class="icon-btn" href="{{ url_for('user.tests') }}" aria-label="{{ _('Testlarga qaytish') }}">{{ icon("x") }}</a>
+<div class="grow strong">{{ _("Attestatsiya testi natijasi") }}</div>
+{% endblock %}
+
+{% block content %}
+{% set relearn = by_topic | selectattr(1, "lt", pass_min) | list %}
+{% set advise = by_topic | selectattr(1, "ge", pass_min) | selectattr(1, "lt", solid_min) | list %}
+<div class="stack stack-xl" x-data="{ f: 'all' }">
+  <section class="items-center stack stack-lg center">
+    {{ ring(pct, 148, "var(--green)" if pct >= solid_min else ("var(--blue)" if pct >= pass_min else "var(--red)"), _("natija")) }}
+    <div class="stack stack-sm">
+      <h1>{{ correct }} / {{ total }} {{ _("ball") }}</h1>
+      <p class="lead">{{ _("35 ta savoldan") }} {{ correct }} {{ _("tasiga to‘g‘ri javob berdingiz.") }}
+        {{ total - correct - (questions|selectattr("mine", "none")|list|length) }} {{ _("ta xato,") }} {{ questions|selectattr("mine", "none")|list|length }} {{ _("ta javobsiz.") }}</p>
+    </div>
+  </section>
+
+  {# ---------- Mavzular bo'yicha o'zlashtirish ---------- #}
+  <section class="card">
+    <div class="card-head"><span class="strong">{{ _("Mavzular bo‘yicha o‘zlashtirish") }}</span><span class="xs muted">{{ _("savol tushgan mavzular") }}</span></div>
+    <div class="list">
+      {% for name, p, c, n in by_topic %}
+      <div class="list-item"><div class="grow stack stack-sm">
+        <div class="row between"><span>{{ name }}</span><span class="num small"><span class="muted">{{ c }}/{{ n }} ·</span> <b class="{{ 't-green' if p >= solid_min else ('t-yellow' if p >= pass_min else 't-red') }}">{{ p }}%</b></span></div>
+        {{ progress(p, "green" if p >= solid_min else ("yellow" if p >= pass_min else "red"), "thin") }}
+      </div></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ---------- Tavsiya ---------- #}
+  {% if relearn or advise %}
+  <section class="items-start ai-card row">
+    <span class="ai-mark">{{ icon("sparkle") }}</span>
+    <div class="grow stack stack-sm">
+      <div class="strong">{{ _("Tavsiya") }}</div>
+      {% if relearn %}<p class="small">{{ _("Qayta o‘zlashtirish kerak (70%% dan past):") }} <b>{{ relearn | map(attribute=0) | join(", ") }}</b>.</p>{% endif %}
+      {% if advise %}<p class="small">{{ _("Takrorlash tavsiya etiladi (70–89%%):") }} <b>{{ advise | map(attribute=0) | join(", ") }}</b>.</p>{% endif %}
+      <a class="self-start btn btn-primary btn-sm mt-8" href="{{ url_for('user.plan') }}">{{ _("O‘quv rejada ochish") }}{{ icon("arrow-right", "ico-sm") }}</a>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ---------- Savollar ---------- #}
+  <section class="stack">
+    <div class="row between wrap">
+      <h2 class="eyebrow">{{ _("Savollar va javoblaringiz") }}</h2>
+      <div class="seg">
+        <button type="button" :class="f === 'all' && 'active'" @click="f = 'all'">{{ _("Hammasi") }}</button>
+        <button type="button" :class="f === 'bad' && 'active'" @click="f = 'bad'">{{ _("Xato va javobsiz") }}</button>
+      </div>
+    </div>
+    <ol class="list-reset stack review-list">
+      {% for r in questions %}
+      {% set ok = r.mine == r.right %}
+      <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else 'is-bad' }}" {% if ok %}x-show="f === 'all'"{% endif %}>
+        <div class="row between wrap">
+          <span class="small muted">{{ r.n }}{{ _("-savol") }} · {{ r.topic }}</span>
+          {% if r.mine is none %}{{ badge(_("Javobsiz"), "gray") }}{% elif ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}{% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}
+        </div>
+        <p class="strong">{{ r.q }}</p>
+        {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
+        <ul class="list-reset ans-list">
+          {% for o in r.options %}
+          {% set is_right = loop.index0 == r.right %}{% set is_mine = loop.index0 == r.mine %}
+          <li class="ans {{ 'ans-right' if is_right }} {{ 'ans-wrong' if is_mine and not is_right }}">
+            <span class="ans-key">{{ "ABCD"[loop.index0] }}</span><span class="grow">{{ o }}</span>
+            {% if is_mine and not is_right %}<span class="ans-tag">{{ icon("x", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
+            {% elif is_right and is_mine %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
+            {% elif is_right %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("To‘g‘ri javob") }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+{% endblock %}
+
+{% block foot %}
+<footer class="focus-foot">
+  <div class="focus-foot-inner">
+    <a class="btn btn-outline" href="{{ url_for('user.results') }}">{{ _("Natijalarim") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('user.plan') }}">{{ _("O‘quv reja") }}{{ icon("arrow-right") }}</a>
+  </div>
+</footer>
+{% endblock %}

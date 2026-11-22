@@ -86,5 +86,19 @@
 <p class="field-error" id="{{ name }}-err" role="alert" x-show="err('{{ name }}')" x-text="err('{{ name }}')"{% if not errors.get(name) %} x-cloak{% endif %}>{{ errors.get(name, "") }}</p>
 {%- endmacro %}
 
+{# Parol maydoni yonidagi «ko'z» tugmasi: var — Alpine holati (true bo'lsa matn ko'rinadi).
+   Ishlatish: <div class="input-group" x-data="{ s1: false }"><input :type="s1 ? 'text' : 'password'" …>{{ eye("s1") }}</div> #}
+{% macro eye(var="show") -%}
+<button class="icon-btn" type="button" @click="{{ var }} = !{{ var }}" :aria-pressed="{{ var }}"
+        :aria-label="{{ var }} ? '{{ _('Yashirish') }}' : '{{ _('Ko‘rsatish') }}'" aria-label="{{ _('Ko‘rsatish') }}">
+  <svg class="ico" aria-hidden="true"><use href="#i-eye" :href="{{ var }} ? '#i-eye-off' : '#i-eye'"/></svg>
+</button>
+{%- endmacro %}
+
+{# Joriy parol maydoni brauzer tomonidan avtomatik to'ldirilmasin: «new-password» + fokusgacha readonly (faqat JS bilan) #}
+{% macro no_autofill() -%}
+autocomplete="new-password" data-lpignore="true" data-1p-ignore x-init="$el.readOnly = true; $el.value = ''" @focus="$el.readOnly = false" @pointerdown="$el.readOnly = false"
+{%- endmacro %}
+
 {# Forma ochilish teglari uchun umumiy atributlar: CSRF va server xatolari #}
 {% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}

@@ -2,22 +2,17 @@
 {% block title %}{{ _("Bosh sahifa") }}{% endblock %}
 {#
   Bosh sahifa tartibi:
-  1) salomlashuv + AI so'rov maydoni
+  1) salomlashuv + har kirishda yangi motivatsion so'z
   2) yangi foydalanuvchi: 3 qadamli yo'riqnoma
-     faol foydalanuvchi: tayyorlik va prognoz → keyingi qadam → bugungi reja (vaqt bahosi bilan)
+     faol foydalanuvchi: tayyorlik va prognoz → keyingi qadam → bugungi reja (vaqt bahosi bilan) → xato qilinayotgan mavzular
 #}
 {% block content %}
 <div class="stack stack-xl">
   <section class="stack stack-lg pt-24">
     <div class="stack stack-sm">
       <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}{{ _("Attestatsiya") }} {{ r.exam }} · {{ r.days_left }} {{ _("kun qoldi") }}</p>
-      <h1 class="text-display">{{ _("Salom,") }} {{ me.first }}. <span class="muted fw-500">{{ _("Bugun nimani o‘rganamiz?") }}</span></h1>
-    </div>
-    {{ composer(_("AI tutorga savol bering…"), note=False) }}
-    <div class="chips scroll">
-      <a class="chip" href="{{ url_for('user.tutor', q='elif va else farqi nima?') }}">{{ icon("bulb") }}{{ _("elif va else farqi nima?") }}</a>
-      <a class="chip" href="{{ url_for('user.tutor', q='Xatolarimni tahlil qil') }}">{{ icon("target") }}{{ _("Xatolarimni tahlil qil") }}</a>
-      <a class="chip" href="{{ url_for('user.tutor', q='Sikllarga masala ber') }}">{{ icon("code") }}{{ _("Sikllarga masala ber") }}</a>
+      {# Har kirishda boshqa qisqa motivatsion so'z (user.home: session["motto"]) #}
+      <h1 class="text-display">{{ _("Salom,") }} {{ me.first }}. <span class="muted fw-500 motto">{{ motto }}</span></h1>
     </div>
   </section>
 
@@ -62,23 +57,31 @@
     </div>
   </section>
 
-  {# ---------- Keyingi qadam ---------- #}
+  {# ---------- Keyingi qadam ----------
+     Sarlavha holatga qarab: mavzu tugatilmay chiqib ketilgan — «Darsni davom ettirish»;
+     mavzu yakunlangan — «Keyingi mavzu»; majburiy nazorat navbati kelgan — «Majburiy nazorat testini boshlash» #}
+  {% set nx = {
+      "davom": (_("Darsni davom ettirish"), _("Python: shart operatorlari"), _("Dasturlash · 3 / 4 kichik mavzu · 60%% o‘qilgan"), 60, _("Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring."), url_for('user.lesson', holat='qayta'), "≈ 12"),
+      "tugadi": (_("Keyingi mavzu"), _("Python: sikllar (for, while)"), _("Dasturlash · 3 kichik mavzu · yangi mavzu"), 0, _("«Shart operatorlari» mavzusi 92%% bilan o‘zlashtirildi. Endi sikllarga o‘tamiz: for va while farqidan boshlang."), url_for('user.lesson'), "≈ 45"),
+      "nazorat": (_("Majburiy nazorat testini boshlash"), _("Oraliq sinov testi: 4–6 mavzular"), _("3 ta mavzu · 3 bosqich · 30 savol"), 0, _("Navbatdagi mavzuga o‘tishdan oldin oxirgi 3 ta mavzu bo‘yicha majburiy nazorat topshiriladi."), url_for('user.control'), "≈ 35"),
+  } %}
+  {% set nx_label, nx_title, nx_sub, nx_pct, nx_ai, nx_url, nx_min = nx.get(next_state, nx["davom"]) %}
   <section class="card" aria-labelledby="next-title">
     <div class="card-pad stack">
       <div class="row between wrap">
-        <span class="eyebrow">{{ _("Keyingi qadam") }}</span>
-        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}{{ _("≈ 12 daqiqa") }}</span>
+        <span class="eyebrow {{ 't-red' if next_state == 'nazorat' }}">{{ nx_label }}</span>
+        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}{{ nx_min }} {{ _("daqiqa") }}</span>
       </div>
       <div class="stack stack-sm">
-        <h2 id="next-title" class="text-h2l">{{ _("Python: shart operatorlari") }}</h2>
-        <p class="muted small">{{ _("Dasturlash · 3 / 4 kichik mavzu · 60%% o‘qilgan") }}</p>
+        <h2 id="next-title" class="text-h2l">{{ nx_title }}</h2>
+        <p class="muted small">{{ nx_sub }}</p>
       </div>
-      {{ progress(60) }}
+      {% if nx_pct %}{{ progress(nx_pct) }}{% endif %}
       <div class="next-ai row items-start">
         <span class="ai-mark">{{ icon("sparkle") }}</span>
-        <p class="small grow">{{ _("Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring.") }}</p>
+        <p class="small grow">{{ nx_ai }}</p>
       </div>
-      <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('user.lesson', holat='qayta') }}">{{ _("Darsni davom ettirish") }}{{ icon("arrow-right") }}</a>
+      <a class="btn btn-primary btn-lg btn-block" href="{{ nx_url }}">{{ nx_label }}{{ icon("arrow-right") }}</a>
     </div>
   </section>
 
@@ -87,13 +90,13 @@
   {% set done_min = today | selectattr("done") | sum(attribute="min") %}
   <section class="card" aria-labelledby="today-title">
     <div class="card-head">
-      <div><h2 id="today-title" class="text-h3">{{ _("Bugun ·") }} {{ total }} {{ _("daqiqa") }}</h2><div class="xs muted">{{ _("Darslar orasidagi qisqa vaqtga mo‘ljallangan") }}</div></div>
+      <div><h2 id="today-title" class="text-h3">{{ _("Bugun ·") }} {{ total }} {{ _("daqiqa") }}</h2><div class="xs muted">{{ _("«Python: shart operatorlari» mavzusini tugatish rejasi") }}</div></div>
       <span class="small muted num">{{ done_min }} / {{ total }} {{ _("daq") }}</span>
     </div>
     <div class="today-progress">{{ progress((done_min / total * 100)|round, "green", "thin") }}</div>
     <div class="list">
       {% for t in today %}
-      <a class="list-item today-item {{ 'is-done' if t.done }}" href="{{ url_for(t.endpoint) }}">
+      <a class="list-item today-item {{ 'is-done' if t.done }}" href="{{ url_for(t.endpoint, **(t.args or {})) }}">
         <span class="list-ico">{% if t.done %}{{ icon("check", "ico-sm") }}{% else %}{{ icon(t.icon, "ico-sm") }}{% endif %}</span>
         <div class="grow"><div class="today-title">{{ t.title }}</div><div class="sub">{{ t.sub }}</div></div>
         <span class="time-chip num">{{ t.min }} {{ _("daq") }}</span>
@@ -101,6 +104,25 @@
       {% endfor %}
     </div>
   </section>
+
+  {# ---------- Xato qilinayotgan mavzular: foiz qancha yuqori bo'lsa, rang yoqimli sariqdan yoqimli qizilga o'tadi ---------- #}
+  <a class="card weak-card" href="{{ url_for('user.errors') }}" aria-labelledby="weak-title">
+    <div class="card-head">
+      <div><h2 id="weak-title" class="text-h3">{{ _("Xato qilayotgan mavzularingiz") }}</h2><div class="xs muted">{{ _("Oldingi testlaringiz bo‘yicha xatolik foizi") }}</div></div>
+      <span class="small link row row-sm">{{ _("Xatolar analitikasi") }}{{ icon("chevron-right", "ico-sm") }}</span>
+    </div>
+    <ul class="list-reset list">
+      {% set mx = weak | map(attribute=2) | max %}
+      {% for name, sec, pct in weak %}
+      {# --h: 45 (sariq) → 0 (qizil) #}
+      <li class="list-item weak-item" style="--h: {{ (45 - 45 * pct / mx)|round(0, 'floor')|int }}">
+        <div class="grow"><div class="weak-name">{{ name }}</div><div class="sub">{{ sec }}</div></div>
+        <span class="weak-bar" aria-hidden="true"><span style="--v: {{ pct }}%"></span></span>
+        <span class="num strong weak-pct">{{ pct }}%</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </a>
   {% endif %}
 
   {% include "partials/install_card.html" %}

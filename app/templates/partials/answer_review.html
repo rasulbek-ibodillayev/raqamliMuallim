@@ -1,0 +1,29 @@
+{# Savollar va javoblar tahlili: har bir variant; foydalanuvchi tanlagani xato bo'lsa — qizil, to'g'ri javob — yashil.
+   Kontekst: questions — [{n, topic, level, q, code?, options, mine, right, why?}] #}
+<ol class="list-reset stack review-list">
+  {% for r in questions %}
+  {% set ok = r.mine == r.right %}
+  <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else 'is-bad' }}">
+    <div class="row between wrap">
+      <span class="small muted">{{ r.n }}{{ _("-savol") }} · {{ r.topic }}{% if r.level %} · {{ r.level }}{% endif %}</span>
+      {% if r.mine is none %}{{ badge(_("Javobsiz"), "gray") }}
+      {% elif ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}{% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}
+    </div>
+    <p class="strong">{{ r.q }}</p>
+    {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
+    <ul class="list-reset ans-list">
+      {% for o in r.options %}
+      {% set is_right = loop.index0 == r.right %}{% set is_mine = loop.index0 == r.mine %}
+      <li class="ans {{ 'ans-right' if is_right }} {{ 'ans-wrong' if is_mine and not is_right }}">
+        <span class="ans-key">{{ "ABCDEF"[loop.index0] }}</span>
+        <span class="grow">{{ o }}</span>
+        {% if is_mine and not is_right %}<span class="ans-tag">{{ icon("x", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
+        {% elif is_right and is_mine %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
+        {% elif is_right %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("To‘g‘ri javob") }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% if not ok and r.why %}<div class="card card-flat small u-p-12-14 u-c-text2"><b>{{ _("Izoh.") }}</b> {{ r.why }}</div>{% endif %}
+  </li>
+  {% endfor %}
+</ol>

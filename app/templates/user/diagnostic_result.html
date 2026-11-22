@@ -12,7 +12,7 @@
   </section>
 
   <section class="card card-pad stack">
-    <div class="row between"><span class="strong">{{ _("Mavzular holati") }}</span><a class="small link" href="{{ url_for('user.knowledge', view='xarita') }}">{{ _("Bilim xaritasi") }}</a></div>
+    <div class="row between"><span class="strong">{{ _("Mavzular holati") }}</span><a class="small link" href="{{ url_for('user.plan') }}">{{ _("O‘quv reja") }}</a></div>
     {% set colors = {"none": "var(--border-strong)", "learn": "#f59e0b", "relearn": "var(--red)", "done": "var(--blue)", "solid": "var(--green)"} %}
     <div class="stacked-bar" aria-hidden="true">{% for k, v in dist %}<span style="--v: {{ v }}%; --d: {{ colors[k] }}"></span>{% endfor %}</div>
     <ul class="list-reset row wrap g-6">
@@ -35,11 +35,19 @@
   <section class="card card-pad stack stack-sm">
     <span class="eyebrow">{{ _("Rejaning boshlanishi") }}</span>
     <ol class="list-reset stack stack-sm">
-      {% for p in plan[2:5] %}
+      {% for p in plan if p.state != "done" %}{% if loop.index <= 3 %}
       <li class="row row-sm"><span class="badge badge-gray num">{{ loop.index }}</span><span class="grow">{{ p.name }}</span>{% if p.min %}<span class="xs muted num">{{ p.min }} {{ _("daq") }}</span>{% endif %}</li>
-      {% endfor %}
+      {% endif %}{% endfor %}
     </ol>
-    <p class="xs muted">{{ _("Bilgan mavzularingiz rejada «O‘zlashtirilgan» bo‘lib turadi. Ularni tasdiqlash testi bilan mustahkamlashingiz mumkin.") }}</p>
+    <p class="xs muted">{{ _("90%% va undan yuqori o‘zlashtirgan mavzularingiz rejadan chiqarildi:") }} {{ excluded|map(attribute=0)|join(", ") }}.</p>
+  </section>
+
+  {# Har bir savol va javob: xato — qizil, to'g'ri javob — yashil #}
+  <section class="stack">
+    <div class="row between wrap"><h2 class="eyebrow">{{ _("Savollar va javoblaringiz") }}</h2>
+      <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("xato javobingiz") }} <span class="dot dot-green"></span>{{ _("to‘g‘ri javob") }}</span></div>
+    <p class="xs muted">{{ _("Diagnostika bosqichma-bosqich: oson → o‘rta → qiyin. Namunada savollarning bir qismi ko‘rsatilgan.") }}</p>
+    {% include "partials/answer_review.html" %}
   </section>
 
   <div class="stack stack-sm">
