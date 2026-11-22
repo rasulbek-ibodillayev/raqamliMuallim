@@ -298,6 +298,12 @@ svg.faint, .ico.faint, .faint > .ico { color: var(--faint); }
   }
 }
 .auth-foot { padding: 20px; text-align: center; }
+/* Kirish sahifalari foni: nuqtalar tarmog'i (js/particles.js). Forma joylashgan markazda xiralashadi, matn o'qilishi buzilmaydi */
+.auth { position: relative; isolation: isolate; }
+.auth-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 0, 0, .25), #000 85%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 0, 0, .25), #000 85%); }
+@media print { .auth-bg { display: none; } }
 
 /* =========================================================
    Komponentlar
@@ -1095,12 +1101,25 @@ body.rest-open { overflow: hidden; }
 .rest-actions { display: flex; gap: 8px; width: 100%; margin-top: 6px; }
 .rest-actions .btn { flex: 1; }
 .rest-break { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; overflow: hidden; }
-/* Yarim shaffof fon ustida sekin harakatlanuvchi gradient qatlam */
-.rest-glow { position: absolute; inset: -20%; opacity: .55;
-  background: linear-gradient(120deg, #a5f3fc, #c7d2fe, #fbcfe8, #bbf7d0, #a5f3fc); background-size: 300% 300%;
-  filter: blur(40px); animation: rest-flow 14s ease-in-out infinite; }
-@keyframes rest-flow { 0% { background-position: 0% 50%; transform: rotate(0deg) scale(1); } 50% { background-position: 100% 50%; transform: rotate(4deg) scale(1.06); } 100% { background-position: 0% 50%; transform: rotate(0deg) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .rest-glow { animation: none; } }
+/* 5 daqiqalik tanaffus foni: sekin suzuvchi yumshoq rangli gradient dog'lar (sof CSS).
+   Dog'lar shaffof — ortidagi sahifa xira ko'rinib turadi. Blur filtri o'rniga radial gradient: telefonda yengil */
+.rest-glow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: .75; }
+.rest-glow i { position: absolute; width: 75vmax; height: 75vmax; border-radius: 50%; will-change: transform;
+  background: radial-gradient(circle at center, var(--blob) 0%, color-mix(in srgb, var(--blob) 40%, transparent) 35%, transparent 68%);
+  animation: rest-drift 26s ease-in-out infinite alternate; }
+.rest-glow i:nth-child(1) { --blob: color-mix(in srgb, var(--ai-1) 45%, transparent); top: -30vmax; left: -25vmax; }
+.rest-glow i:nth-child(2) { --blob: color-mix(in srgb, var(--ai-3) 42%, transparent); top: -20vmax; right: -30vmax; animation-duration: 31s; animation-delay: -8s; }
+.rest-glow i:nth-child(3) { --blob: rgba(244, 114, 182, .32); bottom: -35vmax; left: -15vmax; animation-duration: 29s; animation-delay: -15s; }
+.rest-glow i:nth-child(4) { --blob: rgba(74, 222, 128, .28); bottom: -30vmax; right: -25vmax; animation-duration: 35s; animation-delay: -4s; }
+@keyframes rest-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(14vmax, 10vmax) scale(1.12); }
+  66%  { transform: translate(-8vmax, 16vmax) scale(.94); }
+  100% { transform: translate(10vmax, -6vmax) scale(1.06); }
+}
+:root[data-theme="dark"] .rest-glow { opacity: .9; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rest-glow { opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .rest-glow i { animation: none; } }
 .rest-break-card { position: relative; width: min(440px, 100%); text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center;
   padding: 32px 24px; border-radius: var(--r-xl); background: color-mix(in srgb, var(--surface) 70%, transparent); border: 1px solid var(--border); }
 .rest-break-card p { margin: 0; color: var(--text-2); }
@@ -1259,3 +1278,66 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 639px) {
   .row.wrap > .select.w-auto { flex: 1 1 140px; min-width: 0; }
 }
+
+/* =========================================================
+   AI muhiti: yumshoq AI ranglari (--ai-1/2/3), sekin jonlanish.
+   Hammasi yengil (gradient va transform), «harakatni kamaytirish» yoqilganda harakat o'chadi.
+   ========================================================= */
+/* Sahifa tepasidagi xira AI nurlanishi (ilova va panellar) */
+/* isolation ishlatilmaydi: .main ichidagi oynalar (sheet, bildirishnomalar) pastki panel ustida qolishi kerak */
+.main { position: relative; }
+.main::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 360px; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 100% at 10% 0%, color-mix(in srgb, var(--ai-1) 16%, transparent), transparent 72%),
+    radial-gradient(50% 90% at 95% 0%, color-mix(in srgb, var(--ai-3) 15%, transparent), transparent 72%);
+}
+
+/* AI kartalari va AI tugmalari: gradient chegara sekin oqadi */
+.ai-card, .btn-ai {
+  background:
+    linear-gradient(var(--ai-soft), var(--ai-soft)) padding-box,
+    linear-gradient(120deg, var(--ai-1), var(--ai-3), var(--ai-2), var(--ai-1)) border-box;
+  background-size: 100% 100%, 300% 300%;
+  animation: ai-border 9s ease-in-out infinite alternate;
+}
+.btn-ai { background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(120deg, var(--ai-1), var(--ai-3), var(--ai-2), var(--ai-1)) border-box;
+  background-size: 100% 100%, 300% 300%; }
+.btn-ai:hover { background:
+    linear-gradient(var(--ai-soft), var(--ai-soft)) padding-box,
+    linear-gradient(120deg, var(--ai-1), var(--ai-3), var(--ai-2), var(--ai-1)) border-box;
+  background-size: 100% 100%, 300% 300%; box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--ai-1) 55%, transparent); }
+@keyframes ai-border { from { background-position: 0 0, 0% 50%; } to { background-position: 0 0, 100% 50%; } }
+.ai-card { box-shadow: 0 8px 24px -16px color-mix(in srgb, var(--ai-1) 45%, transparent);
+  background:
+    linear-gradient(var(--ai-soft), var(--ai-soft)) padding-box,
+    linear-gradient(120deg, color-mix(in srgb, var(--ai-1) 55%, transparent), color-mix(in srgb, var(--ai-3) 50%, transparent),
+      color-mix(in srgb, var(--ai-2) 45%, transparent), color-mix(in srgb, var(--ai-1) 55%, transparent)) border-box;
+  background-size: 100% 100%, 300% 300%; }
+
+/* AI belgisi: yumshoq nur; pastki paneldagi AI tutor tugmasi ham */
+.ai-mark, .tab-ai .tab-ai-dot, .brand-mark { box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--ai-1) 60%, transparent); }
+.tab-ai.active .tab-ai-dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ai-2) 22%, transparent), 0 6px 18px -4px color-mix(in srgb, var(--ai-1) 70%, transparent); }
+
+/* AI «o'ylayapti»: nuqtalar AI ranglarida, belgisi sekin nafas oladi */
+.typing span { background: var(--ai-1); }
+.typing span:nth-child(2) { background: var(--ai-2); }
+.typing span:nth-child(3) { background: var(--ai-3); }
+.msg-ai:has(.typing) .ai-mark { animation: ai-think 1.6s ease-in-out infinite; }
+@keyframes ai-think { 50% { transform: scale(1.08); box-shadow: 0 0 0 6px color-mix(in srgb, var(--ai-2) 15%, transparent); } }
+
+/* AI matni (sarlavhalardagi gradient so'z) sekin tovlanadi */
+.ai-text { background-size: 200% 100%; animation: ai-text 8s ease-in-out infinite alternate; }
+@keyframes ai-text { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+
+/* Bosh sahifadagi motivatsion jumla — AI ranglaridagi gradient matn */
+.text-display .motto { color: transparent; -webkit-background-clip: text; background-clip: text; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background-image: linear-gradient(90deg, var(--ai-1), var(--ai-2), var(--ai-3), var(--ai-1)); background-size: 300% 100%;
+  animation: ai-text 10s ease-in-out infinite alternate; }
+
+@media (prefers-reduced-motion: reduce) {
+  .text-display .motto, .ai-card, .btn-ai, .ai-text, .msg-ai:has(.typing) .ai-mark { animation: none; }
+}
+@media print { .main::before { display: none; } }
