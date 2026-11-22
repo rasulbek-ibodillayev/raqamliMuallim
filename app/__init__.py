@@ -1,15 +1,44 @@
 """raqamliMuallim — Flask ilova fabrikasi.
 
 Ekranlar hozircha namunaviy ma'lumotlar (mock.py) bilan ishlaydi.
+Ma'lumotlar bazasi modellari: app/models (TZ 23-bo'lim), migratsiyalar: migrations/.
 """
 import os
 
 from flask import Flask
 
+DEFAULT_DB = "postgresql+psycopg://raqamli:raqamli@localhost:5432/raqamli"  # docker-compose.yml dagi db
 
-def create_app() -> Flask:
+
+def create_app(config: dict | None = None) -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", DEFAULT_DB)
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
+    # /ekranlar va /_rol/<rol> — faqat ishlab chiqishda (debug rejimi yoki RM_DEV_TOOLS=1)
+    app.config["DEV_TOOLS"] = os.environ.get("RM_DEV_TOOLS") == "1"
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
+    app.config.update(config or {})
+
+    from .extensions import db, login_manager, migrate
+    from . import models  # noqa: F401 — Alembic barcha jadvallarni ko'rishi uchun
+
+    db.init_app(app)
+    migrate.init_app(app, db, compare_type=True)
+
+    login_manager.init_app(app)
+    # "basic": telefonda IP tez-tez almashadi, "strong" esa bunda foydalanuvchini chiqarib yuborardi
+    login_manager.session_protection = "basic"
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from .models.users import User
+        return db.session.get(User, int(user_id)) if user_id.isdigit() else None
+
+    from . import cli
+    cli.init_app(app)
 
     # CSRF: barcha POST so'rovlar (formalar — yashirin maydon, fetch — X-CSRFToken sarlavhasi)
     from flask_wtf.csrf import CSRFProtect
@@ -83,9 +112,11 @@ def create_app() -> Flask:
         # _ui.html makroslari barcha shablonlarda importsiz ishlaydi
         ui = {name: get_template_attribute("_ui.html", name) for name in ui_macros}
         # errors/form — forma xatolari va kiritilgan qiymatlar (forms.respond beradi), standart: bo'sh
+        from .views.account import with_user
         from .views.test import TYPE_SLUGS
-        return {"errors": {}, "form": {}, "me": mock.ME, "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
-                "search_index": _search_index, "staff_of": lambda r: mock.STAFF.get(r, {}), **ui}
+        # me / staff_of — kirgan foydalanuvchining ismi va aloqasi, qolgani hozircha mock'dan
+        return {"errors": {}, "form": {}, "me": with_user(mock.ME), "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
+                "search_index": _search_index, "staff_of": lambda r: with_user(mock.STAFF.get(r, {})), **ui}
 
     def _search_index():
         """Tezkor qidiruv (Ctrl+K) uchun sahifalar va mavzular ro'yxati."""

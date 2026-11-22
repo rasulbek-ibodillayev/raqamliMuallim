@@ -141,20 +141,31 @@ def error_preview(code):
     return render_template("errors/error.html", code=code)
 
 
+def _dev_tools_only():
+    """/ekranlar va /_rol faqat ishlab chiqishda ochiladi (debug yoki DEV_TOOLS); aks holda 404."""
+    from flask import abort, current_app
+    if not (current_app.debug or current_app.config.get("DEV_TOOLS")):
+        abort(404)
+
+
 @bp.get("/_rol/<role>")
 def as_role(role):
-    """Faqat ishlab chiqish uchun: rolni almashtirib, sahifani ochish (/ekranlar havolalari shu orqali o'tadi)."""
-    from flask import abort, redirect, request, session, url_for
+    """Faqat ishlab chiqish uchun: shu roldagi namunaviy akkauntga kirib, sahifani ochish
+    (/ekranlar havolalari shu orqali o'tadi). Akkaunt bo'lmasa yaratiladi (app/cli.py)."""
+    from flask import abort, redirect, request, url_for
+    from flask_login import login_user
 
-    from ..roles import HOME, ROLES
+    from ..cli import demo_user
+    from ..roles import HOME, ROLES, safe_next
+    _dev_tools_only()
     if role not in ROLES:
         abort(404)
-    session["role"] = role
-    nxt = request.args.get("next", "")
-    return redirect(nxt if nxt.startswith("/") and not nxt.startswith("//") else url_for(HOME[role]))
+    login_user(demo_user(role))
+    return redirect(safe_next(request.args.get("next")) or url_for(HOME[role]))
 
 
 @bp.get("/ekranlar")
 def screens():
     from ..roles import REQUIRED
+    _dev_tools_only()
     return render_template("meta/screens.html", groups=SCREENS, required=REQUIRED)

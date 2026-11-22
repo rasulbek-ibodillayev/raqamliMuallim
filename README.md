@@ -12,6 +12,37 @@ python -m venv .venv
 .venv/Scripts/python run.py
 ```
 
+Ma’lumotlar bazasi (PostgreSQL 16 + pgvector, Docker Desktop kerak):
+
+```bash
+docker compose up -d db
+FLASK_APP=run.py .venv/Scripts/flask db upgrade
+```
+
+Boshqa bazaga ulanish uchun `DATABASE_URL` muhit o‘zgaruvchisini bering. Kirish, ro‘yxatdan o‘tish va profil bazaga yozadi,
+qolgan ekranlar hozircha `mock.py` dan o‘qiydi.
+
+Namunaviy akkauntlar (parol `parol1234`, maxfiy so‘z «informatika»):
+
+```bash
+FLASK_APP=run.py .venv/Scripts/flask namuna-foydalanuvchilar
+```
+
+| Rol | Login |
+|-----|-------|
+| o‘qituvchi | +998 90 123 45 67 |
+| ekspert | ekspert@raqamlimuallim.uz |
+| admin | admin@raqamlimuallim.uz |
+
+`/ekranlar` va `/_rol/<rol>` faqat debug rejimida (`run.py`) yoki `RM_DEV_TOOLS=1` bilan ochiladi.
+
+Testlar alohida bazada ishlaydi (bir marta yarating):
+
+```bash
+docker exec raqamlimuallim-db-1 psql -U raqamli -d raqamli -c "CREATE DATABASE raqamli_test"
+.venv/Scripts/python -m pytest -q
+```
+
 Keyin brauzerda oching:
 - http://localhost:5000/ekranlar — barcha ekranlar ro‘yxati
 - http://localhost:5000/ — mehmon sahifasi
@@ -50,6 +81,8 @@ Tarjima qilinmagan satr o‘zbekcha ko‘rinadi.
 ```
 app/
   __init__.py          Flask ilova fabrikasi
+  extensions.py        SQLAlchemy va Flask-Migrate
+  models/              ma’lumotlar modeli, 26 jadval (TZ 23: docs/tz-23-malumotlar-modeli.md)
   mock.py              namunaviy ma’lumotlar (keyin bazaga almashtiriladi)
   views/               blueprintlar: auth, user, test, expert, admin, meta
   templates/
@@ -62,7 +95,6 @@ app/
     js/core.js         har sahifada: formalar (rmForm), tarjima (rmT), toast, OTP, kod ranglash, nusxa olish
     js/learner.js      o'qituvchi qobig'i: menyu/qidiruv, ilovani o'rnatish, dam olish taymeri
     js/lesson.js       dars sahifasi · js/tutor.js — AI tutor · js/test.js — test va attestatsiya
-design/stitch-reference/   Google Stitch eksporti: 82 ekran bo‘limlarga ajratilgan + DESIGN.md
 docs/usability-test-plan.md  5 nafar o‘qituvchi bilan sinov rejasi (vazifalar, kuzatuv varag‘i, SUS)
 ```
 
@@ -77,8 +109,9 @@ docs/usability-test-plan.md  5 nafar o‘qituvchi bilan sinov rejasi (vazifalar,
 
 ## Keyingi qadamlar
 
-1. SQLAlchemy modellari va Alembic migratsiyalari (TZ 23-bo‘lim).
-2. Telegram/email orqali ro‘yxatdan o‘tish va sessiyalar.
+1. ~~SQLAlchemy modellari va Alembic migratsiyalari (TZ 23-bo‘lim).~~ Tayyor; `questions` maydonlari TZ 6.1 bilan solishtirilishi kerak.
+2. ~~Ro‘yxatdan o‘tish va sessiyalar.~~ Flask-Login va `users` jadvali ulandi; Telegram bot va email orqali kod yuborish
+   (hozir kod har doim 123456), kirish urinishlarini cheklash va ekspert taklifnomalari jadvali qoldi.
 3. `mock.py` o‘rniga servis qatlami; formalarni HTMX bilan ulash.
 4. ~~Test javoblarini IndexedDB'ga yozib, internet tiklanganda yuborish.~~ Tayyor (`static/js/player.js`, `/api/urinish`); backendda API saqlashni bazaga o‘tkazish qoldi.
 5. Eslatmalar, bildirishnomalar va qidiruvni brauzer xotirasi va namunaviy ma’lumot o‘rniga API'ga ulash.

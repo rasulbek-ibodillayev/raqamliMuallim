@@ -4,33 +4,54 @@ O'qituvchi (user), ekspert va admin profillari bir xil formalardan foydalanadi; 
 blueprint (url'lar /app/profil, /ekspert/profil, /admin/profil). register(bp, ...) shu yo'nalishlarni
 berilgan blueprint'ga qo'shadi. Parolni unutganda — umumiy /parol-tiklash (auth.reset) sahifasi.
 
-Namunada joriy parol "parol1234", tasdiqlash kodi 123456. Backendda: users.password_hash, audit_log.
+Parol, maxfiy so'z, ism va telefon/email users jadvalida (current_user) saqlanadi.
+Tasdiqlash kodi hozircha 123456 (Telegram bot va email ulanmagan). Keyin: audit_log.
 """
 from flask import jsonify, render_template, request, session, url_for
 from flask_babel import gettext as _
+from flask_login import current_user
+from sqlalchemy.exc import IntegrityError
 
 from .. import mock as m
+from ..extensions import db
+from ..models.users import User
 from ..forms import (check_email, check_name, check_otp, check_password, check_phone, check_secret, field, fmt_phone,
                      norm_phone, otp_code, required, respond, validate)
 
-DEMO_PASSWORD = "parol1234"
 DEMO_OTP = "123456"
 PW_MAX_FAILS = 5
 
 
+def mask_phone(p: str | None) -> str:
+    """+998901234567 → +998 90 *** ** 67."""
+    d = (p or "").lstrip("+")
+    return f"+{d[:3]} {d[3:5]} *** ** {d[10:]}" if len(d) == 12 else (p or "")
+
+
+def with_user(base: dict) -> dict:
+    """Namunaviy profil (mock) ustiga kirgan foydalanuvchining haqiqiy ma'lumotlari. Imtihon sanasi va kunlar
+    hali mock'dan olinadi (users.exam_date bilan keyingi bosqichda ulanadi)."""
+    u = current_user
+    if not u.is_authenticated:
+        return base
+    return {**base, "first": u.first_name, "last": u.last_name,
+            "initials": (u.first_name[:1] + u.last_name[:1]).upper(),
+            "phone": mask_phone(u.phone), "phone_raw": u.phone or "", "email": u.email or ""}
+
+
 def account_of(role: str) -> dict:
-    """Profil egasining ma'lumotlari (namuna). Backendda: current_user."""
-    return m.ME if role == "user" else m.STAFF[role]
+    """Profil egasining ma'lumotlari (kirgan foydalanuvchi)."""
+    return with_user(m.ME if role == "user" else m.STAFF[role])
 
 
 def check_current_password(pw: str):
-    """Joriy parolni tekshiradi; 5 ta xato urinishdan keyin 15 daqiqa bloklanadi (namunada — sessiya oxirigacha)."""
+    """Joriy parolni tekshiradi; 5 ta xato urinishdan keyin bloklanadi (hozircha — sessiya oxirigacha)."""
     fails = session.get("pw_fails", 0)
     if fails >= PW_MAX_FAILS:
         return _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring")
     if not pw:
         return _("Joriy parolni kiriting")
-    if pw != DEMO_PASSWORD:
+    if not current_user.check_password(pw):
         session["pw_fails"] = fails + 1
         left = PW_MAX_FAILS - fails - 1
         return (_("Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=left) if left
@@ -53,6 +74,9 @@ def save_info(bp_name, role, template, **extra):
         "fn": (field("fn"), lambda v: check_name(v, "first")),
         "ln": (field("ln"), lambda v: check_name(v, "last")),
     })
+    if not errors:
+        current_user.first_name, current_user.last_name = field("fn"), field("ln")
+        db.session.commit()
     return respond(errors=errors, template=template, **context(bp_name, role, open="info", **extra),
                    redirect_to=url_for(bp_name + ".profile"), message=_("Shaxsiy ma’lumotlar saqlandi"))
 
@@ -76,6 +100,8 @@ def contact_code(bp_name, role, template, **extra):
     target = norm_phone(value) if method == "phone" else value.lower()
     if not errors and target == current:
         errors = {"contact": _("Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting")}
+    if not errors and User.by_login(target) is not None:
+        errors = {"contact": _("Bu telefon/email boshqa akkauntga bog‘langan")}
     pw_error = check_current_password(request.form.get("pw", ""))
     if pw_error:
         errors = {**errors, "pw": pw_error}
@@ -96,15 +122,26 @@ def contact_confirm(bp_name, role, template, **extra):
                        **context(bp_name, role, open="contact", **extra))
     errors = validate({"otp": (otp_code(), check_otp, lambda v: None if v == DEMO_OTP else _("Kod noto‘g‘ri. Namunada kod: 123456"))})
     if not errors:
+        setattr(current_user, cc["method"], cc["target"])
+        try:
+            db.session.commit()
+        except IntegrityError:   # shu orada boshqa akkaunt shu raqam/emailni olgan
+            db.session.rollback()
+            errors = {"otp": _("Bu telefon/email boshqa akkauntga bog‘langan")}
+    if not errors:
         session.pop("contact_change", None)
-    msg = (_("Telefon raqam yangilandi") if cc["method"] == "phone" else _("Email yangilandi")) if not errors else None
+    msg =(_("Telefon raqam yangilandi") if cc["method"] == "phone" else _("Email yangilandi")) if not errors else None
     return respond(errors=errors, template=template, **context(bp_name, role, open="contact", **extra),
                    redirect_to=url_for(bp_name + ".profile"), message=msg)
 
 
 def save_secret(bp_name, role, template, **extra):
     pw = request.form.get("pw", "")
-    errors = validate({"pw": (pw, required), "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw))})
+    errors = validate({"pw": (pw, check_current_password),
+                       "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw))})
+    if not errors:
+        current_user.set_secret(request.form.get("secret", ""))
+        db.session.commit()
     return respond(errors=errors, template=template, **context(bp_name, role, open="secret", **extra),
                    redirect_to=url_for(bp_name + ".profile"), message=_("Maxfiy so‘z yangilandi"))
 
@@ -112,12 +149,15 @@ def save_secret(bp_name, role, template, **extra):
 def change_password(bp_name, role, template, **extra):
     new = request.form.get("new", "")
     errors = validate({
-        "old": (request.form.get("old", ""), required),
+        "old": (request.form.get("old", ""), check_current_password),
         "new": (new, check_password),
         "new2": (request.form.get("new2", ""), lambda v: None if v == new else _("Parollar bir xil emas")),
     })
     if not errors and request.form.get("old") == new:
         errors = {"new": _("Yangi parol joriy paroldan farq qilsin")}
+    if not errors:
+        current_user.set_password(new)
+        db.session.commit()
     return respond(errors=errors, template=template, **context(bp_name, role, open="pw", **extra),
                    redirect_to=url_for(bp_name + ".profile"), message=_("Parol o‘zgartirildi"))
 

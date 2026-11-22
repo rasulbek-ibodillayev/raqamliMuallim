@@ -4,6 +4,7 @@
 <form class="stack stack-lg" action="{{ url_for('auth.login') }}" method="post" novalidate
       x-data="rmForm({ show: false })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
   {% include "partials/form_open.html" %}
+  {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
   <div class="stack stack-sm">
     <h1>{{ _("Qaytganingizdan xursandmiz") }}</h1>
     <p class="lead">{{ _("Telefon raqam yoki email va parolingizni kiriting.") }}</p>

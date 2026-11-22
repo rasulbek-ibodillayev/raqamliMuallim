@@ -45,13 +45,14 @@ def test_success_json_and_prg(as_role):
     assert r.status_code == 302 and r.headers["Location"].endswith("/app/profil")
 
 
-def test_registration_flow(client):
-    assert client.post("/royxat", data={"phone": "90 123 45 67"}, headers=JSON).json["ok"]
-    assert client.post("/royxat/telegram", data={"otp": list("123456")}, headers=JSON).json["ok"]
-    r = client.post("/royxat/malumotlar", headers=JSON, data={
-        "fn": "Dilnoza", "ln": "Karimova", "pw": "parol1234", "pw2": "parol1234",
+def test_registration_flow(guest):
+    assert guest.post("/royxat", data={"phone": "90 765 43 21"}, headers=JSON).json["ok"]
+    assert guest.post("/royxat/telegram", data={"otp": list("123456")}, headers=JSON).json["ok"]
+    r = guest.post("/royxat/malumotlar", headers=JSON, data={
+        "fn": "Malika", "ln": "Tursunova", "pw": "parol1234", "pw2": "parol1234",
         "secret": "Birinchi maktabim", "consent": "1"})
     assert r.json["ok"] and "6 oy" in r.json["message"]
+    assert guest.get("/app/").status_code == 200   # ro'yxatdan o'tgach darhol kirgan
 
 
 def test_csrf_required():

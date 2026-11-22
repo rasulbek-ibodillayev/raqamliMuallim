@@ -1,0 +1,37 @@
+# Lokal ishlab chiqish: PostgreSQL 16 + pgvector va LibreTranslate (o'z serverimizdagi tarjima xizmati)
+#   docker compose up -d db
+#   docker compose up -d translate      # birinchi ishga tushirishda modellar yuklanadi (bir necha daqiqa)
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: raqamli
+      POSTGRES_PASSWORD: raqamli
+      POSTGRES_DB: raqamli
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raqamli -d raqamli"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # LibreTranslate. scripts/translate.py uni RM_TRANSLATE_URL=http://localhost:5050/translate orqali ishlatadi.
+  # Argos modellarida o'zbek (uz) va qoraqalpoq (kaa) yo'q: inglizcha tayyor ruscha tarjimadan (ru → en) olinadi.
+  translate:
+    image: libretranslate/libretranslate:v1.6.0
+    restart: unless-stopped
+    environment:
+      LT_LOAD_ONLY: "ru,en"
+      LT_UPDATE_MODELS: "true"
+    ports:
+      - "5050:5000"
+    volumes:
+      - lt_models:/home/libretranslate/.local
+
+volumes:
+  pgdata:
+  lt_models:
