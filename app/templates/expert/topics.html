@@ -8,7 +8,7 @@
   Yaratilgan mavzu va darslar savollar bankidagi filtrlarga avtomatik qo'shiladi.
   Namunada o'zgarishlar brauzerda saqlanadi (rm-expert-content); backendda /api/kontent ga yoziladi.
 #}
-<script>window.RM_CONTENT = {{ content|tojson }}; window.RM_BLOCKS = {{ block_kinds|tojson }};</script>
+<script nonce="{{ csp_nonce }}">window.RM_CONTENT = {{ content|tojson }}; window.RM_BLOCKS = {{ block_kinds|tojson }};</script>
 <div x-data="rmContentEditor(window.RM_CONTENT)" x-init="init()">
   {% call page_head(_("Mavzular va darslar"), _("Avval mavzu yarating, so‘ng uning ichida darslar qo‘shing")) %}
   <button class="btn btn-primary btn-sm" type="button" @click="open('topic-new')" :aria-expanded="mode === 'topic-new'">{{ icon("plus", "ico-sm") }}{{ _("Mavzu yaratish") }}</button>
@@ -122,7 +122,7 @@
             </div>
             <template x-if="b.kind === 'rasm'"><div class="stack stack-sm">
               <input class="input" type="file" accept="image/*" @change="loadImage(b, $event)" aria-label="{{ _('Rasm yuklash') }}">
-              <img class="q-img-preview" :src="b.body" x-show="b.body" alt="">
+              <template x-if="b.body"><img class="q-img-preview" :src="b.body" alt=""></template>
               <span class="hint">{{ _("Namunada rasm brauzerda saqlanadi (1 MB gacha).") }}</span>
             </div></template>
             <input class="input" type="url" x-show="b.kind === 'video'" x-model="b.body" @input="persist()" placeholder="https://… ({{ _('YouTube yoki video fayl havolasi') }})" aria-label="{{ _('Video havolasi') }}">
@@ -145,7 +145,7 @@
           </template>
           <button class="self-start btn btn-ghost btn-sm" type="button" @click="lesson().links.push({ title: '', url: '' }); persist()">{{ icon("plus", "ico-sm") }}{{ _("Havola biriktirish") }}</button>
         </div>
-        <div class="row justify-end"><button class="btn btn-primary" type="button" @click="persist(); rmToast('{{ _('Dars saqlandi') }}')">{{ _("Saqlash") }}</button></div>
+        <div class="row justify-end"><button class="btn btn-primary" type="button" @click="persist(); rmToast({{ _('Dars saqlandi')|tojson|forceescape }})">{{ _("Saqlash") }}</button></div>
       </div></template>
     </section>
 
@@ -157,7 +157,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function rmContentEditor(seed) {
   var KEY = "rm-expert-content", T = {{ {"empty": _("Nomini kiriting"), "dupTopic": _("Bunday mavzu allaqachon bor"),
     "dupLesson": _("Bu mavzuda bunday dars allaqachon bor"), "savedTopic": _("Mavzu saqlandi"), "savedLesson": _("Dars qo‘shildi"),

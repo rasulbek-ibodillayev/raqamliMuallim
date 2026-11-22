@@ -2,6 +2,7 @@
 {% block title %}{{ _("Muhokama") }}{% endblock %}
 {% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.discussions') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{{ _("Muhokama") }}</span>{% endblock %}
 {% block content %}
+<h1 class="sr-only">{{ _("Muhokama") }}</h1>
 <div class="stack stack-lg" x-data="{ added: [] }" @rm-posted="added.push($event.detail)">
   <div class="card card-pad stack">
     <span class="xs muted">{{ _("14-savol · Sanoq sistemalari") }}</span>
@@ -38,8 +39,8 @@
         x-data="rmForm({}, function (j, f) { f.reset(); f.dispatchEvent(new CustomEvent('rm-posted', { bubbles: true, detail: j.data })); rmToast(j.message); return false; })"
         x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <textarea rows="1" name="body" maxlength="2000" placeholder="Fikringizni yozing…" aria-label="Fikringiz" aria-describedby="body-err" data-autosize
-              @input="clear('body')" @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); $el.form.requestSubmit() }">{{ form.body }}</textarea>
+    <textarea rows="1" name="body" maxlength="2000" placeholder="{{ _('Fikringizni yozing…') }}" aria-label="{{ _('Fikringiz') }}" aria-describedby="body-err" data-autosize
+              @input="clear('body')">{{ form.body }}</textarea>{# Enter — yuborish: core.js (.composer textarea) #}
     <div class="composer-actions"><button class="send" type="submit" aria-label="{{ _('Yuborish') }}" :disabled="busy">{{ icon("arrow-up") }}</button></div>
     {{ field_error("body", errors) }}
   </form>

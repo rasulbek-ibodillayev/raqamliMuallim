@@ -1,8 +1,8 @@
 """Ko'p tillilik (Flask-Babel).
 
 - Asosiy til — o'zbekcha (lotin). Shablon matnlari `{{ _("...") }}` ichida; msgid — o'zbekcha matnning o'zi.
-- Rus, ingliz va qoraqalpoq tillari: app/translations/<til>/LC_MESSAGES/messages.po. Tarjima qilinmagan satr o'zbekcha ko'rinadi.
-- Til tanlash: ?til=uz|ru|en|kaa (sessiyada eslab qolinadi), keyin sessiya, keyin standart (uz).
+- Rus va ingliz tillari: app/translations/<til>/LC_MESSAGES/messages.po. Tarjima qilinmagan satr o'zbekcha ko'rinadi.
+- Til tanlash: ?til=uz|ru|en (sessiyada eslab qolinadi), keyin sessiya, keyin standart (uz).
 - Kataloglarni to'ldirish va kompilyatsiya: scripts/translate.py (lug'at + ixtiyoriy mashina tarjimasi).
 
 Yangi matn qo'shilganda:
@@ -16,9 +16,8 @@ Eslatma: Jinja "newstyle" gettext har bir satrni %-formatlaydi, shuning uchun ma
 from flask import request, session
 from flask_babel import Babel
 
-LANGS = {"uz": "O‘zbekcha", "ru": "Русский", "en": "English", "kaa": "Qaraqalpaqsha"}
-# Tugmadagi qisqa nom (kaa — ISO 639 kodi, foydalanuvchiga «QQ» deb ko'rsatiladi)
-SHORT = {"uz": "UZ", "ru": "RU", "en": "EN", "kaa": "QQ"}
+LANGS = {"uz": "O‘zbekcha", "ru": "Русский", "en": "English"}
+SHORT = {"uz": "UZ", "ru": "RU", "en": "EN"}
 DEFAULT = "uz"
 
 

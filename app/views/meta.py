@@ -15,6 +15,9 @@ SCREENS = [
         ("auth.reset", "Parolni tiklash", {}),
         ("auth.recover", "Maxfiy so‘z orqali tiklash", {"qayta": 1}),
         ("auth.privacy", "Maxfiylik siyosati", {}),
+        ("auth.invite_demo", "Ekspert taklifnomasi — parol o‘rnatish", {}),
+        ("auth.invite_demo", "Ekspert taklifnomasi — muddati o‘tgan", {"holat": "eskirgan"}),
+        ("auth.invite_demo", "Ekspert taklifnomasi — yaroqsiz havola", {"holat": "yaroqsiz"}),
         ("auth.verify_certificate_lookup", "Sertifikatni tekshirish — raqam kiritish", {}),
         ("auth.verify_certificate", "Sertifikatni tekshirish — haqiqiy", {"cert_no": "INF-2026-000123"}),
         ("auth.verify_certificate", "Sertifikatni tekshirish — muddati o‘tgan", {"cert_no": "INF-2023-000099"}),
@@ -102,13 +105,16 @@ SCREENS = [
         ("expert.editor", "Savol qo‘shish", {}),
         ("expert.topics", "Mavzular va dars muharriri", {}),
         ("expert.objections", "E’tirozlar", {}),
+        ("expert.profile", "Ekspert profili", {}),
     ]),
     ("Admin paneli", [
         ("admin.stats", "Statistika", {}),
         ("admin.users", "Foydalanuvchilar", {}),
         ("admin.user_detail", "Foydalanuvchi — to‘liq ma’lumot", {"uid": 1}),
         ("admin.experts", "Ekspertlar", {}),
+        ("admin.experts", "Ekspertlar — javob kutayotgan taklifnoma", {"namuna": 1}),
         ("admin.settings", "Sozlamalar", {}),
+        ("admin.profile", "Admin profili", {}),
     ]),
 ]
 

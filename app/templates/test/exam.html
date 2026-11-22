@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% block layout_js %}<script defer src="{{ url_for('static', filename='js/player.js') }}"></script><script defer src="{{ url_for('static', filename='js/learner.js') }}"></script>{% endblock %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/test.js') }}"></script>{% endblock %}
 {% block title %}{{ _("Attestatsiya testi") }}{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts-exam.css') }}">
@@ -11,7 +13,7 @@
   Rasmiy logotip va nomlar ishlatilmaydi.
 #}
 {% block body %}
-<script>
+<script nonce="{{ csp_nonce }}">
   window.RM_EXAM = {{ questions|tojson }};
   // sample=true — /ekranlar dagi namunaviy holat: alohida, serverga yuborilmaydigan sessiya
   window.RM_EXAM_STATE = { cur: {{ start if start_given else 'null' }}, seed: {{ answered|tojson }}, confirm: {{ 'true' if confirm else 'false' }},
@@ -28,7 +30,7 @@
       <svg viewBox="0 0 20 20" aria-hidden="true" x-show="lang === 'uz'"><clipPath id="fc"><circle cx="10" cy="10" r="9"/></clipPath><g clip-path="url(#fc)"><rect width="20" height="7" fill="#1eb3e6"/><rect y="7" width="20" height="6" fill="#fff"/><rect y="13" width="20" height="7" fill="#1eb53a"/><rect y="6.6" width="20" height=".8" fill="#ce1126"/><rect y="12.6" width="20" height=".8" fill="#ce1126"/></g></svg>
       <svg viewBox="0 0 20 20" aria-hidden="true" x-show="lang === 'ru'" x-cloak><clipPath id="fr"><circle cx="10" cy="10" r="9"/></clipPath><g clip-path="url(#fr)"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="6" fill="#0039a6"/><rect y="13" width="20" height="7" fill="#d52b1e"/></g></svg>
     </button>
-    <button class="ex-pill ex-fs" type="button" data-fs-toggle onclick="rmToggleFullscreen()" aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran') }}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-maximize"/></svg></button>
+    <button class="ex-pill ex-fs" type="button" data-fs-toggle aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran') }}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-maximize"/></svg></button>
     <div class="ex-pill ex-user"><span class="truncate">{{ me.first }}</span><span class="ex-avatar">{{ icon("user", "ico-sm") }}</span></div>
   </header>
 
@@ -97,7 +99,7 @@
       <div class="ex-nums">
         <template x-for="(_, i) in qs" :key="i">
           <button type="button" @click="go(i)" :class="{ current: i === cur, answered: ans[i] !== undefined && i !== cur }"
-            :aria-label="(i + 1) + '-savol' + (ans[i] !== undefined ? ', javob berilgan' : '')" :aria-current="i === cur ? 'step' : null" x-text="i + 1"></button>
+            :aria-label="(i + 1) + {{ _('-savol')|tojson|forceescape }} + (ans[i] !== undefined ? ', ' + {{ _('javob berilgan')|tojson|forceescape }} : '')" :aria-current="i === cur ? 'step' : null" x-text="i + 1"></button>
         </template>
       </div>
       <div class="ex-legend"><span><i class="answered"></i>{{ _("Javob berilgan:") }} <b x-text="answered()"></b></span><span><i></i>{{ _("Qolgan:") }} <b x-text="qs.length - answered()"></b></span></div>
@@ -118,7 +120,7 @@
         <label class="ex-opt"><input type="radio" name="reason" value="{{ v }}" {{ 'checked' if loop.first }}><span>{{ s }}</span></label>
         {% endfor %}
       </div>
-      <textarea class="ex-textarea" name="note" maxlength="1000" placeholder="Izoh (ixtiyoriy)" aria-label="Izoh" aria-describedby="exnote-err" @input="clear('note')"></textarea>
+      <textarea class="ex-textarea" name="note" maxlength="1000" placeholder="{{ _('Izoh (ixtiyoriy)') }}" aria-label="{{ _('Izoh') }}" aria-describedby="exnote-err" @input="clear('note')"></textarea>
       <p class="ex-error" id="exnote-err" role="alert" x-show="err('note') || (message && !ok)" x-text="err('note') || message" x-cloak></p>
       <div class="ex-dialog-foot"><button class="ex-nav-btn" type="button" @click="objection = false">{{ _("Bekor qilish") }}</button><button class="ex-primary" type="submit" :disabled="busy">{{ _("Yuborish") }}</button></div>
     </form>
@@ -157,7 +159,7 @@
   <div class="ex-toast" x-show="toast" x-cloak x-transition x-text="toast" x-init="$watch('toast', v => v && setTimeout(() => toast = '', 2500))" role="status"></div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function exam() {
   var S = window.RM_EXAM_STATE;
   return {

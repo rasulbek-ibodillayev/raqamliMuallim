@@ -24,7 +24,7 @@
     <div class="input-group">
       <input class="input" id="pw" name="pw" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" placeholder="{{ _('Parolingiz') }}" required
              aria-describedby="pw-err" :aria-invalid="!!err('pw')" @input="clear('pw')">
-      <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? 'Parolni yashirish' : 'Parolni ko‘rsatish'" aria-label="{{ _('Parolni ko‘rsatish') }}">{{ icon("eye") }}</button>
+      <button class="icon-btn" type="button" @click="show = !show" :aria-label="show ? {{ _('Parolni yashirish')|tojson|forceescape }} : {{ _('Parolni ko‘rsatish')|tojson|forceescape }}" aria-label="{{ _('Parolni ko‘rsatish') }}">{{ icon("eye") }}</button>
     </div>
     {{ field_error("pw", errors) }}
   </div>

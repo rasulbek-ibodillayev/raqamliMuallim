@@ -83,7 +83,7 @@
           {% endfor %}
           {{ field_error("reason", errors) }}
         </fieldset>
-        <div class="field"><label class="label" for="obj-note">{{ _("Izoh (ixtiyoriy)") }}</label><textarea class="textarea" id="obj-note" name="note" maxlength="1000" placeholder="Nima uchun shunday deb hisoblaysiz?" aria-describedby="note-err" :aria-invalid="!!err('note')" @input="clear('note')"></textarea>{{ field_error("note", errors) }}</div>
+        <div class="field"><label class="label" for="obj-note">{{ _("Izoh (ixtiyoriy)") }}</label><textarea class="textarea" id="obj-note" name="note" maxlength="1000" placeholder="{{ _('Nima uchun shunday deb hisoblaysiz?') }}" aria-describedby="note-err" :aria-invalid="!!err('note')" @input="clear('note')"></textarea>{{ field_error("note", errors) }}</div>
         <label class="check"><input type="checkbox" name="urgent" value="1"><span>{{ _("Shoshilinch: xato yaqqol ko‘rinib turibdi") }}</span></label>
         <button class="btn btn-primary btn-block" type="submit" :disabled="busy">{{ _("Yuborish") }}</button>
       </div></template>

@@ -1,0 +1,44 @@
+{# Profilning umumiy bo'limlari: shaxsiy ma'lumotlar, telefon va email, parol (maxfiy so'z — contact_change ichida).
+   O'qituvchi, ekspert va admin profillarida bir xil. Kontekst: acct (kimning profili), acct_bp (user | expert | admin),
+   open, errors, form — app/views/account.py:context(). Ota element x-data="{ open, saved }" bo'lishi kerak. #}
+      <!-- Shaxsiy ma'lumotlar -->
+      <div>
+        <button class="row-btn list-item" type="button" @click="open = open === 'info' ? '' : 'info'" :aria-expanded="open === 'info'">
+          <span class="list-ico">{{ icon("user") }}</span><span class="grow"><span class="d-block">{{ _("Shaxsiy ma’lumotlar") }}</span><span class="sub">{{ _("Ism va familiya (sertifikatda shunday yoziladi)") if acct_bp == 'user' else _("Ism va familiya") }}</span></span>
+          <svg class="ico ico-sm chev" :style="open === 'info' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+        </button>
+        <form class="pt-4 card-pad stack" x-show="open === 'info'" {{ '' if open == 'info' else 'x-cloak' }} action="{{ url_for(acct_bp ~ '.profile_info') }}" method="post" novalidate
+              x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()" @submit.prevent="submit($event)" data-errors="{{ (errors if open == 'info' else {})|tojson|forceescape }}">
+          {% include "partials/form_open.html" %}
+          {% set e = errors if open == 'info' else {} %}
+          <div class="grid-2">
+            <div class="field"><label class="label" for="p-fn">{{ _("Ism") }}</label><input class="input" id="p-fn" name="fn" value="{{ form.fn or acct.first }}" autocomplete="given-name" required aria-describedby="fn-err" :aria-invalid="!!err('fn')" @input="clear('fn')">{{ field_error("fn", e) }}</div>
+            <div class="field"><label class="label" for="p-ln">{{ _("Familiya") }}</label><input class="input" id="p-ln" name="ln" value="{{ form.ln or acct.last }}" autocomplete="family-name" required aria-describedby="ln-err" :aria-invalid="!!err('ln')" @input="clear('ln')">{{ field_error("ln", e) }}</div>
+          </div>
+          <p class="hint">{{ _("Telefon raqam va email «Telefon va email» bo‘limida kod orqali almashtiriladi.") }}</p>
+          <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
+        </form>
+      </div>
+
+      {% include "partials/contact_change.html" %}
+
+      <!-- Parolni o'zgartirish -->
+      <div class="bt" x-data="{ s1: false, s2: false, s3: false }">
+        <button class="row-btn list-item" type="button" @click="open = open === 'pw' ? '' : 'pw'" :aria-expanded="open === 'pw'">
+          <span class="list-ico">{{ icon("lock") }}</span><span class="grow"><span class="d-block">{{ _("Parolni o‘zgartirish") }}</span><span class="sub">{{ _("Oxirgi o‘zgarish: 2 oy oldin") }}</span></span>
+          <svg class="ico ico-sm chev" :style="open === 'pw' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
+        </button>
+        <form class="pt-4 card-pad stack" x-show="open === 'pw'" {{ '' if open == 'pw' else 'x-cloak' }} action="{{ url_for(acct_bp ~ '.profile_password') }}" method="post" novalidate
+              x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); f.reset(); return false; })" x-init="initForm()" @submit.prevent="submit($event)" data-errors="{{ (errors if open == 'pw' else {})|tojson|forceescape }}">
+          {% include "partials/form_open.html" %}
+          {% set e = errors if open == 'pw' else {} %}
+          <div class="field"><label class="label" for="pw-old">{{ _("Joriy parol") }}</label><div class="input-group"><input class="input" id="pw-old" name="old" :type="s1 ? 'text' : 'password'" type="password" {{ no_autofill() }} required aria-describedby="old-err" :aria-invalid="!!err('old')" @input="clear('old')">{{ eye("s1") }}</div>{{ field_error("old", e) }}</div>
+          <div class="field"><label class="label" for="pw-new">{{ _("Yangi parol") }}</label><div class="input-group"><input class="input" id="pw-new" name="new" :type="s2 ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required aria-describedby="new-err" :aria-invalid="!!err('new')" @input="clear('new')">{{ eye("s2") }}</div>{{ field_error("new", e) }}<span class="hint">{{ _("Kamida 8 ta belgi, harf va raqam aralash bo‘lsin.") }}</span></div>
+          <div class="field"><label class="label" for="pw-new2">{{ _("Yangi parolni takrorlang") }}</label><div class="input-group"><input class="input" id="pw-new2" name="new2" :type="s3 ? 'text' : 'password'" type="password" autocomplete="new-password" minlength="8" required aria-describedby="new2-err" :aria-invalid="!!err('new2')" @input="clear('new2')">{{ eye("s3") }}</div>{{ field_error("new2", e) }}</div>
+          <div class="row between wrap">
+            <a class="link small" href="{{ url_for('auth.reset') }}">{{ _("Joriy parolni unutdingizmi?") }}</a>
+            <div class="row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Parolni yangilash") }}</button></div>
+          </div>
+        </form>
+      </div>
+

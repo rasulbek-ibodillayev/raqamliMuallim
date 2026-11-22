@@ -19,7 +19,7 @@
              x-model="contact" aria-describedby="email-err" :aria-invalid="!!err('email')" @input="clear('email')">
       {# Email to'g'ri kiritilgandagina faollashadi va asosiy rangga o'tadi #}
       <button class="btn" :class="valid ? 'btn-primary' : 'btn-outline'" type="submit" formaction="{{ url_for('auth.send_email_code') }}" formnovalidate
-              :disabled="busy || !valid" x-text="sent ? '{{ _('Qayta yuborish') }}' : '{{ _('Kod yuborish') }}'">{{ _("Kod yuborish") }}</button>
+              :disabled="busy || !valid" x-text="sent ? {{ _('Qayta yuborish')|tojson|forceescape }} : {{ _('Kod yuborish')|tojson|forceescape }}">{{ _("Kod yuborish") }}</button>
     </div>
     {{ field_error("email", errors) }}
   </div>

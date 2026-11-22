@@ -1,10 +1,12 @@
 {% extends "layouts/app.html" %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/tutor.js') }}"></script>{% endblock %}
 {% block title %}{{ _("AI tutor") }}{% endblock %}
 {% block heading %}{{ _("AI tutor") }}{% endblock %}
 {% block topbar_actions %}<span class="badge badge-plain hide-sm">{{ icon("book", "ico-sm") }}{{ _("Mavzu:") }} {{ topic }}</span>{% endblock %}
 {% block content %}
+<h1 class="sr-only">{{ _("AI tutor") }}</h1>
 {#
-  Suhbat qurilmaning localStorage'ida saqlanadi (rmTutorStore, static/js/app.js):
+  Suhbat qurilmaning localStorage'ida saqlanadi (rmTutorStore, static/js/learner.js):
   yangi mavzu boshlanganda yoki yozilganiga 24 soat bo'lganda avtomatik tozalanadi.
   Quyidagi yashirin blok — namunaviy boshlang'ich suhbat (saqlangan suhbat bo'lmasa ko'rsatiladi).
 #}
@@ -33,8 +35,8 @@
 
   <div class="pt-16 thread grow">
     <div class="row between wrap xs muted tutor-meta">
-      <span class="row row-sm">{{ icon("info", "ico-sm") }}<span x-text="restored ? '{{ _('Avvalgi suhbat tiklandi (qurilmada saqlangan)') }}' : '{{ _('Suhbat qurilmada saqlanadi') }}'">{{ _("Suhbat qurilmada saqlanadi") }}</span> · {{ _("yangi mavzuda yoki 24 soatdan keyin tozalanadi") }}</span>
-      <button class="link btn-reset xs" type="button" x-show="msgs.length" @click="if (confirm('{{ _('Suhbat tozalansinmi?') }}')) reset()">{{ _("Suhbatni tozalash") }}</button>
+      <span class="row row-sm">{{ icon("info", "ico-sm") }}<span x-text="restored ? {{ _('Avvalgi suhbat tiklandi (qurilmada saqlangan)')|tojson|forceescape }} : {{ _('Suhbat qurilmada saqlanadi')|tojson|forceescape }}">{{ _("Suhbat qurilmada saqlanadi") }}</span> · {{ _("yangi mavzuda yoki 24 soatdan keyin tozalanadi") }}</span>
+      <button class="link btn-reset xs" type="button" x-show="msgs.length" @click="if (confirm({{ _('Suhbat tozalansinmi?')|tojson|forceescape }})) reset()">{{ _("Suhbatni tozalash") }}</button>
     </div>
 
     <template x-for="(m, i) in msgs" :key="i">
@@ -45,7 +47,7 @@
           <div class="body">
             <div x-html="m.html"></div>
             <div class="msg-tools u-mt-8">
-              <button class="icon-btn" type="button" aria-label="{{ _('Nusxa olish') }}" @click="navigator.clipboard && navigator.clipboard.writeText($el.closest('.body').innerText); rmToast('{{ _('Nusxalandi') }}')">{{ icon("copy", "ico-sm") }}</button>
+              <button class="icon-btn" type="button" aria-label="{{ _('Nusxa olish') }}" @click="navigator.clipboard && navigator.clipboard.writeText($el.closest('.body').innerText); rmToast({{ _('Nusxalandi')|tojson|forceescape }})">{{ icon("copy", "ico-sm") }}</button>
               <button class="icon-btn" type="button" aria-label="{{ _('Foydali') }}">{{ icon("thumb", "ico-sm") }}</button>
             </div>
           </div>
@@ -61,10 +63,10 @@
 
   <div class="stack stack-sm u-pos-sticky u-bottom-beba1 u-bg-bg u-pt-12">
     <div class="chips scroll">
-      <button class="chip" type="button" @click="ask('{{ _('Soddaroq tushuntir') }}')">{{ icon("bulb") }}{{ _("Soddaroq tushuntir") }}</button>
-      <button class="chip" type="button" @click="ask('{{ _('Masala ber') }}')">{{ icon("code") }}{{ _("Masala ber") }}</button>
-      <button class="chip" type="button" @click="ask('{{ _('Sxema bilan ko‘rsat') }}')">{{ icon("graph") }}{{ _("Sxema bilan ko‘rsat") }}</button>
-      <button class="chip" type="button" @click="ask('{{ _('Ko‘p uchraydigan xatolar') }}')">{{ icon("alert") }}{{ _("Ko‘p uchraydigan xatolar") }}</button>
+      <button class="chip" type="button" @click="ask({{ _('Soddaroq tushuntir')|tojson|forceescape }})">{{ icon("bulb") }}{{ _("Soddaroq tushuntir") }}</button>
+      <button class="chip" type="button" @click="ask({{ _('Masala ber')|tojson|forceescape }})">{{ icon("code") }}{{ _("Masala ber") }}</button>
+      <button class="chip" type="button" @click="ask({{ _('Sxema bilan ko‘rsat')|tojson|forceescape }})">{{ icon("graph") }}{{ _("Sxema bilan ko‘rsat") }}</button>
+      <button class="chip" type="button" @click="ask({{ _('Ko‘p uchraydigan xatolar')|tojson|forceescape }})">{{ icon("alert") }}{{ _("Ko‘p uchraydigan xatolar") }}</button>
     </div>
     {{ composer(_("Savolingizni yozing…")) }}
   </div>

@@ -1,10 +1,10 @@
 {% extends "layouts/auth.html" %}
 {# 404, 403, 500 va boshqa xatolar uchun yagona sahifa. Kirish qilmagan foydalanuvchi ham ko'radi #}
 {% set E = {
-  400: ("refresh", "Sahifa muddati o‘tdi", "Xavfsizlik uchun forma eskirdi yoki so‘rov noto‘g‘ri. Sahifani yangilab, qayta yuboring."),
-  404: ("search", "Sahifa topilmadi", "Havola eskirgan yoki manzilda xato bor. Bosh sahifadan kerakli bo‘limni toping."),
-  403: ("lock", "Bu sahifaga ruxsat yo‘q", "Sahifa boshqa rol (ekspert yoki administrator) uchun. Boshqa akkaunt bilan kirib ko‘ring."),
-  500: ("alert", "Nimadir noto‘g‘ri ketdi", "Xato bizning tomonda. Javoblaringiz va progress saqlangan. Bir daqiqadan keyin qayta urinib ko‘ring."),
+  400: ("refresh", _("Sahifa muddati o‘tdi"), _("Xavfsizlik uchun forma eskirdi yoki so‘rov noto‘g‘ri. Sahifani yangilab, qayta yuboring.")),
+  404: ("search", _("Sahifa topilmadi"), _("Havola eskirgan yoki manzilda xato bor. Bosh sahifadan kerakli bo‘limni toping.")),
+  403: ("lock", _("Bu sahifaga ruxsat yo‘q"), _("Sahifa boshqa rol (ekspert yoki administrator) uchun. Boshqa akkaunt bilan kirib ko‘ring.")),
+  500: ("alert", _("Nimadir noto‘g‘ri ketdi"), _("Xato bizning tomonda. Javoblaringiz va progress saqlangan. Bir daqiqadan keyin qayta urinib ko‘ring.")),
 } %}
 {% set ico, head, text = E.get(code, E[500]) %}
 {% block title %}{{ head }}{% endblock %}
@@ -16,10 +16,10 @@
   <p class="maxw-360 muted">{{ text }}</p>
   <div class="justify-center row wrap mt-16">
     {% if code >= 500 or code == 400 %}
-    <button class="btn btn-primary" type="button" onclick="location.reload()">{{ icon("refresh") }}{{ _("Qayta urinish") }}</button>
+    <button class="btn btn-primary" type="button" data-reload>{{ icon("refresh") }}{{ _("Qayta urinish") }}</button>
     {% endif %}
     <a class="btn {{ 'btn-outline' if code >= 500 or code == 400 else 'btn-primary' }}" href="{{ home_url }}">{{ _("Bosh sahifa") }}</a>
-    {% if code == 404 %}<button class="btn btn-ghost" type="button" onclick="history.back()">{{ icon("arrow-left") }}{{ _("Orqaga") }}</button>{% endif %}
+    {% if code == 404 %}<button class="btn btn-ghost" type="button" data-back>{{ icon("arrow-left") }}{{ _("Orqaga") }}</button>{% endif %}
   </div>
 </div>
 {% endblock %}

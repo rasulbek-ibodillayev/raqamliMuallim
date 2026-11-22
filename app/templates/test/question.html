@@ -1,11 +1,12 @@
 {% extends "layouts/focus.html" %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/test.js') }}"></script>{% endblock %}
 {% block title %}{{ _("Savol") }} {{ q.n }} / {{ total }}{% endblock %}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.tests') }}" data-safe-leave aria-label="{{ _('To‘xtatish va chiqish (javoblar saqlanadi)') }}">{{ icon("x") }}</a>
 {# Bosqich faqat bosqichli testlarda (diagnostika, oraliq, haftalik, ixtiyoriy, oylik, yakuniy) ko'rsatiladi #}
 <div class="grow"><div class="strong small">{{ tname }}{% if staged %} · {{ _("1-bosqich · Oson") }}{% endif %}</div><div class="xs muted num">{{ _("Savol") }} {{ q.n }} / {{ total }}</div></div>
 {# Taymer va oflayn belgisi savol komponentidan hodisa orqali yangilanadi #}
-<button class="icon-btn" type="button" data-fs-toggle onclick="rmToggleFullscreen()" aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran (faqat test oynasi)') }}"><svg class="ico" aria-hidden="true"><use href="#i-maximize"/></svg></button>
+<button class="icon-btn" type="button" data-fs-toggle aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran (faqat test oynasi)') }}"><svg class="ico" aria-hidden="true"><use href="#i-maximize"/></svg></button>
 <span class="badge badge-plain num badge-timer" role="timer" aria-label="{{ _('Qolgan vaqt') }}" x-data="{ t: '--:--', low: false }"
       @rm-q-tick.window="t = $event.detail.text; low = $event.detail.left < 60" :class="low && 'warn'">{{ icon("clock") }}<span x-text="t">--:--</span></span>
 {% endblock %}

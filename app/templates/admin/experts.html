@@ -16,6 +16,30 @@
     <div class="card stat"><div class="small muted">{{ _("Shu oy tasdiqlangan") }}</div><div class="stat-value num">214</div><div class="stat-sub">{{ _("savol") }}</div></div>
   </div>
 
+  {% if invites %}
+  {# Taklifnoma yuborilgan, lekin ekspert hali parol o'rnatmagan. Havola 72 soat amal qiladi #}
+  <section class="card" aria-labelledby="inv-title">
+    <div class="card-head"><h2 class="u-fs-16" id="inv-title">{{ _("Javob kutayotgan taklifnomalar") }}</h2><span class="badge">{{ invites|length }}</span></div>
+    <ul class="list-reset list">
+      {% for i in invites|reverse %}
+      <li class="list-item{{ ' bt' if not loop.first }} wrap">
+        <span class="list-ico">{{ icon("telegram" if i.via == "telegram" else "mail") }}</span>
+        <span class="grow u-minw-0"><span class="d-block strong">{{ i.name }}</span>
+          <span class="xs muted"><span class="num">{{ i.shown or i.contact }}</span> · {{ _("Telegram orqali") if i.via == "telegram" else _("Email orqali") }} · {{ _("yuborildi:") }} <span class="num">{{ i.sent }}</span></span></span>
+        <div class="row row-sm wrap">
+          {# Telegram bot ekspertga yoza olmasa (botni /start qilmagan), admin havolani nusxalab o'zi yuboradi #}
+          <button class="btn btn-ghost btn-sm" type="button" data-copy-text="{{ i.link }}" title="{{ i.link }}">{{ icon("link", "ico-sm") }}<span>{{ _("Havolani nusxalash") }}</span></button>
+          <form method="post" action="{{ url_for('admin.invite_action') }}">{{ csrf() }}<input type="hidden" name="contact" value="{{ i.contact }}">
+            <button class="btn btn-outline btn-sm" type="submit" name="action" value="resend">{{ icon("refresh", "ico-sm") }}{{ _("Qayta yuborish") }}</button>
+            <button class="btn btn-ghost btn-sm t-red" type="submit" name="action" value="cancel">{{ _("Bekor qilish") }}</button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
   <div class="table-wrap">
     <table class="table">
       <thead><tr><th>{{ _("Ekspert") }}</th><th>{{ _("Yo‘nalishlar") }}</th><th>{{ _("Yaratgan") }}</th><th>{{ _("Tekshirgan") }}</th><th>{{ _("E’tiroz") }}</th><th>{{ _("Javob vaqti") }}</th><th>{{ _("Holat") }}</th><th></th></tr></thead>
@@ -45,7 +69,7 @@
                 <p class="small">{{ _("Oxirgi faollik:") }} <b>{{ e.last }}</b>. {{ e.created }} {{ _("ta savol yaratgan,") }} {{ e.reviewed }} {{ _("tasini tekshirgan,") }} {{ e.objections }} {{ _("ta e’tirozga xulosa bergan.") }}</p>
                 <form method="post" action="{{ url_for('admin.expert_update', eid=e.id) }}">
                   {{ csrf() }}<input type="hidden" name="action" value="{{ 'block' if e.active else 'unblock' }}">
-                  <button class="btn btn-outline btn-sm {{ 't-red' if e.active }}" type="submit">{{ icon("shield", "ico-sm") }}{{ "Faoliyatini to‘xtatish" if e.active else "Faollashtirish" }}</button>
+                  <button class="btn btn-outline btn-sm {{ 't-red' if e.active }}" type="submit">{{ icon("shield", "ico-sm") }}{{ _("Faoliyatini to‘xtatish") if e.active else _("Faollashtirish") }}</button>
                 </form>
                 <p class="xs muted">{{ _("To‘xtatilgan ekspert panelga kira olmaydi; uning savollari va xulosalari saqlanib qoladi.") }}</p>
               </div>
@@ -68,10 +92,10 @@
     <div class="field"><label class="label" for="x-name">{{ _("Ism va familiya") }}</label>
       <input class="input" id="x-name" name="name" value="{{ form.name }}" placeholder="{{ _('Masalan: Zuhra Qodirova') }}" required aria-describedby="name-err" :aria-invalid="!!err('name')" @input="clear('name')">
       {{ field_error("name", errors) }}</div>
-    <div class="field"><label class="label" for="x-contact">{{ _("Telefon yoki email") }}</label>
-      <input class="input" id="x-contact" name="contact" value="{{ form.contact }}" placeholder="{{ _('+998 90 123 45 67 yoki ism@maktab.uz') }}" required aria-describedby="contact-err" :aria-invalid="!!err('contact')" @input="clear('contact')">
+    <div class="field" x-data="rmContact({{ (form.contact or '')|tojson|forceescape }})"><label class="label" for="x-contact">{{ _("Telefon yoki email (login)") }}</label>
+      <input class="input" id="x-contact" name="contact" x-model="contact" placeholder="{{ _('+998 90 123 45 67 yoki ism@maktab.uz') }}" required autocomplete="off" aria-describedby="contact-err x-contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
       {{ field_error("contact", errors) }}
-      <span class="hint">{{ _("Shu manzilga taklifnoma yuboriladi; ekspert parolni o‘zi o‘rnatadi.") }}</span></div>
+      <span class="hint" id="x-contact-hint" x-text="kind === 'phone' ? {{ _('Taklif havolasi shu raqamga ulangan Telegram orqali yuboriladi. Ekspert havolani ochib, parolni o‘zi o‘rnatadi.')|tojson|forceescape }} : (kind === 'email' ? {{ _('Taklif havolasi shu emailga xat bilan yuboriladi. Ekspert havolani ochib, parolni o‘zi o‘rnatadi.')|tojson|forceescape }} : {{ _('Ekspert shu telefon raqam yoki email bilan tizimga kiradi. Taklif havolasi shu manzilga yuboriladi.')|tojson|forceescape }})">{{ _("Ekspert shu telefon raqam yoki email bilan tizimga kiradi. Taklif havolasi shu manzilga yuboriladi.") }}</span></div>
     <fieldset class="fieldset-reset stack stack-sm">
       <legend class="label">{{ _("Yo‘nalishlar") }}</legend>
       <div class="row wrap g-6" @change="clear('areas')">{% for a in areas %}<label class="check chip-check"><input type="checkbox" name="areas" value="{{ a }}"><span>{{ a }}</span></label>{% endfor %}</div>

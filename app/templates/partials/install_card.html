@@ -1,4 +1,4 @@
-{# PWA o'rnatish taklifi (bosh sahifa). Faqat o'rnatish mumkin bo'lganda ko'rinadi; mantiq: app.js → rmInstall #}
+{# PWA o'rnatish taklifi (bosh sahifa). Faqat o'rnatish mumkin bo'lganda ko'rinadi; mantiq: learner.js → rmInstall #}
 <section class="card card-pad stack stack-sm" x-data="rmInstall({ dismissible: true })" x-show="visible" x-cloak
          @rm-installable.document="canPrompt = true" @rm-installed.document="installed = true" aria-labelledby="pwa-title">
   <div class="row row-sm items-start">
@@ -15,7 +15,7 @@
     <li>{{ _("O‘ng yuqoridagi") }} <b>{{ _("«Qo‘shish»") }}</b> {{ _("ni bosing") }}</li>
   </ol>
   <div class="row row-sm">
-    <button class="btn btn-primary btn-sm" type="button" @click="install()" x-text="ios ? (steps ? 'Yo‘riqnomani yopish' : 'Qanday o‘rnatiladi?') : 'O‘rnatish'">{{ _("O‘rnatish") }}</button>
+    <button class="btn btn-primary btn-sm" type="button" @click="install()" x-text="ios ? (steps ? {{ _('Yo‘riqnomani yopish')|tojson|forceescape }} : {{ _('Qanday o‘rnatiladi?')|tojson|forceescape }}) : {{ _('O‘rnatish')|tojson|forceescape }}">{{ _("O‘rnatish") }}</button>
     <button class="btn btn-ghost btn-sm" type="button" @click="later()">{{ _("Keyinroq") }}</button>
   </div>
 </section>

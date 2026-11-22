@@ -1,4 +1,4 @@
-"""Saytni tanlangan tillarga o'tkazuvchi dastur (ru, en, kaa — qoraqalpoq).
+"""Saytni tanlangan tillarga o'tkazuvchi dastur (ru, en).
 
     .venv/Scripts/python scripts/translate.py            # lug'atlardan to'ldirish + kompilyatsiya
     .venv/Scripts/python scripts/translate.py --extract  # avval shablonlardan yangi matnlarni yig'ish
@@ -9,9 +9,8 @@ Ish tartibi har bir til uchun:
 2) qo'lda tekshirilgan lug'at (app/translations/core_<til>.py, rus tili uchun ru_core.py) bo'sh satrlarni to'ldiradi;
 3) RM_TRANSLATE_URL berilgan bo'lsa (o'z serverimizdagi LibreTranslate: docker compose up -d translate →
    http://localhost:5050/translate), qolgan satrlar mashina tarjimasi bilan to'ldiriladi.
-   Avval xizmat qo'llaydigan tillar so'raladi (/languages). Argos modellarida o'zbek va qoraqalpoq tili yo'q,
-   shuning uchun manba sifatida tayyor ruscha tarjima ishlatiladi (uz → [ru tarjimasi] → en). Xizmat qo'llamaydigan
-   til (kaa) mashina tarjimasisiz qoladi — faqat lug'at va tarjimon. %(n)s, %%, {n} kabi o'rinbosarlar
+   Avval xizmat qo'llaydigan tillar so'raladi (/languages). Argos modellarida o'zbek tili yo'q,
+   shuning uchun manba sifatida tayyor ruscha tarjima ishlatiladi (uz → [ru tarjimasi] → en). %(n)s, %%, {n} kabi o'rinbosarlar
    himoyalanadi; natija keshlanadi (app/translations/<til>/mt_cache.json) va «#. mashina tarjimasi» izohi bilan
    belgilanadi — keyin tarjimon tekshiradi;
 4) .mo fayllari kompilyatsiya qilinadi va qamrov (foiz) chiqariladi.
@@ -34,7 +33,7 @@ BASE = Path(__file__).resolve().parent.parent
 ROOT = BASE / "app" / "translations"
 sys.path.insert(0, str(ROOT))
 
-LANGS = ("ru", "en", "kaa")
+LANGS = ("ru", "en")
 MT_NOTE = "mashina tarjimasi"
 PLACEHOLDER = re.compile(r"%\([a-z_]+\)s|%%|\{[a-z_]+\}|<[^>]+>")
 
@@ -43,11 +42,8 @@ def core(lang):
     if lang == "ru":
         from ru_core import RU
         return RU
-    if lang == "en":
-        from core_en import EN
-        return EN
-    from core_kaa import KAA
-    return KAA
+    from core_en import EN
+    return EN
 
 
 def extract():
@@ -176,7 +172,7 @@ def main():
               "  RM_TRANSLATE_URL=http://localhost:5050/translate bering.")
     elif supported():
         print("Tarjima xizmati tillari:", ", ".join(sorted(supported())),
-              "— o'zbek/qoraqalpoq yo'q bo'lsa, bu tillar faqat lug'at va tarjimon orqali to'ldiriladi.")
+              "— o'zbek yo'q bo'lsa, tarjima ruscha orqali olinadi.")
 
 
 if __name__ == "__main__":

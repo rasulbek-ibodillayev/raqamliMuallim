@@ -1,4 +1,8 @@
 {% extends "base.html" %}
+{% block layout_js %}{# O'qituvchi qobig'i: oflayn javoblar sinxroni (player.js) har sahifada ishlaydi #}
+<script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/learner.js') }}"></script>
+{% endblock %}
 {% from "_ui.html" import icon %}
 {# Test va dars uchun chalg'itmaydigan qobiq: menyusiz, bitta asosiy harakat pastda #}
 {% block body %}

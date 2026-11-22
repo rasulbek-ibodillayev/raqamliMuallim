@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% from "_ui.html" import icon %}
+{% block layout_js %}<script defer src="{{ url_for('static', filename='js/particles.js') }}"></script>{% endblock %}
 {% block body %}
 <div class="auth">
+  <canvas class="auth-bg" aria-hidden="true"></canvas>
   <header class="auth-top">
-    {% block auth_back %}<a class="brand u-p-0" href="{{ url_for('auth.guest') }}"><span class="brand-mark">{{ icon("sparkle") }}</span>{{ _("raqamliMuallim") }}</a>{% endblock %}
+    {% block auth_back %}<a class="brand u-p-0" href="{{ url_for('auth.guest') }}"><span class="brand-mark">{{ icon("sparkle") }}</span><span class="brand-text">{{ _("raqamliMuallim") }}</span></a>{% endblock %}
     <span class="row row-sm">{% include "partials/lang_switch.html" %}
     <button class="icon-btn" type="button" data-theme-toggle aria-label="{{ _('Mavzu rangini almashtirish') }}">{{ icon("moon") }}</button></span>
   </header>

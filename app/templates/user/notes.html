@@ -5,10 +5,10 @@
   Eslatmalar hozircha brauzer xotirasida saqlanadi (localStorage).
   Backend qo'shilganda save()/remove() funksiyalari API'ga so'rov yuboradigan bo'ladi.
 #}
-<script>window.RM_NOTES = {{ notes|tojson }}; window.RM_TOPICS = {{ topics|tojson }}; window.RM_CUR_TOPIC = {{ current_topic|tojson }};</script>
+<script nonce="{{ csp_nonce }}">window.RM_NOTES = {{ notes|tojson }}; window.RM_TOPICS = {{ topics|tojson }}; window.RM_CUR_TOPIC = {{ current_topic|tojson }};</script>
 <div x-data="notesApp(window.RM_NOTES, window.RM_TOPICS, window.RM_CUR_TOPIC)" x-init="init()" @rm-note-ok="save()">
   {% call page_head(_("Eslatmalar"), _("Darslardagi muhim qaydlaringiz. Oflayn ham ochiladi.")) %}
-  <button class="btn btn-outline btn-sm no-print" type="button" onclick="window.print()" title="{{ _('Brauzerning «PDF sifatida saqlash» oynasi ochiladi') }}">{{ icon("download", "ico-sm") }}{{ _("PDF") }}</button>
+  <button class="btn btn-outline btn-sm no-print" type="button" data-print title="{{ _('Brauzerning «PDF sifatida saqlash» oynasi ochiladi') }}">{{ icon("download", "ico-sm") }}{{ _("PDF") }}</button>
   <button class="btn btn-primary btn-sm" type="button" @click="openNew()">{{ icon("plus", "ico-sm") }}{{ _("Eslatma yaratish") }}</button>
   {% endcall %}
 
@@ -46,7 +46,7 @@
 
     <div class="card empty" x-show="grouped().length === 0" x-cloak>
       <span class="empty-ico">{{ icon("note", "ico-lg") }}</span>
-      <h2 x-text="notes.length ? 'Hech narsa topilmadi' : 'Hali eslatma yo‘q'"></h2>
+      <h2 x-text="notes.length ? {{ _('Hech narsa topilmadi')|tojson|forceescape }} : {{ _('Hali eslatma yo‘q')|tojson|forceescape }}"></h2>
       <p class="muted">{{ _("Darsdagi muhim joylarni saqlang yoki o‘zingiz yangi qayd yarating.") }}</p>
       <button class="btn btn-primary mt-16" type="button" @click="openNew()" x-show="!notes.length">{{ _("Eslatma yaratish") }}</button>
     </div>
@@ -60,7 +60,7 @@
           @submit.prevent="submit($event).then(j => { if (!j) $dispatch('rm-note-ok') })">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="sheet-grip"></div>
-      <div class="row between"><h2 id="note-title" x-text="form.id ? 'Eslatmani tahrirlash' : 'Yangi eslatma'"></h2>
+      <div class="row between"><h2 id="note-title" x-text="form.id ? {{ _('Eslatmani tahrirlash')|tojson|forceescape }} : {{ _('Yangi eslatma')|tojson|forceescape }}"></h2>
         <button class="icon-btn" type="button" @click="open = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
       {# Mavzu so'ralmaydi: yangi eslatma foydalanuvchi hozir o'rganayotgan mavzuga saqlanadi
          (dars/mavzu sahifasidan kelganda — o'sha mavzu), tahrirlashda esa eslatmaning o'z mavzusi qoladi #}
@@ -68,10 +68,10 @@
       <p class="note-topic">{{ icon("book", "ico-sm") }}<span class="muted">{{ _("Mavzu:") }}</span> <b x-text="form.topic"></b>
         <span class="xs muted" x-show="!form.id">{{ _("· hozir o‘rganayotgan mavzungiz") }}</span></p>
       <div class="field"><label class="label" for="n-title">{{ _("Sarlavha (ixtiyoriy)") }}</label><input class="input" id="n-title" name="title" maxlength="200" x-model="form.title" placeholder="{{ _('Masalan: elif qoidasi') }}"></div>
-      <div class="field"><label class="label" for="n-text">{{ _("Qayd") }}</label><textarea class="textarea" id="n-text" name="text" maxlength="5000" x-model="form.text" required placeholder="Eslab qolmoqchi bo‘lgan narsangizni yozing…" aria-describedby="text-err" @input="clear('text')"></textarea>{{ field_error("text", errors) }}</div>
+      <div class="field"><label class="label" for="n-text">{{ _("Qayd") }}</label><textarea class="textarea" id="n-text" name="text" maxlength="5000" x-model="form.text" required placeholder="{{ _('Eslab qolmoqchi bo‘lgan narsangizni yozing…') }}" aria-describedby="text-err" @input="clear('text')"></textarea>{{ field_error("text", errors) }}</div>
       <div class="field">
-        <button class="btn btn-ghost btn-sm u-as-flex-start u-pl-0" type="button" @click="form.withCode = !form.withCode">{{ icon("code", "ico-sm") }}<span x-text="form.withCode ? 'Kod blokini olib tashlash' : 'Kod bloki qo‘shish'"></span></button>
-        <textarea class="textarea textarea-code" name="code" maxlength="5000" x-show="form.withCode" x-model="form.code" aria-label="Kod" spellcheck="false" placeholder="print('Salom')"></textarea>
+        <button class="btn btn-ghost btn-sm u-as-flex-start u-pl-0" type="button" @click="form.withCode = !form.withCode">{{ icon("code", "ico-sm") }}<span x-text="form.withCode ? {{ _('Kod blokini olib tashlash')|tojson|forceescape }} : {{ _('Kod bloki qo‘shish')|tojson|forceescape }}"></span></button>
+        <textarea class="textarea textarea-code" name="code" maxlength="5000" x-show="form.withCode" x-model="form.code" aria-label="{{ _('Kod') }}" spellcheck="false" placeholder="print('Salom')"></textarea>
       </div>
       <div class="row">
         <button class="btn btn-ghost" type="button" @click="open = false">{{ _("Bekor qilish") }}</button>
@@ -81,7 +81,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function notesApp(seed, topics, serverTopic) {
   var KEY = "rm-notes";
   // Hozir o'rganilayotgan mavzu: ?mavzu=… (dars sahifasidagi tugmadan) → oxirgi ochilgan dars/mavzu → server
