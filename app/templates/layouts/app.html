@@ -2,11 +2,13 @@
 {% block layout_js %}{# O'qituvchi qobig'i: oflayn javoblar sinxroni (player.js) har sahifada ishlaydi #}
 <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/learner.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/particles.js') }}"></script>
 {% endblock %}
 {% from "_ui.html" import icon %}
 {% set ep = request.endpoint %}
 {% set unread = notifications | selectattr("unread") | list | length %}
 {% block body %}
+<canvas class="ai-bg" data-density=".6" aria-hidden="true"></canvas>
 <script nonce="{{ csp_nonce }}">window.RM_SEARCH = {{ search_index()|tojson }};</script>
 <div class="app" x-data="rmShell()" :class="menu && 'menu-open'" @keydown.window="keys($event)">
   <div class="drawer-backdrop" x-show="menu" x-cloak x-transition.opacity @click="menu = false" aria-hidden="true"></div>

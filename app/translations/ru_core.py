@@ -1,6 +1,6 @@
 """Interfeys asosiy qismining ruscha tarjimasi (menyu, kirish, xatolar, holatlar, testlar, admin/ekspert xabarlari).
 
-scripts/apply_translations.py shu lug'atni ru/LC_MESSAGES/messages.po ga yozadi.
+scripts/translate.py shu lug'atni ru/LC_MESSAGES/messages.po ga yozadi.
 Qolgan satrlar (dars matnlari, maxfiylik siyosati va h.k.) tarjimonga beriladi; tarjima bo'lmasa o'zbekcha ko'rinadi.
 """
 

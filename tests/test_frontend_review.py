@@ -38,3 +38,34 @@ def test_alpine_translations_are_json_quoted(client):
     # Tarjimada apostrof bo'lsa ham JS buzilmasin: matn JSON (&#34;…&#34;) ko'rinishida beriladi
     html = client.get("/parol-tiklash").get_data(as_text=True)
     assert 'x-text="sent ? &#34;Qayta yuborish&#34; : &#34;Kod yuborish&#34;"' in html
+
+
+def _css():
+    from pathlib import Path
+    return (Path(__file__).resolve().parent.parent / "app" / "static" / "css" / "app.css").read_text(encoding="utf8")
+
+
+def test_ai_background_in_app_and_panels(as_role):
+    # Tuzatish 4.1: nuqtalar foni kirish sahifalaridan tashqari ilova va panellarda ham bor
+    for role, url in [("user", "/app/"), ("expert", "/ekspert/navbat"), ("admin", "/admin/")]:
+        html = as_role(role).get(url, follow_redirects=True).get_data(as_text=True)
+        assert 'class="ai-bg"' in html and "js/particles.js" in html, url
+    # Test va dars (fokus rejimi) chalg'itmasligi uchun fonsiz
+    html = as_role("user").get("/test/savol", follow_redirects=True).get_data(as_text=True)
+    assert 'class="ai-bg"' not in html
+
+
+def test_ai_background_follows_rest_strain():
+    # Dam olish rad etilganda (html[data-strain]) nuqtalar rangi fonga mos iliq tusga o'tadi
+    css = _css()
+    assert ':root[data-strain="1"] { --pt-1:' in css and ':root[data-strain="2"] { --pt-1:' in css
+    from pathlib import Path
+    js = (Path(__file__).resolve().parent.parent / "app" / "static" / "js" / "particles.js").read_text(encoding="utf8")
+    assert '"data-strain"' in js and "--pt-1" in js
+
+
+def test_plan_test_card_wraps_on_phone(as_role):
+    # Tuzatish 4.2: navbati kelgan oylik test kartasida matn tor ustunga siqilmaydi
+    html = as_role("user").get("/app/reja?oylik=1").get_data(as_text=True)
+    assert "Oylik test" in html and "plan-test-card" in html
+    assert ".plan-test-card > .row > .grow { flex: 1 1 220px; }" in _css()

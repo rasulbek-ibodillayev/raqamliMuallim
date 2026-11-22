@@ -2,7 +2,9 @@
 {% from "_ui.html" import icon %}
 {# Ekspert va admin paneli qobig'i. Har bir rol faqat o'z bo'limlarini ko'radi (app/roles.py) #}
 {% set ep = request.endpoint %}
+{% block layout_js %}<script defer src="{{ url_for('static', filename='js/particles.js') }}"></script>{% endblock %}
 {% block body %}
+<canvas class="ai-bg" data-density=".6" aria-hidden="true"></canvas>
 <div class="app" x-data="{ menu: false }" :class="menu && 'menu-open'" @keydown.escape.window="menu = false">
   <div class="drawer-backdrop" x-show="menu" x-cloak x-transition.opacity @click="menu = false" aria-hidden="true"></div>
   <aside class="sidebar" id="panel-menu" aria-label="{{ _('Panel menyusi') }}">

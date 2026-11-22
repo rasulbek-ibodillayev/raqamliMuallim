@@ -28,6 +28,17 @@ window.rmT = (function () {
   };
 })();
 
+/* Sahifalararo o'tish animatsiyasi (@view-transition) brauzer tomonidan bekor qilinsa (masalan, ilova fonga o'tganda
+   yoki tez ketma-ket bosilganda) uning va'dalari rad etiladi — bu xato emas, konsolni to'ldirmasligi uchun ushlanadi. */
+window.addEventListener("pagereveal", function (e) {
+  var vt = e.viewTransition;
+  if (vt) ["ready", "finished", "updateCallbackDone"].forEach(function (k) { if (vt[k]) vt[k].catch(function () {}); });
+});
+window.addEventListener("pageswap", function (e) {
+  var vt = e.viewTransition;
+  if (vt) ["ready", "finished", "updateCallbackDone"].forEach(function (k) { if (vt[k]) vt[k].catch(function () {}); });
+});
+
 /* Forma: POST + CSRF, server tekshiruvi, xatolarni maydon yonida ko'rsatish.
    JS bo'lmasa forma oddiy POST bo'lib ishlaydi (server sahifani xatolar bilan qayta chizadi).
    extra — formaning o'z holati ({ show: false } kabi), onOk(json) — muvaffaqiyatdan keyin (ixtiyoriy). */

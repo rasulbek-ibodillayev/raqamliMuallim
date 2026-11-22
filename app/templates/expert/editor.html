@@ -62,7 +62,7 @@
 
         <div class="field" x-show="fmt === 'rasm'" x-cloak><label class="label" for="e-img">{{ _("Rasm") }}</label>
           <input class="input" id="e-img" name="image" type="file" accept="image/*" @change="preview($event)">
-          <img class="q-img-preview" :src="img" x-show="img" alt="">
+          <template x-if="img"><img class="q-img-preview" :src="img" alt=""></template>
           <input class="input" name="image_alt" placeholder="{{ _('Rasm tavsifi (ko‘zi ojizlar uchun)') }}" aria-label="{{ _('Rasm tavsifi') }}"></div>
 
         <div class="field" x-show="fmt === 'chizma'" x-cloak><label class="label" for="e-diagram">{{ _("Chizma (blok-sxema, Mermaid)") }}</label>
@@ -128,7 +128,7 @@
         <span class="eyebrow">{{ _("Oldindan ko‘rish") }}</span>
         <p class="xs muted" x-text="[topic, lesson, level].filter(Boolean).join(' · ')"></p>
         <p class="strong" x-text="text || {{ _('Savol matni shu yerda ko‘rinadi')|tojson|forceescape }}"></p>
-        <img class="q-img-preview" :src="img" x-show="fmt === 'rasm' && img" alt="">
+        <template x-if="fmt === 'rasm' && img"><img class="q-img-preview" :src="img" alt=""></template>
         <div class="options" x-show="kind === 'yopiq' || kind === 'kop'">
           <template x-for="(o, i) in opts" :key="i"><div class="option u-minh-44 u-fs-15" :class="right.includes(i) && 'correct'"><span class="key" x-text="'ABCDEF'[i]"></span><span x-text="o || '…'"></span></div></template>
         </div>
