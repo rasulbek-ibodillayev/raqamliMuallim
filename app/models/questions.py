@@ -32,7 +32,9 @@ class Question(Timestamps, db.Model):
     text: Mapped[str] = mapped_column(Text)
     # Variantlar, kod, rasm, jadval, moslashtirish juftliklari: {"options": [...], "code": "...", "image": "...", ...}
     data: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
-    # To'g'ri javob: {"keys": ["b"]} | {"value": "45", "accept": [...]} | {"pairs": {"a": "2", ...}}
+    # To'g'ri javob (indekslar 0 dan): single/multiple {"keys": [1]} | open {"value": "45", "accept": [...]} |
+    # matching {"pairs": [r0, r1, ...]} — left[k] ↔ right[pairs[k]]. Tekshiruv: services/content_import.check_question
+
     answer: Mapped[dict] = mapped_column(JSONB)
     explanation: Mapped[str | None] = mapped_column(Text)
     source: Mapped[str] = mapped_column(String(8), default="expert", server_default="expert")

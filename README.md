@@ -34,6 +34,12 @@ FLASK_APP=run.py .venv/Scripts/flask namuna-foydalanuvchilar
 | ekspert | ekspert@raqamlimuallim.uz |
 | admin | admin@raqamlimuallim.uz |
 
+Namunaviy kontent (mavzular, dars bloklari, savollar). O'z faylingizni yuklash formati: `docs/kontent-formati.md`.
+
+```bash
+FLASK_APP=run.py .venv/Scripts/flask kontent-yuklash
+```
+
 `/ekranlar` va `/_rol/<rol>` faqat debug rejimida (`run.py`) yoki `RM_DEV_TOOLS=1` bilan ochiladi.
 
 Testlar alohida bazada ishlaydi (bir marta yarating):

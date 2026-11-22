@@ -11,7 +11,7 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 1 | ✅ Baza | 26 jadval, Alembic migratsiyalari, alohida test bazasi | — |
 | 2 | ✅ Kirish | Flask-Login, ro'yxatdan o'tish, parolni tiklash, profil, rollar | — |
 | 3 | ✅ Testlar yadrosi | Ixcham `attempt_items`, `user_seen_questions`, test yig'ish servisi (`app/services/attempts.py`) | — |
-| 4 | ⏳ Kontentni bazaga ko'chirish | `mock.py` dagi bo'lim, mavzu, kichik mavzu va savollarni bazaga yuklovchi buyruq (`flask kontent-yuklash`) | — |
+| 4 | ✅ Kontentni yuklash | JSON formati ([kontent-formati.md](kontent-formati.md)), tekshiruv, `flask kontent-yuklash`, namunaviy kontent (`app/seed/namuna_kontent.json`) | — |
 | 5 | ⏳ O'qituvchi ekranlari bazadan | O'quv reja, mavzu, dars, progress; `mock.py` o'rniga servislar | 4 |
 | 6 | ⏳ Test o'ynatgichi bazada | Testni boshlash, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), yakunlash, natija, qaror (90/80/70) | B1 |
 | 7 | ⏳ Ekspert paneli | Savollarni yaratish va tahrirlash (versiyalar bilan), ko'rib chiqish, e'tirozlarga javob | 5 |
@@ -39,7 +39,7 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
    - Bosqich chegaralari 90/80/70% to'g'rimi?
    - Kichik mavzuda yangi savollar tugaganda eng eski ko'rilgan savolni qaytarish ma'qulmi? Hozir shunday qilingan.
 2. **Kontent.**
-   - Haqiqiy savollar bazasi (TZ 6.1 formatida) va dars matnlari.
+   - Haqiqiy savollar bazasi va dars matnlari, [kontent-formati.md](kontent-formati.md) dagi JSON formatida.
    - RAG uchun darsliklar va me'yoriy hujjatlar. Ulardan foydalanish huquqi bo'lishi kerak.
 3. **Telegram bot.** @BotFather orqali bot yarating va bot nomini ayting. Tokenni serverdagi `.env` ga `TELEGRAM_BOT_TOKEN` sifatida yozasiz.
 4. **Email.**
