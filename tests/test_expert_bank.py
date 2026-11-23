@@ -191,3 +191,52 @@ def test_queue_reject_deletes_unused_and_archives_used(app, expert):
 def test_user_cannot_use_expert_bank(client):
     assert client.get("/ekspert/").status_code == 403
     assert client.post("/ekspert/savol", data={}).status_code == 403
+
+
+# ---------------- Excel orqali import ----------------
+
+def _xlsx(rows):
+    from app.services import xlsx
+    return io.BytesIO(xlsx.write(rows))
+
+
+def _where(app, sub="Rekursiya"):
+    with app.app_context():
+        s = db.session.scalar(select(Subtopic).where(Subtopic.title == sub))
+        t = db.session.get(Topic, s.topic_id)
+        return [db.session.get(Section, t.section_id).title, t.title, s.title]
+
+
+def test_excel_sample_downloads_and_imports_back(app, expert):
+    r = expert.get("/ekspert/savol/namuna.xlsx")
+    assert r.status_code == 200 and r.data[:2] == b"PK"
+    from app.services import xlsx
+    rows = xlsx.read_rows(r.data)
+    assert rows[0][0] == "Mavzu" and len(rows) == 5
+    r = expert.post("/ekspert/savol/excel", data={"file": (io.BytesIO(r.data), "namuna.xlsx")}, headers=JSON,
+                    content_type="multipart/form-data")
+    assert r.json["ok"] and "4 ta savol" in r.json["message"]
+    q = _q(app, "Qaysilari taqqoslash amallari?")
+    assert q.type == "multiple" and q.answer == {"keys": [0, 1, 3]} and q.time_limit_s == 90
+    q = _q(app, "Amallarni ma’nosi bilan moslang.")
+    assert q.type == "matching" and q.data["left"] == ["==", "!=", ">"] and q.data["right"][1] == "teng emas"
+    q = _q(app, "101101₂ sonini o‘nlik sanoq sistemasida yozing.")
+    assert q.type == "open" and q.answer == {"value": "45", "accept": ["qirq besh"]}
+
+
+def test_excel_import_all_or_nothing(app, expert):
+    from app.services.question_bank import EXCEL_HEAD
+    w = _where(app)
+    rows = [EXCEL_HEAD,
+            w + ["Oson", "yopiq", "Excel savol 1?", "bir", "ikki", "", "", "", "", "B", "60", ""],
+            w + ["Oson", "yopiq", "Excel savol 2?", "bir", "ikki", "", "", "", "", "D", "60", ""],     # D bo'sh variant
+            ["Yo‘q mavzu", "x", "y", "Oson", "ochiq", "Excel savol 3?", "", "", "", "", "", "", "5", "", ""]]
+    r = expert.post("/ekspert/savol/excel", data={"file": (_xlsx(rows), "s.xlsx")}, headers=JSON,
+                    content_type="multipart/form-data")
+    assert r.status_code == 422
+    msg = r.json["errors"]["file"]
+    assert "3-qator" in msg and "4-qator" in msg and "2-qator" not in msg
+    assert _q(app, "Excel savol 1?") is None                       # xato bor — hech narsa yozilmadi
+    r = expert.post("/ekspert/savol/excel", data={"file": (io.BytesIO(b"emas"), "s.xlsx")}, headers=JSON,
+                    content_type="multipart/form-data")
+    assert r.status_code == 422 and ".xlsx" in r.json["errors"]["file"]

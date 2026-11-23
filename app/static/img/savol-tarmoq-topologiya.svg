@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 240" font-family="Inter, Arial, sans-serif" font-size="13">
+  <rect width="420" height="240" fill="#ffffff"/>
+  <g stroke="#0f172a" stroke-width="2" fill="none">
+    <path d="M210 120L80 45M210 120L340 45M210 120L80 195M210 120L340 195M210 120L60 120M210 120L360 120"/>
+  </g>
+  <g fill="#eff6ff" stroke="#2563eb" stroke-width="2">
+    <rect x="180" y="100" width="60" height="40" rx="8"/>
+  </g>
+  <g fill="#ffffff" stroke="#0f172a" stroke-width="2">
+    <rect x="52" y="28" width="56" height="34" rx="6"/><rect x="312" y="28" width="56" height="34" rx="6"/>
+    <rect x="52" y="178" width="56" height="34" rx="6"/><rect x="312" y="178" width="56" height="34" rx="6"/>
+    <rect x="16" y="103" width="56" height="34" rx="6"/><rect x="348" y="103" width="56" height="34" rx="6"/>
+  </g>
+  <g fill="#0f172a" text-anchor="middle">
+    <text x="210" y="125" fill="#2563eb" font-weight="600">Hub</text>
+    <text x="80" y="50">PC1</text><text x="340" y="50">PC2</text>
+    <text x="80" y="200">PC5</text><text x="340" y="200">PC4</text>
+    <text x="44" y="125">PC6</text><text x="376" y="125">PC3</text>
+  </g>
+</svg>

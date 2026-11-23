@@ -5,7 +5,7 @@
   Testni tanlasa — savollar va javoblar (xato — qizil, to'g'ri — yashil) hamda qayta topshirish.
 #}
 {% block content %}
-{% call page_head(_("Natijalarim"), _("Dastlabki diagnostikadan boshlab barcha testlar natijalari")) %}{% endcall %}
+{% call page_head(_("Natijalarim"), _("Dastlabki diagnostikadan boshlab barcha testlar natijalari"), "is-center") %}{% endcall %}
 {% if not results %}
 <div class="card empty">
   <span class="empty-ico">{{ icon("chart", "ico-lg") }}</span>
@@ -31,11 +31,6 @@
     <option value="">{{ _("Barcha testlar") }} ({{ results|length }})</option>
     {% for k, v in test_types.items() if k in present %}<option value="{{ k }}">{{ v[0] }} ({{ results|selectattr("type", "equalto", k)|list|length }})</option>{% endfor %}
   </select>
-  <div class="card card-pad stack stack-sm">
-    <div class="row between"><span class="strong">{{ _("Natijalar dinamikasi") }}</span><span class="small muted">{{ _("O‘rtacha:") }} <b class="c-text num">{{ ((results | sum(attribute="pct")) / results|length)|round|int }}%</b></span></div>
-    {{ spark(trend, targets=[(70, "O‘tish"), (90, "A’lo")], labels=["1-noy", "5-noy", "8-noy", "12-noy", "Kecha", "Bugun"]) }}
-    <p class="xs muted">{{ _("Maqsad chiziqlari: 70%% — mavzudan o‘tish, 90%% — to‘liq o‘zlashtirish.") }}</p>
-  </div>
   <div class="card list">
     {% for r in results %}
     {% set label, color = decision[r.decision] %}
@@ -47,7 +42,6 @@
     </a>
     {% endfor %}
   </div>
-  <p class="xs muted">{{ _("Testni qayta topshirsangiz, xuddi shu savollar emas, shu turdagi yangi savollar beriladi va natija bu ro‘yxatga qo‘shiladi.") }}</p>
 </div>
 {% endif %}
 {% endblock %}

@@ -10,16 +10,36 @@
 {% block bar_progress %}<div class="r-0 progress thin"><span class="u---v-50p"></span></div>{% endblock %}
 
 {% block head %}<style>.focus-body { max-width: 1080px; }</style>{% endblock %}
+{# Dars testi: har dars (kichik mavzu) oxirida 3 savol. Natija: < 70% — dars qayta o'zlashtiriladi,
+   70–89% — tavsiya bilan keyingi darsga, ≥ 90% — tavsiyasiz. Natija «Natijalarim»ga tushadi. #}
+{% macro lesson_test(st, pct=None, rid=None) %}
+<div class="lesson-test {{ 'is-' ~ st }} no-print">
+  <span class="list-ico">{{ icon("clipboard", "ico-sm") }}</span>
+  <div class="grow"><div class="small strong">{{ _("Dars testi") }} · 3 {{ _("savol") }}</div>
+    <div class="xs muted">{% if st == "done" %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif st == "current" %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% else %}{{ _("Oldingi dars testidan keyin ochiladi") }}{% endif %}</div></div>
+  {% if st == "done" %}<a class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}" href="{{ url_for('user.result_detail', rid=rid) }}">{{ pct }}%</a>
+  {% elif st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', soni=3) }}">{{ _("Boshlash") }}</a>
+  {% else %}{{ icon("lock", "ico-sm faint") }}{% endif %}
+</div>
+{% endmacro %}
 {% block content %}
-{% set toc = [("if", "if operatori", "done"), ("ifelse", "if / else", "done"), ("elif", "elif zanjiri", "current"), ("nested", "Ichma-ich shartlar", "next"), ("masala", "Yechimli masala", "next")] %}
+{# Joriy dars testi muvaffaqiyatli (≥ 70%) topshirilmaguncha keyingi darslar ko'rsatilmaydi (open_n — ko'rinadigan darslar soni) #}
+{% set toc = [("if", "if operatori"), ("ifelse", "if / else"), ("elif", "elif zanjiri"), ("nested", "Ichma-ich shartlar"), ("masala", "Yechimli masala")] %}
+{% macro lt(i, rid=None) %}{% set p = pcts[i] %}{{ lesson_test("done" if p is not none and p >= 70 else "current", p, rid) }}{% endmacro %}
 <div class="lesson-layout">
   {# Mundarija: desktopda yon tomonda, telefonda yuqorida suriladigan qator #}
   <nav class="lesson-toc" aria-label="{{ _('Dars mundarijasi') }}">
-    <div class="eyebrow toc-title">{{ _("Mundarija · 2 / 4") }}</div>
+    <div class="eyebrow toc-title">{{ _("Mundarija") }} · {{ [open_n - (0 if all_passed else 1), 4]|min }} / 4</div>
     <ol class="list-reset toc-list">
-      {% for id, name, st in toc %}
-      <li><a class="toc-link {{ st }}" href="#{{ id }}" data-toc-link="{{ id }}">
-        <span class="toc-mark">{% if st == "done" %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>{{ name }}</a></li>
+      {% for id, name in toc %}
+      {% set i = loop.index0 %}
+      {% set passed = i < 4 and pcts[i] is not none and pcts[i] >= 70 %}
+      {% if i < open_n or (i == 4 and all_passed) %}
+      <li><a class="toc-link {{ 'done' if passed else ('current' if i < 4 else '') }}" href="#{{ id }}" data-toc-link="{{ id }}">
+        <span class="toc-mark">{% if passed %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>{{ name }}</a></li>
+      {% else %}
+      <li><span class="toc-link is-locked" aria-disabled="true"><span class="toc-mark">{{ icon("lock", "ico-sm") }}</span>{{ name }}</span></li>
+      {% endif %}
       {% endfor %}
     </ol>
   </nav>
@@ -43,8 +63,10 @@
       <p>{{ _("Shart bajarilsa, unga tegishli kod bloki ishga tushadi. Aks holda bu blok tashlab ketiladi.") }}</p>
     </div>
     {{ code('yosh = 18\nif yosh >= 18:\n    print("Kirishga ruxsat berildi")') }}
+    {{ lt(0, 29) }}
   </section>
 
+  {% if open_n >= 2 %}
   <section id="ifelse" class="stack stack-lg" data-toc-section>
     <div class="prose">
       <span class="eyebrow">{{ _("Kichik mavzu 2") }}</span>
@@ -81,8 +103,11 @@
         </tbody>
       </table></div>
     </div>
+    {{ lt(1, 30) }}
   </section>
+  {% endif %}
 
+  {% if open_n >= 3 %}
   <section id="elif" class="stack stack-lg" data-toc-section>
     <div class="prose">
       <span class="eyebrow">{{ _("Kichik mavzu 3") }}</span>
@@ -90,8 +115,11 @@
       <p>{{ _("Bir nechta shartni ketma-ket tekshirish kerak bo‘lsa,") }} <code>elif</code> {{ _("ishlatiladi. Python shartlarni yuqoridan pastga tekshiradi va birinchi rost chiqqan blokni bajaradi, qolganlarini tashlab ketadi.") }}</p>
     </div>
     {{ code('ball = 85\nif ball >= 90:\n    print("A’lo")\nelif ball >= 70:\n    print("Yaxshi")\nelse:\n    print("Qoniqarsiz")') }}
+    {{ lt(2, 27) }}
   </section>
+  {% endif %}
 
+  {% if open_n >= 4 %}
   <section id="nested" class="stack stack-lg" data-toc-section>
     <div class="prose">
       <span class="eyebrow">{{ _("Kichik mavzu 4") }}</span>
@@ -99,8 +127,18 @@
       <p>{{ _("Bir shart ichida boshqa shartni tekshirish mumkin. Ichki blok faqat tashqi shart rost bo‘lgandagina ko‘rib chiqiladi. Chalkashmaslik uchun chekinishlarga (4 ta bo‘sh joy) e’tibor bering.") }}</p>
     </div>
     {{ code('yosh = 20\nhujjat = True\nif yosh >= 18:\n    if hujjat:\n        print("Ruxsat")\n    else:\n        print("Hujjat kerak")') }}
+    {{ lt(3, 28) }}
   </section>
+  {% endif %}
 
+  {% if not all_passed %}
+  {# Keyingi darslar yopiq: joriy dars testi muvaffaqiyatli topshirilgach ochiladi #}
+  <div class="lesson-locked no-print" role="note">
+    <span class="list-ico">{{ icon("lock", "ico-sm") }}</span>
+    <div class="grow"><div class="small strong">{{ _("Keyingi darslar yopiq") }} · {{ 4 - open_n }} {{ _("ta") }}</div>
+      <div class="xs muted">{{ _("Yuqoridagi dars testini kamida 70%% bilan topshirsangiz, keyingi dars ochiladi.") }}</div></div>
+  </div>
+  {% else %}
   <details id="masala" class="card" data-toc-section>
     <summary class="card-head pointer summary-plain">
       <div><div class="eyebrow">{{ _("Yechimli masala") }}</div><div class="strong">{{ _("Haroratni tekshirish") }}</div></div>
@@ -111,6 +149,7 @@
       {{ code('harorat = 15\nif harorat > 0:\n    print("Iliq")\nelse:\n    print("Sovuq")') }}
     </div>
   </details>
+  {% endif %}
 
   <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
@@ -119,6 +158,7 @@
       <div class="chips"><a class="chip" href="{{ url_for('user.tutor', q='elif va else farqi nima?') }}">{{ _("elif va else farqi?") }}</a><a class="chip" href="{{ url_for('user.tutor', q='Ichma-ich shartlarga misol ber') }}">{{ _("Yana misol ber") }}</a></div>
     </div>
   </div>
+  <div data-lesson-end aria-hidden="true"></div>
 </article>
 </div>
 {% endblock %}
@@ -137,10 +177,11 @@
     <button class="btn btn-outline btn-sm" type="button" @click="speed = {'0.75x':'1x','1x':'1.25x','1.25x':'1.5x','1.5x':'2x','2x':'0.75x'}[speed]" x-text="speed">1x</button>
   </div>
 </div>
-{% else %}
-<footer class="focus-foot">
+{% elif all_passed %}
+{# Mavzu testi: barcha dars testlari topshirilgach va mavzu birinchi marta oxirigacha ko'rib chiqilgach (lesson.js: data-end-gate) #}
+<footer class="focus-foot" data-end-gate>
   <div class="focus-foot-inner">
-    <a class="btn btn-primary grow" href="{{ url_for('test.question') }}">{{ _("Mavzu testini boshlash") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question', turi='mavzu', soni=8) }}">{{ _("Mavzu testini boshlash") }} · 8 {{ _("savol") }}</a>
   </div>
 </footer>
 {% endif %}

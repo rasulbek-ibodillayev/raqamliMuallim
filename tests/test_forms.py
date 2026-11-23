@@ -74,18 +74,15 @@ def test_recover_by_secret_word(client):
     # 1) eski login + maxfiy so'z (katta-kichik harf va bo'sh joy farqlanmaydi)
     r = client.post("/parol-tiklash/maxfiy-soz", data={"who": "+998901234567", "secret": " Informatika "}, headers=JSON)
     assert r.json["ok"] and r.json["data"]["step"] == 2
-    # 2) yangi email → kod
-    r = client.post("/parol-tiklash/maxfiy-soz/aloqa", data={"method": "email", "contact": "Yangi@Maktab.uz"}, headers=JSON)
-    assert r.json["ok"] and "yangi@maktab.uz" in r.json["message"]
-    # 3) kod + yangi parol → akkauntga kiradi
-    r = client.post("/parol-tiklash/maxfiy-soz/tasdiq", headers=JSON,
-                    data={"otp": list("123456"), "p1": "yangiparol1", "p2": "yangiparol1"})
+    # 2) yangi parol ikki marta → akkauntga kiradi
+    r = client.post("/parol-tiklash/maxfiy-soz/parol", headers=JSON, data={"p1": "yangiparol1", "p2": "boshqa1234"})
+    assert r.status_code == 422 and "p2" in r.json["errors"]
+    r = client.post("/parol-tiklash/maxfiy-soz/parol", headers=JSON, data={"p1": "yangiparol1", "p2": "yangiparol1"})
     assert r.json["ok"] and r.json["redirect"] == "/app/"
 
 
 def test_recover_steps_cannot_be_skipped(client):
-    assert client.post("/parol-tiklash/maxfiy-soz/aloqa", data={"contact": "a@b.uz"}).status_code == 302
-    assert client.post("/parol-tiklash/maxfiy-soz/tasdiq", data={"otp": "123456"}).status_code == 302
+    assert client.post("/parol-tiklash/maxfiy-soz/parol", data={"p1": "yangiparol1", "p2": "yangiparol1"}).status_code == 302
 
 
 def test_recover_locks_after_5_wrong_secrets(client):

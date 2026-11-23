@@ -120,12 +120,11 @@ def test_password_reset_sets_new_password(app, guest, teacher):
     assert _user(app, "+998901234567").check_password("tiklangan1")
 
 
-def test_recover_replaces_contact_and_password(app, guest, teacher):
+def test_recover_sets_new_password(app, guest, teacher):
     assert guest.post("/parol-tiklash/maxfiy-soz", data={"who": "+998901234567", "secret": " INFORMATIKA "}, headers=JSON).json["ok"]
-    assert guest.post("/parol-tiklash/maxfiy-soz/aloqa", data={"method": "phone", "contact": "99 111 22 33"}, headers=JSON).json["ok"]
-    r = guest.post("/parol-tiklash/maxfiy-soz/tasdiq", data={"otp": list("123456"), "p1": "tiklangan1", "p2": "tiklangan1"}, headers=JSON)
+    r = guest.post("/parol-tiklash/maxfiy-soz/parol", data={"p1": "tiklangan1", "p2": "tiklangan1"}, headers=JSON)
     assert r.json["ok"]
-    u = _user(app, "+998991112233")
+    u = _user(app, "+998901234567")
     assert u.first_name == "Dilnoza" and u.check_password("tiklangan1")
     assert guest.get("/app/").status_code == 200
 

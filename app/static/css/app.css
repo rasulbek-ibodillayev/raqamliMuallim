@@ -1363,3 +1363,65 @@ html { -webkit-tap-highlight-color: transparent; }
   .text-display .motto, .ai-card, .btn-ai, .ai-text, .msg-ai:has(.typing) .ai-mark { animation: none; }
 }
 @media print { .main::before { display: none; } }
+
+/* =========================================================
+   Tuzatish 4: AI muhiti (yengil), markazlash, dars testlari
+   ========================================================= */
+
+/* Kartalar: AI ranglarida juda yengil tus va nur — kontentdan chalg'itmaydi */
+.card {
+  border-color: color-mix(in srgb, var(--ai-1) 9%, var(--border));
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--ai-1) 3.5%, transparent), transparent 140px);
+  box-shadow: var(--shadow-card), 0 12px 32px -24px color-mix(in srgb, var(--ai-1) 45%, transparent);
+}
+.card-flat { background-image: none; box-shadow: none; }
+a.card:hover, .card-link:hover {
+  border-color: color-mix(in srgb, var(--ai-1) 28%, var(--border));
+  box-shadow: var(--shadow-card), 0 14px 32px -20px color-mix(in srgb, var(--ai-1) 55%, transparent);
+}
+
+/* Doira ko'rinishidagi progress — «neon» uslub: shaffof fon, ko'k → binafsha gradient yoy, nur va gradient raqam.
+   Nur SVG elementining o'ziga beriladi (yoyga berilsa, filtr chegarasi uni to'rtburchak qilib kesadi) */
+.ring { --w: 9px; background: none; }
+.ring svg { overflow: visible; filter: drop-shadow(0 0 4px rgba(34, 211, 238, .55)) drop-shadow(0 0 10px rgba(129, 140, 248, .35)); }
+.ring .track { stroke: color-mix(in srgb, #94a3b8 22%, transparent); }
+.ring .ring-s1 { stop-color: #22d3ee; }
+.ring .ring-s2 { stop-color: #60a5fa; }
+.ring .ring-s3 { stop-color: #a78bfa; }
+.ring .bar { filter: none; }
+.ring .center { position: relative; text-align: center; padding: 0 10px; }
+.ring .ring-value { color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(180deg, #06b6d4, #3b82f6 60%, #8b5cf6); font-variant-numeric: tabular-nums; }
+
+/* Bosh sahifa salomlashuvi va «Natijalarim» sarlavhasi — markazda */
+.home-hero { text-align: center; align-items: center; }
+.home-hero .row { justify-content: center; }
+.page-head.is-center { flex-direction: column; align-items: center; text-align: center; }
+.page-head.is-center + .stack .result-filter { justify-content: center; }
+
+/* Dars testi (dars oxirida 3 savol) */
+.lesson-test { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r);
+  border: 1px dashed color-mix(in srgb, var(--ai-1) 35%, var(--border)); background: color-mix(in srgb, var(--ai-soft) 70%, transparent); }
+.lesson-test.is-next { opacity: .65; }
+.lesson-test .list-ico { color: #7c3aed; }
+
+/* Mavzu testi tugmasi — dars oxirigacha ko'rilgunga qadar yashirin */
+.focus-foot.is-gated { display: none; }
+
+/* «Xatolar analitikasi»: tavsiya etilgan darslar */
+.rec-item { flex-wrap: wrap; gap: 12px; }
+.rec-item > .grow { min-width: 220px; }
+@media (max-width: 480px) { .rec-actions { width: 100%; } .rec-actions .btn-primary { flex: 1; } }
+
+/* AI tutor: «Konspekt» tugmasi — yozish maydonidan yuqorida */
+.study-fab-tutor { bottom: calc(176px + env(safe-area-inset-bottom)); }
+@media (max-width: 1023px) { .study-fab-tutor { bottom: calc(var(--tabbar-h) + 176px + env(safe-area-inset-bottom)); } }
+body:has(.study-fab-tutor) .page { padding-bottom: calc(var(--tabbar-h) + 32px); }
+@media (min-width: 1024px) { body:has(.study-fab-tutor) .page { padding-bottom: 64px; } }
+
+/* Yopiq darslar: joriy dars testi topshirilmaguncha keyingi darslar ko'rsatilmaydi */
+.lesson-locked { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--r);
+  background: var(--surface-2); border: 1px solid var(--border); }
+.lesson-locked .list-ico { color: var(--muted); }
+.toc-link.is-locked { color: var(--faint); cursor: not-allowed; }
+.toc-link.is-locked .toc-mark { color: var(--faint); }

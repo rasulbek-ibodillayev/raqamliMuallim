@@ -348,10 +348,11 @@ def reset_verify():
                    redirect_to=url_for("auth.reset", kod=1), message=_("Kod tasdiqlandi. Endi yangi parolni kiriting"))
 
 
-# --- Maxfiy so'z orqali tiklash ---
-# Telefon raqam o'zgargan yoki emailga kirib bo'lmaganda: eski login + maxfiy so'z → yangi aloqa (kod bilan) → yangi parol.
-# Holat sessiyada: recover = {"step": 1|2|3, "uid", "fails", "method", "contact"}. Maxfiy so'z users.secret_hash bilan
-# solishtiriladi. Urinishlar hisobi hozircha sessiyada (keyin audit_log va IP bo'yicha cheklov).
+# --- Maxfiy so'z orqali tiklash (2 bosqich) ---
+# 1) eski telefon raqam yoki email + maxfiy so'z (login bazada bo'lsa va maxfiy so'z mos kelsa) →
+# 2) yangi parol (2 marta) → parol o'zgaradi va foydalanuvchi akkauntiga kiradi.
+# Holat sessiyada: recover = {"step": 1|2, "uid", "fails"}. Maxfiy so'z users.secret_hash bilan solishtiriladi.
+# Urinishlar hisobi hozircha sessiyada (keyin audit_log va IP bo'yicha cheklov).
 RECOVER_MAX_FAILS = 5
 
 
@@ -360,9 +361,8 @@ def _recover():
 
 
 def _recover_ctx(rec, **extra):
-    method = rec.get("method", "phone")
-    return {"rstep": rec.get("step", 1), "method": method, "contact": rec.get("contact", ""),
-            "locked": rec.get("fails", 0) >= RECOVER_MAX_FAILS, "fails_left": RECOVER_MAX_FAILS - rec.get("fails", 0), **extra}
+    return {"rstep": rec.get("step", 1), "locked": rec.get("fails", 0) >= RECOVER_MAX_FAILS,
+            "fails_left": RECOVER_MAX_FAILS - rec.get("fails", 0), **extra}
 
 
 @bp.route("/parol-tiklash/maxfiy-soz", methods=["GET", "POST"])
@@ -374,7 +374,7 @@ def recover():
             session["recover"] = rec
         return render_template("auth/recover.html", **_recover_ctx(rec))
 
-    # 1-qadam: eski telefon/email va maxfiy so'z
+    # 1-bosqich: eski telefon/email va maxfiy so'z
     if rec.get("fails", 0) >= RECOVER_MAX_FAILS:
         return respond(errors={"secret": _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing")},
                        template="auth/recover.html", **_recover_ctx(rec))
@@ -393,40 +393,14 @@ def recover():
                    redirect_to=url_for("auth.recover"), data={"step": 2})
 
 
-@bp.post("/parol-tiklash/maxfiy-soz/aloqa")
-def recover_contact():
-    """2-qadam: yangi telefon (kod Telegram bot orqali) yoki yangi email (kod pochtaga)."""
+@bp.post("/parol-tiklash/maxfiy-soz/parol")
+def recover_confirm():
+    """2-bosqich: yangi parol (2 marta) → parol o'zgaradi va foydalanuvchi akkauntiga kiradi."""
     rec = _recover()
     if rec.get("step", 1) < 2:
         return redirect(url_for("auth.recover"))
-    method = field("method") if field("method") in ("phone", "email") else "phone"
-    value = field("contact")
-    check = (lambda v: check_phone(v)) if method == "phone" else (lambda v: check_email(v.lower()))
-    errors = validate({"contact": (value, required, check)})
-    if not errors:
-        other = User.by_login(value)
-        if other is not None and other.id != rec.get("uid"):
-            errors = {"contact": _("Bu telefon/email boshqa akkauntga bog‘langan")}
-    if not errors:
-        contact = norm_phone(value) if method == "phone" else value.lower()
-        session["recover"] = {**rec, "step": 3, "method": method, "contact": contact}
-        msg = (_("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=_fmt_phone(contact)) if method == "phone"
-               else _("Kod %(c)s manziliga yuborildi", c=contact))
-    else:
-        msg = None
-    return respond(errors=errors, template="auth/recover.html", **_recover_ctx({**rec, "method": method}),
-                   redirect_to=url_for("auth.recover"), message=msg, data={"step": 3})
-
-
-@bp.post("/parol-tiklash/maxfiy-soz/tasdiq")
-def recover_confirm():
-    """3-qadam: yangi aloqadagi kod + yangi parol → aloqa yangilanadi va foydalanuvchi akkauntiga kiradi."""
-    rec = _recover()
-    if rec.get("step", 1) < 3:
-        return redirect(url_for("auth.recover"))
     pw = request.form.get("p1", "")
     errors = validate({
-        "otp": (otp_code(), check_otp, _otp_matches),
         "p1": (pw, check_password),
         "p2": (request.form.get("p2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
     })
@@ -435,22 +409,12 @@ def recover_confirm():
         session.pop("recover", None)
         return redirect(url_for("auth.recover"))
     if not errors:
-        if rec.get("method") == "email":
-            user.email = rec["contact"]
-        else:
-            user.phone = rec["contact"]
         user.set_password(pw)
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            errors = {"otp": _("Bu telefon/email boshqa akkauntga bog‘langan")}
-    if not errors:
+        db.session.commit()
         session.pop("recover", None)
         _sign_in(user)
     return respond(errors=errors, template="auth/recover.html", **_recover_ctx(rec),
-                   redirect_to=url_for("user.home"),
-                   message=_("Akkaunt tiklandi: yangi telefon raqam yoki email saqlandi, endi yangi parol bilan kirasiz"))
+                   redirect_to=url_for("user.home"), message=_("Parol yangilandi, akkauntingizga kirdingiz"))
 
 
 # --- Sertifikatni tekshirish (ommaviy, QR-koddan) ---

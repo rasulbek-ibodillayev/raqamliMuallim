@@ -221,3 +221,132 @@ def reject(question_id: int, actor_id: int) -> bool:
 
 def get(question_id: int) -> Question | None:
     return db.session.get(Question, question_id)
+
+
+# ---------------- Excel orqali import ----------------
+# Bir qator — bitta savol. Ustunlar: EXCEL_HEAD. Savol turlari:
+#   yopiq — A..F variantlar, «To'g'ri javob»: bitta harf (B);
+#   ko'p javobli — A..F variantlar, «To'g'ri javob»: harflar vergul bilan (A, C);
+#   moslashtirish — A..F kataklarda «atama = ta'rif» juftliklari, «To'g'ri javob» bo'sh;
+#   ochiq — variantlar bo'sh, «To'g'ri javob»: javob; boshqa yozilishlari «;» bilan (45; qirq besh).
+# Fayl to'liq tekshiriladi: bitta qatorda xato bo'lsa ham hech narsa yozilmaydi.
+EXCEL_HEAD = ["Mavzu", "Dars", "Kichik mavzu", "Qiyinlik", "Savol turi", "Savol matni",
+              "A", "B", "C", "D", "E", "F", "To‘g‘ri javob", "Vaqt (soniya)", "Izoh"]
+EXCEL_WIDTHS = [22, 24, 22, 10, 16, 48, 18, 18, 18, 18, 12, 12, 14, 12, 36]
+_LETTERS = "ABCDEF"
+
+
+def _norm(s: str) -> str:
+    """Katta-kichik harf va o'zbekcha apostrof shakllari farqlanmaydi."""
+    return " ".join(str(s).lower().replace("ʻ", "'").replace("‘", "'").replace("’", "'").replace("`", "'").split())
+
+
+_KIND_NAMES = {"yopiq": "yopiq", "bitta javob": "yopiq", "ko'p javobli": "kop", "kop": "kop", "ko'p javob": "kop",
+               "moslashtirish": "moslash", "moslash": "moslash", "ochiq": "ochiq", "ochiq javob": "ochiq"}
+_LEVEL_NAMES = {_norm(k): k for k in LEVEL_TO_DIFF}
+
+
+def excel_sample() -> bytes:
+    """Namunaviy fayl: sarlavha va har bir savol turiga bittadan misol (bazadagi birinchi kichik mavzu bilan)."""
+    from . import xlsx
+    tree = content_tree()
+    if tree and tree[0]["lessons"] and tree[0]["lessons"][0]["subtopics"]:
+        sec, les = tree[0], tree[0]["lessons"][0]
+        where = [sec["name"], les["name"], les["subtopics"][0]["name"]]
+    else:
+        where = ["Dasturlash asoslari", "Python: shart operatorlari", "if operatori"]
+    rows = [EXCEL_HEAD,
+            where + ["Oson", "yopiq", "x = 5 bo‘lsa, «if x > 3: print(x * 2)» nima chiqaradi?", "5", "10", "15", "Xato beradi",
+                     "", "", "B", "60", "x > 3 rost, shuning uchun 5 * 2 = 10."],
+            where + ["O‘rta", "ko‘p javobli", "Qaysilari taqqoslash amallari?", "==", "!=", "=", ">=", "", "", "A, B, D", "90", ""],
+            where + ["O‘rta", "moslashtirish", "Amallarni ma’nosi bilan moslang.", "== = teng", "!= = teng emas",
+                     "> = katta", "", "", "", "", "120", ""],
+            where + ["Qiyin", "ochiq", "101101₂ sonini o‘nlik sanoq sistemasida yozing.", "", "", "", "", "", "",
+                     "45; qirq besh", "90", "32 + 8 + 4 + 1 = 45"]]
+    return xlsx.write(rows, widths=EXCEL_WIDTHS)
+
+
+def _subtopic_index() -> dict[tuple[str, str, str], int]:
+    return {(_norm(s["name"]), _norm(l["name"]), _norm(u["name"])): u["id"]
+            for s in content_tree() for l in s["lessons"] for u in l["subtopics"]}
+
+
+def _excel_payload(row: list[str], subs: dict) -> tuple[dict | None, str | None]:
+    row = (row + [""] * len(EXCEL_HEAD))[:len(EXCEL_HEAD)]
+    sec, les, sub, level, kind, text = row[:6]
+    opts, right, time_s, why = row[6:12], row[12], row[13], row[14]
+    sid = subs.get((_norm(sec), _norm(les), _norm(sub)))
+    if sid is None:
+        return None, "mavzu, dars yoki kichik mavzu bazada topilmadi"
+    if _norm(level) not in _LEVEL_NAMES:
+        return None, "qiyinlik: Oson, O‘rta yoki Qiyin"
+    k = _KIND_NAMES.get(_norm(kind))
+    if k is None:
+        return None, "savol turi: yopiq, ko‘p javobli, moslashtirish yoki ochiq"
+    if not text:
+        return None, "savol matni bo‘sh"
+    t = time_s or "60"
+    if not (t.isdigit() and 10 <= int(t) <= 1800):
+        return None, "vaqt 10–1800 soniya oralig‘ida bo‘lsin"
+    data, answer = {"format": "matn"}, {}
+    if k == "ochiq":
+        vals = [v.strip() for v in right.split(";") if v.strip()]
+        if not vals:
+            return None, "ochiq savolning to‘g‘ri javobini kiriting"
+        answer = {"value": vals[0], **({"accept": vals[1:]} if vals[1:] else {})}
+    elif k == "moslash":
+        # «atama = ta'rif»: avval bo'sh joy bilan o'ralgan « = » qidiriladi (atamaning o'zida «=» bo'lishi mumkin: «== = teng»)
+        pairs = [tuple(x.strip() for x in o.split(" = " if " = " in o else "=", 1)) for o in opts if "=" in o]
+        pairs = [p for p in pairs if p[0] and p[1]]
+        if len(pairs) < 2:
+            return None, "moslashtirishda kamida 2 ta «atama = ta’rif» juftligi bo‘lsin"
+        data.update(left=[a for a, _b in pairs], right=[b for _a, b in pairs])
+        answer = {"pairs": list(range(len(pairs)))}
+    else:
+        keep = [i for i, o in enumerate(opts) if o]
+        if len(keep) < 2:
+            return None, "kamida 2 ta javob varianti bo‘lsin"
+        marks = [x.strip().upper() for x in right.replace(";", ",").split(",") if x.strip()]
+        if not marks or any(len(m) != 1 or m not in _LETTERS or _LETTERS.index(m) not in keep for m in marks):
+            return None, "to‘g‘ri javob — to‘ldirilgan variant harfi (masalan: B yoki A, C)"
+        idx = sorted({_LETTERS.index(m) for m in marks})
+        if k == "yopiq" and len(idx) != 1:
+            return None, "yopiq savolda bitta to‘g‘ri javob bo‘lsin"
+        if k == "kop" and len(idx) < 2:
+            return None, "ko‘p javobli savolda kamida 2 ta to‘g‘ri javob bo‘lsin"
+        data["options"] = [opts[i] for i in keep]
+        answer = {"keys": [keep.index(i) for i in idx]}
+    payload = {"subtopic_id": sid, "type": KIND_TO_TYPE[k], "difficulty": LEVEL_TO_DIFF[_LEVEL_NAMES[_norm(level)]],
+               "text": text[:3000], "data": data, "answer": answer, "explanation": why[:2000] or None,
+               "time_limit_s": int(t)}
+    errs = check_question(payload)
+    return (None, errs[0]) if errs else (payload, None)
+
+
+def import_excel(data: bytes, actor_id: int) -> tuple[int, list[str]]:
+    """Excel fayldagi savollarni bankka qo'shadi. Natija: (qo'shilganlar soni, xatolar). Xato bo'lsa hech narsa yozilmaydi."""
+    from . import xlsx
+    try:
+        rows = xlsx.read_rows(data)
+    except xlsx.XlsxError as e:
+        return 0, [str(e)]
+    if rows and _norm(rows[0][0] if rows[0] else "") == _norm(EXCEL_HEAD[0]):
+        rows = rows[1:]
+    numbered = [(n, r) for n, r in enumerate(rows, start=2) if any(c for c in r)]
+    if not numbered:
+        return 0, ["Faylda savol topilmadi"]
+    subs = _subtopic_index()
+    payloads, errors = [], []
+    for n, row in numbered:
+        p, err = _excel_payload(row, subs)
+        if err:
+            errors.append(f"{n}-qator: {err}")
+        else:
+            payloads.append(p)
+    if errors:
+        return 0, errors[:20] + ([f"… yana {len(errors) - 20} ta xato"] if len(errors) > 20 else [])
+    for p in payloads:
+        save(p, actor_id)
+    audit(actor_id, "import_excel", "excel", {"count": len(payloads)})
+    db.session.commit()
+    return len(payloads), []

@@ -2,15 +2,15 @@
 {% block title %}{{ _("Maxfiy so‘z orqali tiklash") }}{% endblock %}
 {% block auth_back %}<a class="icon-btn" href="{{ url_for('auth.reset') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{% endblock %}
 {% block content %}
-{# Telefon raqam o'zgargan yoki emailga kirib bo'lmaganda: 1) eski login + maxfiy so'z, 2) yangi telefon/email,
-   3) yangi aloqaga kelgan kod + yangi parol. Holat serverda (sessiya), JS bo'lsa qadamlar sahifa yangilanmasdan almashadi. #}
-<div class="stack stack-lg" x-data="{ step: {{ rstep }}, method: '{{ method }}' }">
+{# Telefon raqam o'zgargan yoki emailga kirib bo'lmaganda, 2 bosqich: 1) eski login + maxfiy so'z,
+   2) yangi parol (2 marta) → akkauntga kiradi. Holat serverda (sessiya), JS bo'lsa bosqichlar sahifa yangilanmasdan almashadi. #}
+<div class="stack stack-lg" x-data="{ step: {{ rstep }} }">
   <div class="stack stack-sm">
-    <div class="steps" aria-hidden="true"><span :class="step >= 1 && 'on'" class="on"></span><span :class="step >= 2 && 'on'" class="{{ 'on' if rstep >= 2 }}"></span><span :class="step >= 3 && 'on'" class="{{ 'on' if rstep >= 3 }}"></span></div>
-    <span class="xs muted"><span x-text="step">{{ rstep }}</span> / 3 {{ _("qadam") }}</span>
+    <div class="steps" aria-hidden="true"><span :class="step >= 1 && 'on'" class="on"></span><span :class="step >= 2 && 'on'" class="{{ 'on' if rstep >= 2 }}"></span></div>
+    <span class="xs muted"><span x-text="step">{{ rstep }}</span> / 2 {{ _("qadam") }}</span>
   </div>
 
-  <!-- 1-qadam: eski telefon/email va maxfiy so'z -->
+  <!-- 1-bosqich: eski telefon/email va maxfiy so'z -->
   <form class="stack stack-lg" action="{{ url_for('auth.recover') }}" method="post" novalidate data-stay x-show="step === 1" {{ 'x-cloak' if rstep != 1 }}
         x-data="rmForm({}, function (j) { step = 2; return false; })" x-init="initForm()"
         data-errors="{{ (errors if rstep == 1 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
@@ -36,51 +36,19 @@
     <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy" {{ 'disabled' if locked }}>{{ _("Davom etish") }}</button>
   </form>
 
-  <!-- 2-qadam: yangi telefon yoki email -->
-  <form class="stack stack-lg" action="{{ url_for('auth.recover_contact') }}" method="post" novalidate data-stay x-show="step === 2" {{ 'x-cloak' if rstep != 2 }}
-        x-data="rmForm(rmContact({{ (form.contact or '')|tojson|forceescape }}), function (j) { step = 3; rmToast(j.message); return false; })" x-init="initForm()"
-        data-errors="{{ (errors if rstep == 2 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+  <!-- 2-bosqich: yangi parol (2 marta) -->
+  <form class="stack stack-lg" action="{{ url_for('auth.recover_confirm') }}" method="post" novalidate x-show="step === 2" {{ 'x-cloak' if rstep != 2 }}
+        x-data="rmForm({ show: false, show2: false })" x-init="initForm()" data-errors="{{ (errors if rstep == 2 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
     {% include "partials/form_open.html" %}
-    <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span>{{ _("Maxfiy so‘z to‘g‘ri. Endi yangi telefon raqam yoki emailingizni kiriting — unga tasdiqlash kodi yuboramiz.") }}</span></div>
-    <fieldset class="fieldset-reset stack stack-sm">
-      <legend class="label">{{ _("Kod qayerga yuborilsin?") }}</legend>
-      <div class="seg u-w-100p" role="radiogroup">
-        <label class="seg-opt grow"><input class="sr-only" type="radio" name="method" value="phone" x-model="method" {{ 'checked' if method == 'phone' }}>{{ icon("telegram", "ico-sm") }}{{ _("Telefon (Telegram)") }}</label>
-        <label class="seg-opt grow"><input class="sr-only" type="radio" name="method" value="email" x-model="method" {{ 'checked' if method == 'email' }}>{{ icon("mail", "ico-sm") }}{{ _("Email") }}</label>
-      </div>
-    </fieldset>
-    <div class="field">
-      <label class="label" for="rc-contact" x-text="method === 'phone' ? {{ _('Yangi telefon raqam')|tojson|forceescape }} : {{ _('Yangi email')|tojson|forceescape }}">{{ _("Yangi telefon raqam") }}</label>
-      <input class="input" id="rc-contact" name="contact" value="{{ form.contact }}" required
-             :inputmode="method === 'phone' ? 'tel' : 'email'" :autocomplete="method === 'phone' ? 'tel' : 'email'"
-             :placeholder="method === 'phone' ? '+998 90 123 45 67' : 'namuna@maktab.uz'" placeholder="+998 90 123 45 67"
-             x-model="contact" aria-describedby="contact-err contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
-      {{ field_error("contact", errors if rstep == 2 else {}) }}
-      <span class="hint" id="contact-hint" x-text="method === 'phone' ? {{ _('Kod shu raqamga ulangan Telegram bot orqali keladi.')|tojson|forceescape }} : {{ _('Kod shu manzilga xat bilan keladi.')|tojson|forceescape }}">{{ _("Kod shu raqamga ulangan Telegram bot orqali keladi.") }}</span>
-    </div>
-    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy || kind !== method">{{ _("Kod yuborish") }}</button>
-  </form>
-
-  <!-- 3-qadam: kod + yangi parol -->
-  <form class="stack stack-lg" action="{{ url_for('auth.recover_confirm') }}" method="post" novalidate x-show="step === 3" {{ 'x-cloak' if rstep != 3 }}
-        x-data="rmForm({ show: false, show2: false })" x-init="initForm()" data-errors="{{ (errors if rstep == 3 else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
-    {% include "partials/form_open.html" %}
-    {% set e = errors if rstep == 3 else {} %}
-    <p class="lead">{{ _("Yangi telefon yoki emailga kelgan kodni va yangi parolni kiriting. Shundan keyin akkauntingizga kirasiz.") }}</p>
-    {% if contact %}<p class="small muted">{{ _("Kod yuborilgan manzil:") }} <b class="num">{{ contact }}</b></p>{% endif %}
-    <div class="field">
-      <label class="label" for="rc-otp1">{{ _("Tasdiqlash kodi") }}</label>
-      <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">{% for i in range(6) %}<input id="rc-otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
-      {{ field_error("otp", e) }}
-      <span class="hint">{{ _("Namunada kod: 123456") }}</span>
-    </div>
+    {% set e = errors if rstep == 2 else {} %}
+    <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span>{{ _("Maxfiy so‘z to‘g‘ri. Endi yangi parol qo‘ying.") }}</span></div>
     <div class="field"><label class="label" for="rc-p1">{{ _("Yangi parol") }}</label>
       <div class="input-group"><input class="input" id="rc-p1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" required aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">{{ eye("show") }}</div>
       {{ field_error("p1", e) }}</div>
     <div class="field"><label class="label" for="rc-p2">{{ _("Parolni takrorlang") }}</label>
       <div class="input-group"><input class="input" id="rc-p2" name="p2" :type="show2 ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">{{ eye("show2") }}</div>
       {{ field_error("p2", e) }}</div>
-    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Tasdiqlash va kirish") }}</button>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Saqlash va kirish") }}</button>
     <a class="link center small" href="{{ url_for('auth.recover', qayta=1) }}">{{ _("Boshqa telefon yoki email kiritish") }}</a>
   </form>
 

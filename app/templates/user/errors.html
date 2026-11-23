@@ -1,7 +1,7 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ _("Xatolar analitikasi") }}{% endblock %}
 {% block content %}
-{% call page_head(_("Xatolar analitikasi"), _("Qayerda ko‘p xato qilayotganingiz va ularni tuzatish yo‘li")) %}{% endcall %}
+{% call page_head(_("Xatolar analitikasi")) %}{% endcall %}
 <div class="stack stack-xl">
   {# «Testga o'tish» — avval nechta savol ishlashni so'raydi. Natija «Natijalarim»ga qo'shiladi va shu sahifadagi
      xatolik foizlariga ta'sir qiladi #}
@@ -32,18 +32,31 @@
     </div>
   </section>
 
-  <section class="stack">
-    <div class="row between"><h2 class="eyebrow">{{ _("Eng zaif qismlar") }}</h2><span class="xs muted">{{ _("Oxirgi 30 kun") }}</span></div>
+  {# Tavsiya bilan o'tilgan darslar: dars testi 70–89% — keyingi darsga o'tilgan, lekin qayta o'zlashtirish tavsiya etilgan.
+     Darsni qayta o'zlashtirib, dars testini ≥ 90% bajarsa — dars bu ro'yxatdan chiqadi va o'quv rejadagi foiz yangilanadi. #}
+  <section class="stack" aria-labelledby="rec-title">
+    <div class="row between wrap"><h2 id="rec-title" class="eyebrow">{{ _("Qayta o‘zlashtirish tavsiya etilgan darslar") }}</h2>
+      <span class="xs muted">{{ _("Dars testi 70–89%%") }}</span></div>
+    {% if recommended %}
     <div class="card list">
-      {% set mx = weak[0][2] %}
-      {% for name, sec, n in weak %}
-      <div class="list-item">
-        <div class="grow stack stack-sm"><div class="row between"><span>{{ name }}</span><span class="small num t-red nowrap">{{ n }} {{ _("ta xato") }}</span></div>
-          <div class="progress thin progress-red"><span style="--v: {{ (n / mx * 100)|round }}%"></span></div>
-          <span class="xs muted">{{ sec }}</span></div>
+      {% for r in recommended %}
+      <div class="list-item rec-item">
+        <div class="grow stack stack-sm">
+          <div class="row between"><span class="strong">{{ r.lesson }}</span><span class="small num t-yellow nowrap">{{ r.pct }}%</span></div>
+          <div class="progress thin progress-yellow"><span style="--v: {{ r.pct }}%"></span></div>
+          <span class="xs muted">{{ r.topic }} · {{ r.when }}</span>
+        </div>
+        <div class="row row-sm rec-actions">
+          <a class="btn btn-primary btn-sm" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta o‘zlashtirish") }}</a>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('user.result_detail', rid=r.rid) }}">{{ _("Natija") }}</a>
+        </div>
       </div>
       {% endfor %}
     </div>
+    <p class="xs muted">{{ _("Darsni qayta o‘zlashtirib, dars testini 90%% va undan yuqori bajarsangiz, dars bu ro‘yxatdan chiqadi va o‘quv rejadagi foiz yangilanadi.") }}</p>
+    {% else %}
+    <div class="card card-pad small muted">{{ _("Tavsiya bilan o‘tilgan dars yo‘q — barcha dars testlari 90%% va undan yuqori.") }}</div>
+    {% endif %}
   </section>
 
   <section class="stack" x-data="{ f: 'all' }">

@@ -262,6 +262,31 @@ def editor_save():
                    message=_("Savol yangilandi") if qid else _("Savol saqlandi va savollar bankiga qo‘shildi"))
 
 
+@bp.get("/savol/namuna.xlsx")
+def excel_sample():
+    """Excel orqali savol qo'shish uchun namunaviy fayl (har bir savol turiga misol)."""
+    from flask import Response
+    return Response(qb.excel_sample(), headers={"Content-Disposition": 'attachment; filename="savollar-namuna.xlsx"'},
+                    mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+@bp.post("/savol/excel")
+def excel_import():
+    """Excel fayldan savollar: yopiq, ko'p javobli, moslashtirish va ochiq (matnli). Fayl to'liq tekshiriladi —
+    bitta qatorda xato bo'lsa ham hech narsa yozilmaydi."""
+    f = request.files.get("file")
+    if not f or not f.filename:
+        errors = {"file": _("Excel faylni tanlang")}
+    elif not f.filename.lower().endswith(".xlsx"):
+        errors = {"file": _("Fayl .xlsx formatida bo‘lsin")}
+    else:
+        n, errs = qb.import_excel(f.read(), current_user.id)
+        errors = {"file": "; ".join(errs)} if errs else {}
+    return respond(errors=errors, template="expert/editor.html", init=None, **_ctx(),
+                   redirect_to=url_for("expert.questions"),
+                   message=_("%(n)s ta savol savollar bankiga qo‘shildi", n=n) if not errors else None)
+
+
 @bp.post("/savollar/<int:qid>/ochirish")
 def question_delete(qid):
     """«O'chirish» — arxivlash: savol testlarga tushmaydi, o'tgan natijalar va versiyalar saqlanadi."""

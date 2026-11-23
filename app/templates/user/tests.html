@@ -9,7 +9,7 @@
   Namunada: ?oylik=1 — yakunlanmagan majburiy (oylik) test, ?kun=boshqa — yakshanba emas.
 #}
 {% block content %}
-{% call page_head(_("Testlar"), _("Tugatilmagan testlar, ixtiyoriy testlar va majburiy testlar jadvali")) %}{% endcall %}
+{% call page_head(_("Testlar")) %}{% endcall %}
 <div class="stack stack-xl" x-data="{ gone: [] }">
 
   {% if blocker %}
@@ -32,7 +32,7 @@
       </div>
       {{ progress(t.pct) }}
       <div class="row wrap row-sm">
-        <a class="btn {{ 'btn-primary' if must or loop.first else 'btn-outline' }} grow" href="{{ url_for('test.question', turi=test_slug[t.type]) }}">{{ _("Davom ettirish") }}</a>
+        <a class="btn btn-primary grow" href="{{ url_for('test.question', turi=test_slug[t.type]) }}">{{ _("Davom ettirish") }}</a>
         {% if not must %}
         <form action="{{ url_for('user.test_cancel', key=t.key) }}" method="post"
               x-data="rmForm({}, function (j) { gone.push('{{ t.key }}'); rmToast(j.message); return false; })"
@@ -96,7 +96,6 @@
       </div>
       {% endfor %}
     </div>
-    <p class="xs muted">{{ _("Majburiy test navbati kelganda ochiladi va «O‘quv reja»ga qo‘shiladi. Barcha natijalar «Natijalarim» bo‘limiga tushadi.") }}</p>
   </section>
 
   <details class="card">

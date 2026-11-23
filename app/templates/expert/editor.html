@@ -10,6 +10,25 @@
 {% set i = init or {} %}
 {% call page_head(_("Savolni tahrirlash") if i.id else _("Savol qo‘shish"), _("Saqlangan o‘zgarish yangi versiya bo‘ladi; o‘tgan test natijalari eski versiyada qoladi") if i.id else _("Saqlangan savol savollar bankiga qo‘shiladi")) %}{% endcall %}
 <script nonce="{{ csp_nonce }}">window.RM_CONTENT = {{ content|tojson }};</script>
+{% if not i.id %}
+{# Excel orqali bir nechta savol: matnli yopiq, ko'p javobli, moslashtirish va ochiq. Namunaviy faylda har turga misol bor #}
+<form class="card card-pad stack stack-sm mb-24 excel-import" action="{{ url_for('expert.excel_import') }}" method="post" enctype="multipart/form-data" novalidate
+      x-data="rmForm({ name: '' })" x-init="initForm()" data-errors="{{ (errors if 'file' in errors else {})|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
+  <div class="row between wrap items-start">
+    <div><h2 class="text-h3 row row-sm">{{ icon("table", "ico-sm") }}{{ _("Excel orqali qo‘shish") }}</h2>
+      <p class="xs muted">{{ _("Matnli yopiq, ochiq, ko‘p javobli va moslashtirish savollari. Bitta qatorda xato bo‘lsa, fayl qo‘shilmaydi.") }}</p></div>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('expert.excel_sample') }}" download>{{ icon("download", "ico-sm") }}{{ _("Namunaviy fayl") }}</a>
+  </div>
+  <div class="row wrap row-sm">
+    <label class="btn btn-outline btn-sm pointer">{{ icon("upload", "ico-sm") }}<span x-text="name || {{ _('Faylni tanlang (.xlsx)')|tojson|forceescape }}">{{ _("Faylni tanlang (.xlsx)") }}</span>
+      <input class="sr-only" type="file" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+             aria-describedby="file-err" @change="name = $event.target.files[0] ? $event.target.files[0].name : ''; clear('file')"></label>
+    <button class="btn btn-primary btn-sm" type="submit" :disabled="busy || !name">{{ _("Yuklash") }}</button>
+  </div>
+  {{ field_error("file", errors) }}
+</form>
+{% endif %}
 <form class="split u-cols-1fr" action="{{ url_for('expert.editor_save') }}" method="post" novalidate enctype="multipart/form-data"
       x-data="rmForm({
         topic: {{ (i.topic or '')|string|tojson|forceescape }}, lesson: {{ (i.lesson or '')|string|tojson|forceescape }},

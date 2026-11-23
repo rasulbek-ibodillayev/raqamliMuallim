@@ -11,6 +11,7 @@
     </div>
     <p class="strong">{{ r.q }}</p>
     {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
+    {% if r.image %}<figure class="q-figure"><img src="{{ r.image.src }}" alt="{{ r.image.alt }}" loading="lazy"></figure>{% endif %}
     <ul class="list-reset ans-list">
       {% for o in r.options %}
       {% set is_right = loop.index0 == r.right %}{% set is_mine = loop.index0 == r.mine %}

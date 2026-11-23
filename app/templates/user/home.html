@@ -4,11 +4,11 @@
   Bosh sahifa tartibi:
   1) salomlashuv + har kirishda yangi motivatsion so'z
   2) yangi foydalanuvchi: 3 qadamli yo'riqnoma
-     faol foydalanuvchi: tayyorlik va prognoz → keyingi qadam → bugungi reja (vaqt bahosi bilan) → xato qilinayotgan mavzular
+     faol foydalanuvchi: tayyorlik va prognoz → keyingi qadam → bugungi reja (vaqt bahosi bilan) → qayta o'zlashtirish tavsiya etilgan darslar
 #}
 {% block content %}
 <div class="stack stack-xl">
-  <section class="stack stack-lg pt-24">
+  <section class="stack stack-lg pt-24 home-hero">
     <div class="stack stack-sm">
       <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}{{ _("Attestatsiya") }} {{ r.exam }} · {{ r.days_left }} {{ _("kun qoldi") }}</p>
       {# Har kirishda boshqa qisqa motivatsion so'z (user.home: session["motto"]) #}
@@ -35,7 +35,7 @@
       <li class="ob-step {{ st }}">
         <span class="ob-mark">{% if st == "done" %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>
         <div class="grow"><div class="ob-title">{{ s.title }}</div><div class="small muted">{{ s.sub }}</div></div>
-        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for(s.endpoint) }}">{{ _("Boshlash") }}</a>{% endif %}
+        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for(s.endpoint, **(s.args or {})) }}">{{ _("Boshlash") }}</a>{% endif %}
       </li>
       {% endfor %}
     </ol>
@@ -105,24 +105,24 @@
     </div>
   </section>
 
-  {# ---------- Xato qilinayotgan mavzular: foiz qancha yuqori bo'lsa, rang yoqimli sariqdan yoqimli qizilga o'tadi ---------- #}
-  <a class="card weak-card" href="{{ url_for('user.errors') }}" aria-labelledby="weak-title">
+  {# ---------- Qayta o'zlashtirish tavsiya etilgan darslar (dars testi 70–89%): «Xatolar analitikasi» bilan bir xil ro'yxat ---------- #}
+  {% if recommended %}
+  <section class="card" aria-labelledby="weak-title">
     <div class="card-head">
-      <div><h2 id="weak-title" class="text-h3">{{ _("Xato qilayotgan mavzularingiz") }}</h2><div class="xs muted">{{ _("Oldingi testlaringiz bo‘yicha xatolik foizi") }}</div></div>
-      <span class="small link row row-sm nowrap">{{ _("Xatolar analitikasi") }}{{ icon("chevron-right", "ico-sm") }}</span>
+      <div><h2 id="weak-title" class="text-h3">{{ _("Qayta o‘zlashtirish tavsiya etilgan darslar") }}</h2><div class="xs muted">{{ _("90%% olsangiz, ro‘yxatdan chiqadi") }}</div></div>
+      <a class="small link row row-sm nowrap" href="{{ url_for('user.errors') }}">{{ _("Xatolar analitikasi") }}{{ icon("chevron-right", "ico-sm") }}</a>
     </div>
-    <ul class="list-reset list">
-      {% set mx = weak | map(attribute=2) | max %}
-      {% for name, sec, pct in weak %}
-      {# --h: 45 (sariq) → 0 (qizil) #}
-      <li class="list-item weak-item" style="--h: {{ (45 - 45 * pct / mx)|round(0, 'floor')|int }}">
-        <div class="grow"><div class="weak-name">{{ name }}</div><div class="sub">{{ sec }}</div></div>
-        <span class="weak-bar" aria-hidden="true"><span style="--v: {{ pct }}%"></span></span>
-        <span class="num strong weak-pct">{{ pct }}%</span>
-      </li>
+    <div class="list">
+      {% for r in recommended %}
+      <a class="list-item" href="{{ url_for('user.lesson', holat='qayta') }}">
+        <span class="list-ico">{{ icon("refresh", "ico-sm") }}</span>
+        <div class="grow"><div>{{ r.lesson }}</div><div class="sub">{{ r.topic }}</div></div>
+        <span class="num strong t-yellow">{{ r.pct }}%</span>{{ icon("chevron-right", "ico-sm chev") }}
+      </a>
       {% endfor %}
-    </ul>
-  </a>
+    </div>
+  </section>
+  {% endif %}
   {% endif %}
 
   {% include "partials/install_card.html" %}

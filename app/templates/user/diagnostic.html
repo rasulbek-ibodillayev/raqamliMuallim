@@ -9,11 +9,12 @@
   </div>
   <ul class="list-reset card list">
     <li class="list-item"><span class="list-ico">{{ icon("layers") }}</span><div class="grow"><div>{{ _("3 bosqich: oson → o‘rta → qiyin") }}</div><div class="sub">{{ _("Keyingi bosqich faqat yaxshi bilgan mavzularingizdan") }}</div></div></li>
-    <li class="list-item"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>{{ _("Taxminan 40 daqiqa") }}</div><div class="sub">{{ _("Har bosqich vaqti alohida hisoblanadi") }}</div></div></li>
+    {# Vaqt = to'liq o'quv rejadagi har bir dars savollariga ajratilgan vaqtlar yig'indisi (mock.diagnostic_estimate) #}
+    <li class="list-item"><span class="list-ico">{{ icon("clock") }}</span><div class="grow"><div>{{ _("Taxminan") }} <span class="num">{{ minutes }}</span> {{ _("daqiqa") }}</div><div class="sub">{{ _("To‘liq o‘quv rejadagi") }} <span class="num">{{ lessons }}</span> {{ _("ta dars savollari uchun ajratilgan vaqt") }}</div></div></li>
     <li class="list-item"><span class="list-ico">{{ icon("pause") }}</span><div class="grow"><div>{{ _("To‘xtatib, keyin davom ettirish mumkin") }}</div><div class="sub">{{ _("Javoblaringiz saqlanib boradi") }}</div></div></li>
   </ul>
   <div class="stack stack-sm">
-    <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('test.question') }}">{{ _("Diagnostikani boshlash") }}</a>
+    <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('test.question', turi='diagnostika', soni=lessons) }}">{{ _("Diagnostikani boshlash") }}</a>
     <a class="btn btn-ghost btn-block" href="{{ url_for('user.plan') }}">{{ _("Hozir emas, to‘liq rejadan boshlayman") }}</a>
   </div>
 </div>

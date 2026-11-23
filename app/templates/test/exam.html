@@ -52,7 +52,14 @@
           <div class="ex-q-body">
             <p class="ex-q-text" x-text="q().text"></p>
             <template x-if="q().code"><pre class="ex-code" x-text="q().code"></pre></template>
-            <template x-if="q().image"><figure class="ex-figure"><img :src="q().image.src" :alt="q().image.alt"></figure></template>
+            {# Rasmli savol: bosilsa rasm kattalashadi #}
+            <template x-if="q().image"><figure class="ex-figure" x-data="{ z: false }">
+              <button type="button" class="ex-figure-btn" @click="z = true" aria-label="{{ _('Rasmni kattalashtirish') }}"><img :src="q().image.src" :alt="q().image.alt"></button>
+              <figcaption>{{ _("Kattalashtirish uchun rasmni bosing") }}</figcaption>
+              <div class="sheet-backdrop u-ai-center u-p-16" x-show="z" x-cloak @click="z = false" @keydown.escape.window="z = false">
+                <img class="u-maxw-100p u-maxh-90dvh u-r-12 u-bg-6aaa0" :src="q().image.src" :alt="q().image.alt">
+              </div>
+            </figure></template>
             <template x-if="q().table">
               <table class="ex-table">
                 <thead><tr><template x-for="h in q().table.head"><th x-text="h"></th></template></tr></thead>

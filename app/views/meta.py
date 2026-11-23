@@ -49,7 +49,6 @@ SCREENS = [
     ]),
     ("O‘quv reja", [
         ("user.plan", "O‘quv reja (diagnostika asosida)", {}),
-        ("user.plan", "O‘quv reja — diagnostikasiz (umumiy ish reja)", {"diagnostika": "yoq"}),
         ("user.plan", "O‘quv reja — oylik test vaqti kelgan", {"oylik": 1}),
         ("meta.sample_topic", "Mavzu tafsiloti (bazadan; avval `flask kontent-yuklash`)", {"kind": "mavzu"}),
     ]),
@@ -72,8 +71,7 @@ SCREENS = [
         ("test.question", "Savol — jadvalli", {"tur": "jadval"}),
         ("test.question", "Savol — rasmli", {"tur": "rasm"}),
         ("test.question", "Savol — oflayn rejimda", {"tur": "yopiq", "oflayn": 1}),
-        ("test.question", "Savol — xatolar ustida ishlash (15 ta)", {"manba": "xatolar", "soni": 15}),
-        ("test.question", "Savol — haftalik test (bosqichli)", {"turi": "haftalik"}),
+        ("test.question", "Savol — dars testi (3 ta)", {"turi": "dars", "soni": 3}),
         ("test.stage", "Bosqichlar orasida (oraliq sinov)", {"turi": "oraliq"}),
         ("test.result", "Natija — o‘tdi", {}),
         ("test.result", "Natija — qaytarildi", {"holat": "qaytarildi"}),
@@ -81,6 +79,7 @@ SCREENS = [
         ("user.optional", "Ixtiyoriy test", {}),
         ("test.exam", "Attestatsiya testi (savollar navigatori bilan)", {"namuna": 1}),
         ("test.exam", "Attestatsiya testi — jadvalli savol", {"savol": 5, "namuna": 1}),
+        ("test.exam", "Attestatsiya testi — rasmli savol", {"savol": 8, "namuna": 1}),
         ("test.exam", "Attestatsiya testi — yakunlashni tasdiqlash", {"yakun": 1, "namuna": 1}),
         ("test.exam_result", "Attestatsiya testi — natija va tahlil", {}),
     ]),
@@ -102,7 +101,6 @@ SCREENS = [
     ("Ekspert paneli", [
         ("expert.questions", "Savollar banki (kartalar bilan)", {}),
         ("expert.queue", "Tekshiruv navbati — AI savollari", {}),
-        ("expert.queue", "Tekshiruv navbati — 2-sahifa", {"sahifa": 2}),
         ("expert.editor", "Savol qo‘shish", {}),
         ("expert.topics", "Mavzular va dars muharriri", {}),
         ("expert.objections", "E’tirozlar", {}),

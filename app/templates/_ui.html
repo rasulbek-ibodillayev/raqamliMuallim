@@ -25,10 +25,11 @@
 {%- if v is none -%}gray{%- elif v >= 90 -%}green{%- elif v >= 70 -%}blue{%- elif v >= 50 -%}yellow{%- else -%}red{%- endif -%}
 {%- endmacro %}
 
+{# Doira ko'rinishidagi progress: to'q disk, ko'k → binafsha gradient yoy va nur (.ring, app.css). color — eski chaqiriqlar uchun, ishlatilmaydi #}
 {% macro ring(v, size=132, color="var(--primary)", label=None) -%}
-{% set r = (size - 10) / 2 %}{% set c = 2 * 3.14159 * r %}
+{% set r = (size - 10) / 2 %}{% set c = 2 * 3.14159 * r %}{% set gid = "rg" ~ (range(1000000)|random) %}
 <div class="ring" style="--size: {{ size }}px; --rc: {{ color }}">
-  <svg viewBox="0 0 {{ size }} {{ size }}"><circle class="track" cx="{{ size/2 }}" cy="{{ size/2 }}" r="{{ r }}"/><circle class="bar" cx="{{ size/2 }}" cy="{{ size/2 }}" r="{{ r }}" stroke-dasharray="{{ c }}" stroke-dashoffset="{{ c * (1 - v/100) }}"/></svg>
+  <svg viewBox="0 0 {{ size }} {{ size }}" aria-hidden="true"><defs><linearGradient id="{{ gid }}" x1="1" y1="0" x2="0" y2="1"><stop class="ring-s1" offset="0"/><stop class="ring-s2" offset=".55"/><stop class="ring-s3" offset="1"/></linearGradient></defs><circle class="track" cx="{{ size/2 }}" cy="{{ size/2 }}" r="{{ r }}"/><circle class="bar" cx="{{ size/2 }}" cy="{{ size/2 }}" r="{{ r }}" style="stroke: url(#{{ gid }})" stroke-dasharray="{{ c }}" stroke-dashoffset="{{ c * (1 - v/100) }}"/></svg>
   <div class="center"><div class="ring-value num">{{ v }}%</div>{% if label %}<div class="xs muted">{{ label }}</div>{% endif %}</div>
 </div>
 {%- endmacro %}
@@ -56,8 +57,8 @@
 </div>
 {%- endmacro %}
 
-{% macro page_head(title, lead=None) -%}
-<div class="page-head">
+{% macro page_head(title, lead=None, cls="") -%}
+<div class="page-head {{ cls }}">
   <div><h1>{{ title }}</h1>{% if lead %}<p class="lead">{{ lead }}</p>{% endif %}</div>
   {% if caller %}<div class="row wrap">{{ caller() }}</div>{% endif %}
 </div>

@@ -150,3 +150,7 @@
 
 .ex-error { margin: 0; font-size: 13px; color: #c62828; }
 .ex-fs { padding: 0 12px; cursor: pointer; }
+
+/* Rasmli savol: bosilganda kattalashadi */
+.ex-figure-btn { display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.ex-figure figcaption { margin-top: 6px; font-size: 12px; color: #64748b; }

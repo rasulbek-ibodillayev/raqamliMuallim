@@ -1,7 +1,7 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ _("Diagnostika natijasi") }}{% endblock %}
 {% block content %}
-{# Diagnostikadan keyin: umumiy daraja → mavzular holati → shaxsiy reja. Keyingi qadam bitta: rejani ochish #}
+{# Diagnostikadan keyin: umumiy daraja → bo'limlar bo'yicha → savollar. Keyingi qadam bitta: rejani ochish #}
 <div class="stack stack-xl">
   <section class="items-center stack stack-lg center">
     {{ ring(64, 148, "var(--blue)", _("boshlang‘ich daraja")) }}
@@ -9,15 +9,6 @@
       <h1>{{ _("Diagnostika yakunlandi") }}</h1>
       <p class="lead">{{ _("42 ta mavzudan") }} <b>{{ _("18 tasini") }}</b> {{ _("allaqachon bilasiz. Reja qolgan 24 ta mavzudan tuzildi: taxminan") }} <b>{{ _("26 kun") }}</b>{{ _(", kuniga 35 daqiqa.") }}</p>
     </div>
-  </section>
-
-  <section class="card card-pad stack">
-    <div class="row between"><span class="strong">{{ _("Mavzular holati") }}</span><a class="small link" href="{{ url_for('user.plan') }}">{{ _("O‘quv reja") }}</a></div>
-    {% set colors = {"none": "var(--border-strong)", "learn": "#f59e0b", "relearn": "var(--red)", "done": "var(--blue)", "solid": "var(--green)"} %}
-    <div class="stacked-bar" aria-hidden="true">{% for k, v in dist %}<span style="--v: {{ v }}%; --d: {{ colors[k] }}"></span>{% endfor %}</div>
-    <ul class="list-reset row wrap g-6">
-      {% for k, v in dist %}<li class="status-dot"><span class="dot" style="--d: {{ colors[k] }}"></span>{{ status[k][0] }} <span class="muted num">{{ v }}%</span></li>{% endfor %}
-    </ul>
   </section>
 
   <section class="card">
@@ -32,21 +23,10 @@
     </div>
   </section>
 
-  <section class="card card-pad stack stack-sm">
-    <span class="eyebrow">{{ _("Rejaning boshlanishi") }}</span>
-    <ol class="list-reset stack stack-sm">
-      {% for p in plan if p.state != "done" %}{% if loop.index <= 3 %}
-      <li class="row row-sm"><span class="badge badge-gray num">{{ loop.index }}</span><span class="grow">{{ p.name }}</span>{% if p.min %}<span class="xs muted num">{{ p.min }} {{ _("daq") }}</span>{% endif %}</li>
-      {% endif %}{% endfor %}
-    </ol>
-    <p class="xs muted">{{ _("90%% va undan yuqori o‘zlashtirgan mavzularingiz rejadan chiqarildi:") }} {{ excluded|map(attribute=0)|join(", ") }}.</p>
-  </section>
-
   {# Har bir savol va javob: xato — qizil, to'g'ri javob — yashil #}
   <section class="stack">
     <div class="row between wrap"><h2 class="eyebrow">{{ _("Savollar va javoblaringiz") }}</h2>
       <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("xato javobingiz") }} <span class="dot dot-green"></span>{{ _("to‘g‘ri javob") }}</span></div>
-    <p class="xs muted">{{ _("Diagnostika bosqichma-bosqich: oson → o‘rta → qiyin. Namunada savollarning bir qismi ko‘rsatilgan.") }}</p>
     {% include "partials/answer_review.html" %}
   </section>
 

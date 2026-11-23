@@ -24,19 +24,18 @@ def home():
     today = list(m.TODAY) + ([m.TODAY_CONTROL] if state == "nazorat" else [])
     return render_template("user/home.html", sections=m.SECTIONS, r=m.READINESS, rstate=m.READINESS_STATE,
                            today=today, onboarding=m.ONBOARDING, new_user=new_user, done_steps=done_steps,
-                           motto=motto, next_state=state, weak=m.HOME_ERRORS)
+                           motto=motto, next_state=state, recommended=m.recommended_lessons())
 
 
 @bp.get("/diagnostika")
 def diagnostic():
-    return render_template("user/diagnostic.html")
+    lessons, minutes = m.diagnostic_estimate()
+    return render_template("user/diagnostic.html", lessons=lessons, minutes=minutes)
 
 
 @bp.get("/diagnostika/natija")
 def diagnostic_result():
-    return render_template("user/diagnostic_result.html", sections=m.SECTIONS, dist=m.DISTRIBUTION,
-                           status=m.STATUS, plan=[p for p in m.LEARN_PLAN if p["kind"] == "topic"],
-                           excluded=m.PLAN_EXCLUDED, questions=m.RESULT_QUESTIONS)
+    return render_template("user/diagnostic_result.html", sections=m.SECTIONS, questions=m.RESULT_QUESTIONS)
 
 
 @bp.get("/bilim")
@@ -65,10 +64,15 @@ def lesson_topic(topic_id):
     from flask import abort
 
     from ..services import catalog
+    from flask_login import current_user
     lesson = catalog.lesson_view(topic_id)
     if lesson is None or not lesson["parts"]:
         abort(404)
-    return render_template("user/lesson_topic.html", lesson=lesson)
+    # Har dars (kichik mavzu) bo'yicha natija: joriy dars testi ≥ 70% bo'lmaguncha keyingi darslar ko'rsatilmaydi
+    scores = catalog.subtopic_scores(current_user.id, topic_id)
+    pcts = [scores.get(p["id"]) for p in lesson["parts"]]
+    return render_template("user/lesson_topic.html", lesson=lesson, pcts=pcts, open_n=open_lessons(pcts),
+                           all_passed=all(p is not None and p >= m.PASS_MIN for p in pcts))
 
 
 @bp.get("/reja")
@@ -77,15 +81,31 @@ def plan():
     if request.args.get("oylik"):
         cur = next(i for i, x in enumerate(plan) if x.get("state") == "current")
         plan.insert(cur + 1, m.MONTHLY_DUE)
-    return render_template("user/plan.html", plan=plan, s=m.PLAN_SUMMARY, dist=m.DISTRIBUTION, status=m.STATUS,
-                           excluded=m.PLAN_EXCLUDED, diag=request.args.get("diagnostika") != "yoq",
-                           test_types=m.TEST_TYPES, pass_min=m.PASS_MIN, solid_min=m.SOLID_MIN)
+    return render_template("user/plan.html", plan=plan, s=m.PLAN_SUMMARY, test_types=m.TEST_TYPES,
+                           mandatory=m.MANDATORY_TYPES, decide=m.lesson_decision,
+                           pass_min=m.PASS_MIN, solid_min=m.SOLID_MIN)
+
+
+def open_lessons(pcts, pass_pct=m.PASS_MIN):
+    """Nechta dars ko'rinadi: dars testi muvaffaqiyatli (≥ 70%) topshirilganlari va undan keyingi bitta (joriy) dars.
+    Joriy dars testi topshirilmaguncha keyingi darslar ko'rsatilmaydi."""
+    n = 0
+    for p in pcts:
+        n += 1
+        if p is None or p < pass_pct:
+            break
+    return n
 
 
 @bp.get("/dars")
 def lesson():
-    return render_template("user/lesson.html", retry=request.args.get("holat") == "qayta",
-                           audio=bool(request.args.get("audio")))
+    retry = request.args.get("holat") == "qayta"
+    topic = next(t for t in m.LEARN_PLAN if t.get("state") == "current")
+    # Qayta o'zlashtirish namunasi — barcha dars testlari topshirilgan mavzu
+    pcts = [100, 86, 92, 100] if retry else [l["pct"] for l in topic["lessons"]]
+    return render_template("user/lesson.html", retry=retry, audio=bool(request.args.get("audio")),
+                           pcts=pcts, open_n=open_lessons(pcts),
+                           all_passed=all(p is not None and p >= m.PASS_MIN for p in pcts))
 
 
 @bp.get("/tutor")
@@ -140,7 +160,7 @@ def optional():
 def results():
     empty = bool(request.args.get("bosh"))
     return render_template("user/results.html", results=[] if empty else m.RESULTS,
-                           decision=m.DECISION, trend=m.TREND, test_types=m.TEST_TYPES, info=m.TEST_TYPE_INFO)
+                           decision=m.DECISION, test_types=m.TEST_TYPES)
 
 
 @bp.get("/natijalar/<int:rid>")
@@ -158,7 +178,7 @@ def result_detail(rid):
 
 @bp.get("/xatolar")
 def errors():
-    return render_template("user/errors.html", weak=m.ERRORS_WEAK, items=m.ERRORS_LIST)
+    return render_template("user/errors.html", recommended=m.recommended_lessons(), items=m.ERRORS_LIST)
 
 
 @bp.get("/eslatmalar")

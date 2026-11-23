@@ -5,6 +5,12 @@
 {% block topbar_actions %}<span class="badge badge-plain hide-sm">{{ icon("book", "ico-sm") }}{{ _("Mavzu:") }} {{ topic }}</span>{% endblock %}
 {% block content %}
 <h1 class="sr-only">{{ _("AI tutor") }}</h1>
+{# «Konspekt»: shu mavzu bo'yicha eslatmalar (konspekt) — yozish va ko'rish. Dars sahifasidagi tugma bilan bir xil ko'rinishda #}
+<div class="study-fab study-fab-tutor no-print" data-current-topic="{{ topic }}" role="group" aria-label="{{ _('Konspekt') }}">
+  <a class="fab fab-notes" href="{{ url_for('user.notes', mavzu=topic, yangi=1) }}" aria-label="{{ _('Konspekt') }}" title="{{ _('Konspekt') }}">
+    {{ icon("note") }}<span class="fab-label">{{ _("Konspekt") }}</span>
+  </a>
+</div>
 {#
   Suhbat qurilmaning localStorage'ida saqlanadi (rmTutorStore, static/js/learner.js):
   yangi mavzu boshlanganda yoki yozilganiga 24 soat bo'lganda avtomatik tozalanadi.
@@ -35,7 +41,7 @@
 
   <div class="pt-16 thread grow">
     <div class="row between wrap xs muted tutor-meta">
-      <span class="row row-sm">{{ icon("info", "ico-sm") }}<span x-text="restored ? {{ _('Avvalgi suhbat tiklandi (qurilmada saqlangan)')|tojson|forceescape }} : {{ _('Suhbat qurilmada saqlanadi')|tojson|forceescape }}">{{ _("Suhbat qurilmada saqlanadi") }}</span> · {{ _("yangi mavzuda yoki 24 soatdan keyin tozalanadi") }}</span>
+      <span class="row row-sm">{{ icon("info", "ico-sm") }}<span x-text="restored ? {{ _('Avvalgi suhbat tiklandi')|tojson|forceescape }} : {{ _('Suhbat 24 soat saqlanadi')|tojson|forceescape }}">{{ _("Suhbat 24 soat saqlanadi") }}</span></span>
       <button class="link btn-reset xs" type="button" x-show="msgs.length" @click="if (confirm({{ _('Suhbat tozalansinmi?')|tojson|forceescape }})) reset()">{{ _("Suhbatni tozalash") }}</button>
     </div>
 
@@ -62,12 +68,6 @@
   </div>
 
   <div class="stack stack-sm u-pos-sticky u-bottom-beba1 u-bg-bg u-pt-12">
-    <div class="chips scroll">
-      <button class="chip" type="button" @click="ask({{ _('Soddaroq tushuntir')|tojson|forceescape }})">{{ icon("bulb") }}{{ _("Soddaroq tushuntir") }}</button>
-      <button class="chip" type="button" @click="ask({{ _('Masala ber')|tojson|forceescape }})">{{ icon("code") }}{{ _("Masala ber") }}</button>
-      <button class="chip" type="button" @click="ask({{ _('Sxema bilan ko‘rsat')|tojson|forceescape }})">{{ icon("graph") }}{{ _("Sxema bilan ko‘rsat") }}</button>
-      <button class="chip" type="button" @click="ask({{ _('Ko‘p uchraydigan xatolar')|tojson|forceescape }})">{{ icon("alert") }}{{ _("Ko‘p uchraydigan xatolar") }}</button>
-    </div>
     {{ composer(_("Savolingizni yozing…")) }}
   </div>
 </div>

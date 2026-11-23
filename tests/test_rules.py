@@ -53,10 +53,30 @@ def test_translation_routes_through_russian_when_uzbek_unsupported():
     assert tr.route("en", "Saqlash", {}) == (None, None)
 
 
-def test_plan_lesson_results_add_up_to_topic_test():
+def test_plan_lesson_and_topic_test_sizes():
+    """Har dars testi — 3 savol; mavzu testi — 2 × darslar soni. 70–89% darslar «Xatolar analitikasi»da."""
     from app import mock as m
     for t in m.LEARN_PLAN:
+        if t["kind"] != "topic":
+            continue
+        assert all(l["n"] == 3 for l in t["lessons"]), t["name"]
         if t.get("test"):
-            ok = sum(l["ok"] for l in t["lessons"])
-            n = sum(l["n"] for l in t["lessons"])
-            assert n == t["test"]["n"] and round(ok / n * 100) == t["test"]["pct"], t["name"]
+            assert t["test"]["n"] == 2 * len(t["lessons"]), t["name"]
+    assert [m.lesson_decision(p) for p in (69, 70, 89, 90)] == ["relearn", "recommend", "recommend", "pass"]
+    rec = m.recommended_lessons()
+    assert rec and all(70 <= r["pct"] < 90 for r in rec)
+    lessons, minutes = m.diagnostic_estimate()
+    assert lessons == sum(len(t.get("lessons", [])) for t in m.LEARN_PLAN) + sum(m.PLAN_EXCLUDED_LESSONS.values())
+    assert minutes == lessons * m.DIAG_SEC_PER_LESSON // 60
+
+
+def test_next_lessons_hidden_until_lesson_test_passed(client):
+    from app.views.user import open_lessons
+    assert open_lessons([100, 86, None, None]) == 3       # joriy — 3-dars, 4-dars yopiq
+    assert open_lessons([100, 40, None]) == 2              # 2-dars testi < 70% — keyingisi ko'rinmaydi
+    assert open_lessons([100, 90]) == 2
+    html = client.get("/app/dars").get_data(as_text=True)
+    assert 'id="elif"' in html and 'id="nested"' not in html and "Keyingi darslar yopiq" in html
+    assert "data-end-gate" not in html                     # mavzu testi — barcha dars testlaridan keyin
+    html = client.get("/app/dars?holat=qayta").get_data(as_text=True)
+    assert 'id="nested"' in html and "data-end-gate" in html and "Keyingi darslar yopiq" not in html

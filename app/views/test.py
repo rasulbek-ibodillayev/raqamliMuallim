@@ -4,7 +4,8 @@ from .. import mock as m
 
 # Test turi URL'da (?turi=…) → mock.TEST_TYPES kaliti. «Bosqichlar orasi» ekrani faqat mock.STAGED_TYPES uchun.
 TYPE_SLUGS = {"diagnostika": "diagnostic", "mavzu": "topic", "kunlik": "daily", "oraliq": "interim", "haftalik": "weekly",
-              "ixtiyoriy": "optional", "oylik": "monthly", "yakuniy": "final", "xatolar": "errors"}
+              "ixtiyoriy": "optional", "oylik": "monthly", "yakuniy": "final", "xatolar": "errors",
+              "dars": "lesson"}
 
 
 def _test_type():
@@ -101,6 +102,13 @@ EXAM_POOL = [
      "options": ["F = (A ∨ B) ∧ ¬(A ∧ B)", "F = (A ∧ B) ∨ ¬(A ∨ B)", "F = ¬(A ∨ B)", "F = A ∧ B"], "right": 0},
     {"topic": "Axborot hajmi", "text": "256 xil belgidan iborat alifbodagi bitta belgi necha bit axborot olib keladi?",
      "options": ["6", "7", "8", "16"], "right": 2},
+    # Rasmli savollar (attestatsiyada sxema, tarmoq chizmasi, blok-sxema va h.k. bo'ladi)
+    {"topic": "Tarmoq texnologiyalari", "text": "Rasmda kompyuter tarmog‘ining qaysi topologiyasi tasvirlangan?",
+     "image": {"src": "img/savol-tarmoq-topologiya.svg", "alt": "Oltita kompyuter markazdagi bitta hub qurilmasiga alohida kabel bilan ulangan"},
+     "options": ["Shina", "Halqa", "Yulduz", "To‘liq bog‘langan"], "right": 2},
+    {"topic": "Algoritmlash", "text": "Blok-sxemada tasvirlangan algoritm bajarilgach, qanday qiymat chiqariladi?",
+     "image": {"src": "img/savol-blok-sxema.svg", "alt": "Blok-sxema: s = 0, i = 1; i ≤ 4 bo‘lsa s = s + i va i = i + 1, aks holda s chiqariladi"},
+     "options": ["4", "6", "10", "15"], "right": 2},
 ]
 
 
@@ -141,8 +149,9 @@ def exam_result():
             mine = (right + 1) % len(q["options"])
         else:
             mine = right
-        qs.append({"n": i + 1, "topic": q["topic"], "q": q["text"], "code": q.get("code"), "options": q["options"],
-                   "mine": mine, "right": right})
+        image = {**q["image"], "src": url_for("static", filename=q["image"]["src"])} if q.get("image") else None
+        qs.append({"n": i + 1, "topic": q["topic"], "q": q["text"], "code": q.get("code"), "image": image,
+                   "table": q.get("table"), "options": q["options"], "mine": mine, "right": right})
     correct = sum(1 for q in qs if q["mine"] == q["right"])
     topics = {}
     for q in qs:

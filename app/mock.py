@@ -123,44 +123,82 @@ PLAN = [
 # Rejaga mavzu testlari, oraliq sinov (har 3 mavzudan keyin) va yakuniy diagnostika reja tuzilganda qo'shiladi;
 # kunlik 5 ta test, haftalik va oylik testlar — faqat vaqti kelganda.
 PASS_MIN, SOLID_MIN = 70, 90
-# Mavzu → darslar. Har bir dars: o'zlashtirish foizi va mavzu testidagi shu darsga oid savollar natijasi
-# (dars, n — savollar soni, ok — to'g'ri javoblar). Mavzu testi: rid — «Natijalarim»dagi natija (tafsilotga havola).
-def _L(name, pct, ok=None, n=None, mn=None):
-    return {"name": name, "pct": pct, "ok": ok, "n": n, "min": mn}
+# Mavzu → darslar. Har dars so'ngida 3 savollik «dars testi» olinadi:
+#   < 70% — darsni qayta o'zlashtirishga yuboriladi (keyingi dars yopiq);
+#   70–89% — qayta o'zlashtirish tavsiya etiladi, lekin keyingi darsga o'tkaziladi («Xatolar analitikasi»da saqlanadi);
+#   ≥ 90% — tavsiyasiz keyingi darsga o'tkaziladi.
+# Darslar tugagach — mavzu testi: savollar soni = 2 × darslar soni, imkon qadar dars testlarida xato qilingan savol
+# turlaridan tuziladi. Chegaralar xuddi shunday, lekin mavzu bo'yicha. Barcha natijalar «Natijalarim»ga tushadi.
+# Dars testi: ok — to'plangan ball (qisman ball bilan kasr bo'lishi mumkin), rid — natija (tafsilotga havola).
+LESSON_TEST_N = 3
+
+
+def _L(name, pct=None, rid=None, when=None, mn=None, tries=None):
+    return {"name": name, "pct": pct, "rid": rid, "when": when, "min": mn, "tries": tries, "n": LESSON_TEST_N,
+            "ok": None if pct is None else round(pct * LESSON_TEST_N / 100, 1)}
+
+
+def _T(pct, rid, when, lessons, tries=None):
+    return {"pct": pct, "rid": rid, "when": when, "n": 2 * lessons, "tries": tries}
 
 
 LEARN_PLAN = [
-    {"kind": "topic", "id": 1, "name": "Kompyuter arxitekturasi va mantiqiy asoslar", "state": "done", "pct": 96, "min": 40,
-     "lessons": [_L("Kompyuter qurilmalari", 100, 9, 9), _L("Protsessor va xotira", 95, 8, 8), _L("Mantiqiy amallar", 92, 7, 8)],
-     "test": {"pct": 96, "rid": 11, "when": "10-noyabr", "n": 25}},
-    {"kind": "topic", "id": 2, "name": "Algoritmlash asoslari va blok-sxemalar", "state": "done", "pct": 84, "min": 35,
-     "lessons": [_L("Algoritm tushunchasi", 95, 8, 8), _L("Blok-sxemalar", 78, 7, 9), _L("Chiziqli algoritmlar", 80, 6, 8)],
-     "test": {"pct": 84, "rid": 12, "when": "13-noyabr", "n": 25, "tries": 2}},
+    {"kind": "topic", "id": 1, "name": "Kompyuter arxitekturasi va mantiqiy asoslar", "state": "done", "pct": 92, "min": 40,
+     "lessons": [_L("Kompyuter qurilmalari", 100, 21, "8-noyabr"), _L("Protsessor va xotira", 100, 22, "9-noyabr"),
+                 _L("Mantiqiy amallar", 83, 23, "9-noyabr")],
+     "test": _T(92, 11, "10-noyabr", 3)},
+    {"kind": "topic", "id": 2, "name": "Algoritmlash asoslari va blok-sxemalar", "state": "done", "pct": 83, "min": 35,
+     "lessons": [_L("Algoritm tushunchasi", 100, 24, "11-noyabr"), _L("Blok-sxemalar", 78, 25, "11-noyabr", tries=2),
+                 _L("Chiziqli algoritmlar", 92, 26, "12-noyabr")],
+     "test": _T(83, 12, "13-noyabr", 3, tries=2)},
     {"kind": "topic", "id": 3, "name": "Sanoq sistemalari", "state": "done", "pct": 92, "min": 30,
-     "lessons": [_L("Ikkilik sanoq sistemasi", 96, 13, 13), _L("O‘n oltilik sanoq sistemasi", 88, 10, 12)],
-     "test": {"pct": 92, "rid": 1, "when": "Bugun", "n": 25, "tries": 2}},
+     "lessons": [_L("Ikkilik sanoq sistemasi", 100, 27, "14-noyabr"), _L("O‘n oltilik sanoq sistemasi", 92, 28, "15-noyabr")],
+     "test": _T(92, 1, "Bugun", 2, tries=2)},
     {"kind": "test", "type": "interim", "name": "Oraliq sinov testi: 1–3 mavzular", "state": "done", "pct": 78, "min": 35, "rid": 2},
     {"kind": "topic", "id": 4, "name": "Python: shart operatorlari", "state": "current", "pct": None, "read": 60, "min": 12,
-     "lessons": [_L("if operatori", 100, mn=4), _L("if / else", 100, mn=4), _L("elif zanjiri", 40, mn=6), _L("Ichma-ich shartlar", None, mn=6)],
+     "lessons": [_L("if operatori", 100, 29, "Kecha", mn=4), _L("if / else", 86, 30, "Bugun", mn=4),
+                 _L("elif zanjiri", mn=6), _L("Ichma-ich shartlar", mn=6)],
      "test": None},
-    {"kind": "test", "type": "daily", "name": "Kunlik 5 ta test", "state": "done", "pct": 80, "min": 3, "rid": 9,
+    {"kind": "test", "type": "daily", "name": "Kunlik 5 talik test", "state": "done", "pct": 80, "min": 3, "rid": 9,
      "note": "Ko‘p xato qilayotgan mavzulardan"},
     {"kind": "test", "type": "weekly", "name": "Haftalik test", "state": "due", "min": 20,
      "note": "Bugun yakshanba · o‘zlashtirilgan mavzulardan"},
     {"kind": "topic", "id": 5, "name": "Python: sikllar (for, while)", "state": "locked", "date": "24-noyabr", "min": 45,
-     "lessons": [_L("for sikli", None), _L("while sikli", None), _L("break va continue", None)]},
+     "lessons": [_L("for sikli"), _L("while sikli"), _L("break va continue")]},
     {"kind": "topic", "id": 6, "name": "Funksiyalar va modullar", "state": "locked", "date": "26-noyabr", "min": 45,
-     "lessons": [_L("Funksiya e’lon qilish", None), _L("Parametrlar", None), _L("Rekursiya", None)]},
+     "lessons": [_L("Funksiya e’lon qilish"), _L("Parametrlar"), _L("Rekursiya")]},
     {"kind": "topic", "id": 7, "name": "Massivlar va ro‘yxatlar", "state": "locked", "date": "28-noyabr", "min": 40,
-     "lessons": [_L("Ro‘yxat amallari", None), _L("Ko‘p o‘lchovli ro‘yxatlar", None)]},
+     "lessons": [_L("Ro‘yxat amallari"), _L("Ko‘p o‘lchovli ro‘yxatlar")]},
     {"kind": "test", "type": "interim", "name": "Oraliq sinov testi: 4–6 mavzular", "state": "locked", "date": "29-noyabr", "min": 35},
     {"kind": "topic", "id": 8, "name": "Ma’lumotlar bazasi: relyatsion model", "state": "locked", "date": "2-dekabr", "min": 40,
-     "lessons": [_L("Jadval va kalitlar", None), _L("SQL so‘rovlari", None)]},
-    {"kind": "topic", "id": 9, "name": "Kompyuter tarmoqlari va protokollar", "state": "locked", "date": "5-dekabr", "min": 40,
-     "lessons": [_L("Tarmoq turlari", None), _L("Protokollar", None)]},
+     "lessons": [_L("Jadval va kalitlar"), _L("SQL so‘rovlari")]},
+    {"kind": "test", "type": "monthly", "name": "Oylik test: dekabr", "state": "locked", "date": "8-dekabr", "min": 45,
+     "note": "Har 30 kunda · topshirilmaguncha keyingi mavzular ochilmaydi"},
+    {"kind": "topic", "id": 9, "name": "Kompyuter tarmoqlari va protokollar", "state": "locked", "date": "10-dekabr", "min": 40,
+     "lessons": [_L("Tarmoq turlari"), _L("Protokollar")]},
     {"kind": "test", "type": "final", "name": "Yakuniy diagnostika", "state": "locked", "date": "19-dekabr", "min": 90,
      "note": "Barcha mavzular o‘zlashtirilgach. Natijasi bo‘yicha sertifikat beriladi"},
 ]
+
+
+def lesson_decision(pct):
+    """Dars yoki mavzu testi natijasi bo'yicha qaror: relearn (< 70%), recommend (70–89%), pass (≥ 90%)."""
+    if pct is None:
+        return None
+    return "relearn" if pct < PASS_MIN else ("recommend" if pct < SOLID_MIN else "pass")
+
+
+def recommended_lessons(plan=None):
+    """Tavsiya bilan (70–89%) keyingi darsga o'tilgan darslar — «Xatolar analitikasi» va bosh sahifada.
+    Qayta o'zlashtirib, dars testi ≥ 90% bo'lsa, dars ro'yxatdan chiqadi va reja foizi yangilanadi."""
+    out = []
+    for t in plan or LEARN_PLAN:
+        for l in t.get("lessons", []):
+            if lesson_decision(l["pct"]) == "recommend":
+                out.append({"lesson": l["name"], "topic": t["name"], "topic_id": t["id"], "pct": l["pct"],
+                            "rid": l["rid"], "when": l["when"]})
+    return out
+
 # Oylik test (majburiy, har 30 kunda): vaqti kelganda rejaga qo'shiladi. Joriy mavzu tugallanmagan bo'lsa —
 # mavzu tugagach olinadi; yakunlanmaguncha keyingi mavzular ochilmaydi. Namunada ?oylik=1.
 MONTHLY_DUE = {"kind": "test", "type": "monthly", "name": "Oylik test: noyabr", "state": "started", "min": 45,
@@ -168,31 +206,50 @@ MONTHLY_DUE = {"kind": "test", "type": "monthly", "name": "Oylik test: noyabr", 
 
 # Diagnostikada ≥ 90% chiqqani uchun rejadan chiqarilgan mavzular
 PLAN_EXCLUDED = [("Ofis dasturlari: elektron jadvallar", 98), ("IP-manzillash va maskalar", 95), ("Axborot hajmi va o‘lchov birliklari", 92)]
+# Chiqarilgan mavzulardagi darslar soni (to'liq ish reja = shaxsiy reja + chiqarilganlar)
+PLAN_EXCLUDED_LESSONS = {"Ofis dasturlari: elektron jadvallar": 3, "IP-manzillash va maskalar": 2,
+                         "Axborot hajmi va o‘lchov birliklari": 2}
+# Diagnostikada har bir dars bo'yicha savol(lar)ga ajratilgan vaqt, soniya (backendda: savollarning time_limit_s yig'indisi)
+DIAG_SEC_PER_LESSON = 60
+
+
+def diagnostic_estimate(plan=None):
+    """Diagnostika vaqti = to'liq o'quv rejadagi har bir dars savollari uchun ajratilgan vaqtlar yig'indisi.
+    Natija: (darslar soni, daqiqa)."""
+    lessons = sum(len(t.get("lessons", [])) for t in (plan or LEARN_PLAN)) + sum(PLAN_EXCLUDED_LESSONS.values())
+    return lessons, -(-lessons * DIAG_SEC_PER_LESSON // 60)
 PLAN_SUMMARY = {"done": 14, "total": 42, "avg": 88, "days_left": 38, "per_day": "≈ 1 mavzu", "exam": "23-dekabr",
                 "next_control": "2 mavzu"}
 TEST_TYPES = {
-    "diagnostic": ("Diagnostika testi", "target"), "topic": ("Mavzu testi", "clipboard"), "daily": ("Kunlik 5 ta test", "zap"),
+    "diagnostic": ("Diagnostika testi", "target"), "topic": ("Mavzu testi", "clipboard"), "daily": ("Kunlik 5 talik test", "zap"),
     "exam": ("Attestatsiya testi", "clock"), "interim": ("Oraliq sinov testi", "flag"), "weekly": ("Haftalik test", "calendar"),
     "optional": ("Ixtiyoriy test", "settings"), "monthly": ("Oylik test", "calendar"), "final": ("Yakuniy diagnostika", "award"),
-    "errors": ("Xatolar ustida ishlash", "target"),
+    "errors": ("Xatolar ustida ishlash", "target"), "lesson": ("Dars testi", "note"),
 }
 
 # «Natijalarim»: dastlabki diagnostikadan boshlab barcha turdagi yakunlangan testlar (type — TEST_TYPES kaliti).
 # Qayta topshirilganda shu turdagi YANGI savollar beriladi va natija ro'yxatga yangi qator bo'lib qo'shiladi.
 RESULTS = [
-    {"id": 9, "type": "daily", "name": "Kunlik 5 ta test", "when": "Bugun, 08:10", "pct": 80, "decision": "warn", "n": 5, "min": 3},
-    {"id": 1, "type": "topic", "name": "Sanoq sistemalari (2-urinish)", "when": "Bugun, 14:20", "pct": 92, "decision": "pass", "n": 25, "min": 20},
+    {"id": 30, "type": "lesson", "name": "Dars testi: if / else", "when": "Bugun, 15:05", "pct": 86, "decision": "warn", "n": 3, "min": 3},
+    {"id": 29, "type": "lesson", "name": "Dars testi: if operatori", "when": "Kecha, 19:30", "pct": 100, "decision": "pass", "n": 3, "min": 3},
+    {"id": 9, "type": "daily", "name": "Kunlik 5 talik test", "when": "Bugun, 08:10", "pct": 80, "decision": "warn", "n": 5, "min": 3},
+    {"id": 1, "type": "topic", "name": "Sanoq sistemalari (2-urinish)", "when": "Bugun, 14:20", "pct": 92, "decision": "pass", "n": 4, "min": 4},
     {"id": 8, "type": "errors", "name": "Xatolar ustida ishlash", "when": "Kecha, 20:05", "pct": 70, "decision": "warn", "n": 10, "min": 8},
     {"id": 2, "type": "interim", "name": "Oraliq sinov testi: 1–3 mavzular", "when": "Kecha, 18:45", "pct": 78, "decision": "warn", "n": 30, "min": 35},
     {"id": 7, "type": "weekly", "name": "Haftalik test", "when": "16-noyabr", "pct": 86, "decision": "pass", "n": 20, "min": 20},
     {"id": 10, "type": "optional", "name": "Ixtiyoriy test: Sanoq sistemalari", "when": "14-noyabr", "pct": 90, "decision": "pass", "n": 10, "min": 10},
-    {"id": 12, "type": "topic", "name": "Algoritmlash asoslari va blok-sxemalar (2-urinish)", "when": "13-noyabr", "pct": 84, "decision": "warn", "n": 25, "min": 20},
-    {"id": 3, "type": "topic", "name": "Sanoq sistemalari", "when": "12-noyabr", "pct": 62, "decision": "fail", "n": 25, "min": 20},
-    {"id": 11, "type": "topic", "name": "Kompyuter arxitekturasi va mantiqiy asoslar", "when": "10-noyabr", "pct": 96, "decision": "pass", "n": 25, "min": 20},
+    {"id": 12, "type": "topic", "name": "Algoritmlash asoslari va blok-sxemalar (2-urinish)", "when": "13-noyabr", "pct": 83, "decision": "warn", "n": 6, "min": 6},
+    {"id": 3, "type": "topic", "name": "Sanoq sistemalari", "when": "12-noyabr", "pct": 62, "decision": "fail", "n": 4, "min": 4},
+    {"id": 11, "type": "topic", "name": "Kompyuter arxitekturasi va mantiqiy asoslar", "when": "10-noyabr", "pct": 92, "decision": "pass", "n": 6, "min": 6},
     {"id": 4, "type": "diagnostic", "name": "Dastlabki diagnostika", "when": "8-noyabr", "pct": 70, "decision": "pass", "n": 60, "min": 70},
     {"id": 5, "type": "exam", "name": "Attestatsiya testi", "when": "5-noyabr", "pct": 84, "decision": "pass", "n": 35, "min": 120},
-    {"id": 6, "type": "topic", "name": "Algoritmlash asoslari va blok-sxemalar", "when": "11-noyabr", "pct": 65, "decision": "fail", "n": 25, "min": 20},
+    {"id": 6, "type": "topic", "name": "Algoritmlash asoslari va blok-sxemalar", "when": "11-noyabr", "pct": 65, "decision": "fail", "n": 6, "min": 6},
 ]
+# O'quv rejadagi qolgan dars testlari ham «Natijalarim»da (rid — LEARN_PLAN dagi dars natijasi)
+RESULTS += [{"id": l["rid"], "type": "lesson", "name": f"Dars testi: {l['name']}", "when": l["when"], "pct": l["pct"],
+             "decision": {"pass": "pass", "recommend": "warn", "relearn": "fail"}[lesson_decision(l["pct"])],
+             "n": l["n"], "min": 3}
+            for t in LEARN_PLAN if t["kind"] == "topic" and t["state"] == "done" for l in t["lessons"]]
 # Natija tafsiloti: har bir savol, foydalanuvchi javobi (mine) va to'g'ri javob (right) — variantlar indeksi
 RESULT_QUESTIONS = [
     {"n": 1, "topic": "Sanoq sistemalari", "level": "Oson", "q": "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.",
@@ -213,7 +270,7 @@ RESULT_QUESTIONS = [
 
 # «Testlar» bo'limi: yakunlanmagan (to'xtatilgan) testlar — istalgan turdagi
 # Majburiy turlar (yakunlanmagan bo'lsa — keyingi mavzu va keyingi majburiy test yopiq), qolganlari ixtiyoriy
-MANDATORY_TYPES = {"topic", "daily", "interim", "monthly", "final"}
+MANDATORY_TYPES = {"lesson", "topic", "daily", "interim", "monthly", "final"}
 # Majburiy testlar jadvali: navbati kelguncha qulflangan (taxminiy sana), kelganda ochiladi va o'quv rejaga qo'shiladi
 MANDATORY_SCHEDULE = [
     {"type": "daily", "name": "Kunlik 5 ta test", "state": "done", "date": "Bugun", "note": "Bugungisi topshirildi · ertaga 08:00 da yangisi"},
@@ -233,7 +290,8 @@ DECISION = {"pass": (_l("O‘tdi"), "green"), "warn": (_l("Tavsiya bilan"), "yel
 # Test turlari haqida qisqa ma'lumot (Natijalarim va Testlar sahifalarida)
 TEST_TYPE_INFO = [
     ("diagnostic", _l("Tizimga birinchi kirganda (ixtiyoriy). O‘quv reja shu natijadan tuziladi.")),
-    ("topic", _l("Har mavzu so‘ngida (majburiy). Mavzuni qay darajada o‘zlashtirganingizni aniqlaydi.")),
+    ("lesson", _l("Har dars so‘ngida 3 ta savol (majburiy). 70% dan past — dars qayta o‘zlashtiriladi, 70–89% — tavsiya bilan keyingi darsga o‘tasiz.")),
+    ("topic", _l("Mavzu darslari tugagach (majburiy). Savollar soni darslar sonidan 2 barobar, dars testlaridagi xatolaringiz turidan.")),
     ("daily", _l("Har kuni 5 ta savol (majburiy): ko‘p xato qilayotgan mavzulardan.")),
     ("interim", _l("Har 3 ta o‘zlashtirilgan mavzudan keyin (majburiy).")),
     ("weekly", _l("Har yakshanba (ixtiyoriy): shu paytgacha o‘zlashtirilgan mavzulardan.")),
@@ -330,25 +388,16 @@ MOTTOS = [
 TODAY = [
     {"title": "elif zanjiri", "sub": "Python: shart operatorlari · 3-bo‘lim", "min": 6, "done": False, "endpoint": "user.lesson", "icon": "book"},
     {"title": "Ichma-ich shartlar", "sub": "Python: shart operatorlari · 4-bo‘lim", "min": 6, "done": False, "endpoint": "user.lesson", "icon": "book"},
-    {"title": "Mavzu testi", "sub": "Majburiy · 10 savol", "min": 8, "done": False, "endpoint": "test.question", "icon": "clipboard"},
-    {"title": "Kunlik 5 ta test", "sub": "Majburiy · ko‘p xato qilayotgan mavzulardan", "min": 3, "done": True, "endpoint": "test.question", "args": {"turi": "kunlik"}, "icon": "zap"},
+    {"title": "Mavzu testi", "sub": "Majburiy · 8 savol", "min": 8, "done": False, "endpoint": "test.question", "args": {"turi": "mavzu", "soni": 8}, "icon": "clipboard"},
+    {"title": "Kunlik 5 talik test", "sub": "Majburiy · ko‘p xato qilayotgan mavzulardan", "min": 3, "done": True, "endpoint": "test.question", "args": {"turi": "kunlik"}, "icon": "zap"},
 ]
 TODAY_CONTROL = {"title": "Oraliq sinov testi", "sub": "Majburiy · oxirgi 3 ta mavzu", "min": 35, "done": False, "endpoint": "user.control", "icon": "flag"}
 
-# Bosh sahifa: oldingi testlarda xato qilinayotgan mavzular (xatolik foizi)
-HOME_ERRORS = [
-    ("Rekursiv funksiyalar va stek", "Funksiyalar", 64),
-    ("Mantiqiy amallar va rostlik jadvallari", "Mantiq asoslari", 48),
-    ("Ko‘p o‘lchovli ro‘yxatlar", "Ma’lumotlar tuzilmasi", 35),
-    ("Murakkab shartli o‘tishlar", "Algoritmlash", 22),
-    ("Sanoq sistemalarida arifmetika", "Axborot nazariyasi", 12),
-]
-
 # Yangi foydalanuvchi uchun 3 qadam (TZ 1.3: diagnostikani yakunlaganlar ≥ 60%)
 ONBOARDING = [
-    {"title": "Diagnostikadan o‘ting", "sub": "≈ 40 daqiqa · bilgan mavzularingizni aniqlaymiz", "endpoint": "user.diagnostic"},
+    {"title": "Diagnostikadan o‘ting", "sub": f"≈ {diagnostic_estimate()[1]} daqiqa · bilgan mavzularingizni aniqlaymiz", "endpoint": "user.diagnostic"},
     {"title": "Birinchi darsni o‘qing", "sub": "≈ 12 daqiqa · rejangizdagi birinchi mavzu", "endpoint": "user.lesson"},
-    {"title": "Birinchi mavzu testini topshiring", "sub": "≈ 8 daqiqa · 10 savol", "endpoint": "test.question"},
+    {"title": "Birinchi dars testini topshiring", "sub": "≈ 3 daqiqa · 3 savol", "endpoint": "test.question", "args": {"turi": "dars", "soni": 3}},
 ]
 
 NOTIFICATIONS = [

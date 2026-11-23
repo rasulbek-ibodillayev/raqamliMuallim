@@ -42,6 +42,28 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lessonNav); else lessonNav();
 
+  // «Mavzu testini boshlash» — mavzu birinchi marta oxirigacha ko'rib chiqilgach paydo bo'ladi.
+  // Bir marta ko'rilgani qurilmada eslab qolinadi (keyingi kirishda tugma darhol ko'rinadi).
+  function endGate() {
+    var foot = document.querySelector("[data-end-gate]");
+    var end = document.querySelector("[data-lesson-end]");
+    var art = document.querySelector("[data-resume]");
+    if (!foot || !end || !art) return;
+    var key = "lesson-end:" + art.dataset.resume;
+    var seen = false;
+    try { seen = localStorage.getItem(key) === "1"; } catch (e) {}
+    if (seen || !("IntersectionObserver" in window)) return;
+    foot.classList.add("is-gated");
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (en) { return en.isIntersecting; })) return;
+      foot.classList.remove("is-gated");
+      try { localStorage.setItem(key, "1"); } catch (e) {}
+      io.disconnect();
+    });
+    io.observe(end);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", endGate); else endGate();
+
   // Darsda matnni belgilaganda: «Eslatmaga saqlash» va «AI’dan so‘rash»
   // Eslatmalar hozircha brauzer xotirasiga (rm-notes-inbox) yoziladi, «Eslatmalar» sahifasi uni o'qib oladi.
   var selMenu = null;

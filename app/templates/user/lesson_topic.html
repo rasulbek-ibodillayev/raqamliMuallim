@@ -16,7 +16,12 @@
     <div class="eyebrow toc-title">{{ _("Mundarija") }}</div>
     <ol class="list-reset toc-list">
       {% for p in lesson.parts %}
-      <li><a class="toc-link" href="#{{ p.anchor }}" data-toc-link="{{ p.anchor }}"><span class="toc-mark">{{ loop.index }}</span>{{ p.name }}</a></li>
+      {% set pct = pcts[loop.index0] %}
+      {% if loop.index0 < open_n %}
+      <li><a class="toc-link {{ 'done' if pct is not none and pct >= 70 }}" href="#{{ p.anchor }}" data-toc-link="{{ p.anchor }}"><span class="toc-mark">{% if pct is not none and pct >= 70 %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>{{ p.name }}</a></li>
+      {% else %}
+      <li><span class="toc-link is-locked" aria-disabled="true"><span class="toc-mark">{{ icon("lock", "ico-sm") }}</span>{{ p.name }}</span></li>
+      {% endif %}
       {% endfor %}
     </ol>
   </nav>
@@ -24,31 +29,52 @@
 <article class="stack stack-xl lesson-body" data-select-menu data-topic="{{ lesson.name }}" data-resume="dars-{{ lesson.id }}"
          data-notes-url="{{ url_for('user.notes') }}" data-tutor-url="{{ url_for('user.tutor', mavzu=lesson.name) }}">
   <p class="hint row row-sm no-print">{{ icon("info", "ico-sm") }}{{ _("Matnni belgilang — eslatmaga saqlash yoki AI’dan so‘rash mumkin.") }}</p>
-  {% for p in lesson.parts %}
+  {# Joriy dars testi muvaffaqiyatli (≥ 70%) topshirilmaguncha keyingi darslar ko'rsatilmaydi #}
+  {% for p in lesson.parts[:open_n] %}
+  {% set pct = pcts[loop.index0] %}
   <section id="{{ p.anchor }}" class="stack stack-lg" data-toc-section>
     <div class="prose">
       <span class="eyebrow">{{ _("Kichik mavzu %(n)s", n=loop.index) }}</span>
       {% if loop.first %}<h1 class="lesson-h1">{{ p.name }}</h1>{% else %}<h2>{{ p.name }}</h2>{% endif %}
     </div>
     {% for b in p.blocks %}{{ render_block(b, p.name) }}{% endfor %}
+    {# Dars testi: har dars oxirida 3 savol (natija «Natijalarim»ga tushadi) #}
+    <div class="lesson-test {{ 'is-done' if pct is not none and pct >= 70 else 'is-current' }} no-print">
+      <span class="list-ico">{{ icon("clipboard", "ico-sm") }}</span>
+      <div class="grow"><div class="small strong">{{ _("Dars testi") }} · 3 {{ _("savol") }}</div>
+        <div class="xs muted">{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
+      {% if pct is not none and pct >= 70 %}<span class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}">{{ pct }}%</span>
+      {% else %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', soni=3) }}">{{ _("Boshlash") }}</a>{% endif %}
+    </div>
   </section>
   {% endfor %}
+  {% if not all_passed and open_n < lesson.parts|length %}
+  <div class="lesson-locked no-print" role="note">
+    <span class="list-ico">{{ icon("lock", "ico-sm") }}</span>
+    <div class="grow"><div class="small strong">{{ _("Keyingi darslar yopiq") }} · {{ lesson.parts|length - open_n }} {{ _("ta") }}</div>
+      <div class="xs muted">{{ _("Yuqoridagi dars testini kamida 70%% bilan topshirsangiz, keyingi dars ochiladi.") }}</div></div>
+  </div>
+  {% endif %}
 
   <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
     <p class="grow">{{ _("Tushunmagan joyingiz bormi? Shu mavzu bo‘yicha AI tutordan so‘rang.") }}
       <a href="{{ url_for('user.tutor', mavzu=lesson.name) }}">{{ _("AI tutorni ochish") }}</a></p>
   </div>
+  <div data-lesson-end aria-hidden="true"></div>
 </article>
 </div>
 {% endblock %}
 
 {% block foot %}
-<footer class="focus-foot">
+{% if all_passed %}
+{# Mavzu testi: barcha dars testlari topshirilgach va mavzu birinchi marta oxirigacha ko'rib chiqilgach #}
+<footer class="focus-foot" data-end-gate>
   <div class="focus-foot-inner">
-    <a class="btn btn-primary grow" href="{{ url_for('test.question') }}">{{ _("Mavzu testini boshlash") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question', turi='mavzu', soni=2 * lesson.parts|length) }}">{{ _("Mavzu testini boshlash") }} · {{ 2 * lesson.parts|length }} {{ _("savol") }}</a>
   </div>
 </footer>
+{% endif %}
 {% endblock %}
 
 {% block overlay %}{% with fab_ctx = "focus", fab_topic = lesson.name %}{% include "partials/study_fab.html" %}{% endwith %}{% endblock %}
