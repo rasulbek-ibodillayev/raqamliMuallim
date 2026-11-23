@@ -105,7 +105,7 @@ def create_app(config: dict | None = None) -> Flask:
     from flask import get_template_attribute
 
     ui_macros = ("icon", "badge", "status_dot", "status_badge", "progress", "pct_color", "ring",
-                 "code", "spark", "page_head", "back", "composer", "field_error", "csrf", "eye", "no_autofill")
+                 "code", "spark", "page_head", "back", "composer", "field_error", "objection_btn", "csrf", "eye", "no_autofill")
 
     @app.context_processor
     def inject_globals():

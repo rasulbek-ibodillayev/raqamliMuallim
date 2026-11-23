@@ -105,7 +105,7 @@
     </div>
   </section>
 
-  {# ---------- Qayta o'zlashtirish tavsiya etilgan darslar (dars testi 70–89%): «Xatolar analitikasi» bilan bir xil ro'yxat ---------- #}
+  {# ---------- Qayta o'zlashtirish tavsiya etilgan darslar (dars testi yoki bosqichli testda 70–89%): «Xatolar analitikasi» bilan bir xil ro'yxat ---------- #}
   {% if recommended %}
   <section class="card" aria-labelledby="weak-title">
     <div class="card-head">
@@ -114,7 +114,7 @@
     </div>
     <div class="list">
       {% for r in recommended %}
-      <a class="list-item" href="{{ url_for('user.lesson', holat='qayta') }}">
+      <a class="list-item" href="{{ r.url }}">
         <span class="list-ico">{{ icon("refresh", "ico-sm") }}</span>
         <div class="grow"><div>{{ r.lesson }}</div><div class="sub">{{ r.topic }}</div></div>
         <span class="num strong t-yellow">{{ r.pct }}%</span>{{ icon("chevron-right", "ico-sm chev") }}

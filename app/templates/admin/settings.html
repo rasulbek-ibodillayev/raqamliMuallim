@@ -16,7 +16,7 @@
     <section class="card" x-show="tab === 'limits'">
       <div class="card-head"><div><div class="strong">{{ _("Mavzu testi") }}</div><div class="xs muted">{{ _("Bosqichdan o‘tish chegaralari") }}</div></div></div>
       <div class="list">
-        {% for l, sub, v in [("1-bosqich (oson)", "2-bosqichga o‘tish", 90), ("2-bosqich (o‘rta)", "3-bosqichga o‘tish", 80), ("3-bosqich: to‘liq o‘tish", "«O‘zlashtirilgan» holati", 90), ("3-bosqich: tavsiya bilan o‘tish", "Keyingi mavzuga ruxsat + takrorlash belgisi", 70)] %}
+        {% for l, sub, v in [("Tavsiya bilan o‘tish", "Keyingi bosqichga o‘tadi, darsni qayta o‘zlashtirish tavsiya etiladi", 70), ("Tavsiyasiz o‘tish", "Keyingi bosqichga o‘tadi, tavsiya berilmaydi", 90)] %}
         <div class="list-item"><div class="grow"><div>{{ l }}</div><div class="sub">{{ sub }}</div></div>
           <div class="input-group u-w-110"><input class="input num u-ta-right u-minh-40" value="{{ v }}" aria-label="{{ l }}"><span class="addon u-border-right-0 u-border-left-1">%</span></div></div>
         {% endfor %}

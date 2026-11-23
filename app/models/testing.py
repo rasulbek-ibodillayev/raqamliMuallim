@@ -9,7 +9,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..extensions import db
 from ._base import JSONB, PK, QID, created_at, one_of, pk
 
-ATTEMPT_KINDS = ("diagnostic", "topic", "control", "final", "optional", "daily", "exam")
+# Nomlari mock.TEST_TYPES kalitlari bilan bir xil. control (eski nom) = interim
+ATTEMPT_KINDS = ("diagnostic", "lesson", "topic", "daily", "interim", "weekly", "monthly", "optional", "final", "errors",
+                 "exam")
 ATTEMPT_STATUS = ("in_progress", "submitted", "expired", "abandoned")
 DECISIONS = ("pass", "warn", "fail")
 
@@ -31,7 +33,10 @@ class TestAttempt(db.Model):
     kind: Mapped[str] = mapped_column(String(10))
     status: Mapped[str] = mapped_column(String(11), default="in_progress", server_default="in_progress")
     topic_id: Mapped[int | None] = mapped_column(PK, ForeignKey("topics.id", ondelete="SET NULL"), index=True)
-    stage: Mapped[int | None] = mapped_column(SmallInteger)              # 1 oson / 2 o'rta / 3 qiyin
+    # Dars testi (kind=lesson) qaysi kichik mavzudan
+    subtopic_id: Mapped[int | None] = mapped_column(PK, ForeignKey("subtopics.id", ondelete="SET NULL"), index=True)
+    # Bosqichli testda joriy bosqich (settings_snapshot["stages"] ro'yxatidagi tartib, 1 dan)
+    stage: Mapped[int | None] = mapped_column(SmallInteger)
     total: Mapped[int] = mapped_column(SmallInteger, default=0, server_default="0")
     correct: Mapped[float | None] = mapped_column(Float)                 # qisman ball bo'lishi mumkin
     score_pct: Mapped[float | None] = mapped_column(Float)
@@ -69,7 +74,7 @@ class AttemptItem(db.Model):
     time_ms: Mapped[int | None] = mapped_column(Integer)
     position: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
     score: Mapped[int | None] = mapped_column(SmallInteger)              # 0..100 (qisman ball ham butun foizda)
-    answer: Mapped[dict | None] = mapped_column(JSONB)                  # null — javob berilmagan
+    answer: Mapped[dict | None] = mapped_column(JSONB)                  # {"v": javob, "at": mijoz vaqti}; null — berilmagan
 
     attempt: Mapped[TestAttempt] = relationship(back_populates="items")
 

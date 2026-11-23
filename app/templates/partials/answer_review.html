@@ -1,22 +1,30 @@
-{# Savollar va javoblar tahlili: har bir variant; foydalanuvchi tanlagani xato bo'lsa — qizil, to'g'ri javob — yashil.
-   Kontekst: questions — [{n, topic, level, q, code?, options, mine, right, why?}] #}
+{# Savollar va javoblar tahlili: foydalanuvchi tanlagani xato bo'lsa — qizil, to'g'ri javob — yashil. Qisman ball — sariq.
+   Kontekst: questions — services/attempts.review: [{n, kind, topic, level?, q, code?, image?, table?, score, answered, ref,
+   objected, why?, + yopiq/kop: options, mine[], right[]; moslash: pairs[{left, right, mine, ok}]; ochiq: mine_text, right_text}]
+   review_filter — Alpine o'zgaruvchisi nomi ('all' bo'lmasa, to'liq to'g'ri javoblar yashiriladi).
+   Sahifada partials/objection_sheet.html ham bo'lishi kerak. #}
 <ol class="list-reset stack review-list">
   {% for r in questions %}
-  {% set ok = r.mine == r.right %}
-  <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else 'is-bad' }}">
+  {% set ok = r.score == 100 %}
+  <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else 'is-bad' }}" {% if ok and review_filter %}x-show="{{ review_filter }} === 'all'"{% endif %}>
     <div class="row between wrap">
       <span class="small muted">{{ r.n }}{{ _("-savol") }} · {{ r.topic }}{% if r.level %} · {{ r.level }}{% endif %}</span>
-      {% if r.mine is none %}{{ badge(_("Javobsiz"), "gray") }}
-      {% elif ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}{% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}
+      {% if not r.answered %}{{ badge(_("Javobsiz"), "gray") }}
+      {% elif ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}
+      {% elif r.score %}{{ badge(_("Qisman: %(p)s%%", p=r.score), "yellow") }}
+      {% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}
     </div>
     <p class="strong">{{ r.q }}</p>
     {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
-    {% if r.image %}<figure class="q-figure"><img src="{{ r.image.src }}" alt="{{ r.image.alt }}" loading="lazy"></figure>{% endif %}
+    {% if r.image %}<figure class="q-figure"><img src="{{ url_for('static', filename=r.image.src) }}" alt="{{ r.image.alt }}" loading="lazy"></figure>{% endif %}
+    {% if r.table %}{% with q = {"table": r.table} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
+
+    {% if r.kind in ("yopiq", "kop") %}
     <ul class="list-reset ans-list">
       {% for o in r.options %}
-      {% set is_right = loop.index0 == r.right %}{% set is_mine = loop.index0 == r.mine %}
+      {% set is_right = loop.index0 in r.right %}{% set is_mine = loop.index0 in r.mine %}
       <li class="ans {{ 'ans-right' if is_right }} {{ 'ans-wrong' if is_mine and not is_right }}">
-        <span class="ans-key">{{ "ABCDEF"[loop.index0] }}</span>
+        <span class="ans-key">{{ "ABCDEFGHIJ"[loop.index0] }}</span>
         <span class="grow">{{ o }}</span>
         {% if is_mine and not is_right %}<span class="ans-tag">{{ icon("x", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
         {% elif is_right and is_mine %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
@@ -24,7 +32,24 @@
       </li>
       {% endfor %}
     </ul>
+    {% elif r.kind == "moslash" %}
+    <ul class="list-reset ans-list">
+      {% for p in r.pairs %}
+      <li class="ans {{ 'ans-right' if p.ok else 'ans-wrong' }}">
+        <span class="strong">{{ p.left }}</span>
+        <span class="grow">{{ p.mine or "—" }}{% if not p.ok %}<span class="small t-green row row-sm">{{ icon("check", "ico-sm") }}{{ p.right }}</span>{% endif %}</span>
+        <span class="ans-tag">{{ icon("check" if p.ok else "x", "ico-sm") }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <ul class="list-reset ans-list">
+      {% if not ok %}<li class="ans ans-wrong"><span class="grow">{{ r.mine_text or "—" }}</span><span class="ans-tag">{{ icon("x", "ico-sm") }}{{ _("Sizning javobingiz") }}</span></li>{% endif %}
+      <li class="ans ans-right"><span class="grow">{{ r.mine_text if ok else r.right_text }}</span><span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("Sizning javobingiz") if ok else _("To‘g‘ri javob") }}</span></li>
+    </ul>
+    {% endif %}
     {% if not ok and r.why %}<div class="card card-flat small u-p-12-14 u-c-text2"><b>{{ _("Izoh.") }}</b> {{ r.why }}</div>{% endif %}
+    {{ objection_btn(r.ref, r.q, "self-start", r.objected) }}
   </li>
   {% endfor %}
 </ol>

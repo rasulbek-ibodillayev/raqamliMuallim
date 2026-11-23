@@ -45,7 +45,8 @@
     "selection": _("Belgilangan matn"), "toNote": _("Eslatmaga saqlash"), "askAi": _("AI’dan so‘rash"),
     "general": _("Umumiy"), "today": _("Bugun"), "noteSaved": _("Eslatmalarga saqlandi"),
     "explain": _("Tushuntirib bering: «%(t)s»", t="{t}"), "breakOver": _("Tanaffus tugadi. Davom etamiz!"),
-    "copyManually": _("Nusxalab oling:")
+    "copyManually": _("Nusxalab oling:"),
+    "unanswered": _("%(n)s ta savolga javob berilmagan (0 ball hisoblanadi). Baribir yakunlaysizmi?", n="{n}")
   }|tojson }}</script>
   {% with msgs = get_flashed_messages() %}{% if msgs %}<div hidden data-flash="{{ msgs|tojson|forceescape }}"></div>{% endif %}{% endwith %}
 </body>

@@ -51,7 +51,7 @@ def test_ai_background_in_app_and_panels(as_role):
         html = as_role(role).get(url, follow_redirects=True).get_data(as_text=True)
         assert 'class="ai-bg"' in html and "js/particles.js" in html, url
     # Test va dars (fokus rejimi) chalg'itmasligi uchun fonsiz
-    html = as_role("user").get("/test/savol", follow_redirects=True).get_data(as_text=True)
+    html = as_role("user").get("/test/savol?tur=yopiq").get_data(as_text=True)
     assert 'class="ai-bg"' not in html
 
 

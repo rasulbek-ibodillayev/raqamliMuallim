@@ -1,16 +1,20 @@
 {% extends "layouts/focus.html" %}
 {% block page_js %}<script defer src="{{ url_for('static', filename='js/test.js') }}"></script>{% endblock %}
-{% block title %}{{ _("Savol") }} {{ q.n }} / {{ total }}{% endblock %}
+{% block title %}{{ tname }}{% endblock %}
+{#
+  Pleyer: joriy bosqichning (bosqichsiz testda — butun testning) hamma savollari bitta sahifada, bittadan ko'rsatiladi.
+  Shuning uchun sahifa ochilgach internet uzilsa ham test davom etadi. Kontekst: qs, cfg (views/test.py: _render_player).
+#}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.tests') }}" data-safe-leave aria-label="{{ _('To‘xtatish va chiqish (javoblar saqlanadi)') }}">{{ icon("x") }}</a>
 {# Bosqich faqat bosqichli testlarda (diagnostika, oraliq, haftalik, ixtiyoriy, oylik, yakuniy) ko'rsatiladi #}
-<div class="grow"><div class="strong small">{{ tname }}{% if staged %} · {{ _("1-bosqich · Oson") }}{% endif %}</div><div class="xs muted num">{{ _("Savol") }} {{ q.n }} / {{ total }}</div></div>
+<div class="grow" x-data="{ n: 1 }" @rm-q-state.window="n = $event.detail.cur + 1"><h1 class="strong small truncate">{{ tname }}{% if stage_label %} · {{ stage_label }}{% endif %}</h1><div class="xs muted num">{{ _("Savol") }} <span x-text="n">1</span> / {{ qs|length }}</div></div>
 {# Taymer va oflayn belgisi savol komponentidan hodisa orqali yangilanadi #}
 <button class="icon-btn" type="button" data-fs-toggle aria-label="{{ _('To‘liq ekran') }}" title="{{ _('To‘liq ekran (faqat test oynasi)') }}"><svg class="ico" aria-hidden="true"><use href="#i-maximize"/></svg></button>
 <span class="badge badge-plain num badge-timer" role="timer" aria-label="{{ _('Qolgan vaqt') }}" x-data="{ t: '--:--', low: false }"
       @rm-q-tick.window="t = $event.detail.text; low = $event.detail.left < 60" :class="low && 'warn'">{{ icon("clock") }}<span x-text="t">--:--</span></span>
 {% endblock %}
-{% block bar_progress %}<div class="r-0 progress thin"><span style="--v: {{ (q.n / total * 100)|round|int }}%"></span></div>{% endblock %}
+{% block bar_progress %}<div class="r-0 progress thin" x-data="{ v: {{ (100 / qs|length)|round|int }} }" @rm-q-state.window="v = Math.round(($event.detail.cur + 1) / {{ qs|length }} * 100)"><span style="--v: {{ (100 / qs|length)|round|int }}%" :style="'--v: ' + v + '%'"></span></div>{% endblock %}
 
 {% block before_body %}
 <div class="alert alert-yellow alert-bar" role="status" x-data="{ off: {{ 'true' if offline else '!navigator.onLine' }} }"
@@ -21,74 +25,94 @@
 
 {% block content %}
 {# Javob har o'zgarishda qurilmaga (IndexedDB) yoziladi va navbat orqali serverga yuboriladi: static/js/player.js #}
-{# GET forma: action'dagi ?turi=… yo'qoladi, shuning uchun test turi yashirin maydonda #}
-<form id="answer" class="stack stack-lg" action="{{ next_url }}" method="get" data-leave-guard
-      x-data="rmTestQuestion({ id: '{{ ttype }}:namuna', kind: '{{ ttype }}', total: {{ total }}, duration: {{ total * 60 }}, pos: {{ q.n - 1 }}, mode: '{{ kind }}', offline: {{ 'true' if offline else 'false' }} })"
-      x-effect="$dispatch('rm-q-tick', { text: fmt(left), left: left === null ? 999 : left }); $dispatch('rm-q-online', online)"
-      @change="save()" @input.debounce.400ms="save()">
-  <input type="hidden" name="turi" value="{{ slug }}">
-  <div class="stack stack-sm">
-    <div class="row row-sm wrap"><span class="badge badge-gray">{{ q.type }}</span><span class="xs muted grow">{{ _("Mavzu:") }} {{ q.topic }}</span>
-      <span class="saved-ind" role="status" aria-live="polite">
-        <span class="g-6 row" x-show="label()" x-cloak>
-          <svg class="ico" x-show="st !== 'saving'" :class="(st === 'local' || !online) && 'pending'"><use :href="st === 'error' ? '#i-alert' : (st === 'local' || !online ? '#i-upload' : '#i-check-circle')"/></svg>
-          <span x-text="label()"></span><span class="num" x-show="pending && !online" x-text="'· ' + pending + ' ta navbatda'"></span>
+<form id="answer" data-leave-guard x-data="rmTestPlayer({{ cfg|tojson|forceescape }})"
+      x-effect="$dispatch('rm-q-tick', { text: fmt(left), left: left === null ? 999 : left }); $dispatch('rm-q-online', online); $dispatch('rm-q-state', { cur: cur, last: cur === cfg.questions.length - 1, busy: finishing })"
+      @submit.prevent="next()" @rm-q-prev.window="go(cur - 1)" @change="save()" @input.debounce.400ms="save()">
+  {% for q in qs %}
+  {% set i = loop.index0 %}
+  <section class="stack stack-lg" data-q="{{ i }}" x-show="cur === {{ i }}" {{ 'x-cloak' if i }} aria-label="{{ _('%(n)s-savol', n=i + 1) }}">
+    <div class="stack stack-sm">
+      <div class="row row-sm wrap"><span class="badge badge-gray">{{ {"yopiq": _("Bitta javob"), "kop": _("Bir nechta javob"), "moslash": _("Moslashtirish"), "ochiq": _("Ochiq javob")}[q.kind] }}</span><span class="xs muted grow">{{ _("Mavzu:") }} {{ q.topic }}</span>
+        <span class="saved-ind" role="status" aria-live="polite">
+          <span class="g-6 row" x-show="label()" x-cloak>
+            <svg class="ico" x-show="st !== 'saving'" :class="(st === 'local' || !online) && 'pending'"><use :href="st === 'error' ? '#i-alert' : (st === 'local' || !online ? '#i-upload' : '#i-check-circle')"/></svg>
+            <span x-text="label()"></span><span class="num" x-show="pending && !online" x-text="'· ' + pending + ' ta navbatda'"></span>
+          </span>
         </span>
-      </span>
+      </div>
+      <h2 class="text-q">{{ q.text }}</h2>
     </div>
-    <h1 class="text-q">{{ q.text }}</h1>
-  </div>
-  {% include "test/_question_media.html" %}
+    {% include "test/_question_media.html" %}
 
-  {% if kind == "yopiq" %}
-  <fieldset class="fieldset-reset options">
-    <legend class="sr-only">{{ _("Bitta javobni tanlang") }}</legend>
-    {% for o in q.options %}
-    <label class="option"><input type="radio" name="a" value="{{ loop.index0 }}"><span class="key">{{ "ABCD"[loop.index0] }}</span><span class="grow">{{ o }}</span></label>
-    {% endfor %}
-  </fieldset>
+    {% if q.kind == "yopiq" %}
+    <fieldset class="fieldset-reset options">
+      <legend class="sr-only">{{ _("Bitta javobni tanlang") }}</legend>
+      {% for o in q.options %}
+      <label class="option"><input type="radio" name="a{{ i }}" value="{{ loop.index0 }}"><span class="key">{{ "ABCDEFGHIJ"[loop.index0] }}</span><span class="grow">{{ o }}</span></label>
+      {% endfor %}
+    </fieldset>
 
-  {% elif kind == "kop" %}
-  <fieldset class="fieldset-reset options">
-    <legend class="mb-10 hint">{{ _("Bir nechta javobni belgilang") }}</legend>
-    {% for o in q.options %}
-    <label class="option multi"><input type="checkbox" name="a" value="{{ loop.index0 }}"><span class="key">{{ icon("check", "ico-sm") }}</span><span class="grow">{{ o }}</span></label>
-    {% endfor %}
-  </fieldset>
+    {% elif q.kind == "kop" %}
+    <fieldset class="fieldset-reset options">
+      <legend class="mb-10 hint">{{ _("Bir nechta javobni belgilang") }}</legend>
+      {% for o in q.options %}
+      <label class="option multi"><input type="checkbox" name="a{{ i }}" value="{{ loop.index0 }}"><span class="key">{{ icon("check", "ico-sm") }}</span><span class="grow">{{ o }}</span></label>
+      {% endfor %}
+    </fieldset>
 
-  {% elif kind == "moslash" %}
-  {# Bir ta'rif faqat bitta atamaga: tanlangan javob boshqa atamalarning ro'yxatidan olib tashlanadi (rmMatch) #}
-  <div class="match" x-data="rmMatch()" x-init="init()" @change="sync()">
-    {% for p in q.pairs %}
-    <span class="term">{{ p }}</span>
-    <select class="select" name="m{{ loop.index0 }}" aria-label="{{ p }} uchun ta’rif">
-      <option value="">{{ _("Tanlang…") }}</option>
-      {% for a in q.answers %}<option value="{{ loop.index0 }}">{{ a }}</option>{% endfor %}
-    </select>
-    {% endfor %}
-  </div>
-
-  {% elif kind == "ochiq" %}
-  <div class="field" x-data="{ v: '' }">
-    <label class="label" for="open">{{ _("Javobingiz") }}</label>
-    <input class="input num input-xl" id="open" name="a" data-answer x-model="v" inputmode="numeric" autocomplete="off" maxlength="100">
-    <span class="hint">{{ q.hint }}</span>
-    <div class="keypad mt-8" aria-label="{{ _('Raqamli klaviatura') }}">
-      {% for k in ["1","2","3","4","5","6","7","8","9","C","0","⌫"] %}
-      <button type="button" @click="{{ 'v = \'\'' if k == 'C' else ('v = v.slice(0, -1)' if k == '⌫' else 'v += \'' ~ k ~ '\'') }}; $nextTick(() => save())"
-              aria-label="{{ 'Tozalash' if k == 'C' else ('O‘chirish' if k == '⌫' else k) }}">{{ k }}</button>
+    {% elif q.kind == "moslash" %}
+    {# Bir ta'rif faqat bitta atamaga: tanlangan javob boshqa atamalarning ro'yxatidan olib tashlanadi (rmMatch) #}
+    <div class="match" x-data="rmMatch()" x-init="init()" @change="sync()">
+      {% for p in q.pairs %}
+      <span class="term">{{ p }}</span>
+      <select class="select" name="m{{ i }}-{{ loop.index0 }}" aria-label="{{ p }} uchun ta’rif">
+        <option value="">{{ _("Tanlang…") }}</option>
+        {% for v, a in q.answers %}<option value="{{ v }}">{{ a }}</option>{% endfor %}
+      </select>
       {% endfor %}
     </div>
-  </div>
-  {% endif %}
+
+    {% elif q.kind == "ochiq" %}
+    <div class="field" x-data="{ v: '' }">
+      <label class="label" for="open-{{ i }}">{{ _("Javobingiz") }}</label>
+      <input class="input input-xl {{ 'num' if q.numeric }}" id="open-{{ i }}" name="a{{ i }}" data-answer x-model="v" {% if q.numeric %}inputmode="numeric"{% endif %} autocomplete="off" autocapitalize="off" maxlength="200">
+      {% if q.numeric %}<span class="hint">{{ _("Faqat sonni kiriting") }}</span>
+      <div class="keypad mt-8" aria-label="{{ _('Raqamli klaviatura') }}">
+        {% for k in ["1","2","3","4","5","6","7","8","9","C","0","⌫"] %}
+        <button type="button" @click="{{ 'v = \'\'' if k == 'C' else ('v = v.slice(0, -1)' if k == '⌫' else 'v += \'' ~ k ~ '\'') }}; $nextTick(() => save())"
+                aria-label="{{ 'Tozalash' if k == 'C' else ('O‘chirish' if k == '⌫' else k) }}">{{ k }}</button>
+        {% endfor %}
+      </div>{% endif %}
+    </div>
+    {% endif %}
+    {{ objection_btn(q.ref, q.text, "self-start", q.objected) }}
+  </section>
+  {% endfor %}
 </form>
 {% endblock %}
 
 {% block foot %}
-<footer class="focus-foot">
+<footer class="focus-foot" x-data="{ cur: 0, last: {{ 'true' if qs|length == 1 else 'false' }}, busy: false }" @rm-q-state.window="cur = $event.detail.cur; last = $event.detail.last; busy = $event.detail.busy">
   <div class="focus-foot-inner">
-    <a class="btn btn-ghost" href="{{ url_for('user.tests') }}" data-safe-leave>{{ icon("pause", "ico-sm") }}<span>{{ _("To‘xtatish") }}</span></a>
-    <button class="btn btn-primary grow" form="answer" type="submit">{{ _("Keyingisi") }}{{ icon("arrow-right") }}</button>
+    <a class="btn btn-ghost" href="{{ url_for('user.tests') }}" data-safe-leave x-show="cur === 0">{{ icon("pause", "ico-sm") }}<span>{{ _("To‘xtatish") }}</span></a>
+    <button class="btn btn-outline" type="button" x-show="cur > 0" x-cloak @click="$dispatch('rm-q-prev')">{{ icon("arrow-left", "ico-sm") }}<span>{{ _("Ortga") }}</span></button>
+    <button class="btn btn-primary grow" form="answer" type="submit" :disabled="busy"><span x-text="last ? {{ _('Yakunlash')|tojson|forceescape }} : {{ _('Keyingisi')|tojson|forceescape }}">{{ _("Keyingisi") }}</span><span x-show="!last">{{ icon("arrow-right") }}</span></button>
   </div>
 </footer>
+{% endblock %}
+
+{% block overlay %}
+{# Internet yo'q paytda yakunlangan: javoblar qurilmada, internet tiklanganda natija ochiladi #}
+<div class="sheet-backdrop" x-data="{ open: false }" @rm-q-queued.window="open = $event.detail" x-show="open" x-cloak>
+  <div class="sheet stack stack-lg" role="alertdialog" aria-modal="true" aria-labelledby="queued-t">
+    <div class="sheet-grip"></div>
+    <h2 id="queued-t">{{ _("Internet yo‘q") }}</h2>
+    <p class="muted">{{ _("Test yakunlandi, javoblaringiz qurilmada saqlandi. Internet tiklanganda ular yuboriladi va natija ochiladi.") }}</p>
+    <div class="row wrap">
+      <button class="btn btn-primary grow" type="button" @click="$dispatch('rm-q-retry')">{{ icon("refresh", "ico-sm") }}{{ _("Qayta yuborish") }}</button>
+      <a class="btn btn-outline" href="{{ url_for('user.tests') }}" data-safe-leave>{{ _("Testlarga qaytish") }}</a>
+    </div>
+  </div>
+</div>
+{% with obj_live = True %}{% include "partials/objection_sheet.html" %}{% endwith %}
 {% endblock %}

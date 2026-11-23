@@ -17,7 +17,7 @@
   <span class="list-ico">{{ icon("clipboard", "ico-sm") }}</span>
   <div class="grow"><div class="small strong">{{ _("Dars testi") }} · 3 {{ _("savol") }}</div>
     <div class="xs muted">{% if st == "done" %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif st == "current" %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% else %}{{ _("Oldingi dars testidan keyin ochiladi") }}{% endif %}</div></div>
-  {% if st == "done" %}<a class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}" href="{{ url_for('user.result_detail', rid=rid) }}">{{ pct }}%</a>
+  {% if st == "done" %}<a class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}" href="{{ url_for('user.result_detail', rid=900000 + rid) }}">{{ pct }}%</a>
   {% elif st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', soni=3) }}">{{ _("Boshlash") }}</a>
   {% else %}{{ icon("lock", "ico-sm faint") }}{% endif %}
 </div>

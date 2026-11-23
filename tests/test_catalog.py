@@ -42,6 +42,7 @@ def test_topic_shows_progress_and_weak_subtopic(app, client):
         db.session.add(UserTopicProgress(user_id=uid, topic_id=tid, status="relearn", best_pct=64.4))
         attempt = attempts.start_attempt(uid, "topic", attempts.plan_for_topic(tid), topic_id=tid)
         subs = {q.id: q.subtopic.title for q in db.session.scalars(select(Question))}
+        attempt.status = "submitted"                              # faqat yakunlangan testlar hisobga olinadi
         for item in attempt.items:                               # elif — 40%, qolganlari — 100%
             item.score = 40 if subs[item.question_id] == "elif zanjiri" else 100
         db.session.commit()

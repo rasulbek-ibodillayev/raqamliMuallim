@@ -14,7 +14,13 @@
          "questions": [
            {"type": "single", "difficulty": "easy", "text": "Quyidagi kod natijasini aniqlang:",
             "data": {"code": "x = 5\nif x > 3:\n    print(x * 2)", "options": ["5", "10", "15", "Xato beradi"]},
-            "answer": {"keys": [1]}, "explanation": "x > 3 rost, shuning uchun x * 2 = 10 chiqadi."}
+            "answer": {"keys": [1]}, "explanation": "x > 3 rost, shuning uchun x * 2 = 10 chiqadi."},
+           {"type": "multiple", "difficulty": "easy", "text": "Pythonda qaysi ifodalar if shartida True deb hisoblanadi?",
+            "data": {"options": ["5 > 3", "0", "'salom'", "''", "not False"]}, "answer": {"keys": [0, 2, 4]},
+            "explanation": "0 va bo‘sh satr False; nolga teng bo‘lmagan son, bo‘sh bo‘lmagan satr va not False — True."},
+           {"type": "open", "difficulty": "easy", "text": "Dastur nechani chiqaradi?",
+            "data": {"code": "x = 4\nif x % 2 == 0:\n    x = x * 3\nprint(x)"}, "answer": {"value": "12"},
+            "explanation": "4 juft son, shart rost: x = 4 * 3 = 12."}
          ]},
         {"title": "if / else", "weight": 1, "questions": [
            {"type": "single", "difficulty": "easy", "text": "Quyidagi kod natijasini aniqlang:",

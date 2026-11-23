@@ -71,7 +71,7 @@ SCREENS = [
         ("test.question", "Savol — jadvalli", {"tur": "jadval"}),
         ("test.question", "Savol — rasmli", {"tur": "rasm"}),
         ("test.question", "Savol — oflayn rejimda", {"tur": "yopiq", "oflayn": 1}),
-        ("test.question", "Savol — dars testi (3 ta)", {"turi": "dars", "soni": 3}),
+        ("test.question", "Savol — dars testi", {"tur": "kop", "turi": "dars"}),
         ("test.stage", "Bosqichlar orasida (oraliq sinov)", {"turi": "oraliq"}),
         ("test.result", "Natija — o‘tdi", {}),
         ("test.result", "Natija — qaytarildi", {"holat": "qaytarildi"}),
@@ -86,7 +86,7 @@ SCREENS = [
     ("Natijalar va tahlil", [
         ("user.results", "Natijalarim", {}),
         ("user.results", "Natijalarim — bo‘sh holat", {"bosh": 1}),
-        ("user.result_detail", "Natija tafsiloti: savollar va javoblar", {"rid": 3}),
+        ("user.result_detail", "Natija tafsiloti: savollar va javoblar", {"rid": 900003}),
         ("user.errors", "Xatolar analitikasi", {}),
     ]),
     ("Muhokama, e’tiroz, sertifikat", [

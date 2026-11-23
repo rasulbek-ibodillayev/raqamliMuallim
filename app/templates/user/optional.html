@@ -2,16 +2,16 @@
 {% block title %}{{ _("Ixtiyoriy test") }}{% endblock %}
 {% block content %}
 {% call page_head(_("Ixtiyoriy test"), _("Bu test o‘quv rejangizga ta’sir qilmaydi.")) %}{% endcall %}
-<form class="stack stack-lg" action="{{ url_for('test.question') }}" method="get" x-data="{ n: 20, picked: {{ topics|selectattr(3)|list|length }} }" @change="picked = $el.querySelectorAll('input[name=mavzu]:checked').length">
+<form class="stack stack-lg" action="{{ url_for('test.question') }}" method="get" x-data="{ n: 20, picked: {{ topics|selectattr('on')|list|length }} }" @change="picked = $el.querySelectorAll('input[name=mavzu]:checked').length">
   <input type="hidden" name="turi" value="ixtiyoriy">
   <input type="hidden" name="soni" :value="n" value="20">
   <div class="card">
-    <div class="card-head"><span class="strong">{{ _("Mavzular") }}</span><span class="small muted"><span x-text="picked">{{ topics|selectattr(3)|list|length }}</span> {{ _("ta tanlandi") }}</span></div>
+    <div class="card-head"><span class="strong">{{ _("Mavzular") }}</span><span class="small muted"><span x-text="picked">{{ topics|selectattr('on')|list|length }}</span> {{ _("ta tanlandi") }}</span></div>
     <div class="list">
-      {% for name, qn, st, on in topics %}
+      {% for t in topics %}
       <label class="pointer list-item">
-        <input class="u-w-18 u-h-18 u-accent-primary" type="checkbox" name="mavzu" value="{{ name }}" {{ 'checked' if on }}>
-        <div class="grow"><div>{{ name }}</div><div class="sub">{{ qn }} {{ _("ta savol") }}{% if st == "relearn" %} · <span class="t-yellow">{{ _("Takrorlash tavsiya etiladi") }}</span>{% endif %}</div></div>
+        <input class="u-w-18 u-h-18 u-accent-primary" type="checkbox" name="mavzu" value="{{ t.id }}" {{ 'checked' if t.on }}>
+        <div class="grow"><div>{{ t.name }}</div><div class="sub">{{ t.n }} {{ _("ta savol") }}{% if t.status == "relearn" %} · <span class="t-yellow">{{ _("Takrorlash tavsiya etiladi") }}</span>{% endif %}</div></div>
       </label>
       {% endfor %}
     </div>

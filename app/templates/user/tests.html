@@ -6,7 +6,7 @@
      Ixtiyoriy testni davom ettirish yoki bekor qilish mumkin.
   2) Ixtiyoriy testlar — shu yerdan boshlanadi (Attestatsiya, Haftalik — faqat yakshanba, Ixtiyoriy, Xatolar ustida ishlash).
   3) Majburiy testlar — taxminiy sana bilan qulflangan; navbati kelganda ochiladi va o'quv rejaga qo'shiladi.
-  Namunada: ?oylik=1 — yakunlanmagan majburiy (oylik) test, ?kun=boshqa — yakshanba emas.
+  Yakunlanmagan testlar bazadan. Namunada (ishlab chiqishda): ?oylik=1 — yakunlanmagan majburiy (oylik) test, ?kun=boshqa.
 #}
 {% block content %}
 {% call page_head(_("Testlar")) %}{% endcall %}
@@ -32,7 +32,7 @@
       </div>
       {{ progress(t.pct) }}
       <div class="row wrap row-sm">
-        <a class="btn btn-primary grow" href="{{ url_for('test.question', turi=test_slug[t.type]) }}">{{ _("Davom ettirish") }}</a>
+        <a class="btn btn-primary grow" href="{{ t.url }}">{{ _("Davom ettirish") }}</a>
         {% if not must %}
         <form action="{{ url_for('user.test_cancel', key=t.key) }}" method="post"
               x-data="rmForm({}, function (j) { gone.push('{{ t.key }}'); rmToast(j.message); return false; })"
@@ -65,7 +65,7 @@
       {% else %}
       <div class="list-item u-op-_6" aria-disabled="true">
         <span class="list-ico">{{ icon("calendar") }}</span>
-        <div class="grow"><div>{{ _("Haftalik test") }}</div><div class="sub">{{ _("Faqat yakshanba ochiladi · keyingisi: 29-noyabr") }}</div></div>
+        <div class="grow"><div>{{ _("Haftalik test") }}</div><div class="sub">{{ _("Faqat yakshanba ochiladi · keyingisi: %(d)s", d=next_sunday) }}</div></div>
         {{ icon("lock", "ico-sm faint") }}
       </div>
       {% endif %}

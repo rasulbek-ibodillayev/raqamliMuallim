@@ -16,8 +16,7 @@
 <script nonce="{{ csp_nonce }}">
   window.RM_EXAM = {{ questions|tojson }};
   // sample=true — /ekranlar dagi namunaviy holat: alohida, serverga yuborilmaydigan sessiya
-  window.RM_EXAM_STATE = { cur: {{ start if start_given else 'null' }}, seed: {{ answered|tojson }}, confirm: {{ 'true' if confirm else 'false' }},
-                           sample: {{ 'true' if sample else 'false' }}, resultUrl: {{ url_for('test.exam_result')|tojson }} };
+  window.RM_EXAM_STATE = {{ state|tojson }};   // views/test.py: attempt / exam
 </script>
 {% include "partials/rest.html" %}
 <div class="ex" x-data="exam()" x-init="init()" @keydown.window="key($event)" data-leave-guard>
@@ -40,7 +39,7 @@
         <div class="ex-card-head">
           <h1>{{ _("Informatika") }}</h1>
           <span class="grow"></span>
-          <button class="ex-objection" type="button" @click="objection = true">{{ icon("info", "ico-sm") }}{{ _("E’tiroz") }}</button>
+          <button class="ex-objection" type="button" @click="objection = true" :disabled="q().objected">{{ icon("info", "ico-sm") }}<span x-text="q().objected ? {{ _('E’tiroz yuborildi')|tojson|forceescape }} : {{ _('E’tiroz')|tojson|forceescape }}">{{ _("E’tiroz") }}</span></button>
           <div class="ex-timer" role="timer" aria-label="{{ _('Qolgan vaqt') }}">
             <div class="ex-time" :class="left < 600 && 'warn'">{{ icon("clock") }}<span x-text="fmt(left)">01:59:39</span></div>
             <div class="ex-time-label">{{ _("Qolgan vaqt") }}</div>
@@ -117,9 +116,9 @@
   <div class="ex-modal" x-show="objection" x-cloak @click.self="objection = false" @keydown.escape.window="objection = false">
     <form class="ex-dialog" role="dialog" aria-modal="true" aria-labelledby="ob-t" action="{{ url_for('user.objection_create') }}" method="post" novalidate
           x-data="rmForm({}, function (j, f) { f.reset(); f.dispatchEvent(new CustomEvent('rm-objected', { bubbles: true, detail: 'E’tirozingiz qabul qilindi' })); return false; })"
-          x-init="initForm()" @submit.prevent="submit($event)" @rm-objected="objection = false; toast = $event.detail">
+          x-init="initForm()" @submit.prevent="submit($event)" @rm-objected="objection = false; q().objected = true; toast = $event.detail">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <input type="hidden" name="question" :value="'exam-' + (cur + 1)">
+      <input type="hidden" name="question" :value="q().ref">
       <div class="ex-dialog-head"><h2 id="ob-t">{{ _("E’tiroz bildirish") }}</h2><button class="icon-btn" type="button" @click="objection = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
       <p class="ex-muted" x-text="(cur + 1) + '-savol bo‘yicha'"></p>
       <div class="ex-radio-list">
@@ -171,14 +170,16 @@ function exam() {
   var S = window.RM_EXAM_STATE;
   return {
     qs: window.RM_EXAM, s: null, st: "idle", pending: 0, cur: S.cur || 0, ans: {}, confirm: S.confirm, paused: false, objection: false, toast: "",
-    lang: "uz", left: 2 * 3600, shownAt: Date.now(), finishing: false, queued: false,
+    lang: "uz", left: S.duration, shownAt: Date.now(), finishing: false, queued: false,
     init: function () {
       var self = this;
       RMPlayer.on(function (p) { self.st = p.state; self.pending = p.pending; });
       // Sessiya IndexedDB'dan tiklanadi: sahifa yangilansa ham javoblar, joriy savol va vaqt saqlanadi
-      RMPlayer.open({ id: S.sample ? "exam:namuna" : "exam:asosiy", kind: "exam", total: this.qs.length, duration: 2 * 3600,
+      RMPlayer.open({ id: S.sample ? "exam:namuna" : S.uuid + ":0", uuid: S.uuid, kind: "exam", total: this.qs.length,
+                      duration: S.duration, server: S.answers,
                       local: S.sample, seed: S.sample ? S.seed : null, restart: S.sample }).then(function (s) {
         self.s = s;
+        if (s.finished) { self.finish(); return; }     // avval yakunlangan, lekin hali yuborilmagan
         var a = {};
         Object.keys(s.answers).forEach(function (k) { a[+k] = s.answers[k].v; });
         self.ans = a;

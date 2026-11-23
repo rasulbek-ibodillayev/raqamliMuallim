@@ -10,7 +10,8 @@
    - IndexedDB yo'q bo'lsa (ba'zi maxfiy rejimlar) localStorage'ga, u ham bo'lmasa xotiraga tushadi.
 
    Ishlatish:
-     const s = await RMPlayer.open({ id: "exam:asosiy", kind: "exam", total: 35, duration: 7200 });
+     const s = await RMPlayer.open({ id: "<uuid>:0", uuid: "<uuid>", kind: "exam", total: 35, duration: 7200 });
+     (uuid — server yaratgan urinish; bosqichli testda har bosqich alohida sessiya: id "<uuid>:<bosqich>", stage)
      s.answer(3, 1, 4200);  s.setPos(4);  s.remaining();  await s.finish();
      RMPlayer.on(function (st) { ... st.state: "idle" | "saving" | "local" | "synced" | "error", st.pending });
 */
@@ -19,7 +20,7 @@
 
   var DB_NAME = "rm-player", DB_VER = 1, API = "/api/urinish/";
   var listeners = [], status = { state: "idle", pending: 0, online: navigator.onLine };
-  var forceOffline = false, syncing = false, syncTimer = null, retryMs = 2000;
+  var forceOffline = false, running = null, syncTimer = null, retryMs = 2000;
 
   /* ---------- saqlash qatlami ---------- */
   function idbStore() {
@@ -146,10 +147,15 @@
       this.d.status = "submitted"; this.d.finishedAt = Date.now();
       return this.persist().then(function () {
         if (self.d.local) return { synced: true, result_url: null };
-        return store.put("outbox", { key: self.d.uuid + ":finish", uuid: self.d.uuid, kind: self.d.kind, op: "finish", at: Date.now() })
-          .then(function () { return RMPlayer.sync(); })
-          .then(function () { return store.get("outbox", self.d.uuid + ":finish"); })
-          .then(function (left) { return left ? { synced: false } : { synced: true, result_url: self.d.resultUrl || null }; });
+        var key = self.d.uuid + ":finish:" + (self.d.stage || 0);
+        return store.put("outbox", { key: key, uuid: self.d.uuid, kind: self.d.kind, op: "finish", stage: self.d.stage || null, at: Date.now() })
+          // Fondagi yuborish «finish» yozilishidan oldin boshlangan bo'lishi mumkin: u tugagach yana bir marta yuboriladi
+          .then(function () { return RMPlayer.sync(); }).then(function () { return RMPlayer.sync(); })
+          .then(function () { return Promise.all([store.get("outbox", key), store.get("sessions", self.d.id)]); })
+          .then(function (r) {
+            if (r[1]) self.d.resultUrl = r[1].resultUrl;
+            return r[0] ? { synced: false } : { synced: true, result_url: self.d.resultUrl || null };
+          });
       });
     },
     discard: function () { return store.del("sessions", this.d.id); }
@@ -181,69 +187,82 @@
       items.forEach(function (it) { (by[it.uuid] = by[it.uuid] || { answers: [], finish: null, kind: it.kind }); });
       items.forEach(function (it) { if (it.op === "finish") by[it.uuid].finish = it; else by[it.uuid].answers.push(it); });
       var chain = Promise.resolve();
+      var keep = false;   // boshqa akkaunt javoblari (401/403): navbatda qoladi, lekin qolgan urinishlarni to'xtatmaydi
       Object.keys(by).forEach(function (u) {
-        var g = by[u];
+        var g = by[u], stop = false;
         chain = chain.then(function () {
           if (!g.answers.length) return;
           return post(API + u + "/javoblar", {
             kind: g.kind, answers: g.answers.map(function (a) { return { pos: a.pos, v: a.v, t: a.t, at: a.at }; })
           }).then(function (r) {
-            // 409 — urinish serverda allaqachon yakunlangan: bu javoblarni qayta yuborishdan foyda yo'q
-            if (r.status === 200 || r.status === 409) {
+            // 409 — urinish yakunlangan, 404 — bunday urinish yo'q, 422 — format: qayta yuborishdan foyda yo'q
+            if (r.status === 200 || r.status === 409 || r.status === 404 || r.status === 422) {
               return Promise.all(g.answers.map(function (a) {
                 // Yuborilayotganda yangi javob yozilgan bo'lsa, uni o'chirmaymiz
                 return store.get("outbox", a.key).then(function (cur) { if (cur && cur.at === a.at) return store.del("outbox", a.key); });
               }));
             }
+            if (r.status === 401 || r.status === 403) { keep = stop = true; return; }
             throw new Error("HTTP " + r.status);
           });
         }).then(function () {
-          if (!g.finish) return;
-          return post(API + u + "/yakunlash", { kind: g.kind }).then(function (r) {
-            if (r.status !== 200 && r.status !== 409) throw new Error("HTTP " + r.status);
+          if (!g.finish || stop) return;
+          return post(API + u + "/yakunlash", { kind: g.kind, stage: g.finish.stage || null }).then(function (r) {
+            if (r.status === 401 || r.status === 403) { keep = true; return; }
+            if ([200, 404, 409, 422].indexOf(r.status) === -1) throw new Error("HTTP " + r.status);
             return Promise.all([
               store.del("outbox", g.finish.key),
               store.all("sessions").then(function (ss) {
-                var s = ss.filter(function (x) { return x.uuid === u; })[0];
+                var s = ss.filter(function (x) { return x.uuid === u && (x.stage || null) === (g.finish.stage || null); })[0];
                 if (s) { s.resultUrl = r.body.result_url || null; s.syncedAt = Date.now(); return store.put("sessions", s); }
               })
             ]);
           });
         });
       });
-      return chain;
+      return chain.then(function () { if (keep) retryMs = 60000; });
     }).then(function () { retryMs = 2000; emit({ online: true }); return refreshPending(); })
       .then(function (left) { emit({ state: left.length ? "local" : (status.state === "idle" ? "idle" : "synced") }); });
   }
 
   var RMPlayer = {
     /* Sessiyani ochish: bor bo'lsa tiklanadi, yo'q bo'lsa yaratiladi.
-       opts: id, kind, total, duration (soniya, ixtiyoriy), local (true — serverga yubormaslik, namunalar uchun),
+       opts: id, uuid (server urinishi), stage, kind, total, duration (soniya, ixtiyoriy),
+             server ({pos: {v, at}} — serverda saqlangan javoblar: boshqa qurilmada boshlangan test davom ettirilganda),
+             local (true — serverga yubormaslik, namunalar uchun),
              seed ({pos: value} — yangi sessiya uchun boshlang'ich javoblar), restart (true — eskisini o'chirish) */
     open: function (opts) {
       return store.ready.catch(function () {}).then(function () { return store.get("sessions", opts.id); }).then(function (d) {
         // Yakunlangan urinish qayta ochilmaydi: yangisi boshlanadi (eskisining navbatdagi javoblari baribir yuboriladi)
-        if (d && (opts.restart || d.status !== "in_progress")) d = null;
+        // (server urinishi hali ochiq bo'lsa — yakunlash navbatda: sessiya saqlanadi, sahifa uni qayta yuboradi)
+        if (d && (opts.restart || (opts.uuid ? d.uuid !== opts.uuid : d.status !== "in_progress"))) d = null;
+        if (d && opts.server) Object.keys(opts.server).forEach(function (k) {
+          if (!d.answers[k] || d.answers[k].at < opts.server[k].at) d.answers[k] = { v: opts.server[k].v, t: 0, at: opts.server[k].at };
+        });
         if (!d) {
           d = {
-            id: opts.id, uuid: uuid(), kind: opts.kind, total: opts.total, status: "in_progress",
+            id: opts.id, uuid: opts.uuid || uuid(), stage: opts.stage || null, kind: opts.kind, total: opts.total, status: "in_progress",
             startedAt: Date.now(), deadline: opts.duration ? Date.now() + opts.duration * 1000 : null,
             pausedAt: null, pos: 0, answers: {}, flagged: [], local: !!opts.local
           };
           if (opts.seed) Object.keys(opts.seed).forEach(function (k) { d.answers[k] = { v: opts.seed[k], t: 0, at: 0 }; });
+          if (opts.server) Object.keys(opts.server).forEach(function (k) {
+            var x = opts.server[k];
+            if (x.v !== null && x.v !== undefined) d.answers[k] = { v: x.v, t: 0, at: x.at || 0 };
+          });
           return store.put("sessions", d).then(function () { return new Session(d); });
         }
         return new Session(d);
       }).then(function (s) { refreshPending().then(function (it) { if (it.length) emit({ state: "local" }); }); return s; });
     },
     sync: function () {
-      if (syncing) return Promise.resolve();
-      syncing = true;
-      return syncOnce().catch(function () {
+      if (running) return running;        // ketayotgan yuborish tugashini kutadi
+      running = syncOnce().catch(function () {
         emit({ state: "local" });
         retryMs = Math.min(retryMs * 2, 60000);
         scheduleSync(retryMs);
-      }).then(function () { syncing = false; });
+      }).then(function () { running = null; });
+      return running;
     },
     on: function (fn) { listeners.push(fn); fn(status); return function () { listeners = listeners.filter(function (f) { return f !== fn; }); }; },
     status: function () { return status; },

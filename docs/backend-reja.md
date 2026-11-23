@@ -1,6 +1,6 @@
 # Backend rejasi: kim nima qiladi
 
-Holat: 2026-11-22, `backend` branchi.
+Holat: 2026-11-23, `backend` branchi.
 
 Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qaysi qadamingizga bog'liqligi ko'rsatilgan.
 
@@ -13,10 +13,10 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 3 | ✅ Testlar yadrosi | Ixcham `attempt_items`, `user_seen_questions`, test yig'ish servisi (`app/services/attempts.py`) | — |
 | 4 | ✅ Kontentni yuklash | JSON formati ([kontent-formati.md](kontent-formati.md)), tekshiruv, `flask kontent-yuklash`, namunaviy kontent (`app/seed/namuna_kontent.json`) | — |
 | 5 | ✅ O'qituvchi ekranlari bazadan (1-qism) | Mavzu sahifasi (kichik mavzular bo'yicha foizlar javoblardan), dars sahifasi `/app/dars/<id>` (bloklar bazadan), tezkor qidiruv, eslatmalar uchun mavzular ro'yxati, hududni saqlash (`app/services/catalog.py`) | — |
-| 5b | ⏳ O'qituvchi ekranlari (2-qism) | O'quv reja, bosh sahifa, diagnostika natijasi, «Natijalarim»: ular test natijalari va baholashga tayanadi, shuning uchun 6-bosqich bilan birga | B1 |
-| 6 | ⏳ Test o'ynatgichi bazada | Testni boshlash, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), yakunlash, natija, qaror (90/80/70) | B1 |
+| 5b | ⏳ O'qituvchi ekranlari (2-qism) | O'quv reja, bosh sahifa, «Xatolar analitikasi» va majburiy testlar jadvali (qachon navbati kelishi). «Natijalarim», natija tafsiloti va diagnostika natijasi 6-bosqichda bazaga o'tdi | — |
+| 6 | ✅ Test o'ynatgichi bazada | 11 tur test savollar bankidan (`app/services/test_builder.py`), pleyer, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), bosqichlar, baholash (`app/services/scoring.py`), natija va tahlil, xatolar va mavzu holati (`app/services/progress.py`), e'tiroz yuborish/tahrirlash/o'chirish | — |
 | 7 | ✅ Ekspert paneli (1-qism) | Savollar banki bazadan (filtrlar, sahifalash, «savollar yetarli emas»), muharrir: yaratish va tahrirlash (har tahrir yangi versiya, kichik mavzu tanlovi, jadval/chizma/rasm), arxivlash, AI navbati (tahrirlab tasdiqlash, rad etish), `audit_log`, rasm yuklash (PNG/JPEG/WebP, mazmunga qarab tekshiruv) | — |
-| 7b | ⏳ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazaga (bo'lim, mavzu, kichik mavzu, bloklar), Excel import/eksport, ekspert huquqlari (yo'nalishlar, ruxsatlar); e'tirozlar — 6-bosqichdan keyin | — |
+| 7b | ⏳ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazaga (bo'lim, mavzu, kichik mavzu, bloklar), Excel import/eksport, ekspert huquqlari (yo'nalishlar, ruxsatlar); e'tirozlarni ko'rib chiqish va natijani qayta hisoblash | — |
 | 8 | ⏳ Admin paneli | Foydalanuvchilar, sozlamalar (`settings`), imtihon sanasi, `expert_invites` jadvali, `audit_log`, Excel/CSV import va eksport | 5 |
 | 9 | ⏳ Himoya | Redis, kirish va kod yuborishni cheklash (IP va login bo'yicha), xavfsizlik tekshiruvi | — |
 | 10 | ⏳ Fon vazifalari | Redis + RQ (`volatile-lru`, 64 MB): email, audio, PDF, statistika | — |
@@ -34,13 +34,16 @@ Har bir bosqich alohida commit bo'ladi va testlari bilan topshiriladi.
 
 Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular serverdagi `.env` fayliga yoziladi. Men faqat qaysi o'zgaruvchi kerakligini aytaman.
 
-1. **Baholash qoidalarini tasdiqlash (6-bosqichdan oldin kerak).**
-   - Ko'p javobli savol: qisman ball beriladimi? Masalan, 3 ta to'g'ridan 2 tasi belgilansa 66% bo'ladimi yoki 0%mi? Noto'g'ri belgilangan variant uchun ball ayiriladimi?
-   - Moslashtirish: har bir to'g'ri juftlik uchun ulush beriladimi yoki hammasi to'g'ri bo'lgandagina ball beriladimi?
-   - Ochiq javob: faqat aniq mos kelgan javob qabul qilinadimi yoki bir nechta to'g'ri variant ro'yxati bo'ladimi?
-   - Bosqich chegaralari 90/80/70% to'g'rimi?
-   - Kichik mavzuda yangi savollar tugaganda eng eski ko'rilgan savolni qaytarish ma'qulmi? Hozir shunday qilingan.
+1. ✅ **Baholash qoidalari (2026-11-23 da tasdiqlangan).**
+   - Ko'p javobli: (to'g'ri belgilangan − noto'g'ri belgilangan) ÷ jami to'g'ri; manfiy bo'lsa 0.
+   - Moslashtirish: har bir to'g'ri juftlik uchun teng ulush.
+   - Ochiq javob: `value` yoki `accept` ro'yxatidan biri; katta-kichik harf, ortiqcha bo'sh joy va tutuq belgisi yozilishi farqlanmaydi.
+   - Chegaralar: < 70 — qayta o'zlashtirish, 70–89 — tavsiya bilan, ≥ 90 — o'tdi.
+   - Yangi savollar tugasa, eng eski ko'rilgan savol qaytadi.
+   - Dars testi 3 savol, kamida bittasi ko'p javobli yoki moslashtirish (aks holda 70–89% chiqishi mumkin emas).
+   - Bosqichli testda mavzu bo'yicha: < 70% — keyingi bosqichga o'tmaydi; 70–89% — o'tadi, 90% ga yetmagan darslarini qayta o'zlashtirish tavsiya etiladi; ≥ 90% — tavsiyasiz o'tadi. Berilmagan savollar 0 ball.
 2. **Kontent.**
+   - Har bir darsga kamida 3 ta savol, ulardan kamida bittasi ko'p javobli yoki moslashtirish.
    - Haqiqiy savollar bazasi va dars matnlari, [kontent-formati.md](kontent-formati.md) dagi JSON formatida.
    - RAG uchun darsliklar va me'yoriy hujjatlar. Ulardan foydalanish huquqi bo'lishi kerak.
 3. **Telegram bot.** @BotFather orqali bot yarating va bot nomini ayting. Tokenni serverdagi `.env` ga `TELEGRAM_BOT_TOKEN` sifatida yozasiz.
@@ -66,7 +69,6 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
 ## Bog'liqliklar qisqacha
 
 - Bloklamaydi, hozirdanoq boshlash mumkin: A4, A5, A7, A8, A9, A10.
-- B1 kerak: A6 (test o'ynatgichi).
 - B3/B4 kerak: A11/A12 (bot va email). Ungacha kod `123456` bo'lib qoladi.
 - B5 kerak: A13 (AI).
 - B7 va B8 kerak: A16 (serverga chiqarish).

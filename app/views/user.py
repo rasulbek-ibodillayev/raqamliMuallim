@@ -8,6 +8,17 @@ from ..forms import OBJECTION_REASONS, REGIONS, field, required, respond, valida
 bp = Blueprint("user", __name__, url_prefix="/app")
 
 
+def _recommended():
+    from flask_login import current_user
+
+    from ..services import catalog
+    rows = catalog.recommended_lessons(current_user.id)
+    for r in rows:
+        r["url"] = (url_for("user.lesson_topic", topic_id=r["topic_id"], _anchor=f"k{r['sid']}") if r["has_lesson"]
+                    else url_for("user.topic", topic_id=r["topic_id"]))
+    return rows
+
+
 @bp.get("/")
 def home():
     import random
@@ -24,7 +35,7 @@ def home():
     today = list(m.TODAY) + ([m.TODAY_CONTROL] if state == "nazorat" else [])
     return render_template("user/home.html", sections=m.SECTIONS, r=m.READINESS, rstate=m.READINESS_STATE,
                            today=today, onboarding=m.ONBOARDING, new_user=new_user, done_steps=done_steps,
-                           motto=motto, next_state=state, recommended=m.recommended_lessons())
+                           motto=motto, next_state=state, recommended=_recommended())
 
 
 @bp.get("/diagnostika")
@@ -35,7 +46,24 @@ def diagnostic():
 
 @bp.get("/diagnostika/natija")
 def diagnostic_result():
-    return render_template("user/diagnostic_result.html", sections=m.SECTIONS, questions=m.RESULT_QUESTIONS)
+    """Oxirgi diagnostika natijasi (bazadan). Topshirilmagan bo'lsa — ishlab chiqishda namuna, aks holda taklif sahifasi."""
+    from flask import redirect
+    from flask_login import current_user
+
+    from ..services import attempts as at
+    from ..services import catalog
+    from .test import is_dev, review_of, sample_review
+    last = at.finished(current_user.id, "diagnostic", limit=1)
+    if last:
+        sections = catalog.attempt_by_section(last[0])
+        topics = sum(s["topics"] for s in sections)
+        known = sum(s["known"] for s in sections)
+        return render_template("user/diagnostic_result.html", pct=int(last[0].score_pct), sections=sections, topics=topics,
+                               known=known, questions=review_of(last[0]), advice=at.advice(last[0]))
+    if not is_dev():
+        return redirect(url_for("user.diagnostic"))
+    return render_template("user/diagnostic_result.html", pct=64, sections=m.SECTIONS, topics=42, known=18,
+                           questions=sample_review())
 
 
 @bp.get("/bilim")
@@ -68,8 +96,8 @@ def lesson_topic(topic_id):
     lesson = catalog.lesson_view(topic_id)
     if lesson is None or not lesson["parts"]:
         abort(404)
-    # Har dars (kichik mavzu) bo'yicha natija: joriy dars testi ≥ 70% bo'lmaguncha keyingi darslar ko'rsatilmaydi
-    scores = catalog.subtopic_scores(current_user.id, topic_id)
+    # Har dars testining eng yaxshi natijasi: joriy dars testi ≥ 70% bo'lmaguncha keyingi darslar ko'rsatilmaydi
+    scores = catalog.lesson_scores(current_user.id, topic_id)
     pcts = [scores.get(p["id"]) for p in lesson["parts"]]
     return render_template("user/lesson_topic.html", lesson=lesson, pcts=pcts, open_n=open_lessons(pcts),
                            all_passed=all(p is not None and p >= m.PASS_MIN for p in pcts))
@@ -113,30 +141,57 @@ def tutor():
     return render_template("user/tutor.html", topic=request.args.get("mavzu") or m.CURRENT_TOPIC)
 
 
+def _tests_ctx(**extra):
+    """«Testlar» sahifasi: yakunlanmagan urinishlar bazadan; majburiy testlar jadvali hozircha namunaviy (5b)."""
+    from flask_login import current_user
+
+    from ..services import attempts as at
+    from ..services import test_builder as tb
+    from ..services.timefmt import day_month, now
+    from .test import attempt_url, is_dev, type_names, weekly_open
+    rows = tb.unfinished(current_user.id)
+    names = at.names(rows, type_names())
+    unfinished = []
+    for a in rows:
+        done = sum(1 for i in a.items if (i.answer or {}).get("v") not in (None, "", []))
+        unfinished.append({"key": str(a.client_uuid), "type": a.kind, "name": names[a.id], "url": attempt_url(a),
+                           "note": _("%(d)s / %(t)s savol · javoblar saqlangan", d=done, t=a.total),
+                           "pct": round(100 * done / a.total) if a.total else 0})
+    # /ekranlar namunasi: yakunlanmagan majburiy (oylik) test
+    if is_dev() and request.args.get("oylik"):
+        unfinished.insert(0, {**m.UNFINISHED_MONTHLY, "url": url_for("test.question", turi="oylik")})
+    from datetime import timedelta
+    today = now()
+    sunday = weekly_open() and not (is_dev() and request.args.get("kun") == "boshqa")
+    return {"unfinished": unfinished, "test_types": m.TEST_TYPES, "info": m.TEST_TYPE_INFO, "sunday": sunday,
+            "next_sunday": day_month(today + timedelta(days=(6 - today.weekday()) % 7 or 7)), "mandatory": tb.MANDATORY,
+            "schedule": m.MANDATORY_SCHEDULE,
+            "blocker": next((t for t in unfinished if t["type"] in tb.MANDATORY), None), **extra}
+
+
 @bp.get("/testlar")
 def tests():
     """«Testlar»: yakunlanmagan testlarni davom ettirish va Attestatsiya / Haftalik / Ixtiyoriy testni boshlash.
-    Haftalik test faqat yakshanba kuni ochiq (namunada ?kun=yakshanba)."""
-    # Namunada bugun yakshanba (haftalik test ochiq); ?kun=boshqa — boshqa kun
-    sunday = request.args.get("kun") != "boshqa"
-    unfinished = ([m.UNFINISHED_MONTHLY] if request.args.get("oylik") else []) + m.UNFINISHED_TESTS
-    blocker = next((t for t in unfinished if t["type"] in m.MANDATORY_TYPES), None)
-    return render_template("user/tests.html", unfinished=unfinished, test_types=m.TEST_TYPES, info=m.TEST_TYPE_INFO,
-                           sunday=sunday, mandatory=m.MANDATORY_TYPES, schedule=m.MANDATORY_SCHEDULE, blocker=blocker)
+    Haftalik test faqat yakshanba kuni ochiq."""
+    return render_template("user/tests.html", **_tests_ctx())
 
 
-@bp.post("/testlar/<key>/bekor")
+@bp.post("/testlar/<uuid:key>/bekor")
 def test_cancel(key):
     """Yakunlanmagan IXTIYORIY testni bekor qilish (javoblar o'chiriladi). Majburiy testni bekor qilib bo'lmaydi."""
-    t = next((x for x in m.UNFINISHED_TESTS + [m.UNFINISHED_MONTHLY] if x["key"] == key), None)
-    if not t:
-        return respond(errors={"key": _("Test topilmadi")}, template="user/tests.html", unfinished=m.UNFINISHED_TESTS,
-                       test_types=m.TEST_TYPES, info=m.TEST_TYPE_INFO, sunday=True, mandatory=m.MANDATORY_TYPES,
-                       schedule=m.MANDATORY_SCHEDULE, blocker=None)
-    if t["type"] in m.MANDATORY_TYPES:
-        return respond(errors={"key": _("Majburiy testni bekor qilib bo‘lmaydi — uni yakunlang")}, template="user/tests.html",
-                       unfinished=m.UNFINISHED_TESTS, test_types=m.TEST_TYPES, info=m.TEST_TYPE_INFO, sunday=True,
-                       mandatory=m.MANDATORY_TYPES, schedule=m.MANDATORY_SCHEDULE, blocker=None)
+    from flask_login import current_user
+
+    from ..services import attempts as at
+    from ..services import test_builder as tb
+    a = at.get(key, lock=True)
+    error = None
+    if a is None or a.user_id != current_user.id or a.status != "in_progress":
+        error = _("Test topilmadi")
+    elif a.kind in tb.MANDATORY:
+        error = _("Majburiy testni bekor qilib bo‘lmaydi — uni yakunlang")
+    if error:
+        return respond(errors={"key": error}, template="user/tests.html", **_tests_ctx())
+    at.cancel(a)
     return respond(redirect_to=url_for("user.tests"), message=_("Test bekor qilindi"))
 
 
@@ -153,13 +208,28 @@ def control():
 
 @bp.get("/ixtiyoriy-test")
 def optional():
-    return render_template("user/optional.html", topics=m.OPTIONAL_TOPICS, status=m.STATUS)
+    from flask_login import current_user
+
+    from ..services import catalog
+    return render_template("user/optional.html", topics=catalog.optional_topics(current_user.id), status=m.STATUS)
+
+
+def _result_row(a, names) -> dict:
+    from ..services.timefmt import when
+    minutes = max(1, round((a.finished_at - a.started_at).total_seconds() / 60))
+    return {"id": a.id, "type": a.kind, "name": names[a.id], "when": when(a.finished_at), "pct": int(a.score_pct),
+            "decision": a.decision, "n": a.total, "min": minutes}
 
 
 @bp.get("/natijalar")
 def results():
-    empty = bool(request.args.get("bosh"))
-    return render_template("user/results.html", results=[] if empty else m.RESULTS,
+    from flask_login import current_user
+
+    from ..services import attempts as at
+    from .test import is_dev, type_names
+    rows = [] if is_dev() and request.args.get("bosh") else at.finished(current_user.id, limit=300)
+    names = at.names(rows, type_names())
+    return render_template("user/results.html", results=[_result_row(a, names) for a in rows],
                            decision=m.DECISION, test_types=m.TEST_TYPES)
 
 
@@ -167,18 +237,31 @@ def results():
 def result_detail(rid):
     """Yakunlangan test: har bir savol va javob (xato — qizil, to'g'ri javob — yashil) va qayta topshirish."""
     from flask import abort
+    from flask_login import current_user
+
+    from ..extensions import db
+    from ..models import TestAttempt
+    from ..services import attempts as at
+    from .test import retry_url, review_of, sample_review, type_names
+    a = db.session.get(TestAttempt, rid)
+    if a is not None and a.user_id == current_user.id and a.status == "submitted":
+        return render_template("user/result_detail.html", r=_result_row(a, at.names([a], type_names())),
+                               questions=review_of(a), decision=m.DECISION, test_types=m.TEST_TYPES,
+                               staged=at.is_staged(a), retry=retry_url(a), sample=False,
+                               advice=at.advice(a) if at.is_staged(a) else None)
+    # O'quv reja va bosh sahifa hali namunaviy (5b): ulardagi natija havolalari (id ≥ m.MOCK_RID) namunani ochadi
     r = next((x for x in m.RESULTS if x["id"] == rid), None)
     if not r:
         abort(404)
-    from .test import TYPE_SLUGS
-    slug = next((k for k, v in TYPE_SLUGS.items() if v == r["type"]), "mavzu")
-    return render_template("user/result_detail.html", r=r, questions=m.RESULT_QUESTIONS, decision=m.DECISION,
-                           test_types=m.TEST_TYPES, staged=r["type"] in m.STAGED_TYPES, slug=slug)
+    from .test import SLUG_OF
+    retry = url_for("test.exam") if r["type"] == "exam" else url_for("test.question", turi=SLUG_OF.get(r["type"], "mavzu"))
+    return render_template("user/result_detail.html", r=r, questions=sample_review(), decision=m.DECISION,
+                           test_types=m.TEST_TYPES, staged=r["type"] in m.STAGED_TYPES, retry=retry, sample=True)
 
 
 @bp.get("/xatolar")
 def errors():
-    return render_template("user/errors.html", recommended=m.recommended_lessons(), items=m.ERRORS_LIST)
+    return render_template("user/errors.html", recommended=_recommended(), items=m.ERRORS_LIST)
 
 
 @bp.get("/eslatmalar")
@@ -200,40 +283,67 @@ def discussion():
     return render_template("user/discussion.html", msgs=m.DISCUSSION)
 
 
-@bp.get("/etirozlarim")
-def objections():
-    return render_template("user/objections.html", items=m.OBJECTIONS, state=m.OBJ_STATE)
+def _objections_ctx():
+    from flask_login import current_user
+
+    from ..services import objections as ob
+    return {"items": ob.mine(current_user.id), "state": m.OBJ_STATE}
 
 
-@bp.post("/etirozlarim/<int:oid>/tahrir")
-def objection_edit(oid):
-    """Hali ko'rib chiqilmagan e'tirozning sababi va izohini o'zgartirish."""
-    o = next((x for x in m.OBJECTIONS if x["id"] == oid), None)
-    ctx = {"template": "user/objections.html", "items": m.OBJECTIONS, "state": m.OBJ_STATE}
-    if not o:
-        return respond(errors={"reason": _("E’tiroz topilmadi")}, **ctx)
-    if o["state"] != "review":
-        return respond(errors={"reason": _("Ko‘rib chiqilgan e’tirozni o‘zgartirib bo‘lmaydi")}, **ctx)
+def _objection_fields() -> dict:
     errors = validate({
         "reason": (field("reason"), lambda v: None if v in OBJECTION_REASONS else _("Sababni tanlang")),
         "note": (field("note"), lambda v: None if len(v) <= 1000 else _("Izoh 1000 belgidan oshmasin")),
     })
     if not errors and field("reason") == "other" and not field("note"):
         errors = {"note": _("«Boshqa» sababini izohda yozing")}
-    return respond(errors=errors, **ctx, redirect_to=url_for("user.objections"), message=_("E’tiroz yangilandi"))
+    return errors
+
+
+@bp.get("/etirozlarim")
+def objections():
+    return render_template("user/objections.html", **_objections_ctx())
+
+
+@bp.post("/etirozlarim/<int:oid>/tahrir")
+def objection_edit(oid):
+    """Hali ko'rib chiqilmagan e'tirozning sababi va izohini o'zgartirish."""
+    from flask_login import current_user
+
+    from ..extensions import db
+    from ..services import objections as ob
+    o = ob.own(current_user.id, oid)
+    if o is None:
+        errors = {"reason": _("E’tiroz topilmadi")}
+    elif o.status != "review":
+        errors = {"reason": _("Ko‘rib chiqilgan e’tirozni o‘zgartirib bo‘lmaydi")}
+    else:
+        errors = _objection_fields()
+    if not errors:
+        o.reason, o.text = field("reason"), field("note")
+        db.session.commit()
+    return respond(errors=errors, template="user/objections.html", **_objections_ctx(),
+                   redirect_to=url_for("user.objections"), message=_("E’tiroz yangilandi"))
 
 
 @bp.post("/etirozlarim/<int:oid>/ochirish")
 def objection_delete(oid):
-    """Hali ko'rib chiqilmagan e'tirozni o'chirish. Ko'rib chiqilgani (qabul/rad) o'chirilmaydi.
-    Backendda: objections.status = 'review' va muallif shu foydalanuvchi bo'lsagina o'chiriladi."""
-    o = next((x for x in m.OBJECTIONS if x["id"] == oid), None)
-    if not o:
-        return respond(errors={"id": _("E’tiroz topilmadi")}, template="user/objections.html", items=m.OBJECTIONS, state=m.OBJ_STATE)
-    if o["state"] != "review":
-        return respond(errors={"id": _("Ko‘rib chiqilgan e’tirozni o‘chirib bo‘lmaydi")}, template="user/objections.html",
-                       items=m.OBJECTIONS, state=m.OBJ_STATE)
-    return respond(redirect_to=url_for("user.objections"), message=_("E’tiroz o‘chirildi"))
+    """Hali ko'rib chiqilmagan e'tirozni o'chirish. Ko'rib chiqilgani (qabul/rad) o'chirilmaydi."""
+    from flask_login import current_user
+
+    from ..extensions import db
+    from ..services import objections as ob
+    o = ob.own(current_user.id, oid)
+    errors = None
+    if o is None:
+        errors = {"id": _("E’tiroz topilmadi")}
+    elif o.status != "review":
+        errors = {"id": _("Ko‘rib chiqilgan e’tirozni o‘chirib bo‘lmaydi")}
+    else:
+        db.session.delete(o)
+        db.session.commit()
+    return respond(errors=errors, template="user/objections.html", **_objections_ctx(),
+                   redirect_to=url_for("user.objections"), message=_("E’tiroz o‘chirildi"))
 
 
 @bp.get("/sertifikatlar")
@@ -318,15 +428,19 @@ def profile_region():
 
 @bp.post("/etiroz")
 def objection_create():
-    """Natija sahifasi va attestatsiya sinovidan e'tiroz. Backendda: objections jadvali, ekspert navbati."""
-    errors = validate({
-        "question": (field("question"), required),
-        "reason": (field("reason"), lambda v: None if v in OBJECTION_REASONS else _("Sababni tanlang")),
-        "note": (field("note"), lambda v: None if len(v) <= 1000 else _("Izoh 1000 belgidan oshmasin")),
-    })
-    if not errors and field("reason") == "other" and not field("note"):
-        errors = {"note": _("«Boshqa» sababini izohda yozing")}
-    return respond(errors=errors, template="test/result.html", failed=False, questions=m.RESULT_QUESTIONS,
+    """Test davomida yoki natija sahifasida savolga e'tiroz (services/objections.py).
+    "namuna:…" — /ekranlar dagi namunaviy savol: tekshiriladi, lekin saqlanmaydi (faqat ishlab chiqishda)."""
+    from flask_login import current_user
+
+    from ..services import objections as ob
+    from .test import is_dev
+    errors = {**validate({"question": (field("question"), required)}), **_objection_fields()}
+    if not errors and not (is_dev() and field("question").startswith("namuna:")):
+        try:
+            ob.create(current_user.id, field("question"), field("reason"), field("note"), field("urgent") == "1")
+        except ob.ObjectionError as e:
+            errors = {"reason": str(e)}
+    return respond(errors=errors, template="user/objections.html", **_objections_ctx(),
                    redirect_to=url_for("user.objections"),
                    message=_("E’tirozingiz qabul qilindi. Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi"))
 

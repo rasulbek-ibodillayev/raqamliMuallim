@@ -36,7 +36,7 @@
      Darsni qayta o'zlashtirib, dars testini ≥ 90% bajarsa — dars bu ro'yxatdan chiqadi va o'quv rejadagi foiz yangilanadi. #}
   <section class="stack" aria-labelledby="rec-title">
     <div class="row between wrap"><h2 id="rec-title" class="eyebrow">{{ _("Qayta o‘zlashtirish tavsiya etilgan darslar") }}</h2>
-      <span class="xs muted">{{ _("Dars testi 70–89%%") }}</span></div>
+      <span class="xs muted">{{ _("Natija 70–89%%") }}</span></div>
     {% if recommended %}
     <div class="card list">
       {% for r in recommended %}
@@ -47,7 +47,7 @@
           <span class="xs muted">{{ r.topic }} · {{ r.when }}</span>
         </div>
         <div class="row row-sm rec-actions">
-          <a class="btn btn-primary btn-sm" href="{{ url_for('user.lesson', holat='qayta') }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta o‘zlashtirish") }}</a>
+          <a class="btn btn-primary btn-sm" href="{{ r.url }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta o‘zlashtirish") }}</a>
           <a class="btn btn-ghost btn-sm" href="{{ url_for('user.result_detail', rid=r.rid) }}">{{ _("Natija") }}</a>
         </div>
       </div>
@@ -55,7 +55,7 @@
     </div>
     <p class="xs muted">{{ _("Darsni qayta o‘zlashtirib, dars testini 90%% va undan yuqori bajarsangiz, dars bu ro‘yxatdan chiqadi va o‘quv rejadagi foiz yangilanadi.") }}</p>
     {% else %}
-    <div class="card card-pad small muted">{{ _("Tavsiya bilan o‘tilgan dars yo‘q — barcha dars testlari 90%% va undan yuqori.") }}</div>
+    <div class="card card-pad small muted">{{ _("Tavsiya bilan o‘tilgan dars yo‘q.") }}</div>
     {% endif %}
   </section>
 

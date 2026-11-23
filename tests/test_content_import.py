@@ -50,7 +50,7 @@ def test_seed_supports_test_assembly(app):
         plan = attempts.plan_for_topic(topic.id)
         assert sum(plan.values()) == 4                            # weight: 2 + 1 + 1 (+0)
         attempt = attempts.start_attempt(demo_user("user").id, "topic", plan, topic_id=topic.id)
-        assert attempt.total == 4 - 1                             # «if operatori»da 1 ta savol bor, 2 so'ralgan
+        assert attempt.total == 4
 
 
 def test_reload_updates_structure_but_not_questions(app):

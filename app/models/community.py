@@ -8,12 +8,14 @@ from ..extensions import db
 from ._base import JSONB, PK, QID, Timestamps, created_at, one_of, pk
 
 OBJ_STATUS = ("review", "accepted", "rejected")
+OBJ_REASONS = ("wrong_key", "also_correct", "unclear", "media", "other")
 
 
 class Objection(Timestamps, db.Model):
     __tablename__ = "objections"
     __table_args__ = (
         one_of("status", OBJ_STATUS),
+        one_of("reason", OBJ_REASONS),
         Index("ix_objections_status_created", "status", "created_at"),   # ekspert navbati
     )
 
@@ -22,7 +24,9 @@ class Objection(Timestamps, db.Model):
     question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"), index=True)
     question_version: Mapped[int] = mapped_column(Integer)
     attempt_id: Mapped[int | None] = mapped_column(PK, ForeignKey("test_attempts.id", ondelete="SET NULL"))
-    text: Mapped[str] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(String(12), default="other", server_default="other")
+    text: Mapped[str] = mapped_column(Text)                              # izoh (bo'sh bo'lishi mumkin)
+    urgent: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     status: Mapped[str] = mapped_column(String(8), default="review", server_default="review")
     expert_id: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))
     verdict: Mapped[str | None] = mapped_column(Text)

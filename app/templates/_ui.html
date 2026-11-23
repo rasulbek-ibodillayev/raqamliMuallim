@@ -89,6 +89,14 @@
 <p class="field-error" id="{{ prefix }}{{ name }}-err" role="alert" x-show="err('{{ name }}')" x-text="err('{{ name }}')"{% if not errors.get(name) %} x-cloak{% endif %}>{{ errors.get(name, "") }}</p>
 {%- endmacro %}
 
+{# Savolga e'tiroz tugmasi: partials/objection_sheet.html oynasini ochadi (o'sha sahifaga include qilingan bo'lishi shart).
+   Yuborilgach tugma o'chadi va «E'tiroz yuborildi» deb turadi. qid — savol identifikatori, text — savol matni. #}
+{% macro objection_btn(qid, text, cls="", sent=False) -%}
+<button class="btn btn-outline btn-sm {{ cls }}" type="button" x-data="{ sent: {{ 'true' if sent else 'false' }} }" :disabled="sent" {{ 'disabled' if sent }} aria-haspopup="dialog"
+        @click="$dispatch('objection', { id: {{ qid|tojson|forceescape }}, text: {{ text|tojson|forceescape }} })"
+        @objection-sent.window="if ($event.detail === {{ qid|tojson|forceescape }}) sent = true">{{ icon("flag", "ico-sm") }}<span x-show="!sent">{{ _("E’tiroz bildirish") }}</span><span x-show="sent" x-cloak>{{ _("E’tiroz yuborildi") }}</span></button>
+{%- endmacro %}
+
 {# Parol maydoni yonidagi «ko'z» tugmasi: var — Alpine holati (true bo'lsa matn ko'rinadi).
    Ishlatish: <div class="input-group" x-data="{ s1: false }"><input :type="s1 ? 'text' : 'password'" …>{{ eye("s1") }}</div> #}
 {% macro eye(var="show") -%}

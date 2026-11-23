@@ -187,18 +187,6 @@ def lesson_decision(pct):
         return None
     return "relearn" if pct < PASS_MIN else ("recommend" if pct < SOLID_MIN else "pass")
 
-
-def recommended_lessons(plan=None):
-    """Tavsiya bilan (70–89%) keyingi darsga o'tilgan darslar — «Xatolar analitikasi» va bosh sahifada.
-    Qayta o'zlashtirib, dars testi ≥ 90% bo'lsa, dars ro'yxatdan chiqadi va reja foizi yangilanadi."""
-    out = []
-    for t in plan or LEARN_PLAN:
-        for l in t.get("lessons", []):
-            if lesson_decision(l["pct"]) == "recommend":
-                out.append({"lesson": l["name"], "topic": t["name"], "topic_id": t["id"], "pct": l["pct"],
-                            "rid": l["rid"], "when": l["when"]})
-    return out
-
 # Oylik test (majburiy, har 30 kunda): vaqti kelganda rejaga qo'shiladi. Joriy mavzu tugallanmagan bo'lsa —
 # mavzu tugagach olinadi; yakunlanmaguncha keyingi mavzular ochilmaydi. Namunada ?oylik=1.
 MONTHLY_DUE = {"kind": "test", "type": "monthly", "name": "Oylik test: noyabr", "state": "started", "min": 45,
@@ -250,6 +238,14 @@ RESULTS += [{"id": l["rid"], "type": "lesson", "name": f"Dars testi: {l['name']}
              "decision": {"pass": "pass", "recommend": "warn", "relearn": "fail"}[lesson_decision(l["pct"])],
              "n": l["n"], "min": 3}
             for t in LEARN_PLAN if t["kind"] == "topic" and t["state"] == "done" for l in t["lessons"]]
+# Namunaviy natija id'lari haqiqiy test_attempts.id bilan to'qnashmasin (reja va bosh sahifa bazaga o'tguncha, 5b)
+MOCK_RID = 900_000
+for _r in RESULTS:
+    _r["id"] += MOCK_RID
+for _t in LEARN_PLAN:
+    for _x in [_t, _t.get("test") or {}, *_t.get("lessons", [])]:
+        if _x.get("rid"):
+            _x["rid"] += MOCK_RID
 # Natija tafsiloti: har bir savol, foydalanuvchi javobi (mine) va to'g'ri javob (right) — variantlar indeksi
 RESULT_QUESTIONS = [
     {"n": 1, "topic": "Sanoq sistemalari", "level": "Oson", "q": "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.",
@@ -282,10 +278,6 @@ MANDATORY_SCHEDULE = [
 # Namunada ?oylik=1: oylik test vaqti kelgan va boshlab qo'yilgan (yakunlanmagan majburiy test)
 UNFINISHED_MONTHLY = {"key": "oylik-noyabr", "type": "monthly", "name": "Oylik test: noyabr", "note": "12 / 30 savol · javoblar saqlangan", "pct": 40}
 
-UNFINISHED_TESTS = [
-    {"key": "xatolar-1", "type": "errors", "name": "Xatolar ustida ishlash", "note": "6 / 15 savol · javoblar saqlangan", "pct": 40},
-    {"key": "ixtiyoriy-1", "type": "optional", "name": "Ixtiyoriy test: Shart operatorlari", "note": "4 / 10 savol · javoblar saqlangan", "pct": 40},
-]
 DECISION = {"pass": (_l("O‘tdi"), "green"), "warn": (_l("Tavsiya bilan"), "yellow"), "fail": (_l("Qaytarildi"), "red")}
 # Test turlari haqida qisqa ma'lumot (Natijalarim va Testlar sahifalarida)
 TEST_TYPE_INFO = [
@@ -418,15 +410,6 @@ DISCUSSION = [
     ("Dilshod Karimov", "Bugun, 10:45", "Savol shartidagi so‘z biroz chalg‘ituvchi edi, lekin hisob-kitob qoidasi to‘g‘ri."),
     ("Nodira Aliyeva", "Kecha, 16:20", "Mening variantimda javoblar tartibi boshqacha edi, 45 javobi B variantda edi."),
     ("Javohir Toshmatov", "14-noyabr", "Ekspert tushuntirishi aniq bo‘ldi, rahmat."),
-]
-
-OPTIONAL_TOPICS = [
-    ("Python asoslari: sintaksis va o‘zgaruvchilar", 45, "done", True),
-    ("Shart operatorlari: if, elif, else", 32, "done", True),
-    ("Takrorlanish operatorlari: for va while", 38, "done", True),
-    ("Funksiyalar va modullar", 28, "done", True),
-    ("Ikkilik va o‘nlik sanoq sistemalari", 20, "solid", True),
-    ("Ma’lumotlar bazasi: relyatsion model", 15, "relearn", False),
 ]
 
 # --- Ekspert ---

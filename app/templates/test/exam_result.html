@@ -17,8 +17,8 @@
     {{ ring(pct, 148, "var(--green)" if pct >= solid_min else ("var(--blue)" if pct >= pass_min else "var(--red)"), _("natija")) }}
     <div class="stack stack-sm">
       <h1>{{ correct }} / {{ total }} {{ _("ball") }}</h1>
-      <p class="lead">{{ _("35 ta savoldan") }} {{ correct }} {{ _("tasiga to‘g‘ri javob berdingiz.") }}
-        {{ total - correct - (questions|selectattr("mine", "none")|list|length) }} {{ _("ta xato,") }} {{ questions|selectattr("mine", "none")|list|length }} {{ _("ta javobsiz.") }}</p>
+      <p class="lead">{{ _("%(t)s ta savoldan %(c)s tasiga to‘g‘ri javob berdingiz.", t=total, c=correct) }}
+        {{ _("%(x)s ta xato, %(b)s ta javobsiz.", x=total - correct - blank, b=blank) }}</p>
     </div>
   </section>
 
@@ -57,31 +57,7 @@
         <button type="button" :class="f === 'bad' && 'active'" @click="f = 'bad'">{{ _("Xato va javobsiz") }}</button>
       </div>
     </div>
-    <ol class="list-reset stack review-list">
-      {% for r in questions %}
-      {% set ok = r.mine == r.right %}
-      <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else 'is-bad' }}" {% if ok %}x-show="f === 'all'"{% endif %}>
-        <div class="row between wrap">
-          <span class="small muted">{{ r.n }}{{ _("-savol") }} · {{ r.topic }}</span>
-          {% if r.mine is none %}{{ badge(_("Javobsiz"), "gray") }}{% elif ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}{% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}
-        </div>
-        <p class="strong">{{ r.q }}</p>
-        {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
-        {% if r.image %}<figure class="q-figure"><img src="{{ r.image.src }}" alt="{{ r.image.alt }}" loading="lazy"></figure>{% endif %}
-        <ul class="list-reset ans-list">
-          {% for o in r.options %}
-          {% set is_right = loop.index0 == r.right %}{% set is_mine = loop.index0 == r.mine %}
-          <li class="ans {{ 'ans-right' if is_right }} {{ 'ans-wrong' if is_mine and not is_right }}">
-            <span class="ans-key">{{ "ABCD"[loop.index0] }}</span><span class="grow">{{ o }}</span>
-            {% if is_mine and not is_right %}<span class="ans-tag">{{ icon("x", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
-            {% elif is_right and is_mine %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
-            {% elif is_right %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("To‘g‘ri javob") }}</span>{% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-      </li>
-      {% endfor %}
-    </ol>
+    {% with review_filter = "f" %}{% include "partials/answer_review.html" %}{% endwith %}
   </section>
 </div>
 {% endblock %}
@@ -94,3 +70,5 @@
   </div>
 </footer>
 {% endblock %}
+
+{% block overlay %}{% include "partials/objection_sheet.html" %}{% endblock %}

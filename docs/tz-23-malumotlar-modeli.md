@@ -56,6 +56,11 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   - Har bir kichik mavzuda avval ko'rilmagan savollar tasodifiy tartibda olinadi.
   - Ular tugasa, eng oldin ko'rilgan savollar qaytariladi. Nechtasi takrorlangani
     `settings_snapshot.repeated` ga yoziladi: bu kichik mavzuga yangi savol kerakligini ko'rsatadi.
+- **Test turlari.** `test_attempts.kind`: diagnostic, lesson, topic, daily, interim, weekly, monthly, optional, final, errors,
+  exam. Dars testi `subtopic_id` ga bog'lanadi. Bosqichli testda `stage` — joriy bosqich, bosqichlar chegarasi va o'tmagan
+  mavzular `settings_snapshot` da (`stages`, `failed_topics`, `skipped`).
+- **Vaqt.** `deadline_at` ma'lumot uchun: mashq testlarini to'xtatib turish mumkin, shuning uchun server kech kelgan javobni
+  rad etmaydi; vaqtni pleyer hisoblaydi va tugaganda testni o'zi yakunlaydi.
 - **Oflayn sinxronlash.** `test_attempts.client_uuid`: IndexedDB'dan qayta yuborilgan javoblar ikki marta yozilmaydi.
 - **Attestatsiya sanasi** `users.exam_date`da, uni admin kiritadi.
 - **Vektor o'lchami** 768 (Gemini `text-embedding-004`), `app/models/rag.py`dagi `EMBED_DIM`.

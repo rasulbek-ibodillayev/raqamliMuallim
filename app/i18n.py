@@ -13,7 +13,7 @@ Yangi matn qo'shilganda:
 
 Eslatma: Jinja "newstyle" gettext har bir satrni %-formatlaydi, shuning uchun matndagi foiz belgisi `%%` deb yoziladi.
 """
-from flask import request, session
+from flask import has_request_context, request, session
 from flask_babel import Babel
 
 LANGS = {"uz": "O‘zbekcha", "ru": "Русский", "en": "English"}
@@ -22,6 +22,8 @@ DEFAULT = "uz"
 
 
 def select_locale() -> str:
+    if not has_request_context():          # buyruqlar, fon vazifalari
+        return DEFAULT
     lang = request.args.get("til")
     if lang in LANGS:
         session["til"] = lang

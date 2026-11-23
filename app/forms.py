@@ -13,6 +13,8 @@ from datetime import date
 from flask import flash, jsonify, redirect, render_template, request
 from flask_babel import gettext as _
 
+from .models.community import OBJ_REASONS as OBJECTION_REASONS  # noqa: F401 — ko‘rinishlar shu yerdan oladi
+
 PHONE_RE = re.compile(r"^\+?998\d{9}$")
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$")
 NAME_RE = re.compile(r"^[A-Za-zА-Яа-яЁёЎўҚқҒғҲҳ‘’ʻʼ'`\- ]{2,80}$")
@@ -20,8 +22,6 @@ NAME_RE = re.compile(r"^[A-Za-zА-Яа-яЁёЎўҚқҒғҲҳ‘’ʻʼ'`\- ]{2,
 REGIONS = ["Toshkent shahri", "Toshkent viloyati", "Andijon viloyati", "Buxoro viloyati", "Farg‘ona viloyati",
            "Jizzax viloyati", "Xorazm viloyati", "Namangan viloyati", "Navoiy viloyati", "Qashqadaryo viloyati",
            "Samarqand viloyati", "Sirdaryo viloyati", "Surxondaryo viloyati", "Qoraqalpog‘iston Respublikasi"]
-
-OBJECTION_REASONS = ["wrong_key", "also_correct", "unclear", "media", "other"]
 
 
 def wants_json() -> bool:

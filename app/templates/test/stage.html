@@ -1,6 +1,7 @@
 {% extends "layouts/focus.html" %}
-{% block title %}{{ _("1-bosqichdan o‘tdingiz") }}{% endblock %}
-{# «Bosqichlar orasi» faqat bosqichli testlarda: diagnostika, oraliq sinov, haftalik, ixtiyoriy, oylik test, yakuniy diagnostika #}
+{% block title %}{{ _("%(n)s-bosqich yakunlandi", n=done) }}{% endblock %}
+{# «Bosqichlar orasi» faqat bosqichli testlarda: diagnostika, oraliq sinov, haftalik, ixtiyoriy, oylik test, yakuniy diagnostika.
+   Mavzu bo'yicha: < 70% — keyingi bosqichga o'tmaydi; 70–89% — o'tadi, darslarini takrorlash tavsiya etiladi; ≥ 90% — tavsiyasiz. #}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.tests') }}" aria-label="{{ _('Chiqish') }}">{{ icon("x") }}</a>
 <div class="grow strong small">{{ tname }}</div>
@@ -8,18 +9,22 @@
 {% block content %}
 <div class="stack stack-xl center u-ai-center u-pt-24">
   <div class="g-6 row">
-    <span class="badge badge-green">{{ icon("check", "ico-sm") }}{{ _("Oson") }}</span>
-    <span class="faint">—</span><span class="badge badge-blue">{{ _("O‘rta") }}</span>
-    <span class="faint">—</span><span class="badge badge-gray">{{ _("Qiyin") }}</span>
+    {% for l in levels %}
+    {% if not loop.first %}<span class="faint">—</span>{% endif %}
+    <span class="badge badge-{{ 'green' if loop.index < stage else ('blue' if loop.index == stage else 'gray') }}">{% if loop.index < stage %}{{ icon("check", "ico-sm") }}{% endif %}{{ l }}</span>
+    {% endfor %}
   </div>
-  {{ ring(90, 148, "var(--green)", "natija") }}
+  {{ ring(pct, 148, "var(--green)" if pct >= 90 else ("var(--blue)" if pct >= pass_min else "var(--red)"), _("natija")) }}
   <div class="stack stack-sm">
-    <h1>{{ _("1-bosqichdan o‘tdingiz") }}</h1>
-    <p class="lead">{{ _("O‘tish uchun 90%% kerak edi.") }}</p>
+    <h1>{{ _("%(n)s-bosqich yakunlandi", n=done) }}</h1>
+    <p class="lead">{% if advice.relearn %}{{ _("%(p)s%% dan past chiqqan mavzular keyingi bosqichga o‘tmaydi.", p=pass_min) }}
+      {% elif advice.lessons %}{{ _("Barcha mavzular keyingi bosqichga o‘tdi, ba’zi darslarni takrorlash tavsiya etiladi.") }}
+      {% else %}{{ _("Barcha mavzular keyingi bosqichga o‘tdi.") }}{% endif %}</p>
   </div>
+  {% include "partials/stage_advice.html" %}
   <div class="card card-pad stack stack-sm u-ta-left u-w-100p">
-    <div class="row row-sm strong">{{ icon("info", "ico-sm") }}{{ _("Keyingi bosqich") }}</div>
-    <p class="small muted">{{ _("10 ta o‘rta darajadagi savol, 15 daqiqa. Savollar biroz murakkabroq bo‘ladi, shoshilmang.") }}</p>
+    <div class="row row-sm strong">{{ icon("info", "ico-sm") }}{{ _("Keyingi bosqich") }}: {{ levels[stage - 1] }}</div>
+    <p class="small muted">{{ _("%(n)s ta savol, %(m)s daqiqa. Savollar biroz murakkabroq bo‘ladi, shoshilmang.", n=n, m=minutes) }}</p>
   </div>
 </div>
 {% endblock %}
@@ -27,7 +32,7 @@
 <footer class="focus-foot">
   <div class="focus-foot-inner">
     <a class="btn btn-outline" href="{{ url_for('user.tests') }}">{{ _("Keyinroq") }}</a>
-    <a class="btn btn-primary grow" href="{{ url_for('test.question', tur='kop', turi=slug) }}">{{ _("2-bosqichni boshlash") }}</a>
+    <a class="btn btn-primary grow" href="{{ next_url }}">{{ _("%(n)s-bosqichni boshlash", n=stage) }}</a>
   </div>
 </footer>
 {% endblock %}

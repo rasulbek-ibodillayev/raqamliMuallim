@@ -1,0 +1,15 @@
+{# Bosqichli test xulosasi: advice — services/attempts.advice. < 70% mavzular qayta o'zlashtiriladi, 70–89% — darslarini
+   takrorlash tavsiya etiladi, ≥ 90% — hech narsa ko'rsatilmaydi. #}
+{% if advice and (advice.relearn or advice.lessons) %}
+<section class="card u-ta-left u-w-100p">
+  <div class="card-head"><span class="strong">{{ _("Tavsiya") }}</span></div>
+  <div class="list">
+    {% for t in advice.relearn %}
+    <div class="list-item"><span class="t-red">{{ icon("x-circle") }}</span><div class="grow"><div>{{ t }}</div><div class="sub">{{ _("70%% dan past — mavzuni qayta o‘zlashtirish kerak") }}</div></div></div>
+    {% endfor %}
+    {% for l in advice.lessons %}
+    <div class="list-item"><span class="t-yellow">{{ icon("refresh") }}</span><div class="grow"><div>{{ l.name }}</div><div class="sub">{{ l.topic }} · {{ _("darsni qayta o‘zlashtirish tavsiya etiladi") }}</div></div><span class="num small t-yellow">{{ l.pct }}%</span></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

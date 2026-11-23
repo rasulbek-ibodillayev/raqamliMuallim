@@ -13,10 +13,6 @@
   <p class="muted u-maxw-340">{{ _("Birinchi testni topshirganingizdan keyin natijalar shu yerda ko‘rinadi.") }}</p>
   <a class="btn btn-primary mt-16" href="{{ url_for('user.plan') }}">{{ _("O‘quv rejaga o‘tish") }}</a>
 </div>
-<div class="card list mt-24" aria-hidden="true">
-  {% for i in range(3) %}<div class="list-item"><div class="skeleton u-w-36 u-h-36"></div><div class="grow stack stack-sm"><div class="skeleton u-h-12 u-w-60p"></div><div class="skeleton u-h-10 u-w-35p"></div></div></div>{% endfor %}
-</div>
-<p class="xs faint center mt-8">{{ _("Yuklanish holati namunasi") }}</p>
 {% else %}
 {% set present = results | map(attribute="type") | unique | list %}
 <div class="stack stack-lg" x-data="{ f: '' }">

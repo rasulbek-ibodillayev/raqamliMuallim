@@ -42,9 +42,9 @@
     <div class="lesson-test {{ 'is-done' if pct is not none and pct >= 70 else 'is-current' }} no-print">
       <span class="list-ico">{{ icon("clipboard", "ico-sm") }}</span>
       <div class="grow"><div class="small strong">{{ _("Dars testi") }} · 3 {{ _("savol") }}</div>
-        <div class="xs muted">{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
+        <div class="xs muted">{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif pct is not none %}{{ _("Oxirgi eng yaxshi natija: %(p)s%%. Darsni takrorlab, qayta topshiring", p=pct) }}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
       {% if pct is not none and pct >= 70 %}<span class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}">{{ pct }}%</span>
-      {% else %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', soni=3) }}">{{ _("Boshlash") }}</a>{% endif %}
+      {% else %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', dars=p.id) }}">{{ _("Boshlash") if pct is none else _("Qayta topshirish") }}</a>{% endif %}
     </div>
   </section>
   {% endfor %}
@@ -71,7 +71,7 @@
 {# Mavzu testi: barcha dars testlari topshirilgach va mavzu birinchi marta oxirigacha ko'rib chiqilgach #}
 <footer class="focus-foot" data-end-gate>
   <div class="focus-foot-inner">
-    <a class="btn btn-primary grow" href="{{ url_for('test.question', turi='mavzu', soni=2 * lesson.parts|length) }}">{{ _("Mavzu testini boshlash") }} · {{ 2 * lesson.parts|length }} {{ _("savol") }}</a>
+    <a class="btn btn-primary grow" href="{{ url_for('test.question', turi='mavzu', mavzu=lesson.id) }}">{{ _("Mavzu testini boshlash") }} · {{ 2 * lesson.parts|length }} {{ _("savol") }}</a>
   </div>
 </footer>
 {% endif %}

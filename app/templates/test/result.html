@@ -1,50 +1,56 @@
 {% extends "layouts/focus.html" %}
 {% block title %}{{ _("Natija") }}{% endblock %}
+{# Kontekst: r (pct, decision, kind, name, topic_id, total, retry), by_sub — [(kichik mavzu, foiz, ball, soni)], questions #}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.home') }}" aria-label="{{ _('Bosh sahifa') }}">{{ icon("x") }}</a>
-<div class="grow strong">{{ _("Natija") }}</div>
+<div class="grow strong truncate">{{ r.name }}</div>
 {% endblock %}
 
 {% block content %}
-{% set pct = 62 if failed else 78 %}
-<div class="stack stack-xl" x-data>
+{% set failed = r.decision == "fail" %}
+{% set solid = r.decision == "pass" %}
+<div class="stack stack-xl">
   <section class="items-center stack stack-lg center">
-    {{ ring(pct, 148, "var(--red)" if failed else "var(--blue)", _("umumiy ball")) }}
+    {{ ring(r.pct, 148, "var(--red)" if failed else ("var(--green)" if solid else "var(--blue)"), _("umumiy ball")) }}
     <div class="stack stack-sm">
-      {% if failed %}
-      <h1>{{ _("Bu mavzuni yana bir bor o‘rganamiz") }}</h1>
-      <p class="lead">{{ _("Keyingi mavzuga o‘tish uchun kamida 70%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.") }}</p>
+      {% if r.kind == "lesson" %}
+      <h1>{{ _("Bu darsni yana bir bor o‘rganamiz") if failed else _("Keyingi darsga o‘tishingiz mumkin") }}</h1>
+      <p class="lead">{% if failed %}{{ _("Keyingi darsga o‘tish uchun kamida 70%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.") }}
+        {% elif solid %}{{ _("Ajoyib natija: dars mustahkam o‘zlashtirildi.") }}
+        {% else %}{{ _("Natija 70–89%% oralig‘ida, shuning uchun darsni keyinroq takrorlashni tavsiya qilamiz.") }}{% endif %}</p>
+      {% elif r.kind == "topic" %}
+      <h1>{{ _("Bu mavzuni yana bir bor o‘rganamiz") if failed else _("Keyingi mavzuga o‘tishingiz mumkin") }}</h1>
+      <p class="lead">{% if failed %}{{ _("Keyingi mavzuga o‘tish uchun kamida 70%% kerak edi. Xato qilgan qismlaringizdan boshlaymiz.") }}
+        {% elif solid %}{{ _("Ajoyib natija: mavzu mustahkam o‘zlashtirildi.") }}
+        {% else %}{{ _("Natija 70–89%% oralig‘ida, shuning uchun mavzuni keyinroq takrorlashni tavsiya qilamiz.") }}{% endif %}</p>
       {% else %}
-      <h1>{{ _("Keyingi mavzuga o‘tishingiz mumkin") }}</h1>
-      <p class="lead">{{ _("Natija 70–89%% oralig‘ida, shuning uchun mavzuni keyinroq takrorlashni tavsiya qilamiz.") }}</p>
+      <h1>{{ _("Test yakunlandi") }}</h1>
+      <p class="lead">{% if failed %}{{ _("Natija 70%% dan past. Quyidagi xatolarni ko‘rib chiqing.") }}
+        {% elif solid %}{{ _("Ajoyib natija!") }}{% else %}{{ _("Yaxshi natija. Xato qilgan qismlaringizni takrorlashni tavsiya qilamiz.") }}{% endif %}</p>
       {% endif %}
     </div>
   </section>
 
-  {% if failed %}
-  <section class="card card-pad stack stack-sm">
-    <span class="eyebrow">{{ _("Xato qilingan qismlar") }}</span>
-    <div class="chips"><span class="chip">{{ _("Kiritish va chiqarish qurilmalari") }}</span><span class="chip">{{ _("Tarmoq protokollari") }}</span></div>
-  </section>
-  {% else %}
   <section class="card">
-    <div class="card-head"><span class="strong">{{ _("Mavzular bo‘yicha") }}</span></div>
+    <div class="card-head"><span class="strong">{{ _("Kichik mavzular bo‘yicha") }}</span></div>
     <div class="list">
-      {% for n, p in [("Shart operatorlari", 78), ("Sanoq sistemalari", 85), ("Kompyuter qurilmalari", 65)] %}
-      <div class="list-item"><div class="grow stack stack-sm"><div class="row between"><span>{{ n }}</span><span class="num small">{{ p }}%</span></div>{{ progress(p, "green" if p >= 70 else "red", "thin") }}</div></div>
+      {% for name, p, ok, n in by_sub %}
+      <div class="list-item"><div class="grow stack stack-sm"><div class="row between"><span>{{ name }}</span><span class="num small">{{ p }}%</span></div>{{ progress(p, "green" if p >= 90 else ("yellow" if p >= 70 else "red"), "thin") }}</div></div>
       {% endfor %}
     </div>
   </section>
-  {% endif %}
+
+  {% include "partials/stage_advice.html" %}
 
   {# Har bir savol: xato javob — qizil, to'g'ri javob — yashil (barcha test turlarida bir xil) #}
   <section class="stack">
     <div class="row between wrap"><h2 class="eyebrow">{{ _("Savollar va javoblar") }}</h2>
       <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("xato javobingiz") }} <span class="dot dot-green"></span>{{ _("to‘g‘ri javob") }}</span></div>
+    {% if r.total > questions|length %}<p class="xs muted">{{ _("Keyingi bosqichga o‘tmagan mavzularning %(n)s ta savoli berilmadi va 0 ball hisoblandi.", n=r.total - questions|length) }}</p>{% endif %}
     {% include "partials/answer_review.html" %}
     <div class="row wrap row-sm">
       <a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor', q='Xatolarimni tushuntir') }}">{{ icon("sparkle", "ico-sm") }}{{ _("Xatolarimni tushuntir") }}</a>
-      <button class="btn btn-ghost btn-sm" type="button" @click="$dispatch('objection', { id: 'Q-4', text: {{ questions[3].q|tojson|forceescape }} })">{{ icon("flag", "ico-sm") }}{{ _("E’tiroz bildirish") }}</button>
+      <a class="btn btn-ghost btn-sm" href="{{ r.retry }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta topshirish") }}</a>
     </div>
   </section>
 </div>
@@ -54,46 +60,17 @@
 <footer class="focus-foot">
   <div class="focus-foot-inner">
     <a class="btn btn-outline" href="{{ url_for('user.home') }}">{{ _("Bosh sahifa") }}</a>
-    {% if failed %}
-    <a class="btn btn-primary grow" href="{{ url_for('user.lesson', holat='qayta') }}">{{ _("Darsga qaytish") }}</a>
-    {% else %}
+    {% if r.kind == "lesson" and r.topic_id %}
+    <a class="btn btn-primary grow" href="{{ url_for('user.lesson_topic', topic_id=r.topic_id) }}">{{ _("Darsga qaytish") if failed else _("Keyingi dars") }}{{ icon("arrow-right") }}</a>
+    {% elif r.kind == "topic" and failed %}
+    <a class="btn btn-primary grow" href="{{ url_for('user.topic', topic_id=r.topic_id) if r.topic_id else url_for('user.lesson', holat='qayta') }}">{{ _("Darsga qaytish") }}</a>
+    {% elif r.kind == "topic" %}
     <a class="btn btn-primary grow" href="{{ url_for('user.plan') }}">{{ _("Keyingi mavzu") }}{{ icon("arrow-right") }}</a>
+    {% else %}
+    <a class="btn btn-primary grow" href="{{ url_for('user.results') }}">{{ _("Natijalarim") }}{{ icon("arrow-right") }}</a>
     {% endif %}
   </div>
 </footer>
 {% endblock %}
 
-{% block overlay %}
-<div x-data="{ open: false, sent: false, qid: '', qtext: '' }" @objection.window="open = true; sent = false; qid = $event.detail.id; qtext = $event.detail.text"
-     @rm-sent="sent = true" @keydown.escape.window="open = false">
-  <div class="sheet-backdrop" x-show="open" x-cloak @click.self="open = false">
-    <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="obj-title" action="{{ url_for('user.objection_create') }}" method="post" novalidate
-          x-data="rmForm({}, function (j, f) { f.reset(); f.dispatchEvent(new CustomEvent('rm-sent', { bubbles: true })); return false; })" x-init="initForm()"
-          data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
-      {% include "partials/form_open.html" %}
-      <input type="hidden" name="question" :value="qid">
-      <div class="sheet-grip"></div>
-      <template x-if="!sent"><div class="stack stack-lg">
-        <div class="row between"><h2 id="obj-title">{{ _("E’tiroz bildirish") }}</h2><button class="icon-btn" type="button" @click="open = false" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
-        <p class="small muted" x-text="'«' + qtext + '» savoli bo‘yicha'"></p>
-        <fieldset class="fieldset-reset options">
-          <legend class="mb-10 label">{{ _("Sabab") }}</legend>
-          {% for v, s in [("wrong_key", "To‘g‘ri javob noto‘g‘ri ko‘rsatilgan"), ("also_correct", "Mening javobim ham to‘g‘ri"), ("unclear", "Savol tushunarsiz"), ("other", "Boshqa")] %}
-          <label class="option option-sm"><input type="radio" name="reason" value="{{ v }}" {{ 'checked' if loop.first }} @change="clear('reason')"><span class="key key-radio"></span>{{ s }}</label>
-          {% endfor %}
-          {{ field_error("reason", errors) }}
-        </fieldset>
-        <div class="field"><label class="label" for="obj-note">{{ _("Izoh (ixtiyoriy)") }}</label><textarea class="textarea" id="obj-note" name="note" maxlength="1000" placeholder="{{ _('Nima uchun shunday deb hisoblaysiz?') }}" aria-describedby="note-err" :aria-invalid="!!err('note')" @input="clear('note')"></textarea>{{ field_error("note", errors) }}</div>
-        <label class="check"><input type="checkbox" name="urgent" value="1"><span>{{ _("Shoshilinch: xato yaqqol ko‘rinib turibdi") }}</span></label>
-        <button class="btn btn-primary btn-block" type="submit" :disabled="busy">{{ _("Yuborish") }}</button>
-      </div></template>
-      <template x-if="sent"><div class="empty u-p-24-0">
-        <span class="empty-ico u-bg-8d2ee u-c-4f5ac">{{ icon("check", "ico-lg") }}</span>
-        <h2>{{ _("E’tirozingiz qabul qilindi") }}</h2>
-        <p class="muted small">{{ _("Ekspert xulosasi «E’tirozlarim» bo‘limida ko‘rinadi.") }}</p>
-        <button class="btn btn-outline mt-16" type="button" @click="open = false">{{ _("Yopish") }}</button>
-      </div></template>
-    </form>
-  </div>
-</div>
-{% endblock %}
+{% block overlay %}{% include "partials/objection_sheet.html" %}{% endblock %}

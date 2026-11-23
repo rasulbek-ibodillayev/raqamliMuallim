@@ -6,7 +6,9 @@ from sqlalchemy import func, select
 
 from ..extensions import db
 from ..models import (AttemptItem, ContentBlock, Question, Section, Subtopic, TestAttempt, Topic, UserTopicProgress)
+from .timefmt import when
 
+SOLID_MIN = 90
 PASS_PCT = 70   # kichik mavzu «tayyor» chegarasi (mavzu ochilish chegarasi bilan bir xil, TZ 7)
 
 
@@ -21,17 +23,98 @@ def topic_titles() -> list[dict]:
     return [{"id": tid, "name": name, "section": sec} for tid, name, sec in rows]
 
 
+def lesson_scores(user_id: int, topic_id: int) -> dict[int, int]:
+    """{kichik mavzu: dars testining eng yaxshi foizi}. Keyingi dars shunga qarab ochiladi; qayta o'zlashtirib
+    ≥ 90% qilinsa, dars tavsiya ro'yxatidan chiqadi."""
+    rows = db.session.execute(
+        select(TestAttempt.subtopic_id, func.max(TestAttempt.score_pct))
+        .where(TestAttempt.user_id == user_id, TestAttempt.topic_id == topic_id, TestAttempt.kind == "lesson",
+               TestAttempt.status == "submitted", TestAttempt.subtopic_id.is_not(None))
+        .group_by(TestAttempt.subtopic_id)).all()
+    return {sid: int(pct) for sid, pct in rows}
+
+
+def recommended_lessons(user_id: int) -> list[dict]:
+    """Tavsiya bilan (70–89%) o'tilgan darslar — bosh sahifa va «Xatolar analitikasi»da:
+    - dars testining eng yaxshi natijasi 70–89%;
+    - bosqichli testda mavzusi 70–89% bilan o'tgan, o'zi 90% ga yetmagan darslar (ixtiyoriy testdan tashqari —
+      u o'quv rejaga ta'sir qilmaydi).
+    Keyin dars testi ≥ 90% topshirilsa, dars ro'yxatdan chiqadi. Yangisi birinchi."""
+    rows = db.session.execute(
+        select(TestAttempt.id, TestAttempt.kind, TestAttempt.subtopic_id, TestAttempt.score_pct, TestAttempt.finished_at,
+               TestAttempt.settings_snapshot["recommended"])
+        .where(TestAttempt.user_id == user_id, TestAttempt.status == "submitted", TestAttempt.kind != "optional")
+        .order_by(TestAttempt.finished_at, TestAttempt.id)).all()
+    found: dict[int, dict] = {}
+    best: dict[int, float] = {}
+    for aid, kind, sid, pct, at_, rec in rows:
+        if kind == "lesson" and sid:
+            if pct >= SOLID_MIN:
+                found.pop(sid, None)
+            elif pct >= PASS_PCT and pct >= best.get(sid, 0):
+                found[sid] = {"pct": int(pct), "rid": aid, "at": at_}
+            best[sid] = max(best.get(sid, 0), pct)
+        for s, p in (rec or {}).items():
+            found[int(s)] = {"pct": p, "rid": aid, "at": at_}
+    if not found:
+        return []
+    info = db.session.execute(
+        select(Subtopic.id, Subtopic.title, Topic.id, Topic.title, select(ContentBlock.id).where(
+            ContentBlock.subtopic_id == Subtopic.id, ContentBlock.is_active.is_(True)).exists())
+        .join(Topic, Topic.id == Subtopic.topic_id).where(Subtopic.id.in_(found), Topic.is_published.is_(True))).all()
+    out = [{**found[sid], "sid": sid, "lesson": name, "topic_id": tid, "topic": topic, "has_lesson": blocks,
+            "when": when(found[sid]["at"])} for sid, name, tid, topic, blocks in info]
+    return sorted(out, key=lambda r: r["at"], reverse=True)
+
+
 def subtopic_scores(user_id: int, topic_id: int) -> dict[int, int]:
-    """Foydalanuvchining shu mavzu kichik mavzularidagi o'rtacha bali (0–100), faqat baholangan javoblar bo'yicha."""
+    """Foydalanuvchining shu mavzu kichik mavzularidagi o'rtacha bali (0–100): yakunlangan testlar bo'yicha,
+    ixtiyoriy testlarsiz (ular o'zlashtirish foiziga ta'sir qilmaydi)."""
     rows = db.session.execute(
         select(Question.subtopic_id, func.avg(AttemptItem.score))
         .join(AttemptItem, AttemptItem.question_id == Question.id)
         .join(TestAttempt, TestAttempt.id == AttemptItem.attempt_id)
         .join(Subtopic, Subtopic.id == Question.subtopic_id)
-        .where(TestAttempt.user_id == user_id, Subtopic.topic_id == topic_id, AttemptItem.score.is_not(None))
+        .where(TestAttempt.user_id == user_id, Subtopic.topic_id == topic_id, AttemptItem.score.is_not(None),
+               TestAttempt.status == "submitted", TestAttempt.kind != "optional")
         .group_by(Question.subtopic_id)
     ).all()
     return {sid: round(avg) for sid, avg in rows}
+
+
+def optional_topics(user_id: int) -> list[dict]:
+    """Ixtiyoriy test uchun mavzular: tasdiqlangan savollari bor, nashr qilingan; o'zlashtirilganlari belgilangan.
+    Hali hech biri o'zlashtirilmagan bo'lsa — hammasi belgilangan."""
+    rows = db.session.execute(
+        select(Topic.id, Topic.title, func.count(Question.id), func.coalesce(UserTopicProgress.status, "none"))
+        .join(Section, Section.id == Topic.section_id)
+        .join(Subtopic, Subtopic.topic_id == Topic.id).join(Question, Question.subtopic_id == Subtopic.id)
+        .outerjoin(UserTopicProgress, (UserTopicProgress.topic_id == Topic.id) & (UserTopicProgress.user_id == user_id))
+        .where(Topic.is_published.is_(True), Question.status == "approved", Subtopic.weight > 0)
+        .group_by(Topic.id, Section.id, UserTopicProgress.status)
+        .order_by(Section.position, Section.id, Topic.position, Topic.id)).all()
+    any_done = any(st in ("done", "solid") for *_x, st in rows)
+    return [{"id": tid, "name": name, "n": n, "status": st, "on": st in ("done", "solid") or not any_done}
+            for tid, name, n, st in rows]
+
+
+def attempt_by_section(a: TestAttempt) -> list[dict]:
+    """Urinish natijasi bo'limlar bo'yicha: [{"name", "pct", "topics", "known"}] (known — ≥ 90% chiqqan mavzular)."""
+    rows = db.session.execute(
+        select(Section.id, Section.title, Topic.id, func.avg(func.coalesce(AttemptItem.score, 0)), func.count())
+        .join(Question, Question.id == AttemptItem.question_id).join(Subtopic, Subtopic.id == Question.subtopic_id)
+        .join(Topic, Topic.id == Subtopic.topic_id).join(Section, Section.id == Topic.section_id)
+        .where(AttemptItem.attempt_id == a.id).group_by(Section.id, Topic.id)
+        .order_by(Section.position, Section.id, Topic.position)).all()
+    out: dict[int, dict] = {}
+    for sid, name, _tid, avg, n in rows:
+        s = out.setdefault(sid, {"name": name, "sum": 0, "n": 0, "topics": 0, "known": 0})
+        s["sum"] += float(avg) * n
+        s["n"] += n
+        s["topics"] += 1
+        s["known"] += float(avg) >= SOLID_MIN
+    return [{"name": s["name"], "pct": round(s["sum"] / s["n"]), "topics": s["topics"], "known": s["known"]}
+            for s in out.values()]
 
 
 def topic_view(topic_id: int, user_id: int) -> dict | None:

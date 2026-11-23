@@ -5,7 +5,16 @@
    Ko'rib chiqilgani (qabul/rad) o'zgartirilmaydi — server ham tekshiradi. #}
 {% set reasons = [("wrong_key", _("To‘g‘ri javob noto‘g‘ri ko‘rsatilgan")), ("also_correct", _("Mening javobim ham to‘g‘ri")), ("unclear", _("Savol tushunarsiz")), ("media", _("Rasm yoki jadvalda xato")), ("other", _("Boshqa"))] %}
 {% call page_head(_("E’tirozlarim"), _("Ekspert har bir e’tirozni 3 ish kuni ichida ko‘rib chiqadi. Ko‘rib chiqilmaguncha uni tahrirlash yoki o‘chirish mumkin.")) %}{% endcall %}
+{# JS'siz yuborilgan forma xatolari #}
+{% for e in errors.values() %}<p class="field-error" role="alert">{{ e }}</p>{% endfor %}
 <div class="stack" x-data="{ gone: [] }">
+  {% if not items %}
+  <div class="card empty">
+    <span class="empty-ico">{{ icon("flag", "ico-lg") }}</span>
+    <h2>{{ _("Hali e’tiroz yo‘q") }}</h2>
+    <p class="muted u-maxw-340">{{ _("Test davomida yoki natija sahifasida savol ostidagi «E’tiroz bildirish» tugmasini bosing.") }}</p>
+  </div>
+  {% endif %}
   {% for o in items %}
   {% set label, color = state[o.state] %}
   <article class="card card-pad stack stack-sm" x-show="!gone.includes({{ o.id }})" x-transition.opacity

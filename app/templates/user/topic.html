@@ -44,7 +44,7 @@
     {% else %}
     <span class="btn btn-outline btn-block" aria-disabled="true">{{ icon("book") }}{{ _("Dars tayyorlanmoqda") }}</span>
     {% endif %}
-    <a class="btn btn-outline btn-block" href="{{ url_for('test.question') }}">{{ icon("refresh") }}{{ _("Takrorlash testi") }}</a>
+    <a class="btn btn-outline btn-block" href="{{ url_for('test.question', turi='mavzu', mavzu=t.id) }}">{{ icon("refresh") }}{{ _("Takrorlash testi") }}</a>
   </div>
 </div>
 {% with fab_ctx = "app", fab_topic = t.name %}{% include "partials/study_fab.html" %}{% endwith %}

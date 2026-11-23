@@ -14,7 +14,8 @@ window.rmT = (function () {
     selection: "Belgilangan matn", toNote: "Eslatmaga saqlash", askAi: "AI’dan so‘rash",
     general: "Umumiy", today: "Bugun", noteSaved: "Eslatmalarga saqlandi",
     explain: "Tushuntirib bering: «{t}»", breakOver: "Tanaffus tugadi. Davom etamiz!",
-    copyManually: "Nusxalab oling:"
+    copyManually: "Nusxalab oling:",
+    unanswered: "{n} ta savolga javob berilmagan (0 ball hisoblanadi). Baribir yakunlaysizmi?"
   };
   var dict = null;
   return function (key, vars) {

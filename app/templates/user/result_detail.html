@@ -14,12 +14,15 @@
     </div>
   </section>
 
+  {% include "partials/stage_advice.html" %}
+
   <section class="stack">
     <div class="row between wrap">
       <h2 class="eyebrow">{{ _("Savollar va javoblar") }}</h2>
       <span class="xs muted row row-sm"><span class="dot dot-red"></span>{{ _("xato javobingiz") }} <span class="dot dot-green"></span>{{ _("to‘g‘ri javob") }}</span>
     </div>
-    <p class="xs muted">{{ _("Namunada savollardan bir qismi ko‘rsatilgan.") }}</p>
+    {% if sample %}<p class="xs muted">{{ _("Namunada savollardan bir qismi ko‘rsatilgan.") }}</p>
+    {% elif r.n > questions|length %}<p class="xs muted">{{ _("Keyingi bosqichga o‘tmagan mavzularning %(n)s ta savoli berilmadi va 0 ball hisoblandi.", n=r.n - questions|length) }}</p>{% endif %}
     {% include "partials/answer_review.html" %}
   </section>
 
@@ -27,13 +30,10 @@
     <div class="strong">{{ _("Testni qayta topshirish") }}</div>
     <p class="small muted">{{ _("Aynan shu savollar emas — shu turdagi va shu mavzulardan yangi savollar beriladi. Natija «Natijalarim» bo‘limiga yangi qator bo‘lib qo‘shiladi.") }}</p>
     <div class="row wrap">
-      {% if r.type == "exam" %}
-      <a class="btn btn-primary" href="{{ url_for('test.exam') }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta topshirish") }}</a>
-      {% else %}
-      <a class="btn btn-primary" href="{{ url_for('test.question', turi=slug, soni=r.n, qayta=r.id) }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta topshirish") }}</a>
-      {% endif %}
+      <a class="btn btn-primary" href="{{ retry }}">{{ icon("refresh", "ico-sm") }}{{ _("Qayta topshirish") }}</a>
       <a class="btn btn-ai" href="{{ url_for('user.tutor', q='Xatolarimni tushuntir: ' ~ r.name) }}">{{ icon("sparkle", "ico-sm") }}{{ _("Xatolarimni tushuntir") }}</a>
     </div>
   </section>
 </div>
+{% include "partials/objection_sheet.html" %}
 {% endblock %}
