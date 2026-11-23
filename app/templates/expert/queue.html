@@ -11,9 +11,9 @@
   {# Filtrlar serverda qo'llanadi (JS'siz ham ishlaydi); tanlov o'zgarsa forma avtomatik yuboriladi #}
   <form class="row wrap row-sm" action="{{ url_for('expert.queue') }}" method="get" @change="if ($event.target.name === 'mavzu') $el.dars.value = ''; $el.requestSubmit()">
     <div class="minw-220 input-group grow"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input" name="q" value="{{ f.q }}" placeholder="{{ _('Savol matni bo‘yicha qidirish') }}" aria-label="{{ _('Qidirish') }}"></div>
-    <select class="w-auto select" name="mavzu" aria-label="{{ _('Mavzu') }}"><option value="">{{ _("Barcha mavzular") }}</option>{% for t in content %}<option {{ 'selected' if f.mavzu == t.name }}>{{ t.name }}</option>{% endfor %}</select>
-    <select class="w-auto select" name="dars" aria-label="{{ _('Dars') }}" {{ 'disabled' if not lessons }}><option value="">{{ _("Barcha darslar") if lessons else _("Avval mavzuni tanlang") }}</option>{% for l in lessons or [] %}<option {{ 'selected' if f.dars == l.name }}>{{ l.name }}</option>{% endfor %}</select>
-    <select class="w-auto select" name="daraja" aria-label="{{ _('Daraja') }}"><option value="">{{ _("Barcha darajalar") }}</option>{% for l in levels %}<option {{ 'selected' if f.daraja == l }}>{{ l }}</option>{% endfor %}</select>
+    <select class="w-auto select" name="mavzu" aria-label="{{ _('Mavzu') }}"><option value="">{{ _("Barcha mavzular") }}</option>{% for t in content %}<option value="{{ t.id }}" {{ 'selected' if f.mavzu == t.id|string }}>{{ t.name }}</option>{% endfor %}</select>
+    <select class="w-auto select" name="dars" aria-label="{{ _('Dars') }}" {{ 'disabled' if not lessons }}><option value="">{{ _("Barcha darslar") if lessons else _("Avval mavzuni tanlang") }}</option>{% for l in lessons or [] %}<option value="{{ l.id }}" {{ 'selected' if f.dars == l.id|string }}>{{ l.name }}</option>{% endfor %}</select>
+    <select class="w-auto select" name="daraja" aria-label="{{ _('Daraja') }}"><option value="">{{ _("Barcha darajalar") }}</option>{% for l in levels %}<option value="{{ l }}" {{ 'selected' if f.daraja == l }}>{{ _(l) }}</option>{% endfor %}</select>
     <noscript><button class="btn btn-outline" type="submit">{{ _("Filtrlash") }}</button></noscript>
   </form>
   {% if f.q or f.mavzu or f.dars or f.daraja %}
@@ -26,16 +26,16 @@
     <form action="{{ url_for('expert.queue_decide', qid=q.id) }}" method="post" novalidate
           x-data="rmForm({}, function (j) { gone.push({{ q.id }}); rmToast(j.message); return false; })" x-init="initForm()"
           @submit.prevent="if ($event.submitter.value !== 'reject' || confirm({{ _('Savol rad etilib, o‘chirilsinmi?')|tojson|forceescape }})) submit($event)">
-      {{ csrf() }}<input type="hidden" name="type" value="{{ q.type }}">
+      {{ csrf() }}<input type="hidden" name="type" value="{{ q.kind }}">
       <div class="card-head">
         {# Savol qaysi mavzu va qaysi darsga tegishli — aniq ko'rsatiladi #}
         <div class="stack q-where">
           <div class="row row-sm wrap small">
             <span class="ai-mark u-w-20 u-h-20 u-r-6"><svg class="ico u-w-12 u-h-12"><use href="#i-sparkle"/></svg></span>
-            <span class="pk pk-topic">{{ icon("book", "ico-sm") }}{{ _("Mavzu") }}</span><b>{{ q.topic }}</b>
-            <span class="pk pk-lesson">{{ icon("note", "ico-sm") }}{{ _("Dars") }}</span><b>{{ q.lesson }}</b>
+            <span class="pk pk-topic">{{ icon("book", "ico-sm") }}{{ _("Mavzu") }}</span><b>{{ q.section }}</b>
+            <span class="pk pk-lesson">{{ icon("note", "ico-sm") }}{{ _("Dars") }}</span><b>{{ q.topic }}</b> <span class="muted">· {{ q.subtopic }}</span>
           </div>
-          <span class="xs muted">{{ _("AI yaratgan") }} · {{ q.created }} · {{ q.level }} · {{ kinds[q.type] }}</span>
+          <span class="xs muted">{{ _("AI yaratgan") }} · <span class="num">{{ q.created.strftime("%d.%m.%Y") }}</span> · {{ _(q.level) }} · {{ kinds[q.kind] }}</span>
         </div>
         <button class="btn btn-ghost btn-sm" type="button" @click="edit = !edit" :aria-pressed="edit">{{ icon("edit", "ico-sm") }}<span x-text="edit ? {{ _('Ko‘rish')|tojson|forceescape }} : {{ _('Tahrirlash')|tojson|forceescape }}">{{ _("Tahrirlash") }}</span></button>
       </div>
@@ -46,18 +46,19 @@
         <ul class="list-reset ans-list">
           <template x-for="(o, i) in opts" :key="i">
             <li class="ans" :class="right.includes(i) && 'ans-right'">
-              {% if q.type == "ochiq" %}
+              {% if q.kind in ("ochiq", "moslash") %}
               <span class="ans-key">{{ icon("check", "ico-sm") }}</span>
               {% else %}
               <label class="ans-key u-cur-pointer" :title="{{ _('To‘g‘ri javob')|tojson|forceescape }}">
-                <input class="sr-only" type="{{ 'checkbox' if q.type in ['kop', 'moslash'] else 'radio' }}" name="right" :value="i" :checked="right.includes(i)" :disabled="!edit"
-                       @change="{{ 'right = right.includes(i) ? right.filter(x => x !== i) : right.concat([i])' if q.type in ['kop', 'moslash'] else 'right = [i]' }}">
+                <input class="sr-only" type="{{ 'checkbox' if q.kind == 'kop' else 'radio' }}" name="right" :value="i" :checked="right.includes(i)" :disabled="!edit"
+                       @change="{{ 'right = right.includes(i) ? right.filter(x => x !== i) : right.concat([i])' if q.kind == 'kop' else 'right = [i]' }}">
                 <span x-text="'ABCDEF'[i]"></span>
               </label>
               {% endif %}
               <span class="grow" x-show="!edit" x-text="o"></span>
-              <input class="input grow u-minh-40" name="opt" x-show="edit" x-model="opts[i]" :aria-label="'Variant ' + 'ABCDEF'[i]">
-              {% if q.type == "ochiq" %}<input type="hidden" name="right" value="0">{% endif %}
+              {# Moslashtirish juftliklari navbatda o'zgarmaydi (faqat matn) — to'liq tahrir: savol muharririda #}
+              <input class="input grow u-minh-40" name="opt" x-show="edit" x-model="opts[i]" :aria-label="'Variant ' + 'ABCDEF'[i]" {{ 'readonly' if q.kind == 'moslash' }}>
+              {% if q.kind in ("ochiq", "moslash") %}<input type="hidden" name="right" value="0">{% endif %}
             </li>
           </template>
         </ul>

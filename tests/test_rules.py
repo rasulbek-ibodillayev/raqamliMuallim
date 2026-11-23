@@ -26,11 +26,21 @@ def test_unfinished_mandatory_test_blocks(as_role):
     assert "Majburiy test yakunlanmagan" not in as_role("user").get("/app/testlar").get_data(as_text=True)
 
 
-def test_queue_filters_by_topic_and_lesson(as_role):
+def test_queue_filters_by_topic_and_lesson(app, as_role):
+    # Namunaviy kontentda 5 ta AI savoli: 3 tasi «Axborot va kodlash» → «Sanoq sistemalari» darsida
+    from sqlalchemy import select
+
+    from app.extensions import db
+    from app.models import Section, Topic
+    with app.app_context():
+        sec = db.session.scalar(select(Section.id).where(Section.title == "Axborot va kodlash"))
+        top = db.session.scalar(select(Topic.id).where(Topic.title == "Sanoq sistemalari"))
     c = as_role("expert")
-    html = c.get("/ekspert/navbat?mavzu=Sanoq+sistemalari&dars=O‘n+oltilik").get_data(as_text=True)
-    assert html.count("q-review") == 3 and "Kompyuter tarmoqlari</b>" not in html
+    assert c.get("/ekspert/navbat").get_data(as_text=True).count("q-review") == 5
+    html = c.get(f"/ekspert/navbat?mavzu={sec}&dars={top}").get_data(as_text=True)
+    assert html.count("q-review") == 3 and "Tarmoq texnologiyalari</b>" not in html
     assert c.get("/ekspert/navbat?q=yoq-matn").get_data(as_text=True).count("q-review") == 0
+    assert c.get("/ekspert/navbat?daraja=Qiyin").get_data(as_text=True).count("q-review") == 1
 
 
 def test_translation_routes_through_russian_when_uzbek_unsupported():

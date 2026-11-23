@@ -57,11 +57,17 @@
            {"type": "open", "difficulty": "medium", "text": "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.",
             "data": {"hint": "Faqat sonni kiriting"}, "answer": {"value": "45"}},
            {"type": "single", "difficulty": "easy", "text": "1101₂ soni o‘nlik sanoq sistemasida nechaga teng?",
-            "data": {"options": ["11", "12", "13", "14"]}, "answer": {"keys": [2]}}
+            "data": {"options": ["11", "12", "13", "14"]}, "answer": {"keys": [2]}},
+           {"source": "ai", "type": "single", "difficulty": "medium", "text": "1010₂ + 0110₂ yig‘indisi ikkilik sanoq sistemasida nechaga teng?",
+            "data": {"options": ["10000", "1111", "10001", "1100"]}, "answer": {"keys": [0]}}
          ]},
         {"title": "O‘n oltilik", "weight": 1, "questions": [
            {"type": "open", "difficulty": "hard", "text": "2F₁₆ sonini o‘nlik sanoq sistemasida yozing.",
-            "answer": {"value": "47"}}
+            "answer": {"value": "47"}},
+           {"source": "ai", "type": "open", "difficulty": "hard", "text": "3A₁₆ sonini o‘nlik sanoq sistemasida yozing.",
+            "answer": {"value": "58"}},
+           {"source": "ai", "type": "single", "difficulty": "easy", "text": "FF₁₆ soni o‘nlik sanoq sistemasida nechaga teng?",
+            "data": {"options": ["255", "256", "240", "265"]}, "answer": {"keys": [0]}}
          ]}
       ]},
       {"title": "Axborot hajmi", "est_minutes": 20, "subtopics": [
@@ -90,7 +96,10 @@
            {"type": "matching", "difficulty": "easy", "text": "Atamalarni ta’riflari bilan moslashtiring.",
             "data": {"left": ["HTTP", "DNS", "IP", "FTP"],
                      "right": ["Gipermatn uzatish protokoli", "Domen nomini IP-manzilga o‘giradi", "Qurilmaning tarmoqdagi manzili", "Fayl uzatish protokoli"]},
-            "answer": {"pairs": [0, 1, 2, 3]}}
+            "answer": {"pairs": [0, 1, 2, 3]}},
+           {"source": "ai", "type": "matching", "difficulty": "easy", "text": "Protokollarni vazifasi bilan moslang.",
+            "data": {"left": ["HTTP", "DNS", "FTP"], "right": ["Gipermatn uzatish", "Domen nomini IP ga o‘girish", "Fayl uzatish"]},
+            "answer": {"pairs": [0, 1, 2]}}
          ]}
       ]}
     ]},
@@ -107,7 +116,9 @@
          ]},
         {"title": "De Morgan qonunlari", "weight": 1, "questions": [
            {"type": "single", "difficulty": "easy", "text": "De Morgan qonuniga ko‘ra ¬(A ∧ B) nimaga teng?",
-            "data": {"options": ["¬A ∧ ¬B", "¬A ∨ ¬B", "A ∨ B", "A ∧ ¬B"]}, "answer": {"keys": [1]}}
+            "data": {"options": ["¬A ∧ ¬B", "¬A ∨ ¬B", "A ∨ B", "A ∧ ¬B"]}, "answer": {"keys": [1]}},
+           {"source": "ai", "type": "single", "difficulty": "easy", "text": "De Morgan qonuniga ko‘ra ¬(A ∨ B) nimaga teng?",
+            "data": {"options": ["¬A ∧ ¬B", "¬A ∨ ¬B", "A ∧ B", "¬A ∧ B"]}, "answer": {"keys": [0]}}
          ]}
       ]}
     ]},

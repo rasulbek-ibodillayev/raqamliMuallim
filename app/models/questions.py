@@ -49,8 +49,10 @@ class Question(Timestamps, db.Model):
     times_correct: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     subtopic = relationship("Subtopic")
+    # O'chirishni baza bajaradi (ON DELETE CASCADE); ORM versiyalarning question_id'sini NULL qilishga urinmaydi
     versions: Mapped[list["QuestionVersion"]] = relationship(back_populates="question",
-                                                             order_by="QuestionVersion.version")
+                                                             order_by="QuestionVersion.version",
+                                                             cascade="all, delete-orphan", passive_deletes=True)
 
 
 class QuestionVersion(db.Model):

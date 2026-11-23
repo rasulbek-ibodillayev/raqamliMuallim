@@ -15,7 +15,8 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 5 | ✅ O'qituvchi ekranlari bazadan (1-qism) | Mavzu sahifasi (kichik mavzular bo'yicha foizlar javoblardan), dars sahifasi `/app/dars/<id>` (bloklar bazadan), tezkor qidiruv, eslatmalar uchun mavzular ro'yxati, hududni saqlash (`app/services/catalog.py`) | — |
 | 5b | ⏳ O'qituvchi ekranlari (2-qism) | O'quv reja, bosh sahifa, diagnostika natijasi, «Natijalarim»: ular test natijalari va baholashga tayanadi, shuning uchun 6-bosqich bilan birga | B1 |
 | 6 | ⏳ Test o'ynatgichi bazada | Testni boshlash, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), yakunlash, natija, qaror (90/80/70) | B1 |
-| 7 | ⏳ Ekspert paneli | Savollarni yaratish va tahrirlash (versiyalar bilan), ko'rib chiqish, e'tirozlarga javob | 5 |
+| 7 | ✅ Ekspert paneli (1-qism) | Savollar banki bazadan (filtrlar, sahifalash, «savollar yetarli emas»), muharrir: yaratish va tahrirlash (har tahrir yangi versiya, kichik mavzu tanlovi, jadval/chizma/rasm), arxivlash, AI navbati (tahrirlab tasdiqlash, rad etish), `audit_log`, rasm yuklash (PNG/JPEG/WebP, mazmunga qarab tekshiruv) | — |
+| 7b | ⏳ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazaga (bo'lim, mavzu, kichik mavzu, bloklar), Excel import/eksport, ekspert huquqlari (yo'nalishlar, ruxsatlar); e'tirozlar — 6-bosqichdan keyin | — |
 | 8 | ⏳ Admin paneli | Foydalanuvchilar, sozlamalar (`settings`), imtihon sanasi, `expert_invites` jadvali, `audit_log`, Excel/CSV import va eksport | 5 |
 | 9 | ⏳ Himoya | Redis, kirish va kod yuborishni cheklash (IP va login bo'yicha), xavfsizlik tekshiruvi | — |
 | 10 | ⏳ Fon vazifalari | Redis + RQ (`volatile-lru`, 64 MB): email, audio, PDF, statistika | — |

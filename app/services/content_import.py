@@ -66,6 +66,8 @@ def check_question(q) -> list[str]:
         errs.append(f"difficulty {Q_DIFFICULTY} dan biri bo'lishi kerak")
     if not _is_str(q.get("text")):
         errs.append("text bo'sh")
+    if q.get("source", "import") not in ("import", "ai"):
+        errs.append("source: import yoki ai")
     if not isinstance(data, dict) or not isinstance(ans, dict):
         return errs + ["data va answer obyekt bo'lishi kerak"]
     if t in ("single", "multiple"):
@@ -209,9 +211,11 @@ def _load_questions(sub: Subtopic, questions: list, status: str, report: Report)
         if _question_key(sub.id, text, data):
             report.skipped_questions += 1
             continue
+        # AI tuzgan savol har doim ekspert tekshiruviga tushadi (Tekshiruv navbati), --holat unga ta'sir qilmaydi
+        source = q.get("source", "import")
         row = Question(subtopic_id=sub.id, type=q["type"], difficulty=q["difficulty"], text=text, data=data,
-                       answer=q["answer"], explanation=q.get("explanation"), source="import", status=status,
-                       time_limit_s=q.get("time_limit_s"))
+                       answer=q["answer"], explanation=q.get("explanation"), source=source,
+                       status="review" if source == "ai" else status, time_limit_s=q.get("time_limit_s"))
         db.session.add(row)
         db.session.flush()
         snapshot = {k: getattr(row, k) for k in ("type", "difficulty", "text", "data", "answer", "explanation")}

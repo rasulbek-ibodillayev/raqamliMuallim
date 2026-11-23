@@ -43,6 +43,7 @@ Tartib JSON'dagi tartib bilan bir xil bo'ladi.
 | `answer` | ha | To'g'ri javob (pastda) |
 | `explanation` | yo'q | Natijada ko'rsatiladigan izoh |
 | `time_limit_s` | yo'q | Savolga ajratilgan vaqt, soniyalarda |
+| `source` | yo'q | `import` (standart) yoki `ai`. AI tuzgan savol har doim `review` holatida tushadi va ekspertning «Tekshiruv navbati»ga chiqadi |
 
 Variant indekslari 0 dan boshlanadi.
 
