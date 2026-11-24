@@ -30,14 +30,14 @@ from ..extensions import db
 from ..models import (ErrorItem, Question, Section, Subtopic, TestAttempt, Topic, UserTopicProgress)
 from . import attempts as at
 from . import generator, seen
+from . import settings as conf
 from .scoring import PASS_MIN
 
 STAGED = {"diagnostic", "interim", "weekly", "optional", "monthly", "final"}
 MANDATORY = {"lesson", "topic", "daily", "interim", "monthly", "final"}
 MASTERED = ("done", "solid")
 DIFFICULTIES = ("easy", "medium", "hard")
-LESSON_N, DAILY_N, WEEKLY_N, MONTHLY_N, EXAM_N = 3, 5, 20, 30, 35
-EXAM_SECONDS = 120 * 60
+LESSON_N = 3                # qolgan sonlar — admin sozlamalari (services/settings.py)
 
 
 class Unavailable(ValueError):
@@ -191,7 +191,7 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
         else:
             learning = _subtopics_of(db.session.scalars(select(UserTopicProgress.topic_id)
                                                         .where(UserTopicProgress.user_id == user_id)))
-            plan, left = {}, DAILY_N
+            plan, left = {}, conf.get("daily_n")
             for tier in (weak, [s for s in avail if s in learning], list(avail)):
                 got = allocate(left, [s for s in tier if s not in plan], avail)
                 plan.update(got)
@@ -199,8 +199,8 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
         spec = Spec(kind, [at.pick_questions(user_id, plan)])
     elif kind == "exam":
         avail = _available(user_id, types=("single",))
-        plan = allocate(EXAM_N, list(avail), avail)
-        spec = Spec(kind, [at.pick_questions(user_id, plan, types=("single",))], seconds=EXAM_SECONDS)
+        plan = allocate(conf.get("exam_n"), list(avail), avail)
+        spec = Spec(kind, [at.pick_questions(user_id, plan, types=("single",))], seconds=conf.get("exam_minutes") * 60)
     elif kind in STAGED:
         subs = None
         if kind in ("interim", "weekly", "monthly"):
@@ -221,7 +221,7 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
                                        .where(Subtopic.topic_id == Topic.id, Question.status == "approved").exists())))
             if published - set(_mastered(user_id)):
                 raise Unavailable(_("Yakuniy diagnostika barcha mavzular o‘zlashtirilgach ochiladi"))
-        size = {"weekly": WEEKLY_N, "monthly": MONTHLY_N, "optional": n or 20}.get(kind)
+        size = {"weekly": conf.get("weekly_n"), "monthly": conf.get("monthly_n"), "optional": n or 20}.get(kind)
         parts, levels = _staged(user_id, subs, n=size)
         spec = Spec(kind, parts, levels, settings={"topic_ids": sorted(topic_ids)} if topic_ids else {})
     else:

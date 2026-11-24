@@ -40,7 +40,8 @@ def create_app(config: dict | None = None) -> Flask:
     @login_manager.user_loader
     def load_user(user_id):
         from .models.users import User
-        return db.session.get(User, int(user_id)) if user_id.isdigit() else None
+        user = db.session.get(User, int(user_id)) if user_id.isdigit() and len(user_id) < 19 else None
+        return user if user is not None and user.is_active else None      # bloklangan akkaunt ochiq sessiyada ham chiqadi
 
     from . import cli
     cli.init_app(app)
@@ -85,6 +86,14 @@ def create_app(config: dict | None = None) -> Flask:
     from flask import g
 
     @app.before_request
+    def daily_activity():
+        from flask_login import current_user
+        if request.endpoint in (None, "static", "meta.service_worker") or not current_user.is_authenticated:
+            return
+        from .services.activity import touch
+        touch(current_user, request.headers.get("User-Agent", ""), request.cookies.get("rm_pwa") == "1")
+
+    @app.before_request
     def make_nonce():
         g.csp_nonce = secrets.token_urlsafe(16)
 
@@ -106,6 +115,7 @@ def create_app(config: dict | None = None) -> Flask:
         return resp
 
     from . import mock
+    from .services import settings as conf
 
     from flask import get_template_attribute
 
@@ -121,7 +131,7 @@ def create_app(config: dict | None = None) -> Flask:
         from .views.test import TYPE_SLUGS
         # me / staff_of — kirgan foydalanuvchining ismi va aloqasi, qolgani hozircha mock'dan
         return {"errors": {}, "form": {}, "me": with_user(mock.ME), "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": _notifications,
-                "search_index": _search_index, "staff_of": lambda r: with_user(mock.STAFF.get(r, {})), "learner_meta": _learner_meta, **ui}
+                "search_index": _search_index, "staff_of": lambda r: with_user(mock.STAFF.get(r, {})), "learner_meta": _learner_meta, "conf": conf.get, **ui}
 
     def _notifications():
         """Qo'ng'iroqcha (faqat o'qituvchi sahifalarida chaqiriladi)."""

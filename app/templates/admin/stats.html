@@ -3,8 +3,11 @@
 {% block heading %}{{ _("Statistika") }}{% endblock %}
 {% block content %}
 {% call page_head(_("Statistika"), _("Platformaning asosiy ko‘rsatkichlari")) %}
-<select class="w-auto select" aria-label="{{ _('Davr') }}"><option>{{ _("Oxirgi 30 kun") }}</option><option>{{ _("Oxirgi 7 kun") }}</option><option>{{ _("Shu yil") }}</option><option>{{ _("Hammasi") }}</option></select>
-<button class="btn btn-outline btn-sm" type="button">{{ icon("download", "ico-sm") }}{{ _("Hisobot (CSV)") }}</button>
+<form action="{{ url_for('admin.stats') }}" method="get" x-data @change="$el.requestSubmit()">
+  <select class="w-auto select" name="davr" aria-label="{{ _('Davr') }}">{% for k in ["7", "30", "90"] %}<option value="{{ k }}" {{ 'selected' if period == k }}>{{ _("Oxirgi %(n)s kun", n=k) }}</option>{% endfor %}</select>
+  <noscript><button class="btn btn-outline btn-sm" type="submit">{{ _("Filtrlash") }}</button></noscript>
+</form>
+<a class="btn btn-outline btn-sm" href="{{ url_for('admin.stats_csv', davr=period) }}" download>{{ icon("download", "ico-sm") }}{{ _("Hisobot (CSV)") }}</a>
 {% endcall %}
 <div class="stack stack-lg">
   <div class="grid-3">
@@ -18,16 +21,16 @@
 
   <div class="grid u-cols-4a70e">
     <div class="card card-pad stack">
-      <div class="row between"><span class="strong">{{ _("Kunlik faol foydalanuvchilar") }}</span><span class="xs muted">{{ _("7 kun") }}</span></div>
-      <div class="bars" role="img" aria-label="Oxirgi 7 kunda kunlik faol foydalanuvchilar: {{ dau|min }} dan {{ dau|max }} gacha">
-        {% set mx = dau|max %}
-        {% for v in dau %}<div><span class="xs muted num">{{ v }}</span><span class="b" style="--v: {{ (v / mx * 100)|round }}%"></span><span class="xs faint">{{ ["Du","Se","Ch","Pa","Ju","Sh","Ya"][loop.index0] }}</span></div>{% endfor %}
+      <div class="row between"><span class="strong">{{ _("Kunlik faol foydalanuvchilar") }}</span><span class="xs muted">{{ s.dau|length }} {{ _("kun") }}</span></div>
+      {% set mx = [s.dau|map(attribute=1)|max, 1]|max %}
+      <div class="bars" role="img" aria-label="{{ _('Kunlik faol foydalanuvchilar:') }} {{ s.dau|map(attribute=1)|join(', ') }}">
+        {% for d, v in s.dau %}<div><span class="xs muted num">{{ v }}</span><span class="b" style="--v: {{ (v / mx * 100)|round }}%"></span><span class="xs faint num">{{ d.day }}</span></div>{% endfor %}
       </div>
     </div>
     <div class="card card-pad stack">
       <div class="row between"><span class="strong">{{ _("Yangi ro‘yxatdan o‘tishlar") }}</span><span class="xs muted">{{ _("12 hafta") }}</span></div>
       <div class="bars" role="img" aria-label="Haftalik yangi ro‘yxatdan o‘tishlar: {{ s.signups|join(', ') }}">
-        {% set sm = s.signups|max %}
+        {% set sm = [s.signups|max, 1]|max %}
         {% for v in s.signups %}<div><span class="xs muted num">{{ v }}</span><span class="b" style="--v: {{ (v / sm * 100)|round }}%"></span><span class="xs faint">{{ 'Bu' if loop.last else (loop.revindex0 ~ 'h') }}</span></div>{% endfor %}
       </div>
       <p class="small muted">{{ _("Jami") }} {{ s.signups|sum }} {{ _("ta · haftasiga o‘rtacha") }} {{ (s.signups|sum / s.signups|length)|round|int }} {{ _("ta") }}</p>
@@ -38,7 +41,7 @@
     <section class="card">
       <div class="card-head"><span class="strong">{{ _("O‘quv voronkasi") }}</span><span class="xs muted">{{ _("ro‘yxatdan o‘tganlarga nisbatan") }}</span></div>
       <div class="list">
-        {% set base = s.funnel[0][1] %}
+        {% set base = [s.funnel[0][1], 1]|max %}
         {% for label, n in s.funnel %}
         {% set p = (n / base * 100)|round|int %}
         <div class="list-item"><div class="gap-6 grow stack">
@@ -51,7 +54,8 @@
     <section class="card">
       <div class="card-head"><span class="strong">{{ _("Eng qiyin mavzular") }}</span><span class="xs muted">{{ _("xato javoblar %%") }}</span></div>
       <div class="list">
-        {% for n, p in hard %}<div class="list-item u-minh-52"><div class="gap-6 grow stack"><div class="row between small"><span>{{ n }}</span><span class="num">{{ p }}%</span></div>{{ progress(p, "red", "thin") }}</div></div>{% endfor %}
+        {% if not s.hard %}<p class="card-pad small muted">{{ _("Hali yetarli javob yo‘q.") }}</p>{% endif %}
+        {% for n, p in s.hard %}<div class="list-item u-minh-52"><div class="gap-6 grow stack"><div class="row between small"><span>{{ n }}</span><span class="num">{{ p }}%</span></div>{{ progress(p, "red", "thin") }}</div></div>{% endfor %}
       </div>
       <p class="xs muted card-pad">{{ _("Mavzu va savollarni tuzatish — ekspertlar vazifasi; ma’lumot ularning paneliga ham uzatiladi.") }}</p>
     </section>
@@ -61,7 +65,7 @@
     <section class="card">
       <div class="card-head"><span class="strong">{{ _("Hududlar") }}</span><span class="xs muted">{{ _("foydalanuvchilar") }}</span></div>
       <div class="list">
-        {% set rmax = s.regions|map(attribute=1)|max %}
+        {% set rmax = [s.regions|map(attribute=1)|max if s.regions else 1, 1]|max %}
         {% for r, n in s.regions %}
         <div class="list-item"><div class="gap-6 grow stack"><div class="row between small"><span>{{ r }}</span><span class="num">{{ n }}</span></div>{{ progress((n / rmax * 100)|round, cls="thin") }}</div></div>
         {% endfor %}
@@ -70,6 +74,7 @@
     <section class="card">
       <div class="card-head"><span class="strong">{{ _("Qurilmalar") }}</span><span class="xs muted">{{ _("PWA o‘rnatgan:") }} {{ s.pwa }}%</span></div>
       <div class="list">
+        {% if not s.devices %}<p class="card-pad small muted">{{ _("Hali ma’lumot yo‘q.") }}</p>{% endif %}
         {% for d, p in s.devices %}<div class="list-item"><div class="gap-6 grow stack"><div class="row between small"><span>{{ d }}</span><span class="num">{{ p }}%</span></div>{{ progress(p, cls="thin") }}</div></div>{% endfor %}
       </div>
       <div class="card-head bt"><span class="strong">{{ _("Kontent holati") }}</span></div>
@@ -82,15 +87,16 @@
       <div class="list">
         {% for label, n in s.inactive %}<div class="list-item"><span class="grow small">{{ label }}</span><b class="num small">{{ n }}</b></div>{% endfor %}
       </div>
-      <p class="xs muted card-pad">{{ _("Qoida: 6 oy kirilmagan akkaunt avtomatik o‘chiriladi, 2 hafta oldin ogohlantiriladi.") }} <a class="link" href="{{ url_for('admin.settings') }}#akkauntlar">{{ _("Sozlash") }}</a></p>
+      <p class="xs muted card-pad">{{ _("Qoida: 6 oy kirilmagan akkaunt avtomatik o‘chiriladi, 2 hafta oldin ogohlantiriladi.") }}</p>
     </section>
   </div>
 
   <section class="card">
     <div class="card-head"><span class="strong">{{ _("E’tibor talab qiladi") }}</span></div>
     <div class="list">
-      <a class="list-item" href="{{ url_for('admin.experts') }}"><span class="list-ico t-yellow">{{ icon("shield") }}</span><div class="grow"><div>{{ _("1 ta ekspert e’tirozlarga 24 soatdan kech javob bermoqda") }}</div><div class="sub">{{ _("Kamola Ergasheva · o‘rtacha 26 soat") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
-      <a class="list-item" href="{{ url_for('admin.users') }}"><span class="list-ico t-red">{{ icon("calendar") }}</span><div class="grow"><div>{{ _("214 ta foydalanuvchida attestatsiya sanasi kiritilmagan") }}</div><div class="sub">{{ _("Reja va prognoz sanasiz hisoblanmaydi") }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
+      {% for x in s.attention %}
+      <a class="list-item" href="{{ url_for(x.url, **(x.args or {})) }}"><span class="list-ico {{ x.cls }}">{{ icon(x.icon) }}</span><div class="grow"><div>{{ x.title }}</div><div class="sub">{{ x.sub }}</div></div>{{ icon("chevron-right", "ico-sm chev") }}</a>
+      {% else %}<p class="card-pad small muted">{{ _("Hozircha hammasi joyida.") }}</p>{% endfor %}
     </div>
   </section>
 </div>

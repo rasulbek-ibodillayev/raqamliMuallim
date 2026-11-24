@@ -1,11 +1,10 @@
 <!-- Attestatsiya sanasini kiritish -->
 <div class="sheet-backdrop" x-show="edit" x-cloak @click.self="edit = null" @keydown.escape.window="edit = null">
   <form class="sheet stack stack-lg" role="dialog" aria-modal="true" aria-labelledby="ex-title" action="{{ url_for('admin.set_exam_date') }}" method="post" novalidate
-        x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); return false; })" x-init="initForm()"
+        x-data="rmForm({}, function (j, f) { f.dispatchEvent(new CustomEvent('rm-saved', { bubbles: true, detail: j.message })); setTimeout(function () { location.reload(); }, 900); return false; })" x-init="initForm()"
         data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
     {% include "partials/form_open.html" %}
-    <input type="hidden" name="user" :value="edit && edit.name">
-    <input type="hidden" name="name" :value="edit && edit.name">
+    <input type="hidden" name="user" :value="edit && edit.id">
     <div class="sheet-grip"></div>
     <div class="row between"><h2 id="ex-title">{{ _("Attestatsiya sanasi") }}</h2><button class="icon-btn" type="button" @click="edit = null" aria-label="{{ _('Yopish') }}">{{ icon("x") }}</button></div>
     <p class="muted" x-text="edit && edit.name"></p>
@@ -15,7 +14,7 @@
       {{ field_error("date", errors) }}
       <span class="hint">{{ _("O‘qituvchi bu sanani o‘zgartira olmaydi. Reja tezligi va «Attestatsiyagacha N kun» hisobi shu sanadan olinadi.") }}</span>
     </div>
-    <label class="check"><input type="checkbox" name="notify" value="1" checked><span>{{ _("O‘qituvchiga Telegram orqali xabar yuborish") }}</span></label>
+    <label class="check"><input type="checkbox" name="notify" value="1" checked><span>{{ _("O‘qituvchiga bildirishnoma yuborish") }}</span></label>
     <div class="row"><button class="btn btn-ghost" type="button" @click="edit = null">{{ _("Bekor qilish") }}</button><button class="btn btn-primary grow" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
   </form>
 </div>

@@ -91,7 +91,7 @@ SCREENS = [
     ("Haqiqiy testlar (bazadan)", [
         ("test.question", "Dars testi", {"turi": "dars"}),
         ("test.question", "Mavzu testi", {"turi": "mavzu"}),
-        ("test.question", "Kunlik 5 talik test", {"turi": "kunlik"}),
+        ("test.question", "Kunlik test", {"turi": "kunlik"}),
         ("test.question", "Oraliq sinov testi", {"turi": "oraliq"}),
         ("test.question", "Haftalik test", {"turi": "haftalik", "kun": "yakshanba"}),
         ("test.question", "Oylik test", {"turi": "oylik"}),
@@ -127,10 +127,10 @@ SCREENS = [
     ("Admin paneli", [
         ("admin.stats", "Statistika", {}),
         ("admin.users", "Foydalanuvchilar", {}),
-        ("admin.user_detail", "Foydalanuvchi — to‘liq ma’lumot", {"uid": 1}),
+        ("admin.sample_user", "Foydalanuvchi — to‘liq ma’lumot", {}),
         ("admin.experts", "Ekspertlar", {}),
-        ("admin.experts", "Ekspertlar — javob kutayotgan taklifnoma", {"namuna": 1}),
         ("admin.settings", "Sozlamalar", {}),
+        ("admin.journal", "Amallar jurnali", {}),
         ("admin.profile", "Admin profili", {}),
     ]),
 ]

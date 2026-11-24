@@ -14,9 +14,9 @@
   </div>
 
   <dl class="card list u-m-0">
-    <div class="list-item"><dt class="grow muted small">{{ _("Ism va familiya") }}</dt><dd class="strong u-m-0">{{ inv.n }}</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Ism va familiya") }}</dt><dd class="strong u-m-0">{{ inv.name }}</dd></div>
     <div class="list-item"><dt class="grow muted small">{{ _("Login") }}</dt><dd class="u-m-0 num row row-sm">{{ icon("telegram" if via == "telegram" else "mail", "ico-sm") }} {{ contact }}</dd></div>
-    <div class="list-item"><dt class="grow muted small">{{ _("Yo‘nalishlar") }}</dt><dd class="u-m-0 small u-ta-right">{{ inv.a|join(", ") }}</dd></div>
+    <div class="list-item"><dt class="grow muted small">{{ _("Yo‘nalishlar") }}</dt><dd class="u-m-0 small u-ta-right">{{ areas|join(", ") }}</dd></div>
   </dl>
 
   <div class="field">

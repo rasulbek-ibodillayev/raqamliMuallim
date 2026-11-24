@@ -347,6 +347,9 @@ window.rmPwGate = function (url) {
     try { JSON.parse(el.dataset.flash).forEach(function (m, i) { setTimeout(function () { window.rmToast(m); }, i * 2600); }); } catch (e) {}
   });
 
+  // O'rnatilgan ilova (PWA) ekani — faqat umumiy statistika uchun (services/activity.py)
+  if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) document.cookie = "rm_pwa=1; path=/; max-age=31536000; samesite=lax";
+
   // PWA: Service Worker (oflayn rejim)
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
     window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });

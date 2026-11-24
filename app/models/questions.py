@@ -47,9 +47,6 @@ class Question(Timestamps, db.Model):
     author_id: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))
     reviewer_id: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    # Statistika (fon vazifasi yangilaydi): qiyinlikni kalibrlash va "qiyin mavzular" uchun
-    times_answered: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
-    times_correct: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     subtopic = relationship("Subtopic")
     # O'chirishni baza bajaradi (ON DELETE CASCADE); ORM versiyalarning question_id'sini NULL qilishga urinmaydi
@@ -72,3 +69,13 @@ class QuestionVersion(db.Model):
     created_at: Mapped[datetime] = created_at()
 
     question: Mapped[Question] = relationship(back_populates="versions")
+
+
+class QuestionStat(db.Model):
+    """Javoblar statistikasi (qiyinlikni kalibrlash, «qiyin mavzular»). Alohida tor jadval: har javobda questions qatori
+    (≈ 400 bayt) qayta yozilmaydi."""
+    __tablename__ = "question_stats"
+
+    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"), primary_key=True)
+    answered: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    correct: Mapped[int] = mapped_column(Integer, default=0, server_default="0")

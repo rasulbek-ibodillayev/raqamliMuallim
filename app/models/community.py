@@ -82,10 +82,11 @@ class Note(Timestamps, db.Model):
 
 
 class Certificate(db.Model):
+    """O'zi yetarli: akkaunt o'chsa, ism, raqam, sana va natija qoladi (user_id va attempt_id NULL), tekshiruv ishlayveradi."""
     __tablename__ = "certificates"
 
     id: Mapped[int] = pk()
-    user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"), index=True)
     attempt_id: Mapped[int | None] = mapped_column(PK, ForeignKey("test_attempts.id", ondelete="SET NULL"))
     number: Mapped[str] = mapped_column(String(20), unique=True)          # RM-2026-000123
     verify_token: Mapped[str] = mapped_column(String(43), unique=True)    # secrets.token_urlsafe(32), QR'da

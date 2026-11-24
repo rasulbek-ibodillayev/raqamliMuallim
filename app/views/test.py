@@ -17,6 +17,7 @@ from .. import mock as m
 from ..services import attempts as at
 from ..services import objections as ob
 from ..services import scoring
+from ..services import settings as conf
 from ..services import test_builder as tb
 
 # Test turi URL'da (?turi=…) → urinish turi (mock.TEST_TYPES kaliti). «Bosqichlar orasi» ekrani faqat tb.STAGED uchun.
@@ -357,7 +358,7 @@ def exam():
     qs = [_pool_question(i) for i in range(35)]
     start_given = "savol" in request.args
     start = max(1, min(35, request.args.get("savol", 1, type=int) or 1)) - 1
-    return _render_exam(qs, {"uuid": None, "kind": "exam", "stage": None, "answers": {}, "duration": tb.EXAM_SECONDS,
+    return _render_exam(qs, {"uuid": None, "kind": "exam", "stage": None, "answers": {}, "duration": conf.get("exam_minutes") * 60,
                              "sample": True, "cur": start if start_given else None,
                              "seed": {i: (i * 3) % 4 for i in range(1, 11) if i != start},
                              "confirm": bool(request.args.get("yakun")), "resultUrl": url_for("test.exam_result")})

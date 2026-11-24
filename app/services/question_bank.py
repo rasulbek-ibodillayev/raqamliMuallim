@@ -10,12 +10,13 @@ Qoidalar:
 - AI savolini rad etish: hech kimga berilmagan bo'lsa butunlay o'chiriladi, aks holda arxivlanadi.
 """
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from flask import has_request_context, request
 from sqlalchemy import func, select, true, update
 
 from ..extensions import db
-from ..models import AuditLog, Question, QuestionVersion, Section, Subtopic, Topic
+from ..models import AuditLog, Question, QuestionStat, QuestionVersion, Section, Subtopic, Topic
 from . import notify, recalc, seen
 from .content_import import check_question
 
@@ -98,9 +99,9 @@ def _apply(stmt, f: Filters):
 def list_questions(f: Filters, page: int = 1, *, source: str | None = None, status: str | None = None,
                    areas: set[int] | None = None):
     """→ (sahifadagi qatorlar, topilganlar soni, sahifalar soni). Arxivlangan savollar faqat holat=archived filtrida."""
-    base = (select(Question, Subtopic.title, Topic.title, Section.title)
+    base = (select(Question, Subtopic.title, Topic.title, Section.title, QuestionStat.answered, QuestionStat.correct)
             .join(Subtopic, Question.subtopic_id == Subtopic.id).join(Topic, Subtopic.topic_id == Topic.id)
-            .join(Section, Topic.section_id == Section.id))
+            .join(Section, Topic.section_id == Section.id).outerjoin(QuestionStat, QuestionStat.question_id == Question.id))
     base = _apply(base, f)
     if areas is not None:
         base = base.where(Section.id.in_(areas))
@@ -114,13 +115,13 @@ def list_questions(f: Filters, page: int = 1, *, source: str | None = None, stat
     page = min(max(1, page), pages)
     rows = db.session.execute(base.order_by(Question.updated_at.desc(), Question.id.desc())
                               .offset((page - 1) * size).limit(size)).all()
-    return [_row(q, sub, top, sec) for q, sub, top, sec in rows], total, pages, page
+    return [_row(*r) for r in rows], total, pages, page
 
 
-def _row(q: Question, sub: str, top: str, sec: str) -> dict:
-    pct = round(100 * q.times_correct / q.times_answered) if q.times_answered else None
+def _row(q: Question, sub: str, top: str, sec: str, answered: int | None, correct: int | None) -> dict:
+    pct = round(100 * correct / answered) if answered else None
     # Daraja shubhali: yetarli javob bo'yicha oson savolni kam, qiyinini juda ko'p odam topyapti
-    doubt = q.times_answered >= 20 and ((q.difficulty == "easy" and pct < 50) or (q.difficulty == "hard" and pct > 90))
+    doubt = (answered or 0) >= 20 and ((q.difficulty == "easy" and pct < 50) or (q.difficulty == "hard" and pct > 90))
     return {"id": q.id, "text": q.text, "section": sec, "topic": top, "subtopic": sub, "status": q.status,
             "level": DIFF_TO_LEVEL[q.difficulty], "kind": TYPE_TO_KIND[q.type], "pct": pct, "doubt": doubt,
             "source": q.source, "created": q.created_at, **_options(q)}
@@ -184,6 +185,8 @@ def save(payload: dict, actor_id: int, question_id: int | None = None, status: s
         if q is None:
             raise FormError({"text": "Savol topilmadi"})
         before = _snapshot(q)
+        if q.status == "review" and status == "approved":
+            q.reviewer_id, q.reviewed_at = actor_id, datetime.now(timezone.utc)
         # Muharrirda variant izohlari maydoni yo'q: variantlar o'zgarmagan bo'lsa, izohlar saqlanib qoladi
         notes = (q.answer or {}).get("notes")
         if notes and "notes" not in fields["answer"] and (q.data or {}).get("options") == (fields["data"] or {}).get("options"):
@@ -229,7 +232,7 @@ def reject(question_id: int, actor_id: int) -> bool:
     used = seen.ever_given(q.id)
     audit(actor_id, "reject", q.id, {"before": _snapshot(q)})
     if used:
-        q.status = "archived"
+        q.status, q.reviewer_id, q.reviewed_at = "archived", actor_id, datetime.now(timezone.utc)
         for c in recalc.drop(q.id):
             notify.add(c.user_id, notify.DROPPED, c.attempt_id, c.old, c.new)
     else:

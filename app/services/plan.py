@@ -10,8 +10,8 @@ Rejaga tasdiqlangan savollari bor, nashr qilingan mavzular kontent tartibida kir
 - Kunlik test — har kuni (majburiy); haftalik — yakshanba, o'zlashtirilgan mavzu bo'lsa (ixtiyoriy).
 - Yakuniy diagnostika — barcha mavzular o'zlashtirilgach.
 
-Sanalar: attestatsiya sanasi bo'lsa, qolgan mavzular unga RESERVE_DAYS kun qolguncha teng taqsimlanadi; bo'lmasa — har
-DEFAULT_PACE kunda bitta mavzu.
+Sanalar: attestatsiya sanasi bo'lsa, qolgan mavzular unga reserve_days kun qolguncha teng taqsimlanadi; bo'lmasa — har
+pace_days kunda bitta mavzu (admin sozlamalari: services/settings.py).
 """
 import math
 from collections import defaultdict
@@ -24,15 +24,13 @@ from sqlalchemy import func, select
 from ..extensions import db
 from ..models import Section, TestAttempt, Topic, User, UserTopicProgress
 from . import catalog
+from . import settings as conf
 from . import test_builder as tb
 from .scoring import PASS_MIN
 from .timefmt import TASHKENT, day_month, when
 from .timefmt import now as tk_now
 
 INTERIM_EVERY = 3
-MONTHLY_DAYS = 30
-RESERVE_DAYS = 3            # yakuniy diagnostika va takrorlash uchun
-DEFAULT_PACE = 2.0          # attestatsiya sanasi yo'q bo'lsa: necha kunda bitta mavzu
 LESSON_MIN = 10             # topics.est_minutes bo'lmasa, bitta darsga daqiqa
 FORECAST_DAYS = 14
 
@@ -84,9 +82,9 @@ def all_topics() -> list[dict]:
 def pace(user: User, remaining: int, today: date) -> float:
     """Bitta mavzuga necha kun."""
     if user.exam_date and remaining:
-        days = (user.exam_date - today).days - RESERVE_DAYS
+        days = (user.exam_date - today).days - conf.get("reserve_days")
         return max(days, 1) / remaining
-    return DEFAULT_PACE
+    return float(conf.get("pace_days"))
 
 
 def build(user: User, *, sunday: bool | None = None) -> Plan:
@@ -154,21 +152,21 @@ def build(user: User, *, sunday: bool | None = None) -> Plan:
     any_mastered = bool(p.excluded) or any(t["state"] == "done" for t in p.topics)
     anchor = by_kind["monthly"][-1].finished_at if by_kind["monthly"] else (rows[0].started_at if rows else None)
     if anchor is not None and any_mastered:
-        next_monthly = anchor.astimezone(TASHKENT).date() + timedelta(days=MONTHLY_DAYS)
+        next_monthly = anchor.astimezone(TASHKENT).date() + timedelta(days=conf.get("monthly_days"))
         state = due_state("monthly") if next_monthly <= today or "monthly" in open_kinds else "locked"
-        p.monthly = test("monthly", _("Oylik test"), state, min=tb.MONTHLY_N, date=day_month(next_monthly),
-                         note=_("Har 30 kunda · topshirilmaguncha keyingi mavzular ochilmaydi"))
+        p.monthly = test("monthly", _("Oylik test"), state, min=conf.get("monthly_n"), date=day_month(next_monthly),
+                         note=_("Har %(n)s kunda · topshirilmaguncha keyingi mavzular ochilmaydi", n=conf.get("monthly_days")))
 
     last_daily = by_kind["daily"][-1] if by_kind["daily"] else None
     daily_done = last_daily is not None and last_daily.finished_at.astimezone(TASHKENT).date() == today
-    p.daily = test("daily", _("Kunlik 5 talik test"), "done" if daily_done else due_state("daily"), min=tb.DAILY_N,
+    p.daily = test("daily", _("Kunlik test"), "done" if daily_done else due_state("daily"), min=conf.get("daily_n"),
                    note=_("Ko‘p xato qilayotgan mavzulardan"), **(last("daily") if daily_done else {}))
 
     weekly = None
     last_weekly = by_kind["weekly"][-1] if by_kind["weekly"] else None
     weekly_done = last_weekly is not None and last_weekly.finished_at.astimezone(TASHKENT).date() == today
     if any_mastered and (sunday or "weekly" in open_kinds or weekly_done):
-        weekly = test("weekly", _("Haftalik test"), "done" if weekly_done else due_state("weekly"), min=tb.WEEKLY_N,
+        weekly = test("weekly", _("Haftalik test"), "done" if weekly_done else due_state("weekly"), min=conf.get("weekly_n"),
                       note=_("O‘zlashtirilgan mavzulardan"), **(last("weekly") if weekly_done else {}))
 
     if p.topics or p.excluded:

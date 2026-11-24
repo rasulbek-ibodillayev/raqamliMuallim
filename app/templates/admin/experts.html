@@ -10,10 +10,10 @@
 
 <div class="stack stack-lg">
   <div class="grid-4">
-    <div class="card stat"><div class="small muted">{{ _("Tekshiruv navbati") }}</div><div class="stat-value num">12</div><div class="stat-sub">{{ _("savol ekspert kutmoqda") }}</div></div>
-    <div class="card stat"><div class="small muted">{{ _("Ochiq e’tirozlar") }}</div><div class="stat-value num">3</div><div class="stat-sub">{{ _("1 tasi shoshilinch") }}</div></div>
-    <div class="card stat"><div class="small muted">{{ _("O‘rtacha javob vaqti") }}</div><div class="stat-value num">{{ _("9 soat") }}</div><div class="stat-sub">{{ _("Me’yor: 24 soatgacha") }}</div></div>
-    <div class="card stat"><div class="small muted">{{ _("Shu oy tasdiqlangan") }}</div><div class="stat-value num">214</div><div class="stat-sub">{{ _("savol") }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("Tekshiruv navbati") }}</div><div class="stat-value num">{{ summary.queue }}</div><div class="stat-sub">{{ _("savol ekspert kutmoqda") }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("Ochiq e’tirozlar") }}</div><div class="stat-value num">{{ summary.open }}</div><div class="stat-sub">{{ _("%(n)s tasi shoshilinch", n=summary.urgent) }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("O‘rtacha javob vaqti") }}</div><div class="stat-value num">{{ summary.resp }}</div><div class="stat-sub">{{ _("Me’yor: 3 ish kunigacha") }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("Shu oy tasdiqlangan") }}</div><div class="stat-value num">{{ summary.approved }}</div><div class="stat-sub">{{ _("savol") }}</div></div>
   </div>
 
   {% if invites %}
@@ -25,12 +25,12 @@
       <li class="list-item{{ ' bt' if not loop.first }} wrap">
         <span class="list-ico">{{ icon("telegram" if i.via == "telegram" else "mail") }}</span>
         <span class="grow u-minw-0"><span class="d-block strong">{{ i.name }}</span>
-          <span class="xs muted"><span class="num">{{ i.shown or i.contact }}</span> · {{ _("Telegram orqali") if i.via == "telegram" else _("Email orqali") }} · {{ _("yuborildi:") }} <span class="num">{{ i.sent }}</span></span></span>
+          <span class="xs muted"><span class="num">{{ i.shown or i.contact }}</span> · {% if i.expired %}<span class="t-red">{{ _("muddati o‘tgan") }}</span>{% else %}{{ _("tayyorlandi:") }} <span class="num">{{ i.sent }}</span>{% endif %}</span></span>
         <div class="row row-sm wrap">
-          {# Telegram bot ekspertga yoza olmasa (botni /start qilmagan), admin havolani nusxalab o'zi yuboradi #}
-          <button class="btn btn-ghost btn-sm" type="button" data-copy-text="{{ i.link }}" title="{{ i.link }}">{{ icon("link", "ico-sm") }}<span>{{ _("Havolani nusxalash") }}</span></button>
-          <form method="post" action="{{ url_for('admin.invite_action') }}">{{ csrf() }}<input type="hidden" name="contact" value="{{ i.contact }}">
-            <button class="btn btn-outline btn-sm" type="submit" name="action" value="resend">{{ icon("refresh", "ico-sm") }}{{ _("Qayta yuborish") }}</button>
+          {# Telegram bot va email ulanguncha (11, 12-bosqichlar) admin havolani nusxalab o'zi yuboradi #}
+          {% if not i.expired %}<button class="btn btn-ghost btn-sm" type="button" data-copy-text="{{ i.link }}" title="{{ i.link }}">{{ icon("link", "ico-sm") }}<span>{{ _("Havolani nusxalash") }}</span></button>{% endif %}
+          <form method="post" action="{{ url_for('admin.invite_action') }}">{{ csrf() }}<input type="hidden" name="id" value="{{ i.id }}">
+            <button class="btn btn-outline btn-sm" type="submit" name="action" value="resend">{{ icon("refresh", "ico-sm") }}{{ _("Yangi havola") }}</button>
             <button class="btn btn-ghost btn-sm t-red" type="submit" name="action" value="cancel">{{ _("Bekor qilish") }}</button>
           </form>
         </div>
@@ -47,11 +47,11 @@
         {% for e in experts %}
         <tr>
           <td><div class="row row-sm"><span class="avatar u-w-32 u-h-32 u-fs-12">{{ e.ini }}</span><div><div class="nowrap strong">{{ e.name }}</div><div class="xs muted nowrap">{{ e.contact }} · {{ e.last }}</div></div></div></td>
-          <td><div class="row wrap g-6">{% for a in e.areas %}<span class="chip xs">{{ a }}</span>{% endfor %}</div></td>
+          <td><div class="row wrap g-6">{% for a in e.areas %}<span class="chip xs">{{ a }}</span>{% else %}<span class="xs muted">{{ _("Barcha mavzular") }}</span>{% endfor %}</div></td>
           <td class="num">{{ e.created }}</td>
           <td class="num">{{ e.reviewed }}</td>
           <td class="num">{{ e.objections }}</td>
-          <td class="nowrap {{ 't-red' if e.resp.endswith('soat') and e.resp.split()[0]|int > 24 }}">{{ e.resp }}</td>
+          <td class="nowrap {{ 't-red' if e.slow }}">{{ e.resp }}</td>
           <td>{{ status_dot(_("Faol"), "green") if e.active else badge(_("To‘xtatilgan"), "gray") }}</td>
           <td><button class="btn btn-ghost btn-sm" type="button" @click="open = open === {{ e.id }} ? null : {{ e.id }}" :aria-expanded="open === {{ e.id }}">{{ _("Boshqarish") }}{{ icon("chevron-down", "ico-sm") }}</button></td>
         </tr>
@@ -62,6 +62,8 @@
                 {{ csrf() }}<input type="hidden" name="action" value="perms">
                 <span class="eyebrow">{{ _("Huquqlar") }}</span>
                 {% for k, label in perms %}<label class="check"><input type="checkbox" name="perms" value="{{ k }}" {{ 'checked' if k in e.perms }}><span>{{ label }}</span></label>{% endfor %}
+                <span class="eyebrow">{{ _("Mavzulari (belgilanmasa — hammasi)") }}</span>
+                <div class="row wrap g-6">{% for aid, title in areas %}<label class="check chip-check"><input type="checkbox" name="areas" value="{{ aid }}" {{ 'checked' if aid in e.area_ids }}><span>{{ title }}</span></label>{% endfor %}</div>
                 <div><button class="btn btn-outline btn-sm" type="submit">{{ _("Huquqlarni saqlash") }}</button></div>
               </form>
               <div class="stack stack-sm">
@@ -95,10 +97,10 @@
     <div class="field" x-data="rmContact({{ (form.contact or '')|tojson|forceescape }})"><label class="label" for="x-contact">{{ _("Telefon yoki email (login)") }}</label>
       <input class="input" id="x-contact" name="contact" x-model="contact" placeholder="{{ _('+998 90 123 45 67 yoki ism@maktab.uz') }}" required autocomplete="off" aria-describedby="contact-err x-contact-hint" :aria-invalid="!!err('contact')" @input="clear('contact')">
       {{ field_error("contact", errors) }}
-      <span class="hint" id="x-contact-hint" x-text="kind === 'phone' ? {{ _('Taklif havolasi shu raqamga ulangan Telegram orqali yuboriladi. Ekspert havolani ochib, parolni o‘zi o‘rnatadi.')|tojson|forceescape }} : (kind === 'email' ? {{ _('Taklif havolasi shu emailga xat bilan yuboriladi. Ekspert havolani ochib, parolni o‘zi o‘rnatadi.')|tojson|forceescape }} : {{ _('Ekspert shu telefon raqam yoki email bilan tizimga kiradi. Taklif havolasi shu manzilga yuboriladi.')|tojson|forceescape }})">{{ _("Ekspert shu telefon raqam yoki email bilan tizimga kiradi. Taklif havolasi shu manzilga yuboriladi.") }}</span></div>
+      <span class="hint" id="x-contact-hint" x-text="kind === 'phone' ? {{ _('Ekspert shu raqam bilan kiradi. Taklif havolasini nusxalab, o‘ziga yuborasiz — parolni u o‘zi o‘rnatadi.')|tojson|forceescape }} : (kind === 'email' ? {{ _('Ekspert shu email bilan kiradi. Taklif havolasini nusxalab, o‘ziga yuborasiz — parolni u o‘zi o‘rnatadi.')|tojson|forceescape }} : {{ _('Ekspert shu telefon raqam yoki email bilan tizimga kiradi. Taklif havolasini nusxalab, o‘ziga yuborasiz.')|tojson|forceescape }})">{{ _("Ekspert shu telefon raqam yoki email bilan tizimga kiradi. Taklif havolasini nusxalab, o‘ziga yuborasiz.") }}</span></div>
     <fieldset class="fieldset-reset stack stack-sm">
-      <legend class="label">{{ _("Yo‘nalishlar") }}</legend>
-      <div class="row wrap g-6" @change="clear('areas')">{% for a in areas %}<label class="check chip-check"><input type="checkbox" name="areas" value="{{ a }}"><span>{{ a }}</span></label>{% endfor %}</div>
+      <legend class="label">{{ _("Mavzulari (belgilanmasa — hammasi)") }}</legend>
+      <div class="row wrap g-6" @change="clear('areas')">{% for aid, title in areas %}<label class="check chip-check"><input type="checkbox" name="areas" value="{{ aid }}"><span>{{ title }}</span></label>{% endfor %}</div>
       {{ field_error("areas", errors) }}
     </fieldset>
     <fieldset class="fieldset-reset stack stack-sm">
@@ -106,7 +108,7 @@
       <div @change="clear('perms')">{% for k, label in perms %}<label class="check"><input type="checkbox" name="perms" value="{{ k }}" {{ 'checked' if k in ['questions', 'review'] }}><span>{{ label }}</span></label>{% endfor %}</div>
       {{ field_error("perms", errors) }}
     </fieldset>
-    <div class="row"><button class="btn btn-ghost" type="button" @click="add = false">{{ _("Bekor qilish") }}</button><button class="btn btn-primary grow" type="submit" :disabled="busy">{{ _("Qo‘shish va taklif yuborish") }}</button></div>
+    <div class="row"><button class="btn btn-ghost" type="button" @click="add = false">{{ _("Bekor qilish") }}</button><button class="btn btn-primary grow" type="submit" :disabled="busy">{{ _("Taklifnoma tayyorlash") }}</button></div>
   </form>
 </div>
 </div>

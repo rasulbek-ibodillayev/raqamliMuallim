@@ -1,0 +1,30 @@
+{% extends "layouts/panel.html" %}
+{% block title %}{{ _("Jurnal") }}{% endblock %}
+{% block heading %}{{ _("Jurnal") }}{% endblock %}
+{% block content %}
+{% call page_head(_("Amallar jurnali"), _("Admin va ekspertlarning barcha o‘zgartirishlari: kim, qachon, nima qildi")) %}
+<form action="{{ url_for('admin.journal') }}" method="get" x-data @change="$el.requestSubmit()">
+  <select class="w-auto select" name="tur" aria-label="{{ _('Turi') }}"><option value="">{{ _("Hammasi") }}</option>{% for k, l in entities.items() %}<option value="{{ k }}" {{ 'selected' if entity == k }}>{{ l }}</option>{% endfor %}</select>
+  <noscript><button class="btn btn-outline" type="submit">{{ _("Filtrlash") }}</button></noscript>
+</form>
+{% endcall %}
+<div class="stack">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{ _("Vaqt") }}</th><th>{{ _("Kim") }}</th><th>{{ _("Nima") }}</th><th>{{ _("Amal") }}</th><th>{{ _("Tafsilot") }}</th></tr></thead>
+      <tbody>
+        {% for r in j.rows %}
+        <tr><td class="nowrap muted num">{{ r.when }}</td><td class="nowrap">{{ r.who }}</td><td class="nowrap">{{ r.entity }} <span class="num muted">#{{ r.id }}</span></td><td>{{ r.action }}</td><td class="small muted">{{ r.note }}</td></tr>
+        {% else %}<tr><td colspan="5" class="muted">{{ _("Hali yozuv yo‘q.") }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if j.pages > 1 %}
+  <nav class="pager" aria-label="{{ _('Sahifalar') }}">
+    <a class="btn btn-outline btn-sm {{ 'disabled' if j.page == 1 }}" href="{{ url_for('admin.journal', sahifa=j.page - 1, tur=entity) }}" aria-label="{{ _('Oldingi sahifa') }}">{{ icon("arrow-left", "ico-sm") }}</a>
+    <span class="xs muted">{{ j.page }} / {{ j.pages }}</span>
+    <a class="btn btn-outline btn-sm {{ 'disabled' if j.page == j.pages }}" href="{{ url_for('admin.journal', sahifa=j.page + 1, tur=entity) }}" aria-label="{{ _('Keyingi sahifa') }}">{{ icon("arrow-right", "ico-sm") }}</a>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

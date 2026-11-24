@@ -3,9 +3,10 @@ import re
 
 import pytest
 
+from app.cli import demo_user
 from tests.conftest import JSON
 
-NEW = {"name": "Nodira Saidova", "contact": "93 555 11 22", "areas": ["Dasturlash"], "perms": ["questions"]}
+NEW = {"name": "Nodira Saidova", "contact": "93 555 11 22", "perms": ["questions"]}
 
 
 def _invite_link(admin, **form):
@@ -18,14 +19,16 @@ def _invite_link(admin, **form):
 def test_admin_invites_expert_by_phone_and_email(as_role):
     admin = as_role("admin")
     msg, links = _invite_link(admin)
-    assert "Telegram" in msg and "+998 93 555 11 22" in msg and len(links) == 1
+    assert "72 soat" in msg and len(links) == 1
     msg, links = _invite_link(admin, name="Ali Valiyev", contact="Ali.V@Maktab.uz")
-    assert "ali.v@maktab.uz manziliga" in msg and len(links) == 2
+    assert len(links) == 2
 
 
-def test_invite_validation(as_role):
+def test_invite_validation(app, as_role):
     admin = as_role("admin")
-    r = admin.post("/admin/ekspertlar", data={**NEW, "contact": "zuhra.q@raqamlimuallim.uz"}, headers=JSON)
+    with app.app_context():
+        demo_user("expert")
+    r = admin.post("/admin/ekspertlar", data={**NEW, "contact": "Ekspert@raqamlimuallim.uz"}, headers=JSON)
     assert r.status_code == 422 and "allaqachon" in r.json["errors"]["contact"]
     r = admin.post("/admin/ekspertlar", data={**NEW, "name": "Nodira", "contact": "123"}, headers=JSON)
     assert set(r.json["errors"]) == {"name", "contact"}
@@ -47,11 +50,12 @@ def test_expert_sets_password_via_link(app, as_role):
 def test_resend_and_cancel_revoke_old_link(app, as_role):
     admin = as_role("admin")
     _, (old,) = _invite_link(admin)
-    admin.post("/admin/ekspertlar/taklif", data={"action": "resend", "contact": "+998935551122"}, headers=JSON)
+    iid = old.split("/")[-1].split("-")[0]
+    admin.post("/admin/ekspertlar/taklif", data={"action": "resend", "id": iid}, headers=JSON)
     html = admin.get("/admin/ekspertlar").get_data(as_text=True)
     (new,) = re.findall(r'data-copy-text="http://localhost(/taklif/[^"]+)"', html)
     assert new != old and app.test_client().get(old).status_code == 404
-    admin.post("/admin/ekspertlar/taklif", data={"action": "cancel", "contact": "+998935551122"}, headers=JSON)
+    admin.post("/admin/ekspertlar/taklif", data={"action": "cancel", "id": iid}, headers=JSON)
     assert app.test_client().get(new).status_code == 404
     assert "Javob kutayotgan" not in admin.get("/admin/ekspertlar").get_data(as_text=True)
 

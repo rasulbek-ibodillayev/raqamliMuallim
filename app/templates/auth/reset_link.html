@@ -1,0 +1,25 @@
+{% extends "layouts/auth.html" %}
+{# Admin bergan bir martalik parol havolasi (app/invites.reset_token): foydalanuvchi parolni o'zi o'rnatadi #}
+{% block title %}{{ _("Yangi parol") }}{% endblock %}
+{% block content %}
+{% if user %}
+<form class="stack stack-lg" action="{{ request.path }}" method="post" novalidate
+      x-data="rmForm({ show: false, show2: false })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+  {% include "partials/form_open.html" %}
+  <div class="stack stack-sm"><h1>{{ _("Yangi parol o‘rnating") }}</h1><p class="lead">{{ _("Parolni faqat siz bilasiz — administrator uni ko‘rmaydi.") }}</p></div>
+  <div class="field"><label class="label" for="rl-1">{{ _("Yangi parol") }}</label>
+    <div class="input-group"><input class="input" id="rl-1" name="p1" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required placeholder="{{ _('Kamida 8 ta belgi, harf va raqam') }}" aria-describedby="p1-err" :aria-invalid="!!err('p1')" @input="clear('p1')">{{ eye("show") }}</div>
+    {{ field_error("p1", errors) }}</div>
+  <div class="field"><label class="label" for="rl-2">{{ _("Parolni takrorlang") }}</label>
+    <div class="input-group"><input class="input" id="rl-2" name="p2" :type="show2 ? 'text' : 'password'" type="password" autocomplete="new-password" required aria-describedby="p2-err" :aria-invalid="!!err('p2')" @input="clear('p2')">{{ eye("show2") }}</div>
+    {{ field_error("p2", errors) }}</div>
+  <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Parolni saqlash") }}</button>
+</form>
+{% else %}
+<div class="stack stack-lg">
+  <h1>{{ _("Havola ishlamaydi") }}</h1>
+  <p class="lead">{{ _("Havola ishlatilgan yoki muddati o‘tgan. Administratordan yangisini so‘rang yoki parolni o‘zingiz tiklang.") }}</p>
+  <a class="btn btn-primary btn-block" href="{{ url_for('auth.reset') }}">{{ _("Parolni tiklash") }}</a>
+</div>
+{% endif %}
+{% endblock %}

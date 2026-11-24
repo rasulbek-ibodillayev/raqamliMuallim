@@ -203,7 +203,7 @@ def test_dates_follow_exam_date(ctx):
     p = plan()
     assert [t["start"] for t in p.topics[:3]] == [today + timedelta(days=d) for d in (0, 2, 4)]
     assert p.summary["exam"] is None and p.summary["per_day"] == "2 kunda 1 mavzu"
-    u.exam_date = today + timedelta(days=pl.RESERVE_DAYS + 70)                   # 70 kun / 7 mavzu = 10 kunda bitta
+    u.exam_date = today + timedelta(days=3 + 70)                   # 70 kun / 7 mavzu = 10 kunda bitta
     db.session.commit()
     p = plan()
     assert p.topics[1]["start"] == today + timedelta(days=10) and p.summary["days_left"] == 73

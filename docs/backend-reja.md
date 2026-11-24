@@ -19,8 +19,8 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 7b | ✅ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazada (mavzu, dars, kichik mavzu, 9 tur blok, shablon tanlash; bir vaqtda tahrirlashdan himoya), e'tirozlarni ko'rib chiqish va natijalarni qayta hisoblash (faqat foydaga), rad etilgan AI savolini natijadan chiqarish, ixcham `notifications`, Excel eksport (import formatida, qayta yuklash takrorlamaydi), variant izohlari va kod maydoni, `expert_profiles` (huquqlar va mavzular; admin oynasi — 8-bosqichda) | — |
 | 7c | ✅ Takrorlanmaslik va xotira | Ko'rilgan savollar bitmapi (`user_seen`), takroriy savol berilmaydi, shablon generator (37 ta shablon, kichik mavzuga `generators` orqali bog'lanadi), xato boshqa savol bilan tuzatiladi, `at` tozalanadi, 7 kundan eski urinishlar siqiladi (`flask eski-testlarni-siqish`; jadval bo'yicha ishga tushirish — 10-bosqichda) | — |
 | 7d | ⏳ Savol formatlari | `lang` (JS, HTML, CSS, LOGO…), Excel panjarasi, Scratch bloklari, LOGO chizmasi, HTML/CSS ko'rinishi, Office ikonkalari | — |
-| 8 | ⏳ Admin paneli | Foydalanuvchilar, sozlamalar (`settings`), imtihon sanasi, `expert_invites` jadvali, `audit_log`, Excel/CSV import va eksport | 5 |
-| 9 | ⏳ Himoya | Kirish va kod yuborishni cheklash (IP va login bo'yicha, PostgreSQL'da), xavfsizlik tekshiruvi; `last_seen_at`ni kuniga bir marta yangilash | — |
+| 8 | ✅ Admin paneli | Statistika va CSV hisobot, foydalanuvchilar (filtr, karta, bloklash, parol havolasi, o'chirish, CSV), attestatsiya sanasi va uni Excel'dan yuklash, ekspertlar va taklifnomalar (`expert_invites`, token bazada saqlanmaydi), huquq va mavzular, sozlamalar (`services/settings.py`), amallar jurnali, `daily_stats`, `question_stats`; `last_seen_at` kuniga bir marta yangilanadi | 5 |
+| 9 | ⏳ Himoya | Kirish va kod yuborishni cheklash (IP va login bo'yicha, PostgreSQL'da), `MAX_CONTENT_LENGTH`, xavfsizlik tekshiruvi | — |
 | 10 | ⏳ Fon vazifalari | PostgreSQL `jobs` navbati (`SKIP LOCKED`) va bitta worker, Redis'siz: email, audio, savol tayyorlash, statistika | — |
 | 10b | ⏳ Faol bo'lmagan akkauntlar | 6 oy: 14 kun oldin ogohlantirish, o'chirish, fayllarni tozalash; ogohlantirish yuborilmagan bo'lsa o'chirilmaydi | 10, 11 yoki 12 |
 | 10c | ⏳ Oflayn paket | Mavzu darslari va dars testlarini oldindan yuklash (kalitsiz), 30 MB chegara | 7c |
@@ -80,7 +80,7 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
 
 ## Bog'liqliklar qisqacha
 
-- Bloklamaydi, hozirdanoq boshlash mumkin: A7d, A8, A9, A10.
+- Bloklamaydi, hozirdanoq boshlash mumkin: A7d, A9, A10.
 - B3/B4 kerak: A11/A12 (bot va email). Ungacha kod `123456` bo'lib qoladi.
 - B5 kerak: A13 (AI).
 - B7 va B8 kerak: A16 (serverga chiqarish).

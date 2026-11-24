@@ -17,8 +17,8 @@ CASES = [
     ("user", "/app/etiroz", {"question": "Q-1", "reason": "other"}, {"note"}),
     ("user", "/app/muhokama", {"body": ""}, {"body"}),
     ("user", "/app/eslatmalar", {"topic": "X", "text": ""}, {"text"}),
-    ("admin", "/admin/foydalanuvchilar/sana", {"user": "A", "date": "2000-01-01"}, {"date"}),
-    ("admin", "/admin/ekspertlar", {"name": "Ali"}, {"name", "contact", "areas", "perms"}),
+    ("admin", "/admin/foydalanuvchilar/sana", {"user": "1", "date": "2000-01-01"}, {"date"}),
+    ("admin", "/admin/ekspertlar", {"name": "Ali"}, {"name", "contact", "perms"}),
 ]
 
 

@@ -58,6 +58,7 @@ NAV = {
         ("admin.users", _l("Foydalanuvchilar"), "users", None),
         ("admin.experts", _l("Ekspertlar"), "shield", None),
         ("admin.settings", _l("Sozlamalar"), "settings", None),
+        ("admin.journal", _l("Jurnal"), "list", None),
     ],
 }
 
@@ -158,7 +159,7 @@ LEARN_PLAN = [
      "lessons": [_L("if operatori", 100, 29, "Kecha", mn=4), _L("if / else", 86, 30, "Bugun", mn=4),
                  _L("elif zanjiri", mn=6), _L("Ichma-ich shartlar", mn=6)],
      "test": None},
-    {"kind": "test", "type": "daily", "name": "Kunlik 5 talik test", "state": "done", "pct": 80, "min": 3, "rid": 9,
+    {"kind": "test", "type": "daily", "name": "Kunlik test", "state": "done", "pct": 80, "min": 3, "rid": 9,
      "note": "Ko‘p xato qilayotgan mavzulardan"},
     {"kind": "test", "type": "weekly", "name": "Haftalik test", "state": "due", "min": 20,
      "note": "Bugun yakshanba · o‘zlashtirilgan mavzulardan"},
@@ -208,7 +209,7 @@ def diagnostic_estimate(plan=None):
 PLAN_SUMMARY = {"done": 14, "total": 42, "avg": 88, "days_left": 38, "per_day": "≈ 1 mavzu", "exam": "23-dekabr",
                 "next_control": "2 mavzu"}
 TEST_TYPES = {
-    "diagnostic": ("Diagnostika testi", "target"), "topic": ("Mavzu testi", "clipboard"), "daily": ("Kunlik 5 talik test", "zap"),
+    "diagnostic": ("Diagnostika testi", "target"), "topic": ("Mavzu testi", "clipboard"), "daily": ("Kunlik test", "zap"),
     "exam": ("Attestatsiya testi", "clock"), "interim": ("Oraliq sinov testi", "flag"), "weekly": ("Haftalik test", "calendar"),
     "optional": ("Ixtiyoriy test", "settings"), "monthly": ("Oylik test", "calendar"), "final": ("Yakuniy diagnostika", "award"),
     "errors": ("Xatolar ustida ishlash", "target"), "lesson": ("Dars testi", "note"),
@@ -219,7 +220,7 @@ TEST_TYPES = {
 RESULTS = [
     {"id": 30, "type": "lesson", "name": "Dars testi: if / else", "when": "Bugun, 15:05", "pct": 86, "decision": "warn", "n": 3, "min": 3},
     {"id": 29, "type": "lesson", "name": "Dars testi: if operatori", "when": "Kecha, 19:30", "pct": 100, "decision": "pass", "n": 3, "min": 3},
-    {"id": 9, "type": "daily", "name": "Kunlik 5 talik test", "when": "Bugun, 08:10", "pct": 80, "decision": "warn", "n": 5, "min": 3},
+    {"id": 9, "type": "daily", "name": "Kunlik test", "when": "Bugun, 08:10", "pct": 80, "decision": "warn", "n": 5, "min": 3},
     {"id": 1, "type": "topic", "name": "Sanoq sistemalari (2-urinish)", "when": "Bugun, 14:20", "pct": 92, "decision": "pass", "n": 4, "min": 4},
     {"id": 8, "type": "errors", "name": "Xatolar ustida ishlash", "when": "Kecha, 20:05", "pct": 70, "decision": "warn", "n": 10, "min": 8},
     {"id": 2, "type": "interim", "name": "Oraliq sinov testi: 1–3 mavzular", "when": "Kecha, 18:45", "pct": 78, "decision": "warn", "n": 30, "min": 35},
@@ -280,12 +281,12 @@ TEST_TYPE_INFO = [
     ("diagnostic", _l("Tizimga birinchi kirganda (ixtiyoriy). O‘quv reja shu natijadan tuziladi.")),
     ("lesson", _l("Har dars so‘ngida 3 ta savol (majburiy). 70% dan past — dars qayta o‘zlashtiriladi, 70–89% — tavsiya bilan keyingi darsga o‘tasiz.")),
     ("topic", _l("Mavzu darslari tugagach (majburiy). Savollar soni darslar sonidan 2 barobar, dars testlaridagi xatolaringiz turidan.")),
-    ("daily", _l("Har kuni 5 ta savol (majburiy): ko‘p xato qilayotgan mavzulardan.")),
+    ("daily", _l("Har kuni (majburiy): ko‘p xato qilayotgan mavzulardan.")),
     ("interim", _l("Har 3 ta o‘zlashtirilgan mavzudan keyin (majburiy).")),
     ("weekly", _l("Har yakshanba (ixtiyoriy): shu paytgacha o‘zlashtirilgan mavzulardan.")),
-    ("monthly", _l("Har 30 kunda (majburiy). Topshirilmaguncha keyingi mavzular ochilmaydi.")),
+    ("monthly", _l("Muntazam oraliqda (majburiy). Topshirilmaguncha keyingi mavzular ochilmaydi.")),
     ("optional", _l("O‘zlashtirgan mavzularingizdan, savollar sonini o‘zingiz tanlaysiz. O‘zlashtirish foiziga ta’sir qilmaydi.")),
-    ("exam", _l("35 ta savol, 120 daqiqa, real attestatsiya interfeysida (ixtiyoriy, istalgan paytda).")),
+    ("exam", _l("Real attestatsiya interfeysida, vaqt bilan (ixtiyoriy, istalgan paytda).")),
     ("final", _l("Barcha mavzular o‘zlashtirilgach. Natijasi bo‘yicha sertifikat beriladi.")),
 ]
 # Bosqichli testlar: oson → (to'g'ri javob berilgan mavzulardan) o'rta → qiyin. Noto'g'ri javob berilgan mavzu
@@ -373,7 +374,7 @@ TODAY = [
     {"title": "elif zanjiri", "sub": "Python: shart operatorlari · 3-bo‘lim", "min": 6, "done": False, "endpoint": "user.lesson", "icon": "book"},
     {"title": "Ichma-ich shartlar", "sub": "Python: shart operatorlari · 4-bo‘lim", "min": 6, "done": False, "endpoint": "user.lesson", "icon": "book"},
     {"title": "Mavzu testi", "sub": "Majburiy · 8 savol", "min": 8, "done": False, "endpoint": "test.question", "args": {"turi": "mavzu", "soni": 8}, "icon": "clipboard"},
-    {"title": "Kunlik 5 talik test", "sub": "Majburiy · ko‘p xato qilayotgan mavzulardan", "min": 3, "done": True, "endpoint": "test.question", "args": {"turi": "kunlik"}, "icon": "zap"},
+    {"title": "Kunlik test", "sub": "Majburiy · ko‘p xato qilayotgan mavzulardan", "min": 3, "done": True, "endpoint": "test.question", "args": {"turi": "kunlik"}, "icon": "zap"},
 ]
 TODAY_CONTROL = {"title": "Oraliq sinov testi", "sub": "Majburiy · oxirgi 3 ta mavzu", "min": 35, "done": False, "endpoint": "user.control", "icon": "flag"}
 
@@ -427,90 +428,7 @@ Q_FORMATS = {"matn": _l("Matnli"), "chizma": _l("Chizmali"), "jadval": _l("Jadva
 Q_LEVELS = ["Oson", "O‘rta", "Qiyin"]
 
 # --- Admin ---
-KPI = [
-    ("Foydalanuvchilar", "1 248", "+34 ta bu hafta"),
-    ("Bugun faol", "312", "25% foydalanuvchilardan"),
-    ("Diagnostikani tugatgan", "61%", "Maqsad ≥ 60%"),
-]
-DAU = [240, 268, 255, 290, 301, 276, 312]
-HARD_TOPICS = [("Ikkilik va o‘nlik sanoq sistemalari", 68), ("De Morgan qonunlari", 59),
-               ("Ikkilik qidiruv algoritmi", 54), ("Funksiyalar va rekursiya", 47), ("Graf va daraxtlar", 41)]
-USERS = [
-    # (ism, initsial, aloqa, viloyat, o'tilgan mavzu, oxirgi faollik, faol, attestatsiya sanasi YYYY-MM-DD yoki None)
-    # Ro'yxatdagi tartib raqami (1 dan) — namunada foydalanuvchi ID'si: /admin/foydalanuvchilar/<id>
-    ("Dilnoza Karimova", "DK", "+998 90 123 45 67", "Toshkent sh.", 14, "Bugun 11:42", True, "2026-12-23"),
-    ("Javlon Toshmatov", "JT", "+998 93 456 78 90", "Samarqand vil.", 38, "Kecha 18:20", True, "2026-12-05"),
-    ("Nigora Mirzayeva", "NM", "+998 97 712 34 56", "Farg‘ona vil.", 21, "3 kun oldin", True, None),
-    ("Sardor Aliyev", "SA", "sardor@maktab.uz", "Buxoro vil.", 4, "12 kun oldin", False, None),
-    ("Malika Yusupova", "MY", "+998 91 222 33 44", "Andijon vil.", 30, "Bugun 09:10", True, "2027-01-14"),
-]
-QUESTIONS = [
-    ("Rekursiv funksiyaning maksimal chaqiruv chuqurligi qanday oshiriladi?", "Funksiyalar", "Oson", "Yopiq", "approved", 42, True),
-    ("1101101₂ sonini o‘n oltilik sanoq sistemasiga o‘tkazing.", "Sanoq sistemalari", "O‘rta", "Ochiq", "approved", 71, False),
-    ("HTTP, DNS, FTP protokollarini vazifasi bilan moslang.", "Tarmoqlar", "Oson", "Moslashtirish", "review", None, False),
-    ("Qaysilari kiritish qurilmalari?", "Kompyuter qurilmalari", "Oson", "Ko‘p javobli", "draft", None, False),
-    ("for sikli necha marta bajariladi?", "Sikllar", "Qiyin", "Yopiq", "archived", 88, True),
-]
 Q_STATE = {"approved": (_l("Tasdiqlangan"), "green"), "review": (_l("Tekshiruvda"), "yellow"),
            "draft": (_l("Qoralama"), "gray"), "archived": (_l("Arxivlangan"), "gray"), "paused": (_l("To‘xtatilgan"), "red")}
-TOPIC_TREE = [
-    ("Dasturlash asoslari", [("Python asoslari", 8), ("Python: shart operatorlari", 14), ("Sikllar", 14), ("Funksiyalar va modullar", 19)]),
-    ("Algoritmlar va ma’lumotlar tuzilmasi", [("Saralash algoritmlari", 22), ("Qidiruv algoritmlari", 9)]),
-    ("Kompyuter tarmoqlari", [("IP-manzillash", 16), ("Protokollar", 11)]),
-    ("Ma’lumotlar bazasi va SQL", [("Relyatsion model", 6)]),
-]
-
-
-# --- Admin: foydalanuvchi tafsiloti (namunada hamma uchun bir xil tarix, ism/aloqa USERS'dan) ---
-USER_DETAIL = {
-    "registered": "8-noyabr, 2026", "auth": ["Telegram", "Google"], "email": "dilnoza.k@maktab.uz",
-    "school": "Toshkent sh., 110-maktab", "experience": "12 yil", "category": "Birinchi toifa",
-    "readiness": 68, "study_hours": 21.5, "streak": 6, "tests": 18, "avg": 79, "ai_requests": 64,
-    "devices": [("Android · Chrome (PWA o‘rnatilgan)", "Bugun 11:42"), ("Windows · Edge", "3 kun oldin")],
-    "activity": [
-        ("Bugun 11:42", "Mavzu testi topshirildi", "Funksiyalar va modullar · 92% · o‘tdi"),
-        ("Bugun 11:05", "Dars o‘qildi", "Funksiyalar va modullar · 100%"),
-        ("Kecha 18:45", "Oraliq nazorat", "3 ta mavzu · 78% · tavsiya bilan"),
-        ("Kecha 18:02", "E’tiroz yuborildi", "#Q-84920 · ko‘rib chiqilmoqda"),
-        ("12-noyabr", "Mavzu testi", "Sanoq sistemalari va mantiq · 62% · qaytarildi"),
-        ("8-noyabr", "Diagnostika yakunlandi", "Boshlang‘ich daraja 70%"),
-        ("8-noyabr", "Ro‘yxatdan o‘tdi", "Telegram orqali"),
-    ],
-}
-
-# --- Admin: ekspertlar ---
-EXPERTS = [
-    # id, ism, initsial, aloqa, yo'nalishlar, yaratgan, tekshirgan, e'tiroz hal qilgan, o'rtacha javob vaqti, faol, oxirgi faollik, huquqlar
-    {"id": 1, "name": "Zuhra Qodirova", "ini": "ZQ", "contact": "zuhra.q@raqamlimuallim.uz", "areas": ["Mantiq asoslari", "Dasturlash"],
-     "created": 142, "reviewed": 388, "objections": 41, "resp": "3 soat", "active": True, "last": "Bugun 10:20",
-     "perms": ["questions", "review", "topics", "objections"]},
-    {"id": 2, "name": "Alisher Rustamov", "ini": "AR", "contact": "+998 90 777 12 34", "areas": ["Algoritmlar", "Ma’lumotlar bazasi"],
-     "created": 96, "reviewed": 210, "objections": 18, "resp": "7 soat", "active": True, "last": "Kecha 21:05",
-     "perms": ["questions", "review", "objections"]},
-    {"id": 3, "name": "Kamola Ergasheva", "ini": "KE", "contact": "kamola.e@raqamlimuallim.uz", "areas": ["Kompyuter tarmoqlari"],
-     "created": 37, "reviewed": 64, "objections": 5, "resp": "26 soat", "active": True, "last": "4 kun oldin",
-     "perms": ["questions", "review"]},
-    {"id": 4, "name": "Bobur Nazarov", "ini": "BN", "contact": "+998 93 101 20 30", "areas": ["Ofis dasturlari"],
-     "created": 12, "reviewed": 8, "objections": 0, "resp": "—", "active": False, "last": "2 oy oldin",
-     "perms": ["questions"]},
-]
 EXPERT_PERMS = [("questions", _l("Savol yaratish va tahrirlash")), ("review", _l("Savollarni tekshirish va tasdiqlash")),
                 ("topics", _l("Mavzular va darslarni tahrirlash")), ("objections", _l("E’tirozlarni ko‘rib chiqish"))]
-CONTENT_AREAS = ["Dasturlash", "Algoritmlar", "Mantiq asoslari", "Axborot va kodlash", "Kompyuter tarmoqlari",
-                 "Ma’lumotlar bazasi", "Ofis dasturlari"]
-
-# --- Admin: statistika ---
-STATS = {
-    "kpi": [("Foydalanuvchilar", "1 248", "+34 bu hafta", "users"), ("Kunlik faol", "312", "25% · o‘tgan haftadan +8%", "zap"),
-            ("O‘rtacha tayyorlik", "64%", "+3 p.p. bu oy", "target"), ("Sertifikatlar", "87", "+12 bu oy", "award"),
-            ("Diagnostikani tugatgan", "61%", "Maqsad ≥ 60%", "check-circle")],
-    "signups": [18, 24, 31, 22, 40, 36, 34, 29, 45, 38, 41, 52],
-    "funnel": [("Ro‘yxatdan o‘tgan", 1248), ("Diagnostikani tugatgan", 761), ("Birinchi darsni o‘qigan", 702),
-               ("Birinchi mavzu testini topshirgan", 655), ("Yarim kursdan o‘tgan", 388), ("Sertifikat olgan", 87)],
-    "regions": [("Toshkent shahri", 248), ("Samarqand viloyati", 156), ("Farg‘ona viloyati", 141), ("Andijon viloyati", 128),
-                ("Toshkent viloyati", 117), ("Qashqadaryo viloyati", 102), ("Boshqa viloyatlar", 356)],
-    "devices": [("Telefon", 71), ("Kompyuter", 24), ("Planshet", 5)],
-    "pwa": 38,
-    "content": [("Tasdiqlangan savollar", "2 140"), ("Tekshiruvda", "86"), ("Ochiq e’tirozlar", "3"), ("O‘rtacha tekshiruv vaqti", "9 soat")],
-    "inactive": [("3–6 oy kirmagan", 42), ("O‘chirishga 2 haftadan kam qolgan", 7), ("Shu oy avtomatik o‘chirilgan", 11)],
-}

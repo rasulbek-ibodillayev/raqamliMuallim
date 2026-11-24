@@ -625,7 +625,8 @@ def test_invite_saves_rights(app, guest):
     from app import invites
     with app.app_context():
         sec = db.session.scalar(select(Section.id).where(Section.title == "Dasturlash"))
-        token = invites.make("Nodira Saidova", "+998935551199", ["Dasturlash", "Yo‘q mavzu"], ["questions", "review", "begona"])
+        token = invites.token(invites.make("Nodira Saidova", "+998935551199", [sec], ["questions", "review", "begona"]))
+        db.session.commit()
     r = guest.post(f"/taklif/{token}", data={"pw": "ekspert123", "pw2": "ekspert123", "secret": "metodika", "agree": "1"}, headers=JSON)
     assert r.json["ok"]
     with app.app_context():

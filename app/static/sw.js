@@ -6,7 +6,7 @@
    - PAGES: faqat o'qituvchi sahifalari (/app/, /test/) — oflayn ochish uchun. Eng ko'pi PAGE_LIMIT ta,
      eskisi o'chiriladi. Ekspert/admin panellari, kirish sahifalari va /api/ javoblari keshlanmaydi
      (shaxsiy yoki tez o'zgaradigan ma'lumot). Chiqishda (/chiqish) server Clear-Site-Data bilan hammasini tozalaydi. */
-var VERSION = "rm-v10";
+var VERSION = "rm-v11";
 var STATIC = VERSION + "-static", PAGES = VERSION + "-pages", PAGE_LIMIT = 50;
 var CORE = [
   "/static/css/app.css",

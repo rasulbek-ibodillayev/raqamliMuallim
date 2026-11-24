@@ -2,48 +2,49 @@
 {% block title %}{{ u.name }}{% endblock %}
 {% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('admin.users') }}" aria-label="{{ _('Foydalanuvchilarga qaytish') }}">{{ icon("arrow-left") }}</a>{{ _("Foydalanuvchi") }}</span>{% endblock %}
 {% block content %}
-{# Admin uchun o'qituvchining to'liq kartasi: profil, tayyorlik, mavzular holati, testlar, xatolar, e'tirozlar, faollik, qurilmalar.
-   Faqat ko'rish va boshqaruv amallari (sana, bloklash, parol, o'chirish); kontentga tegmaydi. #}
-{% set mastered = [] %}{% for sec in sections %}{% for t in sec.topics %}{% if t.status in ["done", "solid"] %}{% set _ = mastered.append(t) %}{% endif %}{% endfor %}{% endfor %}
-<div class="stack stack-lg" x-data="{ edit: null, saved: '', confirm: '' }" @rm-saved="saved = $event.detail; edit = null">
+{# O'qituvchining to'liq kartasi (services/admin_users.card). Faqat ko'rish va boshqaruv amallari; kontentga tegmaydi. #}
+<div class="stack stack-lg" x-data="{ edit: null, saved: '' }" @rm-saved="saved = $event.detail; edit = null">
   <div class="alert alert-green" x-show="saved" x-cloak role="status">{{ icon("check-circle") }}<span x-text="saved"></span></div>
+  {% if reset_link %}
+  <div class="alert alert-yellow alert-col" role="status">
+    <div class="row row-sm strong">{{ icon("lock", "ico-sm") }}{{ _("Parolni tiklash havolasi (24 soat, bir martalik)") }}</div>
+    <p class="small">{{ _("Havolani faqat shu o‘qituvchining o‘ziga yuboring. Sahifa yangilansa, u qayta ko‘rsatilmaydi.") }}</p>
+    <div class="row wrap row-sm"><input class="input grow minw-220 num" readonly value="{{ reset_link }}" aria-label="{{ _('Havola') }}"><button class="btn btn-outline btn-sm" type="button" data-copy-text="{{ reset_link }}">{{ icon("copy", "ico-sm") }}<span>{{ _("Havolani nusxalash") }}</span></button></div>
+  </div>
+  {% endif %}
 
-  <!-- Profil sarlavhasi -->
   <section class="card card-pad">
     <div class="row wrap items-start g-16">
       <span class="avatar lg">{{ u.ini }}</span>
       <div class="grow stack stack-sm">
         <div class="row row-sm wrap"><h1 class="text-h2l">{{ u.name }}</h1>{{ status_dot(_("Faol"), "green") if u.active else badge(_("Bloklangan"), "red") }}</div>
-        <p class="small muted">{{ _("ID") }} {{ u.id }} · {{ u.school }} · {{ u.category }}{{ _(", staj") }} {{ u.experience }}</p>
+        <p class="small muted">{{ _("ID") }} {{ u.id }}</p>
         <div class="row wrap row-sm small">
-          <span class="chip">{{ icon("phone", "ico-sm") }}<span class="num">{{ u.contact }}</span></span>
-          <span class="chip">{{ icon("mail", "ico-sm") }}{{ u.email }}</span>
-          <span class="chip">{{ icon("home", "ico-sm") }}{{ u.region }}</span>
+          {% if u.phone %}<span class="chip">{{ icon("phone", "ico-sm") }}<span class="num">{{ u.phone }}</span></span>{% endif %}
+          {% if u.email %}<span class="chip">{{ icon("mail", "ico-sm") }}{{ u.email }}</span>{% endif %}
+          {% if u.region %}<span class="chip">{{ icon("home", "ico-sm") }}{{ u.region }}</span>{% endif %}
           {% for a in u.auth %}<span class="chip">{{ icon("telegram" if a == "Telegram" else "lock", "ico-sm") }}{{ a }} {{ _("orqali kiradi") }}</span>{% endfor %}
         </div>
       </div>
       <div class="row wrap row-sm">
         <form method="post" action="{{ url_for('admin.user_status', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="reset">
-          <button class="btn btn-outline btn-sm" type="submit">{{ icon("lock", "ico-sm") }}{{ _("Parolni tiklash") }}</button></form>
+          <button class="btn btn-outline btn-sm" type="submit">{{ icon("lock", "ico-sm") }}{{ _("Parol havolasi") }}</button></form>
         <form method="post" action="{{ url_for('admin.user_status', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="{{ 'block' if u.active else 'unblock' }}">
-          <button class="btn btn-outline btn-sm" type="submit">{{ icon("shield", "ico-sm") }}{{ "Bloklash" if u.active else "Blokdan chiqarish" }}</button></form>
+          <button class="btn btn-outline btn-sm" type="submit">{{ icon("shield", "ico-sm") }}{{ _("Bloklash") if u.active else _("Blokdan chiqarish") }}</button></form>
       </div>
     </div>
   </section>
 
-  <!-- Asosiy ko'rsatkichlar -->
-  <div class="grid-4">
+  <div class="grid-3">
     <div class="card stat"><div class="small muted">{{ _("Attestatsiyaga tayyorlik") }}</div><div class="stat-value num">{{ u.readiness }}%</div>{{ progress(u.readiness, "blue", "thin") }}</div>
-    <div class="card stat"><div class="small muted">{{ _("O‘zlashtirilgan mavzular") }}</div><div class="stat-value num">{{ u.done }} / 42</div><div class="stat-sub">{{ _("Namunadagi ro‘yxatda:") }} {{ mastered|length }} {{ _("ta") }}</div></div>
-    <div class="card stat"><div class="small muted">{{ _("Testlar · o‘rtacha ball") }}</div><div class="stat-value num">{{ u.tests }} · {{ u.avg }}%</div><div class="stat-sub">{{ _("Oxirgi 6 ta:") }} {{ trend|join(', ') }}%</div></div>
-    <div class="card stat"><div class="small muted">{{ _("O‘qish vaqti") }}</div><div class="stat-value num">{{ u.study_hours }} {{ _("soat") }}</div><div class="stat-sub">{{ _("Ketma-ket") }} {{ u.streak }} {{ _("kun · AI so‘rovlari") }} {{ u.ai_requests }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("O‘zlashtirilgan mavzular") }}</div><div class="stat-value num">{{ u.done }} / {{ u.topics }}</div></div>
+    <div class="card stat"><div class="small muted">{{ _("Testlar · o‘rtacha ball") }}</div><div class="stat-value num">{{ u.tests }}{% if u.avg is not none %} · {{ u.avg }}%{% endif %}</div></div>
   </div>
 
   <div class="grid u-cols-4a70e">
-    <!-- Mavzular holati -->
     <section class="card">
       <div class="card-head"><span class="strong">{{ _("Mavzular holati") }}</span><span class="xs muted">{{ _("bo‘limlar bo‘yicha") }}</span></div>
-      {% for sec in sections %}
+      {% for sec in u.sections %}
       <div class="card-pad stack stack-sm{{ ' bt' if not loop.first }}">
         <div class="row between small"><b>{{ sec.name }}</b><span class="num muted">{{ sec.pct }}%</span></div>
         <ul class="list-reset stack stack-sm">
@@ -53,68 +54,58 @@
           {% endfor %}
         </ul>
       </div>
-      {% endfor %}
+      {% else %}<p class="card-pad small muted">{{ _("Mavzular hali yo‘q.") }}</p>{% endfor %}
     </section>
 
     <div class="stack stack-lg">
-      <!-- Hisob ma'lumotlari -->
       <section class="card">
         <div class="card-head"><span class="strong">{{ _("Akkaunt") }}</span></div>
         <div class="list">
           <div class="list-item"><span class="grow small muted">{{ _("Ro‘yxatdan o‘tgan") }}</span><span class="small">{{ u.registered }}</span></div>
           <div class="list-item"><span class="grow small muted">{{ _("Oxirgi kirish") }}</span><span class="small">{{ u.last }}</span></div>
-          <div class="list-item"><span class="grow small muted">{{ _("Avtomatik o‘chirish") }}</span><span class="small">{{ _("6 oy kirilmasa · hozir xavf yo‘q") }}</span></div>
           <div class="list-item"><span class="grow small muted">{{ _("Attestatsiya sanasi") }}</span>
-            <button class="btn btn-ghost btn-sm u-p-0-8" type="button" @click="edit = { name: '{{ u.name }}', date: '{{ u.exam or '' }}' }">
-              {% if u.exam %}<span class="num">{{ u.exam[8:10] }}.{{ u.exam[5:7] }}.{{ u.exam[:4] }}</span>{% else %}<span class="t-yellow">{{ _("Kiritilmagan") }}</span>{% endif %}{{ icon("edit", "ico-sm faint") }}</button></div>
+            <button class="btn btn-ghost btn-sm u-p-0-8" type="button" @click="edit = {{ {'id': u.id, 'name': u.name, 'date': u.exam.isoformat() if u.exam else ''}|tojson|forceescape }}">
+              {% if u.exam %}<span class="num">{{ u.exam.strftime("%d.%m.%Y") }}</span>{% else %}<span class="t-yellow">{{ _("Kiritilmagan") }}</span>{% endif %}{{ icon("edit", "ico-sm faint") }}</button></div>
         </div>
       </section>
-
       <section class="card">
-        <div class="card-head"><span class="strong">{{ _("Qurilmalar") }}</span></div>
-        <div class="list">{% for d, when in u.devices %}<div class="list-item"><span class="list-ico">{{ icon("phone" if "Android" in d else "grid", "ico-sm") }}</span><span class="grow small">{{ d }}</span><span class="xs muted">{{ when }}</span></div>{% endfor %}</div>
-      </section>
-
-      <section class="card">
-        <div class="card-head"><span class="strong">{{ _("Ko‘p xato qilinadigan mavzular") }}</span></div>
-        <div class="list">{% for n, sec, c in weak %}<div class="list-item"><span class="grow small">{{ n }}<span class="d-block xs muted">{{ sec }}</span></span><span class="num small t-red">{{ c }} {{ _("ta xato") }}</span></div>{% endfor %}</div>
+        <div class="card-head"><span class="strong">{{ _("Ko‘p xato qilinadigan darslar") }}</span></div>
+        <div class="list">{% for n, sec, c in u.weak %}<div class="list-item"><span class="grow small">{{ n }}<span class="d-block xs muted">{{ sec }}</span></span><span class="num small t-red">{{ c }} {{ _("ta xato") }}</span></div>{% else %}<p class="card-pad small muted">{{ _("Tuzatilmagan xato yo‘q.") }}</p>{% endfor %}</div>
       </section>
     </div>
   </div>
 
-  <!-- Testlar tarixi -->
   <section class="card">
-    <div class="card-head"><span class="strong">{{ _("Testlar tarixi") }}</span><span class="xs muted">{{ results|length }} {{ _("ta oxirgi") }}</span></div>
+    <div class="card-head"><span class="strong">{{ _("Testlar tarixi") }}</span><span class="xs muted">{{ u.results|length }} {{ _("ta oxirgi") }}</span></div>
     <div class="table-wrap u-b-0">
       <table class="table">
-        <thead><tr><th>{{ _("Test") }}</th><th>{{ _("Turi") }}</th><th>{{ _("Sana") }}</th><th>{{ _("Natija") }}</th><th>{{ _("Qaror") }}</th></tr></thead>
-        <tbody>{% for r in results %}{% set dl, dc = decision[r.decision] %}
-          <tr><td>{{ r.name }}</td><td class="muted nowrap">{{ r.kind }}</td><td class="muted nowrap">{{ r.when }}</td><td class="num">{{ r.pct }}%</td><td>{{ badge(dl, dc) }}</td></tr>
-        {% endfor %}</tbody>
+        <thead><tr><th>{{ _("Test") }}</th><th>{{ _("Sana") }}</th><th>{{ _("Natija") }}</th><th>{{ _("Qaror") }}</th></tr></thead>
+        <tbody>{% for r in u.results %}{% set dl, dc = decision[r.decision] %}
+          <tr><td>{{ r.name }}</td><td class="muted nowrap">{{ r.when }}</td><td class="num">{{ r.pct }}%</td><td>{{ badge(dl, dc) }}</td></tr>
+        {% else %}<tr><td colspan="4" class="muted">{{ _("Hali test topshirmagan.") }}</td></tr>{% endfor %}</tbody>
       </table>
     </div>
   </section>
 
   <div class="grid u-cols-4a70e">
     <section class="card">
-      <div class="card-head"><span class="strong">{{ _("Faollik jurnali") }}</span></div>
+      <div class="card-head"><span class="strong">{{ _("So‘nggi harakatlar") }}</span></div>
       <ol class="list-reset list">{% for when, what, sub in u.activity %}
         <li class="list-item"><span class="xs muted u-w-110 nowrap">{{ when }}</span><span class="grow small"><b>{{ what }}</b><span class="d-block xs muted">{{ sub }}</span></span></li>
       {% endfor %}</ol>
     </section>
     <section class="card">
       <div class="card-head"><span class="strong">{{ _("E’tirozlari") }}</span></div>
-      <div class="list">{% for o in objections %}{% set ol, oc = obj_state[o.state] %}
+      <div class="list">{% for o in u.objections %}{% set ol, oc = obj_state[o.state] %}
         <div class="list-item"><span class="grow small clamp-2">{{ o.q }}<span class="d-block xs muted">{{ o.when }}</span></span>{{ badge(ol, oc) }}</div>
-      {% endfor %}</div>
+      {% else %}<p class="card-pad small muted">{{ _("E’tiroz bildirmagan.") }}</p>{% endfor %}</div>
     </section>
   </div>
 
-  <!-- Xavfli amal -->
   <section class="card card-pad stack stack-sm u-border-style-dashed">
     <span class="strong t-red">{{ _("Akkauntni o‘chirish") }}</span>
-    <p class="small muted">{{ _("Foydalanuvchi va uning barcha ma’lumotlari (natijalar, eslatmalar, e’tirozlar) butunlay o‘chiriladi. Berilgan sertifikatlar bekor qilinadi. Bu amalni qaytarib bo‘lmaydi.") }}</p>
-    <form method="post" action="{{ url_for('admin.user_status', uid=u.id) }}" @submit="if (!confirm('{{ u.name }} akkaunti butunlay o‘chirilsinmi? Bu amalni qaytarib bo‘lmaydi.')) $event.preventDefault()">
+    <p class="small muted">{{ _("Foydalanuvchi va uning barcha ma’lumotlari (natijalar, eslatmalar, e’tirozlar) butunlay o‘chiriladi. Faqat berilgan sertifikatlari (ism, raqam, sana, natija) qoladi va tekshiruvdan o‘tadi. Bu amalni qaytarib bo‘lmaydi.") }}</p>
+    <form method="post" action="{{ url_for('admin.user_status', uid=u.id) }}" x-data @submit="if (!confirm({{ _('%(n)s akkaunti butunlay o‘chirilsinmi? Bu amalni qaytarib bo‘lmaydi.', n=u.name)|tojson|forceescape }})) $event.preventDefault()">
       {{ csrf() }}<input type="hidden" name="action" value="delete">
       <button class="btn btn-outline btn-sm t-red" type="submit">{{ icon("trash", "ico-sm") }}{{ _("Akkauntni o‘chirish") }}</button>
     </form>

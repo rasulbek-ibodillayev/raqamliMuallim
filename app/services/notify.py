@@ -4,7 +4,7 @@
 - O'qilganlik har qatorda emas, users.notif_seen_at da: undan keyingilari — yangi.
 - Yakunlanmagan test eslatmasi saqlanmaydi: har safar bazadan hisoblanadi.
 """
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from flask import url_for
 from flask_babel import gettext as _
@@ -13,11 +13,11 @@ from sqlalchemy import delete, select
 from ..extensions import db
 from ..models import Notification, TestAttempt, User
 from . import attempts as at
-from .timefmt import when
+from .timefmt import day_month, when
 
 KEEP_DAYS = 30
 LIMIT = 20
-OBJ_ACCEPTED, OBJ_REJECTED, RECALC, DROPPED = 1, 2, 3, 4
+OBJ_ACCEPTED, OBJ_REJECTED, RECALC, DROPPED, EXAM_DATE, PASSWORD = 1, 2, 3, 4, 5, 6      # EXAM_DATE: ref_id — sana (ordinal)
 
 
 def _old():
@@ -40,6 +40,13 @@ def _view(n: Notification, names: dict[int, str]) -> dict:
         ok = n.kind == OBJ_ACCEPTED
         return {"icon": "shield", "title": _("E’tirozingiz qabul qilindi") if ok else _("E’tirozingizga javob keldi"),
                 "text": pct or _("Ekspert xulosasini o‘qing"), "url": url_for("user.objections")}
+    if n.kind == EXAM_DATE:
+        d = date.fromordinal(n.ref_id)
+        return {"icon": "calendar", "title": _("Attestatsiya sanasi belgilandi"), "url": url_for("user.profile"),
+                "text": _("%(d)s %(y)s · administrator tomonidan", d=day_month(d), y=d.year)}
+    if n.kind == PASSWORD:
+        return {"icon": "lock", "title": _("Parolingiz yangilandi"), "url": url_for("user.profile"),
+                "text": _("Administrator bergan havola orqali. Bu siz bo‘lmasangiz, parolni darhol almashtiring")}
     name = names.get(n.ref_id)
     url = url_for("user.result_detail", rid=n.ref_id) if name else url_for("user.results")
     title = _("Natijangiz qayta hisoblandi") if n.kind == RECALC else _("Savol hisobdan chiqarildi")

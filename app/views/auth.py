@@ -277,22 +277,15 @@ def logout():
     return resp
 
 
-def _expert_rights(user: User, data: dict):
-    """Taklifnomadagi huquqlar va yo'nalishlar (mavzu nomi bo'yicha; mosi topilmasa — hamma mavzu)."""
-    from ..models import Section
-    from ..services import experts
-    ids = db.session.scalars(db.select(Section.id).where(Section.title.in_(data["a"]))).all()
-    experts.save(user.id, data["p"], ids)
-
-
 @bp.route("/taklif/<token>", methods=["GET", "POST"])
 def invite(token):
-    """Ekspert taklifnomasi: admin yuborgan havola orqali ekspert parolni o'zi o'rnatadi va akkaunt yaratiladi.
-    Havola faqat taklif qilingan telefon (Telegram) yoki emailga yuborilgani uchun egalik shu bilan tasdiqlanadi."""
+    """Ekspert taklifnomasi: admin bergan havola orqali ekspert parolni o'zi o'rnatadi va akkaunt yaratiladi."""
     from .. import invites
-    state, data = invites.read(token)
-    ctx = {"state": state, "inv": data, "via": invites.channel(data["c"]) if data else None,
-           "contact": (fmt_phone(data["c"]) if data and "@" not in data["c"] else (data or {}).get("c"))}
+    from ..services import admin_stats, admin_users, experts
+    state, inv = invites.read(token)
+    ctx = {"state": state, "inv": inv, "via": invites.channel(inv.contact) if inv else None,
+           "areas": (admin_stats.section_titles(inv.areas) or [_("Barcha mavzular")]) if inv else [],
+           "contact": (fmt_phone(inv.contact) if "@" not in inv.contact else inv.contact) if inv else None}
     if request.method == "GET" or state != "valid":
         return render_template("auth/invite.html", **ctx), (200 if state == "valid" else 410 if state in ("expired", "used") else 404)
     pw = request.form.get("pw", "")
@@ -302,36 +295,65 @@ def invite(token):
         "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw)),
         "agree": (request.form.get("agree"), lambda v: None if v else _("Shartlarga rozilik bildiring")),
     })
-    if not errors and _taken(data["c"]):
+    if not errors and _taken(inv.contact):
         errors = {"pw": _("Bu telefon/email bilan akkaunt allaqachon bor. Kirish sahifasidan kiring")}
     if not errors:
-        first, last = (data["n"].split(maxsplit=1) + [""])[:2]
-        contact = data["c"].lower() if "@" in data["c"] else norm_phone(data["c"])
-        user = User(first_name=first, last_name=last, role="expert", consent_at=_now(),
-                    **({"email": contact} if "@" in contact else {"phone": contact}))
+        first, last = (inv.name.split(maxsplit=1) + [""])[:2]
+        user = User(first_name=first[:80], last_name=last[:80], role="expert", consent_at=_now(),
+                    **({"email": inv.contact} if "@" in inv.contact else {"phone": inv.contact}))
         user.set_password(pw)
         user.set_secret(request.form.get("secret", ""))
         db.session.add(user)
-        db.session.flush()
-        _expert_rights(user, data)
-        db.session.commit()
-        invites.mark_used(token)
+        try:
+            db.session.flush()
+            experts.save(user.id, inv.perms, inv.areas)
+            inv.used_at = _now()
+            admin_users.log(user.id, "create", "expert", user.id)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            errors = {"pw": _("Bu telefon/email bilan akkaunt allaqachon bor. Kirish sahifasidan kiring")}
+    if not errors:
         _sign_in(user)
     return respond(errors=errors, template="auth/invite.html", **ctx, redirect_to=url_for("expert.questions"),
-                   message=_("Akkauntingiz yaratildi. Xush kelibsiz, %(name)s!", name=data["n"].split()[0]))
+                   message=None if errors else _("Akkauntingiz yaratildi. Xush kelibsiz, %(name)s!", name=user.first_name))
+
+
+@bp.route("/parol-tiklash/havola/<token>", methods=["GET", "POST"])
+def reset_link(token):
+    """Admin bergan bir martalik havola: foydalanuvchi parolni o'zi o'rnatadi (24 soat, parol almashgach ishlamaydi)."""
+    from .. import invites
+    from ..services import admin_users, notify
+    user = invites.read_reset(token)
+    if request.method == "GET" or user is None:
+        return render_template("auth/reset_link.html", user=user), 200 if user else 410
+    pw = request.form.get("p1", "")
+    errors = validate({"p1": (pw, check_password),
+                       "p2": (request.form.get("p2", ""), lambda v: None if v == pw else _("Parollar bir xil emas"))})
+    if not errors:
+        user.set_password(pw)
+        admin_users.log(user.id, "reset_used", "user", user.id)
+        if user.role == "user":
+            notify.add(user.id, notify.PASSWORD)
+        db.session.commit()
+    return respond(errors=errors, template="auth/reset_link.html", user=user, redirect_to=url_for("auth.login"),
+                   message=_("Parol yangilandi. Yangi parol bilan kiring"))
 
 
 @bp.get("/taklif/namuna")
 def invite_demo():
     """/ekranlar uchun: namunaviy taklifnoma (yangi token) yoki ?holat=eskirgan|yaroqsiz holatlari."""
     from .. import invites
+    if not (current_app.debug or current_app.config.get("DEV_TOOLS")):
+        return redirect(url_for("auth.login"))
     holat = request.args.get("holat")
     if holat == "eskirgan":
         return render_template("auth/invite.html", state="expired", inv=None, via=None, contact=None), 410
     if holat == "yaroqsiz":
         return redirect(url_for("auth.invite", token="buzilgan-havola"))
-    token = invites.make("Nodira Saidova", "+998935551122", ["Dasturlash", "Algoritmlar"], ["questions", "review"])
-    return redirect(url_for("auth.invite", token=token))
+    inv = invites.make("Nodira Saidova", "+998935551122", [], ["questions", "review"])
+    db.session.commit()
+    return redirect(url_for("auth.invite", token=invites.token(inv)))
 
 
 @bp.get("/maxfiylik")

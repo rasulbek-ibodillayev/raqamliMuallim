@@ -16,13 +16,14 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from ..extensions import db
-from ..models import ErrorItem, TestAttempt, UserTopicProgress
+from ..models import ErrorItem, QuestionStat, TestAttempt, UserTopicProgress
 from . import scoring
 
 
 def record(a: TestAttempt, snaps: dict) -> None:
     """snaps — {tartib: (nusxa, kichik mavzu, mavzu)}. Commit qilmaydi."""
     _errors(a, snaps)
+    _stats(a)
     if a.kind == "lesson" and a.topic_id:
         _lesson(a)
     elif a.kind == "topic" and a.topic_id:
@@ -105,6 +106,15 @@ def _lesson(a: TestAttempt) -> None:
     lessons = lessons_by_topic(a.topic_id).get(a.topic_id, [])
     ok = sum(1 for x in lessons if not x["testable"] or scores.get(x["id"], 0) >= scoring.PASS_MIN)
     p.lesson_pct = round(100 * ok / len(lessons)) if lessons else 0
+
+
+def _stats(a: TestAttempt) -> None:
+    """Savol statistikasi; id tartibida — bir vaqtda yakunlangan testlar bir-birini qulflab qo'ymasin."""
+    rows = sorted((i.question_id, int(i.score == 100)) for i in a.items if i.score is not None)
+    if rows:
+        stmt = insert(QuestionStat).values([{"question_id": q, "answered": 1, "correct": ok} for q, ok in rows])
+        db.session.execute(stmt.on_conflict_do_update(index_elements=[QuestionStat.question_id], set_={
+            "answered": QuestionStat.answered + 1, "correct": QuestionStat.correct + stmt.excluded.correct}))
 
 
 def _errors(a: TestAttempt, snaps: dict) -> None:

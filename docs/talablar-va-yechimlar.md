@@ -186,8 +186,8 @@ tiklanganda serverda baholanadi. Paket chegarasi — 30 MB. AI tutor oflaynda fa
 
 ## 7. 6 oy kirilmagan akkaunt
 
-**Topilgan kamchilik:** `last_seen_at` faqat login paytida yangilanadi. «Eslab qolish» bilan har kuni kirib yurgan odam ham
-kirmagandek ko'rinadi va xato o'chirilishi mumkin. Avval shu tuzatiladi: kuniga bir marta yangilanadi.
+**Tuzatildi (8-bosqich):** `last_seen_at` endi kuniga bir marta yangilanadi (`app/services/activity.py`). Ilgari faqat login
+paytida yangilanardi va har kuni kirib yurgan odam ham kirmagandek ko'rinardi.
 
 - Har kecha fon vazifasi: 6 oydan 14 kun oldin ogohlantirish (Telegram yoki email), muddati o'tgach o'chirish.
 - Ogohlantirish yuborilmagan akkaunt o'chirilmaydi: yuborilgandan keyin kamida 14 kun beriladi.
@@ -195,7 +195,7 @@ kirmagandek ko'rinadi va xato o'chirilishi mumkin. Avval shu tuzatiladi: kuniga 
   foydalanuvchi bog'lanishi uziladi, IP va shaxsiy matn ham tozalanadi. Zaxira nusxalar 30 kunda almashadi.
 - Ekspert va admin akkauntlariga qo'llanmaydi.
 
-**Qaror (2026-11-24): akkaunt o'chadi, sertifikatlari saqlanadi.** Sertifikat qatori o'zi yetarli: `user_id` uziladi (`SET NULL`),
+**Qaror (2026-11-24): akkaunt o'chadi, sertifikatlari saqlanadi (bajarildi, admin o'chirganda ham).** Sertifikat qatori o'zi yetarli: `user_id` uziladi (`SET NULL`),
 ism-familiya, raqam, sana va natija qoladi, `/s/<raqam>` ishlayveradi. Maxfiylik siyosatiga yozildi.
 
 Ixcham saqlash (100 000 sertifikatda o'lchangan, indekslar bilan): 1336 → 124 bayt, 10,8 baravar kam.

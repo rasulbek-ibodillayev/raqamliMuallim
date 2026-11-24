@@ -53,7 +53,7 @@
     <div class="card list">
       <a class="list-item" href="{{ url_for('test.exam') }}">
         <span class="list-ico">{{ icon("clock") }}</span>
-        <div class="grow"><div class="strong">{{ _("Attestatsiya testi") }}</div><div class="sub">{{ _("35 ta savol · 120 daqiqa · real attestatsiya interfeysi") }}</div></div>
+        <div class="grow"><div class="strong">{{ _("Attestatsiya testi") }}</div><div class="sub">{{ _("%(n)s ta savol · %(m)s daqiqa · real attestatsiya interfeysi", n=conf("exam_n"), m=conf("exam_minutes")) }}</div></div>
         {{ badge(_("Istalgan payt"), "blue") }}{{ icon("chevron-right", "ico-sm chev") }}
       </a>
       {% if sunday %}
