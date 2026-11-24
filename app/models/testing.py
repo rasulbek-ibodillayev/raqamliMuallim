@@ -1,9 +1,9 @@
 """Test urinishlari va berilgan savollar."""
 import uuid
-from datetime import date, datetime
+from datetime import datetime
 
-from sqlalchemy import (CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer,
-                        LargeBinary, SmallInteger, String, Uuid, func)
+from sqlalchemy import (CheckConstraint, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary,
+                        SmallInteger, String, Uuid)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
@@ -46,7 +46,7 @@ class TestAttempt(db.Model):
     started_at: Mapped[datetime] = created_at()
     deadline_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    # 1 yildan eski urinishlar: attempt_items o'chiriladi, bu yerda zlib(JSON) ko'rinishida qoladi
+    # 12 oydan eski urinishlar: attempt_items o'chiriladi, bu yerda zlib(JSON) ko'rinishida qoladi (services/archive.py)
     items_archive: Mapped[bytes | None] = mapped_column(LargeBinary)
 
     items: Mapped[list["AttemptItem"]] = relationship(back_populates="attempt", order_by="AttemptItem.position",
@@ -58,7 +58,8 @@ class AttemptItem(db.Model):
 
     Savol matni nusxalanmaydi — (question_id, question_version) orqali bitta joydagi savolga havola.
     Ustunlar tartibi PostgreSQL tekislashiga mos (8 → 4 → 2 bayt, keyin JSONB): qatorda bo'sh to'ldiruvchi yo'q.
-    question_id bo'yicha alohida indeks yo'q: «foydalanuvchi bu savolni ko'rganmi» — user_seen_questions'da.
+    question_id bo'yicha alohida indeks yo'q: «foydalanuvchi bu savolni ko'rganmi» — user_seen'da.
+    Arxivlangan urinishda qatorlar o'chgan: o'qishda a.items emas, services/archive.rows(a) ishlatiladi.
     """
     __tablename__ = "attempt_items"
     __table_args__ = (
@@ -74,20 +75,19 @@ class AttemptItem(db.Model):
     time_ms: Mapped[int | None] = mapped_column(Integer)
     position: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
     score: Mapped[int | None] = mapped_column(SmallInteger)              # 0..100 (qisman ball ham butun foizda)
-    answer: Mapped[dict | None] = mapped_column(JSONB)                  # {"v": javob, "at": mijoz vaqti}; null — berilmagan
+    # {"v": javob, "at": mijoz vaqti}; test (bosqich) tugagach faqat {"v": ...}; NULL — javob berilmagan
+    answer: Mapped[dict | None] = mapped_column(JSONB(none_as_null=True))
 
     attempt: Mapped[TestAttempt] = relationship(back_populates="items")
 
 
-class UserSeenQuestion(db.Model):
-    """Foydalanuvchiga qaysi savollar berilgan — «bitta savol ikki marta berilmasin» qoidasi uchun.
+class UserSeen(db.Model):
+    """Foydalanuvchiga berilgan savollar bitmapi: questions.id = n savol berilgan bo'lsa, n-bit 1 (bayt n // 8, bit n % 8).
 
-    attempt_items arxivlansa ham (items_archive) bu jadval qoladi, shuning uchun qoida buzilmaydi.
-    Qator ~36 bayt + asosiy kalit indeksi; boshqa ustun yo'q. seen_on — kichik mavzudagi barcha savollar
-    ko'rib bo'linganda eng eskisini qaytarish uchun (services/attempts.py).
+    «Bitta savol bir foydalanuvchiga ikki marta berilmaydi» qoidasi shunga tayanadi; attempt_items arxivlansa ham qoladi.
+    Savol o'chsa biti qolaveradi: id qayta ishlatilmaydi. O'qish va yozish — faqat services/seen.py orqali.
     """
-    __tablename__ = "user_seen_questions"
+    __tablename__ = "user_seen"
 
     user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
-    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"), primary_key=True)
-    seen_on: Mapped[date] = mapped_column(Date, server_default=func.current_date())
+    bits: Mapped[bytes] = mapped_column(LargeBinary)

@@ -17,15 +17,19 @@
 Bosqichli test: oson → o'rta → qiyin. Mavzu shu bosqichda < 70% — keyingisiga o'tmaydi; 70–89% — o'tadi, darslarini
 takrorlash tavsiya etiladi; ≥ 90% — tavsiyasiz o'tadi (attempts._stage_verdict).
 weight = 0 bo'lgan kichik mavzudan savol olinmaydi (dars testidan tashqari).
+
+Takroriy savol berilmaydi: reja foydalanuvchiga berilmagan savollar va shablon generator imkoniyatidan tuziladi. Yetmasa
+test qisqaroq bo'ladi, umuman qolmasa — Unavailable.
 """
 from dataclasses import dataclass, field
 
 from flask_babel import gettext as _
-from sqlalchemy import func, select
+from sqlalchemy import func, select, true
 
 from ..extensions import db
 from ..models import (ErrorItem, Question, Section, Subtopic, TestAttempt, Topic, UserTopicProgress)
 from . import attempts as at
+from . import generator, seen
 from .scoring import PASS_MIN
 
 STAGED = {"diagnostic", "interim", "weekly", "optional", "monthly", "final"}
@@ -63,19 +67,21 @@ def allocate(n: int, order: list, avail: dict) -> dict:
     return {k: v for k, v in got.items() if v}
 
 
-def _available(*, difficulty=None, types=None) -> dict[int, int]:
-    """{kichik mavzu: tasdiqlangan savollar soni}, kontent tartibida (faqat nashr qilingan mavzular, weight > 0)."""
-    q = (select(Subtopic.id, func.count(Question.id))
+def _available(user_id: int, *, difficulty=None, types=None) -> dict[int, int]:
+    """{kichik mavzu: yangi savollar soni + generator imkoniyati}, kontent tartibida.
+
+    Nashr qilingan mavzular, weight > 0 va tasdiqlangan savoli bor kichik mavzular; hech narsa qolmagani kirmaydi."""
+    fits = [c for c in (Question.difficulty == difficulty if difficulty else None,
+                        Question.type.in_(types) if types else None) if c is not None]
+    new = func.count(Question.id).filter(seen.is_new(user_id), *(fits or [true()]))
+    q = (select(Subtopic.id, Subtopic.generators, new)
          .join(Question, Question.subtopic_id == Subtopic.id).join(Topic, Topic.id == Subtopic.topic_id)
          .join(Section, Section.id == Topic.section_id)
          .where(Question.status == "approved", Topic.is_published.is_(True), Subtopic.weight > 0)
          .group_by(Subtopic.id, Section.id, Topic.id)
          .order_by(Section.position, Section.id, Topic.position, Topic.id, Subtopic.position, Subtopic.id))
-    if difficulty:
-        q = q.where(Question.difficulty == difficulty)
-    if types:
-        q = q.where(Question.type.in_(types))
-    return dict(db.session.execute(q).all())
+    counts = {sid: n + generator.capacity(names, difficulty, types) for sid, names, n in db.session.execute(q)}
+    return {sid: n for sid, n in counts.items() if n}
 
 
 def _subtopics_of(topic_ids) -> set[int]:
@@ -123,7 +129,7 @@ def current_lesson(user_id: int) -> int | None:
 
 def _staged(user_id, subtopics: set[int] | None, *, n: int | None) -> tuple[list, list]:
     """Bosqichlar: n berilsa — jami n ta savol bosqichlarga teng bo'linadi, aks holda har kichik mavzudan 1 ta."""
-    avail = {d: {s: c for s, c in _available(difficulty=d).items() if subtopics is None or s in subtopics}
+    avail = {d: {s: c for s, c in _available(user_id, difficulty=d).items() if subtopics is None or s in subtopics}
              for d in DIFFICULTIES}
     if n is None:
         plans = {d: {s: 1 for s in a} for d, a in avail.items()}
@@ -142,20 +148,20 @@ def _staged(user_id, subtopics: set[int] | None, *, n: int | None) -> tuple[list
 def _lesson(user_id: int, sid: int) -> list[at.Picked]:
     """3 savol; hammasi bir javobli/ochiq chiqsa, oxirgisi ko'p javobli yoki moslashtirishga almashtiriladi —
     aks holda 70–89% natija chiqishi mumkin emas (B1)."""
-    picked = at.pick_questions(user_id, {sid: LESSON_N})
-    if picked and not any(p.type in at.PARTIAL_TYPES for p in picked):
-        extra = at.pick_questions(user_id, {sid: 1}, types=at.PARTIAL_TYPES)
-        if extra:
-            # Yangi savollarni saqlab qolamiz: avval ko'rilgani (oxirgi o'rinda) almashtiriladi
-            picked = [*picked[:-1], *extra] if len(picked) >= LESSON_N else [*picked, *extra]
-    return picked
+    picked = at.pick_from_bank(user_id, {sid: LESSON_N})
+    if not any(p.type in at.PARTIAL_TYPES for p in picked):
+        picked = picked[:LESSON_N - 1] + at.pick_questions(user_id, {sid: 1}, types=at.PARTIAL_TYPES) + picked[LESSON_N - 1:]
+    picked = picked[:LESSON_N]
+    # Qolganiga bir javobli/ochiq shablon (xilma-xil bo'lsin), bo'lmasa — istalgani
+    picked += at.make_new(sid, LESSON_N - len(picked), types=("single", "open"))
+    return picked + at.make_new(sid, LESSON_N - len(picked))
 
 
 def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: int | None = None,
           topic_ids: list[int] | None = None, n: int | None = None) -> Spec:
     """Testni tuzadi (bazaga yozmaydi). Tuzib bo'lmasa — Unavailable."""
     all_done = _("Barcha mavzular o‘zlashtirilgan — yangi dars yoki mavzu testi yo‘q")
-    no_questions = _("Bu test uchun hali tasdiqlangan savollar yetarli emas")
+    no_questions = _("Bu test uchun yangi savollar qolmagan. Yangi savollar qo‘shilgach, test ochiladi")
     if kind == "lesson":
         sid = subtopic_id or current_lesson(user_id)
         sub = db.session.get(Subtopic, sid) if sid else None
@@ -168,7 +174,7 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
         if topic is None or not topic.is_published:
             raise Unavailable(_("Mavzu topilmadi") if topic_id else all_done)
         mine = _subtopics_of([tid])
-        avail = {s: c for s, c in _available().items() if s in mine}
+        avail = {s: c for s, c in _available(user_id).items() if s in mine}
         from .catalog import lessons_by_topic
         lessons = len(lessons_by_topic(tid).get(tid, []))
         weak = [s for s in weak_subtopics(user_id, tid) if s in avail]
@@ -176,7 +182,7 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
         plan = allocate(2 * (lessons or len(avail)), order, avail)
         spec = Spec(kind, [at.pick_questions(user_id, {s: plan[s] for s in avail if s in plan})], topic_id=tid)
     elif kind in ("daily", "errors"):
-        avail = _available()
+        avail = _available(user_id)
         weak = [s for s in weak_subtopics(user_id) if s in avail]
         if kind == "errors":
             if not weak:
@@ -192,7 +198,7 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
                 left -= sum(got.values())
         spec = Spec(kind, [at.pick_questions(user_id, plan)])
     elif kind == "exam":
-        avail = _available(types=("single",))
+        avail = _available(user_id, types=("single",))
         plan = allocate(EXAM_N, list(avail), avail)
         spec = Spec(kind, [at.pick_questions(user_id, plan, types=("single",))], seconds=EXAM_SECONDS)
     elif kind in STAGED:

@@ -13,6 +13,7 @@ Qoidalar:
 Javob formatlari (variant indekslari 0 dan):
 - single:   data.options [≥2], answer {"keys": [i]}
 - multiple: data.options [≥2], answer {"keys": [i, j, ...]}
+  (ikkalasida ixtiyoriy answer.notes — har bir variantning izohi, «Yechimini ko'rish»da chiqadi)
 - open:     answer {"value": "45", "accept": ["45", "qirq besh"]}   (accept — ixtiyoriy qo'shimcha to'g'ri javoblar)
 - matching: data.left [≥2], data.right [shuncha], answer {"pairs": [r0, r1, ...]} — left[k] ↔ right[pairs[k]]
 """
@@ -26,6 +27,7 @@ from ..extensions import db
 from ..models import ContentBlock, Course, Question, QuestionVersion, Section, Subtopic, Topic
 from ..models.content import BLOCK_KINDS
 from ..models.questions import Q_DIFFICULTY, Q_STATUS, Q_TYPES
+from .question_templates import TEMPLATES
 
 
 class ContentError(ValueError):
@@ -78,6 +80,10 @@ def check_question(q) -> list[str]:
             errs.append(f"answer.keys: 0..{len(opts) - 1} oralig'idagi takrorlanmas indekslar")
         elif t == "single" and len(keys) != 1:
             errs.append("single savolda answer.keys da aynan 1 ta indeks bo'ladi")
+        notes = ans.get("notes")
+        if notes is not None and (not isinstance(notes, list) or not isinstance(opts, list) or len(notes) != len(opts)
+                                  or not all(isinstance(n, str) for n in notes)):
+            errs.append("answer.notes: har bir variantga bittadan izoh (matn)")
     elif t == "open":
         if not _is_str(ans.get("value")):
             errs.append("answer.value bo'sh")
@@ -123,6 +129,10 @@ def check(doc) -> list[str]:
                 w = u.get("weight", 1)
                 if not isinstance(w, int) or isinstance(w, bool) or not 0 <= w <= 50:
                     errs.append(f"{up}: weight 0..50 butun son")
+                gens = u.get("generators", [])
+                if not isinstance(gens, list) or any(g not in TEMPLATES for g in gens if isinstance(g, str)) \
+                        or not all(isinstance(g, str) for g in gens):
+                    errs.append(f"{up}: generators — shablon nomlari ro'yxati: {', '.join(TEMPLATES)}")
                 for bi, b in enumerate(u.get("blocks") or []):
                     if not isinstance(b, dict) or b.get("kind") not in BLOCK_KINDS or not isinstance(b.get("data"), dict):
                         errs.append(f"{up}.blocks[{bi}]: kind {BLOCK_KINDS} dan biri va data obyekt bo'lishi kerak")
@@ -183,7 +193,8 @@ def load(doc: dict, status: str = "review") -> Report:
                                        is_published=t.get("published", True))
                 for ui, u in enumerate(t["subtopics"]):
                     sub = _get_or_create(Subtopic, {"topic_id": topic.id, "title": u["title"]}, "subtopics", report,
-                                         position=ui, weight=u.get("weight", 1))
+                                         position=ui, weight=u.get("weight", 1),
+                                         **({"generators": u["generators"]} if "generators" in u else {}))
                     _load_blocks(sub, u.get("blocks") or [], report)
                     _load_questions(sub, u.get("questions") or [], status, report)
         db.session.commit()

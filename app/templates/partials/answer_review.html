@@ -2,6 +2,7 @@
    Kontekst: questions — services/attempts.review: [{n, kind, topic, level?, q, code?, image?, table?, score, answered, ref,
    objected, why?, + yopiq/kop: options, mine[], right[]; moslash: pairs[{left, right, mine, ok}]; ochiq: mine_text, right_text}]
    review_filter — Alpine o'zgaruvchisi nomi ('all' bo'lmasa, to'liq to'g'ri javoblar yashiriladi).
+   «Yechimini ko'rish» (xato va qisman javoblarda) AI tutorni shu savol bilan ochadi: /app/tutor?savol=<ref>.
    Sahifada partials/objection_sheet.html ham bo'lishi kerak. #}
 <ol class="list-reset stack review-list">
   {% for r in questions %}
@@ -49,7 +50,10 @@
     </ul>
     {% endif %}
     {% if not ok and r.why %}<div class="card card-flat small u-p-12-14 u-c-text2"><b>{{ _("Izoh.") }}</b> {{ r.why }}</div>{% endif %}
-    {{ objection_btn(r.ref, r.q, "self-start", r.objected) }}
+    <div class="row wrap row-sm">
+      {% if not ok %}<a class="btn btn-ai btn-sm" href="{{ url_for('user.tutor', savol=r.solve or r.ref) }}">{{ icon("sparkle", "ico-sm") }}{{ _("Yechimini ko‘rish") }}</a>{% endif %}
+      {{ objection_btn(r.ref, r.q, "self-start", r.objected) }}
+    </div>
   </li>
   {% endfor %}
 </ol>

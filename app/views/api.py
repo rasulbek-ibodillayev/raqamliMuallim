@@ -18,6 +18,7 @@ from flask_login import current_user
 
 from ..models.testing import ATTEMPT_KINDS
 from ..services import attempts as at
+from ..services.archive import rows as rows_of
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -113,5 +114,5 @@ def finish(attempt_uuid):
         return _err(422, _("Bosqich ko‘rsatilmagan"))
     a = at.finish(a, stage)
     from .test import attempt_url
-    answered = sum(1 for i in a.items if (i.answer or {}).get("v") not in (None, "", []))
+    answered = sum(1 for i in rows_of(a) if (i.answer or {}).get("v") not in (None, "", []))
     return jsonify(ok=True, answered=answered, result_url=attempt_url(a))

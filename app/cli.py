@@ -71,6 +71,12 @@ def init_app(app):
                    f"{c['blocks']} blok, {c['questions']} savol. Avval bor bo'lgani uchun o'tkazilgan savollar: "
                    f"{r.skipped_questions}.")
 
+    @app.cli.command("eski-testlarni-siqish")
+    def compress_attempts():
+        """12 oydan eski yakunlangan testlarni siqadi: natijalar saqlanadi, joy kamayadi. Takroriy ishga tushirish xavfsiz."""
+        from .services.archive import compress_old
+        click.echo(f"Siqilgan urinishlar: {compress_old()}")
+
     @app.cli.command("namuna-foydalanuvchilar")
     def seed_demo_users():
         """O'qituvchi, ekspert va admin namunaviy akkauntlarini yaratadi (bor bo'lsa tegmaydi)."""

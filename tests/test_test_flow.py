@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from app import models as m
 from app.cli import demo_user
 from app.extensions import db
-from app.models import ErrorItem, Objection, Question, Subtopic, TestAttempt, Topic, UserSeenQuestion, UserTopicProgress
+from app.models import ErrorItem, Objection, Question, Subtopic, TestAttempt, Topic, UserTopicProgress
 from app.services import attempts as at
 from app.services import catalog
 from app.services import test_builder as tb
@@ -34,6 +34,12 @@ def _right(snap):
     t, a = snap["type"], snap["answer"]
     return {"single": lambda: a["keys"][0], "multiple": lambda: a["keys"], "matching": lambda: a["pairs"],
             "open": lambda: a["value"]}[t]()
+
+
+def _given(a) -> set[int]:
+    """Urinishdagi bitmapda belgilangan (foydalanuvchiga ko'rsatilgan) savollar tartibi."""
+    bits = db.session.scalar(select(m.UserSeen.bits).where(m.UserSeen.user_id == a.user_id))
+    return {i.position for i in a.items if i.question_id < len(bits) * 8 and bits[i.question_id >> 3] >> (i.question_id & 7) & 1}
 
 
 def _answer(a, good=lambda snap: True):
@@ -313,7 +319,7 @@ def staged(app, fresh_content):
 def test_failed_topic_does_not_reach_next_stage(app, staged):
     a = staged
     assert a.total == 6 and a.stage == 1 and at.active_positions(a) == [0, 1]
-    assert db.session.scalar(select(func.count()).select_from(UserSeenQuestion)) == 2     # faqat 1-bosqich ko'rilgan
+    assert _given(a) == {0, 1}                                                             # faqat 1-bosqich berilgan
     _answer(a, lambda s: s["text"].startswith("a-"))                                       # B mavzu o'tmadi
     at.finish(a, 1)
     assert a.status == "in_progress" and a.stage == 2 and at.active_positions(a) == [2]
@@ -328,7 +334,7 @@ def test_failed_topic_does_not_reach_next_stage(app, staged):
     at.finish(a, 3)
     assert a.status == "submitted" and a.score_pct == 50                                   # 3 / 6: berilmaganlar 0 ball
     assert [r["q"] for r in at.review(a)] == ["a-easy", "b-easy", "a-medium", "a-hard"]
-    assert db.session.scalar(select(func.count()).select_from(UserSeenQuestion)) == 4
+    assert _given(a) == {0, 1, 2, 4}                    # B mavzuning o'rta va qiyin savollari bankka qaytdi
 
 
 def test_all_topics_failed_ends_test(app, staged):
@@ -391,6 +397,7 @@ def test_recommended_lesson_listed_until_lesson_test_90(app, as_role):
         at.finish(a, 2)                                              # 2-bosqich 100%: 1-bosqich tavsiyasi saqlanadi
         assert a.status == "submitted"
         assert sorted(r["lesson"] for r in catalog.recommended_lessons(uid)) == ["d0", "d1"]
+        _load({"M": {"d0": [_q(f"x{i}") for i in range(6)]}})        # savol takrorlanmaydi: ikkita dars testiga yangilari
         sid = _sub("d0")
     c = as_role("user")
     for url in ("/app/", "/app/xatolar"):

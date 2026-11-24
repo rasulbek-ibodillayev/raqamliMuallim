@@ -4,9 +4,10 @@ Foydalanuvchilar users jadvalida (parol va maxfiy so'z — xesh), sessiya — Fl
 Ro'yxatdan o'tish qadamlari orasidagi ma'lumot (telefon/email, tasdiqlangani) Flask sessiyasida saqlanadi.
 Tasdiqlash kodi hozircha har doim 123456: Telegram bot va email yuborish hali ulanmagan.
 """
+import secrets
 from datetime import datetime, timezone
 
-from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from flask_babel import gettext as _
 from flask_login import login_user, logout_user
 from sqlalchemy.exc import IntegrityError
@@ -16,6 +17,7 @@ from ..forms import (fmt_phone, REGIONS, check_secret, check_email, check_login,
                      field, norm_phone, otp_code, required, respond, validate)
 from ..models.users import User
 from ..roles import HOME, safe_next
+from ..services import google_auth
 
 bp = Blueprint("auth", __name__)
 
@@ -73,6 +75,7 @@ def login():
     if errors:
         return respond(errors=errors, template="auth/login.html", next_url=nxt)
     _sign_in(user)
+    _link_google(user)
     to = nxt if nxt and nxt.startswith(_AREA[user.role]) else url_for(HOME[user.role])
     return respond(errors={}, template="auth/login.html", redirect_to=to, message=_("Xush kelibsiz!"))
 
@@ -140,28 +143,35 @@ def verify_email():
 
 @bp.route("/royxat/malumotlar", methods=["GET", "POST"])
 def details():
+    via = session.get("reg_verified")
+    # Google orqali: parol va maxfiy so'z so'ralmaydi (parol keyin «Parolni tiklash» orqali o'rnatiladi)
+    g = session.get("reg_google") if via == "google" else None
+    ctx = {"reg_step": 3, "regions": REGIONS, "google": g}
     if request.method == "GET":
-        return render_template("auth/details.html", reg_step=3, regions=REGIONS)
+        return render_template("auth/details.html", **ctx, **({"form": {"fn": g["first"], "ln": g["last"]}} if g else {}))
     pw = request.form.get("pw", "")
     region = field("region")
     errors = validate({
         "fn": (field("fn"), lambda v: check_name(v, "first")),
         "ln": (field("ln"), lambda v: check_name(v, "last")),
-        "pw": (pw, check_password),
-        "pw2": (request.form.get("pw2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
-        "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw)),
+        **({} if g else {
+            "pw": (pw, check_password),
+            "pw2": (request.form.get("pw2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
+            "secret": (request.form.get("secret", ""), lambda v: check_secret(v, pw))}),
         "region": (region, lambda v: None if not v or v in REGIONS else _("Viloyatni ro‘yxatdan tanlang")),
         "consent": (request.form.get("consent"), lambda v: None if v else _("Davom etish uchun rozilik kerak")),
     })
-    via = session.get("reg_verified")
-    contact = session.get("reg_phone") if via == "phone" else session.get("reg_email") if via == "email" else None
+    contact = (g["email"] if g else session.get("reg_phone") if via == "phone" else session.get("reg_email") if via == "email" else None)
     if not errors and not contact:
         errors = {"fn": _("Avval telefon raqam yoki emailni tasdiqlang")}
     if not errors:
         user = User(first_name=field("fn"), last_name=field("ln"), region=region or None, consent_at=_now(), role="user",
                     **({"phone": contact} if via == "phone" else {"email": contact}))
-        user.set_password(pw)
-        user.set_secret(request.form.get("secret", ""))
+        if g:
+            user.google_sub = g["sub"]
+        else:
+            user.set_password(pw)
+            user.set_secret(request.form.get("secret", ""))
         db.session.add(user)
         try:
             db.session.commit()
@@ -169,28 +179,89 @@ def details():
             db.session.rollback()
             errors = {"fn": _("Bu telefon/email bilan ro‘yxatdan o‘tilgan. Kiring yoki parolni tiklang")}
     if not errors:
-        for k in ("reg_phone", "reg_email", "reg_verified"):
+        for k in ("reg_phone", "reg_email", "reg_verified", "reg_google"):
             session.pop(k, None)
         _sign_in(user)
-    return respond(errors=errors, template="auth/details.html", reg_step=3, regions=REGIONS,
+    return respond(errors=errors, template="auth/details.html", **ctx,
                    redirect_to=url_for("user.home", yangi=1),
                    message=_("Ro‘yxatdan o‘tdingiz. Eslatma: 6 oy kirilmasa akkaunt avtomatik o‘chiriladi"))
 
 
+# --- Google orqali kirish va ro'yxatdan o'tish ---
+# Google → /kirish/google/qaytish: google_sub bo'yicha akkaunt bor — kiradi; yo'q — ism va rozilik so'raladi (details).
+# Shu emailli akkaunt avvaldan bo'lsa, avtomatik bog'lanmaydi: egasi parol bilan bir marta kirgach bog'lanadi (aks holda
+# birovning emailini oldindan ro'yxatdan o'tkazib qo'ygan odam uning akkauntiga kirib qolardi).
+
+def _google_cfg():
+    cfg = current_app.config
+    return (cfg["GOOGLE_CLIENT_ID"], cfg["GOOGLE_CLIENT_SECRET"]) if cfg.get("GOOGLE_CLIENT_ID") and cfg.get("GOOGLE_CLIENT_SECRET") else None
+
+
+def _to_login(message):
+    flash(message)
+    return redirect(url_for("auth.login"))
+
+
 @bp.get("/kirish/google")
 def google():
-    """Google OAuth 2.0. Namunada darhol kiritadi; backendda Authlib bilan accounts.google.com ga yo'naltiriladi,
-    qaytgan email bo'yicha foydalanuvchi topiladi yoki yaratiladi (yangi bo'lsa — ism va rozilik so'raladi)."""
-    from flask import flash
-    if current_app.config.get("GOOGLE_CLIENT_ID"):
-        return redirect(url_for("auth.login"))  # haqiqiy OAuth ulanadigan joy
+    cfg = _google_cfg()
+    if cfg:
+        url, flow = google_auth.begin(cfg[0], url_for("auth.google_back", _external=True))
+        session["google"] = {**flow, "next": safe_next(request.args.get("next"))}
+        return redirect(url)
     if not (current_app.debug or current_app.config.get("DEV_TOOLS")):
-        flash(_("Google orqali kirish hali ulanmagan. Telefon yoki email bilan kiring"))
-        return redirect(url_for("auth.login"))
+        return _to_login(_("Google orqali kirish hali ulanmagan. Telefon yoki email bilan kiring"))
+    # Ishlab chiqishda, kalitsiz: ro'yxatdan o'tish sahifasidan — yangi akkaunt, kirishdan — namunaviy o'qituvchi
+    if request.args.get("yangi"):
+        return _google_signup({"sub": "namuna-google", "email": "namuna.google@example.com", "first": "Malika", "last": "Tursunova"})
     from ..cli import demo_user
     _sign_in(demo_user("user"))
     flash(_("Google akkaunti orqali kirdingiz (namuna)"))
     return redirect(url_for("user.home"))
+
+
+@bp.get("/kirish/google/qaytish")
+def google_back():
+    cfg, flow = _google_cfg(), session.pop("google", None)
+    state, code = request.args.get("state", ""), request.args.get("code", "")
+    if not cfg or not flow or not secrets.compare_digest(state.encode(), flow["state"].encode()) or not code:
+        return _to_login(_("Google orqali kirish bekor qilindi. Qayta urinib ko‘ring"))
+    try:
+        who = google_auth.finish(*cfg, url_for("auth.google_back", _external=True), code, flow)
+    except google_auth.GoogleError as e:
+        current_app.logger.warning("Google: %s", e)
+        return _to_login(_("Google bilan bog‘lanib bo‘lmadi. Qayta urinib ko‘ring"))
+    return _google_signup(who, flow.get("next"))
+
+
+def _google_signup(who: dict, nxt: str | None = None):
+    user = db.session.scalar(db.select(User).where(User.google_sub == who["sub"]))
+    if user is not None:
+        if not user.is_active:
+            return _to_login(_("Akkaunt bloklangan. Yordam xizmatiga yozing"))
+        _sign_in(user)
+        return redirect(nxt if nxt and nxt.startswith(_AREA[user.role]) else url_for(HOME[user.role]))
+    if _taken(who["email"]):
+        session["google_link"] = {"sub": who["sub"], "email": who["email"]}
+        return _to_login(_("Bu email bilan akkaunt bor. Bir marta parol bilan kiring, keyin Google orqali ham kira olasiz"))
+    for k in ("reg_phone", "reg_email", "google_link"):
+        session.pop(k, None)
+    session.update(reg_verified="google", reg_google=who)
+    return redirect(url_for("auth.details"))
+
+
+def _link_google(user: User):
+    """Parol bilan kirgan foydalanuvchiga shu brauzerda kutayotgan Google akkauntini bog'laydi (email bir xil bo'lsa)."""
+    link = session.pop("google_link", None)
+    if not link or user.email != link["email"] or user.google_sub or user.role != "user":
+        return
+    user.google_sub = link["sub"]
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+    else:
+        flash(_("Google akkauntingiz bog‘landi"))
 
 
 @bp.get("/chiqish")

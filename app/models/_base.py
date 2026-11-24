@@ -15,7 +15,7 @@ def pk() -> Mapped[int]:
 PK = BigInteger  # tashqi kalitlar uchun ham shu tur
 
 # Savollar 2 milliarddan oshmaydi: questions.id va unga havola qiluvchi ustunlar 4 baytli. Eng katta jadvallar
-# (attempt_items, user_seen_questions) har qatorda 4 bayt tejaydi.
+# (attempt_items, error_items) har qatorda 4 bayt tejaydi.
 QID = Integer
 
 

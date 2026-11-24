@@ -60,6 +60,7 @@ SCREENS = [
         ("user.lesson", "Dars — qayta o‘qitish", {"holat": "qayta"}),
         ("user.lesson", "Dars — audio pleyer", {"audio": 1}),
         ("user.tutor", "AI tutor", {}),
+        ("user.tutor", "AI tutor: savol yechimi", {"savol": "natija:4"}),
         ("user.notes", "Eslatmalar", {}),
     ]),
     ("Testlar", [

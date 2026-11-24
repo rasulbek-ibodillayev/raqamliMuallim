@@ -17,6 +17,9 @@ def create_app(config: dict | None = None) -> Flask:
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
     # /ekranlar va /_rol/<rol> — faqat ishlab chiqishda (debug rejimi yoki RM_DEV_TOOLS=1)
     app.config["DEV_TOOLS"] = os.environ.get("RM_DEV_TOOLS") == "1"
+    # Google orqali kirish (services/google_auth.py); bo'sh bo'lsa — ulanmagan
+    app.config["GOOGLE_CLIENT_ID"] = os.environ.get("GOOGLE_CLIENT_ID")
+    app.config["GOOGLE_CLIENT_SECRET"] = os.environ.get("GOOGLE_CLIENT_SECRET")
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True

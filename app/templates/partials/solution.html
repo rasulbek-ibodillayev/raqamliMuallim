@@ -1,0 +1,43 @@
+{# Savol yechimi — AI tutor xabari ichida (services/solutions.py). r — attempts.review qatori, lesson_url — darsi bo'lsa #}
+{% set letters = "ABCDEFGHIJ" %}
+{% set has_notes = r.notes and r.notes|select|list %}
+<div class="stack solution">
+  {% if r.kind in ("yopiq", "kop") %}
+  <p><b>{{ _("To‘g‘ri javob:") }}</b> {% for i in r.right %}{{ letters[i] }}) {{ r.options[i] }}{{ "; " if not loop.last }}{% endfor %}</p>
+  {% elif r.kind == "ochiq" %}
+  <p><b>{{ _("To‘g‘ri javob:") }}</b> {{ r.right_text }}</p>
+  {% else %}
+  <p><b>{{ _("To‘g‘ri juftliklar:") }}</b></p>
+  {% endif %}
+
+  {% if r.why %}<p><b>{{ _("Yechilishi:") if r.computed else _("Nega shunday:") }}</b> {{ r.why }}</p>{% endif %}
+
+  {% if r.kind in ("yopiq", "kop") %}
+  <p class="strong">{{ _("Javoblar tahlili") }}</p>
+  <ul class="list-reset ans-list">
+    {% for o in r.options %}
+    {% set is_right = loop.index0 in r.right %}{% set is_mine = loop.index0 in r.mine %}
+    <li class="ans {{ 'ans-right' if is_right else ('ans-wrong' if is_mine) }}">
+      <span class="ans-key">{{ letters[loop.index0] }}</span>
+      <span class="grow"><span class="d-block">{{ o }}</span>{% if has_notes and r.notes[loop.index0] %}<span class="small u-c-text2">{{ r.notes[loop.index0] }}</span>{% endif %}</span>
+      <span class="ans-tag">{{ icon("check" if is_right else "x", "ico-sm") }}{{ _("to‘g‘ri") if is_right else _("noto‘g‘ri") }}{% if is_mine %} · {{ _("sizniki") }}{% endif %}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif r.kind == "moslash" %}
+  <ul class="list-reset ans-list">
+    {% for p in r.pairs %}
+    <li class="ans {{ 'ans-right' if p.ok else 'ans-wrong' }}">
+      <span class="strong">{{ p.left }}</span>
+      <span class="grow">{{ p.right }}{% if not p.ok %}<span class="small d-block">{{ _("Sizniki:") }} {{ p.mine or "—" }}</span>{% endif %}</span>
+      <span class="ans-tag">{{ icon("check" if p.ok else "x", "ico-sm") }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="small">{{ _("Sizning javobingiz:") }} {{ r.mine_text or _("javobsiz") }}</p>
+  {% endif %}
+
+  {% if not r.why and not has_notes %}<p class="small muted">{{ _("Bu savolning batafsil izohi hali yozilmagan.") }}</p>{% endif %}
+  <span class="source">{{ icon("book", "ico-sm") }}{{ _("Manba: savollar banki") }}{% if lesson_url %} · <a class="link" href="{{ lesson_url }}">{{ _("Darsni ochish") }}</a>{% endif %}</span>
+</div>

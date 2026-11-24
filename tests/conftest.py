@@ -45,9 +45,12 @@ def _load_seed():
 def _schema():
     app = create_app(CONFIG)
     with app.app_context():
+        assert db.engine.url.database.endswith("_test"), "testlar faqat *_test bazasida ishlaydi"
         with db.engine.begin() as conn:
+            # Butun sxema: modeldan olib tashlangan eski jadvallar ham qolmasin
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
             conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        db.drop_all()
         db.create_all()
         _load_seed()
         yield
@@ -61,6 +64,8 @@ def app():
     with app.app_context():
         db.session.remove()
         _delete(_all_tables() - CONTENT_TABLES)
+        with db.engine.begin() as conn:             # shablon generator testda tuzgan savollar keyingi testga o'tmasin
+            conn.execute(text("DELETE FROM questions WHERE source = 'template'"))
         db.engine.dispose()
 
 

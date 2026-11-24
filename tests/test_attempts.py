@@ -1,6 +1,5 @@
 """Test yig'ish: savol bir foydalanuvchiga takror berilmaydi, savollar bazada bir joyda turadi."""
 import uuid
-from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import func, select
@@ -8,8 +7,7 @@ from sqlalchemy import func, select
 from app.cli import demo_user
 from app.extensions import db
 from app import models as m
-from app.models import (AttemptItem, Course, Question, QuestionVersion, Section, Subtopic, Topic,
-                        UserSeenQuestion)
+from app.models import AttemptItem, Course, Question, QuestionVersion, Section, Subtopic, Topic
 from app.services import attempts as tb
 
 # Bu testlar o'z kontentini yaratadi: namunaviy kontentsiz boshlanadi (conftest.fresh_content)
@@ -53,31 +51,24 @@ def test_plan_uses_subtopic_weight(app, ctx):
         assert tb.plan_for_topic(ctx["topic"]) == {ctx["a"]: 2, ctx["b"]: 1}
 
 
-def test_no_repeats_until_pool_is_exhausted(app, ctx):
+def test_question_never_repeats(app, ctx):
     with app.app_context():
         plan = {ctx["a"]: 2}
         first = tb.start_attempt(ctx["u1"], "topic", plan)
         second = tb.start_attempt(ctx["u1"], "topic", plan)
-        assert len(set(_qids(first)) | set(_qids(second))) == 4          # 2 + 2, takrorsiz
-        assert first.settings_snapshot["repeated"] == second.settings_snapshot["repeated"] == 0
-        third = tb.start_attempt(ctx["u1"], "topic", plan)              # A'da faqat 1 ta yangi savol qolgan
-        fresh = set(ctx["ids"]["A"]) - set(_qids(first)) - set(_qids(second))
-        assert fresh <= set(_qids(third)) and len(_qids(third)) == 2
-        assert third.settings_snapshot["repeated"] == 1
+        third = tb.start_attempt(ctx["u1"], "topic", plan)              # A'da faqat 1 ta yangi savol qolgan — test qisqaroq
+        assert sorted(_qids(first) + _qids(second) + _qids(third)) == sorted(ctx["ids"]["A"])
+        assert third.total == 1
+        assert tb.pick_questions(ctx["u1"], plan) == []
 
 
-def test_repeats_oldest_seen_first(app, ctx):
+def test_cancelled_test_questions_do_not_return(app, ctx):
     with app.app_context():
-        a_ids = ctx["ids"]["A"]
-        old, *rest = a_ids
-        db.session.add_all([UserSeenQuestion(user_id=ctx["u1"], question_id=q,
-                                             seen_on=date.today() - timedelta(days=30 if q == old else 1))
-                            for q in a_ids])
-        db.session.commit()
-        attempt = tb.start_attempt(ctx["u1"], "topic", {ctx["a"]: 1})
-        assert _qids(attempt) == [old]
-        # Qayta berilgan savol sanasi yangilanadi va navbat oxiriga o'tadi
-        assert db.session.get(UserSeenQuestion, (ctx["u1"], old)).seen_on == date.today()
+        a = tb.start_attempt(ctx["u1"], "optional", {ctx["b"]: 2})
+        given = set(_qids(a))
+        tb.cancel(a)
+        assert db.session.scalar(select(func.count()).select_from(AttemptItem)) == 0      # qatorlari o'chadi
+        assert not given & {p.question_id for p in tb.pick_questions(ctx["u1"], {ctx["b"]: 9})}
 
 
 def test_users_are_independent_and_questions_stored_once(app, ctx):
@@ -85,7 +76,7 @@ def test_users_are_independent_and_questions_stored_once(app, ctx):
         plan = {ctx["a"]: 5, ctx["b"]: 3}
         tb.start_attempt(ctx["u1"], "topic", plan)
         other = tb.start_attempt(ctx["u2"], "topic", plan)
-        assert other.settings_snapshot["repeated"] == 0                    # birinchi foydalanuvchi ta'sir qilmaydi
+        assert other.total == 8                                            # birinchi foydalanuvchi ta'sir qilmaydi
         assert db.session.scalar(select(func.count()).select_from(Question)) == 9   # savollar ko'paymagan
         assert db.session.scalar(select(func.count()).select_from(AttemptItem)) == 16
 

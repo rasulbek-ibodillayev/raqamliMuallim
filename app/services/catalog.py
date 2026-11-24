@@ -7,6 +7,8 @@ from sqlalchemy import func, select
 from ..extensions import db
 from ..models import (AttemptItem, ContentBlock, ErrorItem, Question, Section, Subtopic, TestAttempt, Topic,
                       UserTopicProgress)
+from .archive import rows as rows_of
+from .archive import unpack
 from .timefmt import when
 
 SOLID_MIN = 90
@@ -52,8 +54,13 @@ def error_items(user_id: int, limit: int = 50) -> tuple[list[dict], int]:
     """Tuzatilmagan xatolar, yangisi birinchi: ([{"q", "section", "meta", "rep", "rid"}], jami soni)."""
     base = select(ErrorItem).where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
     total = db.session.scalar(select(func.count()).select_from(base.subquery()))
+    # «Qayta xato»: savol takrorlanmaydi, shuning uchun shu kichik mavzuda nechta testda xato qilingani sanaladi
+    times = (select(ErrorItem.subtopic_id, func.count(ErrorItem.last_attempt_id.distinct()).label("n"))
+             .where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None)).group_by(ErrorItem.subtopic_id).subquery())
     rows = db.session.execute(
-        select(Question.text, Subtopic.title, Topic.title, ErrorItem.wrong_count, ErrorItem.last_wrong_at, ErrorItem.last_attempt_id)
+        select(Question.text, Subtopic.title, Topic.title, func.greatest(times.c.n, 1), ErrorItem.last_wrong_at,
+               ErrorItem.last_attempt_id)
+        .join(times, times.c.subtopic_id == ErrorItem.subtopic_id)
         .join(Question, Question.id == ErrorItem.question_id).join(Subtopic, Subtopic.id == ErrorItem.subtopic_id)
         .join(Topic, Topic.id == Subtopic.topic_id)
         .where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
@@ -120,16 +127,25 @@ def recommended_lessons(user_id: int) -> list[dict]:
 def subtopic_scores(user_id: int, topic_id: int) -> dict[int, int]:
     """Foydalanuvchining shu mavzu kichik mavzularidagi o'rtacha bali (0–100): yakunlangan testlar bo'yicha,
     ixtiyoriy testlarsiz (ular o'zlashtirish foiziga ta'sir qilmaydi)."""
-    rows = db.session.execute(
-        select(Question.subtopic_id, func.avg(AttemptItem.score))
+    mine = (TestAttempt.user_id == user_id, TestAttempt.status == "submitted", TestAttempt.kind != "optional")
+    acc = {sid: [int(total), n] for sid, total, n in db.session.execute(
+        select(Question.subtopic_id, func.sum(AttemptItem.score), func.count())
         .join(AttemptItem, AttemptItem.question_id == Question.id)
         .join(TestAttempt, TestAttempt.id == AttemptItem.attempt_id)
         .join(Subtopic, Subtopic.id == Question.subtopic_id)
-        .where(TestAttempt.user_id == user_id, Subtopic.topic_id == topic_id, AttemptItem.score.is_not(None),
-               TestAttempt.status == "submitted", TestAttempt.kind != "optional")
-        .group_by(Question.subtopic_id)
-    ).all()
-    return {sid: round(avg) for sid, avg in rows}
+        .where(*mine, Subtopic.topic_id == topic_id, AttemptItem.score.is_not(None))
+        .group_by(Question.subtopic_id))}
+    old = db.session.scalars(select(TestAttempt.items_archive).where(*mine, TestAttempt.items_archive.is_not(None),
+                                                                     func.coalesce(TestAttempt.topic_id, topic_id) == topic_id)).all()
+    if old:
+        sub_of = dict(db.session.execute(select(Question.id, Question.subtopic_id).join(Subtopic)
+                                         .where(Subtopic.topic_id == topic_id)).all())
+        for i in (i for blob in old for i in unpack(blob)):
+            if i.score is not None and i.question_id in sub_of:
+                s = acc.setdefault(sub_of[i.question_id], [0, 0])
+                s[0] += i.score
+                s[1] += 1
+    return {sid: round(total / n) for sid, (total, n) in acc.items()}
 
 
 def optional_topics(user_id: int) -> list[dict]:
@@ -150,19 +166,23 @@ def optional_topics(user_id: int) -> list[dict]:
 
 def attempt_by_section(a: TestAttempt) -> list[dict]:
     """Urinish natijasi bo'limlar bo'yicha: [{"name", "pct", "topics", "known"}] (known — ≥ 90% chiqqan mavzular)."""
-    rows = db.session.execute(
-        select(Section.id, Section.title, Topic.id, func.avg(func.coalesce(AttemptItem.score, 0)), func.count())
-        .join(Question, Question.id == AttemptItem.question_id).join(Subtopic, Subtopic.id == Question.subtopic_id)
+    items = rows_of(a)
+    where = {qid: (sid, name, tid) for qid, sid, name, tid in db.session.execute(
+        select(Question.id, Section.id, Section.title, Topic.id).join(Subtopic, Subtopic.id == Question.subtopic_id)
         .join(Topic, Topic.id == Subtopic.topic_id).join(Section, Section.id == Topic.section_id)
-        .where(AttemptItem.attempt_id == a.id).group_by(Section.id, Topic.id)
-        .order_by(Section.position, Section.id, Topic.position)).all()
+        .where(Question.id.in_([i.question_id for i in items]))
+        .order_by(Section.position, Section.id, Topic.position))}
+    score = {i.question_id: i.score or 0 for i in items}
+    topics: dict[tuple, list[int]] = {}
+    for qid, at_ in where.items():                                  # bo'lim va mavzu tartibida
+        topics.setdefault(at_, []).append(score[qid])
     out: dict[int, dict] = {}
-    for sid, name, _tid, avg, n in rows:
+    for (sid, name, _tid), scores in topics.items():
         s = out.setdefault(sid, {"name": name, "sum": 0, "n": 0, "topics": 0, "known": 0})
-        s["sum"] += float(avg) * n
-        s["n"] += n
+        s["sum"] += sum(scores)
+        s["n"] += len(scores)
         s["topics"] += 1
-        s["known"] += float(avg) >= SOLID_MIN
+        s["known"] += sum(scores) / len(scores) >= SOLID_MIN
     return [{"name": s["name"], "pct": round(s["sum"] / s["n"]), "topics": s["topics"], "known": s["known"]}
             for s in out.values()]
 

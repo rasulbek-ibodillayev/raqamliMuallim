@@ -10,14 +10,14 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 |---|---|---|---|
 | 1 | ✅ Baza | 26 jadval, Alembic migratsiyalari, alohida test bazasi | — |
 | 2 | ✅ Kirish | Flask-Login, ro'yxatdan o'tish, parolni tiklash, profil, rollar | — |
-| 3 | ✅ Testlar yadrosi | Ixcham `attempt_items`, `user_seen_questions`, test yig'ish servisi (`app/services/attempts.py`) | — |
+| 3 | ✅ Testlar yadrosi | Ixcham `attempt_items`, test yig'ish servisi (`app/services/attempts.py`) | — |
 | 4 | ✅ Kontentni yuklash | JSON formati ([kontent-formati.md](kontent-formati.md)), tekshiruv, `flask kontent-yuklash`, namunaviy kontent (`app/seed/namuna_kontent.json`) | — |
 | 5 | ✅ O'qituvchi ekranlari bazadan (1-qism) | Mavzu sahifasi (kichik mavzular bo'yicha foizlar javoblardan), dars sahifasi `/app/dars/<id>` (bloklar bazadan), tezkor qidiruv, eslatmalar uchun mavzular ro'yxati, hududni saqlash (`app/services/catalog.py`) | — |
 | 5b | ✅ O'qituvchi ekranlari (2-qism) | O'quv reja, bosh sahifa (tayyorlik, prognoz, keyingi qadam, bugungi reja, 3 qadamli yo'riqnoma), «Xatolar analitikasi», majburiy testlar jadvali, oraliq nazorat sahifasi (`app/services/plan.py`); attestatsiya sanasi `users.exam_date`dan | — |
 | 6 | ✅ Test o'ynatgichi bazada | 11 tur test savollar bankidan (`app/services/test_builder.py`), pleyer, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), bosqichlar, baholash (`app/services/scoring.py`), natija va tahlil, xatolar va mavzu holati (`app/services/progress.py`), e'tiroz yuborish/tahrirlash/o'chirish | — |
 | 7 | ✅ Ekspert paneli (1-qism) | Savollar banki bazadan (filtrlar, sahifalash, «savollar yetarli emas»), muharrir: yaratish va tahrirlash (har tahrir yangi versiya, kichik mavzu tanlovi, jadval/chizma/rasm), arxivlash, AI navbati (tahrirlab tasdiqlash, rad etish), `audit_log`, rasm yuklash (PNG/JPEG/WebP, mazmunga qarab tekshiruv) | — |
 | 7b | ⏳ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazaga (bo'lim, mavzu, kichik mavzu, bloklar), Excel import/eksport, ekspert huquqlari (yo'nalishlar, ruxsatlar); e'tirozlarni ko'rib chiqish, rad etilgan AI savolini natijadan chiqarish, natijani qayta hisoblash, bildirishnomalar jadvali | — |
-| 7c | ⏳ Takrorlanmaslik va xotira | Ko'rilgan savollar bitmapi (`user_seen_questions` o'rniga), takroriy savol bermaslik, shablon generator, `at`ni tozalash, 12 oydan eski urinishlarni siqish | — |
+| 7c | ✅ Takrorlanmaslik va xotira | Ko'rilgan savollar bitmapi (`user_seen`), takroriy savol berilmaydi, shablon generator (37 ta shablon, kichik mavzuga `generators` orqali bog'lanadi), xato boshqa savol bilan tuzatiladi, `at` tozalanadi, 12 oydan eski urinishlar siqiladi (`flask eski-testlarni-siqish`; jadval bo'yicha ishga tushirish — 10-bosqichda) | — |
 | 7d | ⏳ Savol formatlari | `lang` (JS, HTML, CSS, LOGO…), Excel panjarasi, Scratch bloklari, LOGO chizmasi, HTML/CSS ko'rinishi, Office ikonkalari | — |
 | 8 | ⏳ Admin paneli | Foydalanuvchilar, sozlamalar (`settings`), imtihon sanasi, `expert_invites` jadvali, `audit_log`, Excel/CSV import va eksport | 5 |
 | 9 | ⏳ Himoya | Kirish va kod yuborishni cheklash (IP va login bo'yicha, PostgreSQL'da), xavfsizlik tekshiruvi; `last_seen_at`ni kuniga bir marta yangilash | — |
@@ -74,6 +74,9 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
 12. **Kod tekshiruvi.** Har bir bosqich pull request bo'lib keladi: ko'rib chiqib, `main` ga birlashtirasiz.
 13. ✅ **AI savoli (2026-11-24):** darhol beriladi va ekspertizaga tushadi; tasdiqlansa — bazaga, rad etilsa — foydalanuvchiga xabar.
 14. ✅ **Sertifikat (2026-11-24):** akkaunt o'chsa ham saqlanadi, ixcham ko'rinishda.
+15. **Google orqali kirish** (kod tayyor): Google Cloud Console → OAuth client ID (Web application). Qaytish manzili:
+   `https://<domen>/kirish/google/qaytish` (sinov uchun `http://localhost:5000/kirish/google/qaytish`). Qiymatlar `.env` ga:
+   `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. OAuth consent screen'da maxfiylik siyosati havolasi: `/maxfiylik`.
 
 ## Bog'liqliklar qisqacha
 

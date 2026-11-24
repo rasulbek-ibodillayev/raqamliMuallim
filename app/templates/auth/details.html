@@ -7,6 +7,7 @@
   <div class="stack stack-sm">
     <h1>{{ _("Oxirgi qadam") }}</h1>
     <p class="lead">{{ _("Ismingiz sertifikatda shunday yoziladi.") }}</p>
+    {% if google %}<p class="small muted">{{ _("Google akkaunti:") }} <b>{{ google.email }}</b></p>{% endif %}
   </div>
   <div class="grid-2 g-16">
     <div class="field"><label class="label" for="fn">{{ _("Ism") }}</label>
@@ -16,6 +17,7 @@
       <input class="input" id="ln" name="ln" value="{{ form.ln }}" autocomplete="family-name" placeholder="{{ _('Karimova') }}" required aria-describedby="ln-err" :aria-invalid="!!err('ln')" @input="clear('ln')">
       {{ field_error("ln", errors) }}</div>
   </div>
+  {% if not google %}
   <div class="field">
     <label class="label" for="np">{{ _("Parol") }}</label>
     <div class="input-group">
@@ -41,6 +43,7 @@
     {{ field_error("secret", errors) }}
     <span class="hint" id="secret-hint">{{ _("Telefon raqamingiz o‘zgarsa yoki emailingizga kira olmasangiz, akkauntni shu so‘z orqali tiklaysiz. Eslab qoladigan, lekin boshqalar bilmaydigan so‘z tanlang. Katta-kichik harf farqlanmaydi.") }}</span>
   </div>
+  {% endif %}
 
   <div>
     <button class="btn btn-ghost btn-sm pl-0" type="button" @click="more = !more" :aria-expanded="more">{{ icon("chevron-down", "ico-sm") }}{{ _("Hudud (ixtiyoriy)") }}</button>

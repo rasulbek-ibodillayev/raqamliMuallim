@@ -15,7 +15,8 @@ from flask import has_request_context, request
 from sqlalchemy import func, select
 
 from ..extensions import db
-from ..models import AttemptItem, AuditLog, Question, QuestionVersion, Section, Subtopic, Topic
+from ..models import AuditLog, Question, QuestionVersion, Section, Subtopic, Topic
+from . import seen
 from .content_import import check_question
 
 PAGE = 20
@@ -177,6 +178,10 @@ def save(payload: dict, actor_id: int, question_id: int | None = None, status: s
         if q is None:
             raise FormError({"text": "Savol topilmadi"})
         before = _snapshot(q)
+        # Muharrirda variant izohlari maydoni yo'q: variantlar o'zgarmagan bo'lsa, izohlar saqlanib qoladi
+        notes = (q.answer or {}).get("notes")
+        if notes and "notes" not in fields["answer"] and (q.data or {}).get("options") == (fields["data"] or {}).get("options"):
+            fields["answer"] = {**fields["answer"], "notes": notes}
         for k, v in fields.items():
             setattr(q, k, v)
         if _snapshot(q) == before and q.status == status:
@@ -209,7 +214,7 @@ def reject(question_id: int, actor_id: int) -> bool:
     q = db.session.get(Question, question_id)
     if q is None or q.source != "ai" or q.status != "review":
         return False
-    used = db.session.scalar(select(func.count()).select_from(AttemptItem).where(AttemptItem.question_id == q.id))
+    used = seen.ever_given(q.id)
     audit(actor_id, "reject", q.id, {"before": _snapshot(q)})
     if used:
         q.status = "archived"

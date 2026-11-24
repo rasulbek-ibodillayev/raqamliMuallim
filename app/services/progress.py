@@ -1,6 +1,7 @@
 """Yakunlangan testdan keyin: xatolar ro'yxati (error_items) va mavzu holati (user_topic_progress).
 
-- Xato (ball < 100) — error_items qatori ochiladi yoki wrong_count oshadi; keyin to'liq to'g'ri javob — resolved_at.
+- Xato (ball < 100) — error_items qatori ochiladi. Savol qaytib berilmagani uchun xato shu kichik mavzudagi boshqa savolga
+  to'liq to'g'ri javob bilan tuzatiladi: keyingi testlardagi har bir to'g'ri javob bitta (eng eski) xatoni yopadi.
 - Ixtiyoriy test o'zlashtirish foiziga ta'sir qilmaydi (xatolar baribir yoziladi).
 - Dars testi: mavzu «O'rganilmoqda»ga o'tadi, lesson_pct — ≥ 70% topshirilgan darslar ulushi.
 - Mavzu testi: best_pct — eng yaxshi natija; ≥ 90 — mustahkam, ≥ 70 — o'zlashtirilgan, < 70 — qayta o'zlashtirish.
@@ -8,9 +9,10 @@
 - Oraliq sinov: < 70% chiqqan mavzular qayta o'zlashtirishga qaytadi.
 - Diagnostika: ≥ 90% chiqqan mavzu — mustahkam, "diagnostic" belgisi bilan (rejadan chiqariladi).
 """
+from collections import Counter
 from datetime import datetime, timezone
 
-from sqlalchemy import literal_column
+from sqlalchemy import literal_column, select
 from sqlalchemy.dialects.postgresql import insert
 
 from ..extensions import db
@@ -74,7 +76,7 @@ def _lesson(a: TestAttempt) -> None:
 def _errors(a: TestAttempt, snaps: dict) -> None:
     now = datetime.now(timezone.utc)
     wrong = [i for i in a.items if i.score is not None and i.score < 100]
-    right = [i.question_id for i in a.items if i.score == 100]
+    right = Counter(snaps[i.position][1] for i in a.items if i.score == 100)
     if wrong:
         stmt = insert(ErrorItem).values([{"user_id": a.user_id, "subtopic_id": snaps[i.position][1],
                                           "question_id": i.question_id, "last_attempt_id": a.id, "last_wrong_at": now}
@@ -83,6 +85,9 @@ def _errors(a: TestAttempt, snaps: dict) -> None:
             index_elements=[ErrorItem.user_id, ErrorItem.question_id],
             set_={"wrong_count": literal_column("error_items.wrong_count + 1"), "last_attempt_id": a.id,
                   "last_wrong_at": now, "resolved_at": None}))
-    if right:
-        db.session.execute(db.update(ErrorItem).where(ErrorItem.user_id == a.user_id, ErrorItem.question_id.in_(right),
-                                                      ErrorItem.resolved_at.is_(None)).values(resolved_at=now))
+    for sid, n in right.items():
+        oldest = (select(ErrorItem.id).where(ErrorItem.user_id == a.user_id, ErrorItem.subtopic_id == sid,
+                                             ErrorItem.resolved_at.is_(None), ErrorItem.last_attempt_id.is_distinct_from(a.id))
+                  .order_by(ErrorItem.last_wrong_at, ErrorItem.id).limit(n))
+        db.session.execute(db.update(ErrorItem).where(ErrorItem.id.in_(oldest)).values(resolved_at=now)
+                           .execution_options(synchronize_session=False))

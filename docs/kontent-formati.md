@@ -32,6 +32,11 @@ Tartib JSON'dagi tartib bilan bir xil bo'ladi.
 
 **`weight`**: mavzu testida shu kichik mavzudan nechta savol beriladi. 0 dan 50 gacha. Agar 0 bo'lsa, kichik mavzudan savol olinmaydi.
 
+**`generators`** (ixtiyoriy): foydalanuvchiga yangi savol qolmaganda ishlatiladigan shablonlar, masalan `["bin_dec", "bin_match"]`.
+Shablon sonlarni har safar yangidan tanlaydi, javobni kod hisoblaydi, savol darhol tasdiqlangan bo'lib bankka qo'shiladi.
+Dars testi uchun kamida bitta ko'p javobli yoki moslashtirish shablonini qo'shing. Maydon berilmasa, avvalgisi o'zgarmaydi.
+Kichik mavzuda kamida bitta oddiy tasdiqlangan savol ham bo'lishi kerak. Shablonlar ro'yxati — [pastda](#shablonlar).
+
 ## Savollar
 
 | Maydon | Majburiy | Qiymat |
@@ -64,6 +69,13 @@ Variant indekslari 0 dan boshlanadi.
  "answer": {"value": "45", "accept": ["45₁₀"]}}
 ```
 
+**Variant izohlari** (ixtiyoriy, `single` va `multiple`): `answer.notes` — har bir variant nega to'g'ri yoki noto'g'ri ekani, variantlar
+tartibida. Testdan keyin «Yechimini ko'rish» bosilganda AI tutorda chiqadi. Nazariy savollarga yozish tavsiya etiladi:
+
+```json
+"answer": {"keys": [1], "notes": ["Fayl uzatish — FTP vazifasi.", "DNS nomni IP-manzilga o‘giradi.", "Xatni SMTP uzatadi."]}
+```
+
 `accept` maydoni ixtiyoriy: unda to'g'ri deb qabul qilinadigan boshqa yozilishlar beriladi.
 
 **Moslashtirish (`matching`):** `pairs[k]` — chap ustundagi `k`-element o'ng ustundagi qaysi elementga mos kelishi.
@@ -88,3 +100,47 @@ Bu misolda HTTP «Gipermatn uzatadi» ga, DNS esa «Domen nomini o‘giradi» ga
 ```
 
 `kind` qiymatlari: `text`, `code`, `image`, `table`, `mermaid` (`data.code` — sxema matni), `formula`, `video`, `callout`, `example`, `quiz`. `example` (yechimli masala) bazaga yuklanadi, lekin darsda ko'rsatilmaydi.
+
+## Shablonlar
+
+`generators` uchun nomlar (`app/services/question_templates.py`):
+
+| Nomi | Mazmuni | Turi | Darajalar |
+|---|---|---|---|
+| `bin_dec` | Ikkilikdan o‘nlikka | bitta javobli | oson, o'rta, qiyin |
+| `bin_dec_open` | Ikkilikdan o‘nlikka (ochiq) | ochiq | oson, o'rta, qiyin |
+| `dec_bin` | O‘nlikdan ikkilikka | bitta javobli | oson, o'rta, qiyin |
+| `bin_add` | Ikkilik sonlarni qo‘shish | bitta javobli | oson, o'rta, qiyin |
+| `bin_match` | Ikkilik va o‘nlik sonlarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `hex_dec` | O‘n oltilikdan o‘nlikka | bitta javobli | oson, o'rta, qiyin |
+| `hex_dec_open` | O‘n oltilikdan o‘nlikka (ochiq) | ochiq | oson, o'rta, qiyin |
+| `dec_hex` | O‘nlikdan o‘n oltilikka | bitta javobli | oson, o'rta, qiyin |
+| `hex_bin` | O‘n oltilikdan ikkilikka | bitta javobli | o'rta, qiyin |
+| `hex_match` | O‘n oltilik va o‘nlik sonlarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `bits_alphabet` | Alifbo quvvati | bitta javobli | oson, o'rta |
+| `text_volume` | Matn hajmi | bitta javobli | o'rta, qiyin |
+| `unit_convert` | Axborot birliklarini o‘tkazish (ochiq) | ochiq | oson, o'rta, qiyin |
+| `unit_match` | Axborot birliklarini moslash | moslashtirish | oson, o'rta |
+| `logic_count` | Mantiqiy ifoda necha holatda rost | bitta javobli | o'rta, qiyin |
+| `logic_true` | Rost mantiqiy ifodalar | ko'p javobli | oson, o'rta, qiyin |
+| `logic_value` | Mantiqiy ifoda qiymatlari | moslashtirish | o'rta, qiyin |
+| `de_morgan` | De Morgan qonunlari | bitta javobli | oson, o'rta |
+| `py_if` | if operatori: natija | bitta javobli | oson, o'rta, qiyin |
+| `py_if_open` | if operatori: natija (ochiq) | ochiq | oson, o'rta, qiyin |
+| `py_true` | Rost shartlar | ko'p javobli | oson, o'rta, qiyin |
+| `py_ifelse` | if / else: natija | bitta javobli | oson, o'rta, qiyin |
+| `py_ifelse_match` | if / else: qiymatlarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `py_elif` | elif zanjiri: natija | bitta javobli | oson, o'rta, qiyin |
+| `py_elif_match` | elif zanjiri: baholarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `py_for` | for sikli: yig‘indi | bitta javobli | oson, o'rta, qiyin |
+| `py_for_count` | for sikli: shartli hisob (ochiq) | ochiq | o'rta, qiyin |
+| `py_range` | range() elementlari | ko'p javobli | oson, o'rta, qiyin |
+| `py_while` | while sikli: natija | bitta javobli | oson, o'rta, qiyin |
+| `py_rec` | Rekursiya: natija | bitta javobli | oson, o'rta, qiyin |
+| `py_rec_match` | Rekursiya: qiymatlarni moslash | moslashtirish | o'rta, qiyin |
+| `bsearch_steps` | Ikkilik qidiruv qadamlari | bitta javobli | oson, o'rta, qiyin |
+| `bsearch_mid` | Ikkilik qidiruv: birinchi solishtirish | bitta javobli | oson, o'rta, qiyin |
+| `search_true` | Qidiruv haqida to‘g‘ri fikrlar | ko'p javobli | oson, o'rta, qiyin |
+| `xl_sumif` | SUMIF formulasi | bitta javobli | oson, o'rta, qiyin |
+| `xl_countif` | COUNTIF formulasi | bitta javobli | oson, o'rta, qiyin |
+| `xl_match` | Formulalarni natijasi bilan moslash | moslashtirish | oson, o'rta, qiyin |

@@ -17,11 +17,12 @@ window.rmTutor = function () {
       }
       // 24 soat o'tdi yoki keyingi mavzuga o'tildi: ochiq turgan sahifadagi suhbat ham tozalanadi
       document.addEventListener("rm-tutor-cleared", function () { self.msgs = []; self.startedAt = null; self.restored = false; });
-      var q = new URLSearchParams(location.search).get("q");
-      if (q) {
-        this.ask(q);
+      var params = new URLSearchParams(location.search), q = params.get("q"), ref = params.get("savol");
+      if (q || ref) {
+        if (ref) this.solve(ref); else this.ask(q);
         // URL'dan savolni olib tashlaymiz: sahifa yangilansa savol qayta qo'shilmasin
-        history.replaceState(null, "", location.pathname + location.search.replace(/([?&])q=[^&]*&?/, "$1").replace(/[?&]$/, ""));
+        params.delete("q"); params.delete("savol");
+        history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : ""));
       }
       this.$nextTick(function () { self.scroll(); });
     },
@@ -38,6 +39,24 @@ window.rmTutor = function () {
         self.msgs.push({ role: "ai", html: "<p>" + esc(rmT("tutorDemo", { q: text.slice(0, 80) })) + "</p>" });
         self.persist(); self.scroll();
       }, 900);
+    },
+    /* Test natijasidagi «Yechimini ko'rish»: savol va yechimi serverdan (shablonda tozalangan HTML) */
+    solve: function (ref) {
+      var self = this;
+      this.typing = true;
+      fetch("/app/tutor/yechim/" + encodeURIComponent(ref), { headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function (d) {
+          self.typing = false;
+          // Shu savol yechimi suhbatda bo'lsa, takrorlanmaydi (oxiriga ko'chadi)
+          self.msgs = self.msgs.filter(function (m) { return m.ref !== ref; });
+          self.msgs.push({ role: "user", html: d.ask, ref: ref }, { role: "ai", html: d.html, ref: ref });
+          self.persist(); self.scroll();
+        })
+        .catch(function (e) {
+          self.typing = false;
+          rmToast(rmT(e === 404 ? "solveMissing" : "solveFailed"));
+        });
     },
     send: function (ev) {
       var ta = ev.target.querySelector("textarea");

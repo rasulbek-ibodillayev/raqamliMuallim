@@ -13,15 +13,18 @@ yaratiladi va xeshi bo'yicha qayta ishlatiladi.
 
 | Nima | Hozir | Taklif | Farqi |
 |---|---|---|---|
-| Ko'rilgan savollar | `user_seen_questions`: har juftlikka qator | Foydalanuvchiga bitta bitmap (`bytea`, bit = savol id) | 72 MB → 1,5 MB (48 baravar). Tanlash so'rovi 0,6 → 1,1 ms |
-| Javoblar | `{"v":…, "at":…}` | Test yakunlangach faqat `v` qoladi (`at` faqat sinxronlash paytida kerak) | 139 → 114 MB (−18%) |
-| Eski urinishlar | Ustun bor, kod yo'q | 12 oydan eskisi `items_archive`ga siqiladi (zlib) | 20 savol ≈ 187 bayt; 1 mln javob 139 → ≈ 11 MB |
+| Ko'rilgan savollar ✅ | Avval: har juftlikka qator | Foydalanuvchiga bitta bitmap (`bytea`, bit = savol id) | 72 → 1,44 MB (50 baravar; kodda o'lchandi) |
+| Javoblar ✅ | `{"v":…, "at":…}` | Test yakunlangach faqat `v` qoladi (`at` faqat sinxronlash paytida kerak) | 139 → 114 MB (−18%) |
+| Eski urinishlar ✅ | Ustun bor, kod yo'q | 12 oydan eskisi `items_archive`ga siqiladi (zlib) | 20 savol ≈ 204 bayt; 1 mln javob 139 → ≈ 11 MB |
 | RAG vektorlari | `vector(768)`, 4 bayt/o'lcham | `halfvec(768)`, 2 bayt/o'lcham | vektor hajmi 2 baravar kam |
 | Navbat va cheklovlar | Reja: Redis + RQ | PostgreSQL `jobs` jadvali (`SKIP LOCKED`) va bitta worker | Redis jarayoni umuman kerak emas |
 | Sertifikat PDF | Reja: WeasyPrint serverda | Brauzerning «PDF'ga chop etish»i (sahifa tayyor) | Server kutubxonalari va PDF fayllar yo'q |
 | Tarjima | LibreTranslate ≈ 200 MB RAM, obraz 2,1 GB | Faqat ishlab chiqishda; serverga chiqarilmaydi | −200 MB RAM |
 
 Bitmap faqat «takrorlanmasin» qoidasi uchun yetadi: savol endi hech qachon qaytarilmagani sababli `seen_on` sanasi kerak emas.
+
+7c bajarildi (2026-11-24). Kodda o'lchandi (20 000 savol, 500 foydalanuvchi × 2000): bitta kichik mavzudan tanlash 4,7 ms,
+butun bank bo'yicha hisob 17 ms, 35 savollik attestatsiya testini tuzish 58 ms, diagnostika 122 ms, shablondan 3 ta savol 8 ms.
 
 Savol matni ikki joyda (`questions` va `question_versions`) turadi: o'rtacha 311 + 366 bayt. 20 000 savolda bu ≈ 14 MB, shuning
 uchun hozircha o'zgartirilmaydi.
@@ -90,6 +93,16 @@ o'chirmaydi. `ai_cache`ga erkin suhbat emas, faqat umumiy so'rovlar (dars izohi,
 
 **Limitlar:** foydalanuvchiga kuniga 20 ta tutor savoli (sozlamada); kesh javoblari hisobga kirmaydi.
 
+**«Yechimini ko'rish» (Tuzatish 24.11.2).** Natijadagi xato savoldan AI tutorga o'tiladi. Yechim tartibi: baza izohi va variant
+izohlari (`answer.notes`) → shablon savolda hisob-kitob → (13-bosqich) AI. Hozir AI ulanmagan: izohi yo'q savolda to'g'ri javob va
+«izoh hali yozilmagan» chiqadi. AI ulanganda yechim savolga bog'lanadi (`ai_cache`, savol id + versiya): bitta savol uchun model bir
+marta chaqiriladi va hammaga ko'rsatiladi. Hisoblash savolida — yechish usuli qadam-baqadam, nazariy savolda — har bir javob izohi va
+to'g'ri javobning isboti. Bazadagi kalitga zid yechim ko'rsatilmaydi. Yechim faqat yakunlangan o'z testida ochiladi.
+
+**Google orqali ro'yxatdan o'tish.** OAuth 2.0 + PKCE, qo'shimcha kutubxonasiz (`urllib`). Parol va maxfiy so'z so'ralmaydi: ism, hudud,
+rozilik. Akkaunt `users.google_sub` ga bog'lanadi (Google'da email o'zgarsa ham). Shu emailli akkaunt avvaldan bo'lsa, bir marta parol
+bilan kirgandan keyin bog'lanadi: aks holda birovning emailini oldindan ro'yxatdan o'tkazgan odam uning akkauntiga kirib qolishi mumkin.
+
 ## 3. Attestatsiya savollari: dasturlar bo'yicha
 
 Rasm o'rniga tavsif saqlanadi, brauzer chizadi.
@@ -115,8 +128,10 @@ ham o'qiydi), kunlik zaxira nusxa. Bekor qilingan ixtiyoriy test natija hisoblan
 
 Avvalgi qaror («eng eski ko'rilgan savol qaytadi») bekor bo'ladi.
 
+Holat: 1 va 2 bajarildi (7c), 3 — 13b-bosqichda; ungacha savol ham, shablon ham qolmasa, test qisqaroq bo'ladi yoki ochilmaydi.
+
 1. **Baza:** ko'rilmagan tasdiqlangan savollar.
-2. **Shablon generator:** parametrli savol (Python, sanoq sistemasi, Excel formulasi, LOGO…) yangi sonlar bilan. Javob kod bilan
+2. **Shablon generator** (37 ta shablon, `app/services/question_templates.py`): parametrli savol (Python, sanoq sistemasi, Excel formulasi, LOGO…) yangi sonlar bilan. Javob kod bilan
    hisoblanadi, shuning uchun darhol `approved`; AI va token kerak emas.
 3. **AI tutor:** shu kichik mavzu, daraja va turdagi savol, RAG manbasi bilan. Tekshiruv: format (`check_question`) → o'xshash savol
    yo'qligi (`pg_trgm`) → ikkinchi model kalitni ko'rmasdan yechadi, javob mos kelishi shart. O'tsa — savollar bazasiga yoziladi.

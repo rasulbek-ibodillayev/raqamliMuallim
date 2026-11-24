@@ -8,6 +8,8 @@ window.rmT = (function () {
     badServer: "Server javobini o‘qib bo‘lmadi", fixErrors: "Xatolarni tuzating",
     offline: "Internetga ulanib bo‘lmadi. Ulanishni tekshirib, qayta yuboring.", offlineShort: "Internetga ulanib bo‘lmadi",
     installHint: "Brauzer menyusidan «Ilovani o‘rnatish»ni tanlang",
+    solveMissing: "Savol topilmadi",
+    solveFailed: "Yechimni yuklab bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring",
     tutorDemo: "Bu namunaviy javob. Backend ulanganda AI tutor «{q}» savoliga darslik asosida javob beradi.",
     sections: "Bo‘limlar", notes: "Eslatmalar", copied: "Nusxalandi",
     resume: "So‘nggi o‘qigan joyingiz:", fromStart: "Boshidan",

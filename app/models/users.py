@@ -1,7 +1,7 @@
 """Foydalanuvchilar."""
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, Date, DateTime, String, true
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, Date, DateTime, Index, String, text, true
 from sqlalchemy.orm import Mapped, mapped_column
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -22,6 +22,7 @@ class User(Timestamps, db.Model):
     __tablename__ = "users"
     __table_args__ = (
         one_of("role", ROLES),
+        Index("uq_users_google_sub", "google_sub", unique=True, postgresql_where=text("google_sub IS NOT NULL")),
         # Kamida bitta kirish usuli bo'lishi shart
         CheckConstraint("phone IS NOT NULL OR email IS NOT NULL OR telegram_id IS NOT NULL", name="has_login"),
     )
@@ -29,9 +30,10 @@ class User(Timestamps, db.Model):
     id: Mapped[int] = pk()
     phone: Mapped[str | None] = mapped_column(String(20), unique=True)          # +998901234567
     email: Mapped[str | None] = mapped_column(String(254), unique=True)         # kichik harflarda saqlanadi
-    password_hash: Mapped[str | None] = mapped_column(String(255))             # Telegram orqali kirganda bo'sh
+    password_hash: Mapped[str | None] = mapped_column(String(255))             # Telegram yoki Google orqali kirganda bo'sh
     secret_hash: Mapped[str | None] = mapped_column(String(255))               # maxfiy so'z (parolni tiklash uchun)
     telegram_id: Mapped[int | None] = mapped_column(BigInteger, unique=True)
+    google_sub: Mapped[str | None] = mapped_column(String(64))                 # Google akkaunti id'si (email o'zgarsa ham shu)
     first_name: Mapped[str] = mapped_column(String(80))
     last_name: Mapped[str] = mapped_column(String(80))
     role: Mapped[str] = mapped_column(String(10), default="user", server_default="user")

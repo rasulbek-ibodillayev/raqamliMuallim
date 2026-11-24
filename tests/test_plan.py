@@ -161,7 +161,7 @@ def test_interim_uses_its_own_group(ctx):
 
 
 def test_monthly_due_after_30_days(ctx):
-    master(1)
+    master(1, 2)
     run("daily", days=29)
     assert plan().monthly["state"] == "locked"
     run("daily", days=30)
@@ -247,8 +247,18 @@ def test_plan_page(ctx, as_role):
     html = as_role("user").get("/app/reja").get_data(as_text=True)
     assert "T7" in html and "Oraliq sinov testi: 1–3 mavzular" in html and "1 / 2" in html
     rid = db.session.scalar(select(TestAttempt.id))
-    assert f"/app/natijalar/{rid}" in html and f"/test/savol?turi=dars&amp;dars={sub('T1b')}" in html
+    assert f"/app/natijalar/{rid}" in html and f"/app/dars/{topic(1)}#k{sub('T1b')}" in html
+    assert "turi=dars" not in html                                                # dars testi dars oxiridan boshlanadi
     assert "90000" not in html                                                    # namunaviy natija havolalari yo'q
+
+
+def test_plan_keeps_test_button_when_lesson_has_no_blocks(app, as_role):
+    with app.app_context():
+        load({"course": {"slug": "t", "title": "T"}, "sections": [{"title": "S", "topics": [
+            {"title": "T1", "subtopics": [{"title": "T1a", "questions": [_q("a")]}]}]}]}, status="approved")
+        sid = sub("T1a")
+    html = as_role("user").get("/app/reja").get_data(as_text=True)
+    assert f"/test/savol?turi=dars&amp;dars={sid}" in html and "Darsni ochish" not in html
 
 
 def test_empty_plan(app, as_role):
@@ -274,7 +284,7 @@ def test_errors_page(ctx, as_role):
     run("lesson", good=False, subtopic_id=sub("T1a"))
     items, total = catalog.error_items(me().id)
     assert total == len(items) == 4 and {e["section"] for e in items} == {"T1 · T1a"}
-    assert sorted(e["wrong"] for e in items) == [1, 1, 2, 2]                      # 4 ta savol, 3 + 3 berilgan
+    assert [e["wrong"] for e in items] == [2] * 4            # takrorsiz 3 + 1 savol; shu kichik mavzuda 2 ta testda xato
     html = c.get("/app/xatolar").get_data(as_text=True)
     assert "Xato qilingan savollar · 4" in html and "2 marta xato" in html and a.id
 

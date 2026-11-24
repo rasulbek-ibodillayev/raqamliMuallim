@@ -260,6 +260,34 @@ def lesson():
                            all_passed=all(p is not None and p >= m.PASS_MIN for p in pcts))
 
 
+@bp.get("/tutor/yechim/<ref>")
+def tutor_solution(ref):
+    """«Yechimini ko'rish»: savol va yechimi AI tutor suhbatiga (JSON). ref — "<urinish uuid>:<tartib>"."""
+    import uuid as uuidlib
+
+    from flask import abort, jsonify
+    from flask_login import current_user
+
+    from ..services import solutions
+    from . import test as vt
+    found = None
+    head, _sep, pos = ref.rpartition(":")
+    if vt.is_dev() and head in ("natija", "sinov"):                  # /ekranlar namunalari
+        r = vt.sample_solution(head, int(pos) if pos.isdigit() else -1)
+        found = (r, None) if r else None
+    else:
+        try:
+            found = solutions.for_attempt(current_user.id, uuidlib.UUID(head), int(pos))
+        except ValueError:
+            pass
+    if found is None:
+        abort(404, _("Savol topilmadi"))
+    r, lesson = found
+    url = url_for("user.lesson_topic", topic_id=lesson[0], _anchor=f"k{lesson[1]}") if lesson else None
+    return jsonify(ok=True, ask=render_template("partials/solution_ask.html", r=r),
+                   html=render_template("partials/solution.html", r=r, lesson_url=url))
+
+
 @bp.get("/tutor")
 def tutor():
     from .test import is_dev

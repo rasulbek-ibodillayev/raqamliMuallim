@@ -11,7 +11,7 @@
 | questions | 6.1-bo'limdagi maydonlar, versiyalar bilan |
 | test_attempts | Har bir boshlangan test: turi, holati, bosqich, natija, qaror, boshlangan paytdagi sozlamalar nusxasi |
 | attempt_items | Har bir berilgan savol: javob, ball, vaqt (ixcham) |
-| user_seen_questions | Foydalanuvchiga berilgan savollar (bir savol ikki marta berilmasligi uchun) |
+| user_seen | Foydalanuvchiga berilgan savollar bitmapi (bir savol ikki marta berilmasligi uchun) |
 | user_topic_progress | Mavzu holati, belgilar, dars progressi, ketma-ket muvaffaqiyatsizliklar |
 | error_items | Xatolar analitikasi va xatolar ro'yxati (kichik mavzu darajasida) |
 | review_schedule | Takrorlash jadvali (spaced repetition) |
@@ -34,7 +34,7 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
 - **questions (6.1-bo'lim hali qo'lda yo'q).** Maydonlar ekranlar asosida tuzildi: tur
   (`single`, `multiple`, `open`, `matching`), qiyinlik (`easy`, `medium`, `hard` = 1–3-bosqich),
   matn, `data` JSONB (variantlar, kod, rasm, jadval, juftliklar), `answer` JSONB, izoh, manba
-  (`expert`/`ai`), holat (`draft`, `review`, `approved`, `paused`, `archived`), versiya.
+  (`expert`/`import`/`ai`/`template`), holat (`draft`, `review`, `approved`, `paused`, `archived`), versiya.
   6.1 kelgach moslashtiriladi.
 - **Versiyalar.** `questions` joriy holatni saqlaydi, har tahrir `question_versions`ga to'liq
   nusxa (JSONB) sifatida yoziladi. `attempt_items` va `objections` savolning aniq versiyasiga ishora qiladi.
@@ -46,16 +46,23 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   - ball `smallint` turida, 0–100 foiz (`float8` o'rniga);
   - `question_id` bo'yicha alohida indeks yo'q.
 
-  Arxivlangan urinishda tafsilotlar `test_attempts.items_archive`ga (zlib + JSON) siqiladi.
+  Test (bosqich) tugagach javobda faqat `v` qoladi. 12 oydan eski urinish qatorlari `test_attempts.items_archive`ga
+  (zlib + JSON) siqiladi: `flask eski-testlarni-siqish`. Natija sahifasi, e'tiroz va foizlar arxivdan ham o'qiydi
+  (`app/services/archive.py`, `rows`). Bekor qilingan test qatorlari darhol o'chadi.
 - **Savol identifikatorlari 4 baytli.** `questions.id` va unga havola qiluvchi barcha ustunlar `integer`
-  (`question_versions`, `attempt_items`, `objections`, `discussions`, `error_items`, `user_seen_questions`).
+  (`question_versions`, `attempt_items`, `objections`, `discussions`, `error_items`).
   Savollar 2 milliarddan oshmaydi.
-- **Bir savol bir foydalanuvchiga ikki marta berilmaydi.** Bu qoida `user_seen_questions (user_id, question_id, seen_on)`
-  jadvaliga tayanadi. `attempt_items` arxivlanganda ham bu jadval qoladi.
+- **Bir savol bir foydalanuvchiga ikki marta berilmaydi.** Bu qoida `user_seen (user_id, bits)` ga tayanadi: bitmapda
+  n-bit — `questions.id = n` savol berilgan (`app/services/seen.py`). `attempt_items` arxivlanganda ham qoladi.
   - Testlar `app/services/attempts.py` orqali yig'iladi: kichik mavzular `weight`i bo'yicha, faqat `approved` savollardan.
-  - Har bir kichik mavzuda avval ko'rilmagan savollar tasodifiy tartibda olinadi.
-  - Ular tugasa, eng oldin ko'rilgan savollar qaytariladi. Nechtasi takrorlangani
-    `settings_snapshot.repeated` ga yoziladi: bu kichik mavzuga yangi savol kerakligini ko'rsatadi.
+  - Har bir kichik mavzuda berilmagan savollar tasodifiy tartibda olinadi. Yakunlanmagan bosqichli testning keyingi
+    bosqichlaridagi savollar band: boshqa testga tushmaydi.
+  - Yetmasa shablon generator (`app/services/generator.py`, `subtopics.generators`) yangi savol tuzadi. Javob kod bilan
+    hisoblanadi, savol `source=template`, `approved` bo'lib bankka qo'shiladi; `questions.sig` takrorni oldini oladi.
+  - U ham yetmasa test qisqaroq bo'ladi, umuman qolmasa test ochilmaydi va sabab ko'rsatiladi.
+- **Xato tuzatilishi.** Savol qaytmagani uchun xato shu kichik mavzudagi boshqa savolga keyingi testdagi to'liq to'g'ri
+  javob bilan yopiladi: bitta to'g'ri javob — bitta, eng eski xato. «Qayta xato» — shu kichik mavzuda nechta testda xato
+  qilingani.
 - **Test turlari.** `test_attempts.kind`: diagnostic, lesson, topic, daily, interim, weekly, monthly, optional, final, errors,
   exam. Dars testi `subtopic_id` ga bog'lanadi. Bosqichli testda `stage` — joriy bosqich, bosqichlar chegarasi va o'tmagan
   mavzular `settings_snapshot` da (`stages`, `failed_topics`, `skipped`).

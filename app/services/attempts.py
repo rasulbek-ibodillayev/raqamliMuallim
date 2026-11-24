@@ -3,27 +3,27 @@ Qaysi testga nechta savol tushishi — test_builder.py; natijaning progressga ta
 
 Qoidalar:
 - Savol bazada bir joyda (questions) turadi; urinish faqat (question_id, version) ga havola qiladi.
-- Bitta foydalanuvchiga bitta savol ikki marta berilmaydi: berilgan savollar user_seen_questions'ga yoziladi.
-- Kichik mavzudagi yangi savollar tugasa, test to'liq bo'lishi uchun eng oldin ko'rilgan savollar qaytariladi
-  (seen_on bo'yicha). Nechtasi takrorlangani test_attempts.settings_snapshot["repeated"] ga yoziladi —
-  admin shu bo'yicha qaysi mavzuga yangi savol kerakligini ko'radi.
+- Bitta foydalanuvchiga bitta savol ikki marta berilmaydi (seen.py). Yangi savol yetmasa — shablon generator (generator.py),
+  u ham yetmasa test qisqaroq bo'ladi.
 - Faqat tasdiqlangan (approved) savollar olinadi.
+- Test (bosqich) tugagach javobdan faqat qiymati qoladi; 12 oydan eski urinish siqiladi (archive.py), shuning uchun
+  yakunlangan urinish qatorlari archive.rows(a) orqali o'qiladi.
 
-Savollar bitta SQL so'rov bilan tanlanadi: har bir kichik mavzu ichida avval ko'rilmaganlar (tasodifiy tartibda),
-keyin ko'rilganlar (eng eskisidan) va har biridan rejadagi sonicha olinadi.
+Bankdagi savollar bitta SQL so'rov bilan tanlanadi: har bir kichik mavzudan rejadagi sonicha, tasodifiy tartibda.
 """
 import random
 import uuid
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from flask_babel import lazy_gettext as _l
-from sqlalchemy import func, literal_column, select
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import func, select, tuple_
 
 from ..extensions import db
-from ..models import AttemptItem, Question, QuestionVersion, Subtopic, TestAttempt, Topic, UserSeenQuestion
-from . import progress, scoring
+from ..models import AttemptItem, Question, QuestionVersion, Subtopic, TestAttempt, Topic
+from . import generator, progress, scoring, seen
+from .archive import rows as rows_of
 
 PARTIAL_TYPES = ("multiple", "matching")      # qisman ball beriladigan turlar
 DEFAULT_SECONDS = 60                          # savolda time_limit_s bo'lmasa
@@ -35,7 +35,6 @@ class Picked:
     question_id: int
     version: int
     subtopic_id: int
-    repeated: bool          # foydalanuvchi bu savolni avval ko'rgan (yangi savollar yetmadi)
     type: str = "single"
     seconds: int = DEFAULT_SECONDS
 
@@ -49,20 +48,32 @@ def plan_for_topic(topic_id: int) -> dict[int, int]:
 
 def pick_questions(user_id: int, plan: dict[int, int], difficulty: str | None = None,
                    types: tuple[str, ...] | None = None) -> list[Picked]:
-    """Reja bo'yicha savollarni tanlaydi (bazaga hech narsa yozmaydi). Natija kichik mavzular tartibida."""
+    """Reja bo'yicha savollar, kichik mavzular tartibida: avval bankdagi yangi savollar, yetmaganiga shablon generator.
+
+    Generator tuzgan savollar sessiyaga qo'shiladi (commit urinish bilan birga)."""
+    picked = pick_from_bank(user_id, plan, difficulty, types)
+    have = Counter(p.subtopic_id for p in picked)
+    out = []
+    for sid, n in plan.items():
+        out += [p for p in picked if p.subtopic_id == sid]
+        out += make_new(sid, n - have[sid], difficulty, types)
+    return out
+
+
+def make_new(subtopic_id: int, n: int, difficulty=None, types=None) -> list[Picked]:
+    return [Picked(q.id, q.version, q.subtopic_id, q.type, q.time_limit_s or DEFAULT_SECONDS)
+            for q in generator.make(subtopic_id, n, difficulty, types)]
+
+
+def pick_from_bank(user_id: int, plan: dict[int, int], difficulty: str | None = None,
+                   types: tuple[str, ...] | None = None) -> list[Picked]:
+    """Bankdagi foydalanuvchiga berilmagan savollar (bazaga hech narsa yozmaydi)."""
     plan = {sid: n for sid, n in plan.items() if n > 0}
     if not plan:
         return []
-    seen = UserSeenQuestion
-    is_seen = seen.question_id.is_not(None)
-    rank = func.row_number().over(
-        partition_by=Question.subtopic_id,
-        order_by=(is_seen, seen.seen_on, func.random()),
-    ).label("rn")
-    q = (select(Question.id, Question.version, Question.subtopic_id, is_seen.label("repeated"),
-                Question.type, Question.time_limit_s, rank)
-         .outerjoin(seen, (seen.question_id == Question.id) & (seen.user_id == user_id))
-         .where(Question.subtopic_id.in_(plan), Question.status == "approved"))
+    rank = func.row_number().over(partition_by=Question.subtopic_id, order_by=func.random()).label("rn")
+    q = (select(Question.id, Question.version, Question.subtopic_id, Question.type, Question.time_limit_s, rank)
+         .where(Question.subtopic_id.in_(plan), Question.status == "approved", seen.is_new(user_id)))
     if difficulty:
         q = q.where(Question.difficulty == difficulty)
     if types:
@@ -72,34 +83,23 @@ def pick_questions(user_id: int, plan: dict[int, int], difficulty: str | None = 
     limits = select(func.unnest(list(plan.keys())).label("sid"),
                     func.unnest(list(plan.values())).label("n")).subquery()
     rows = db.session.execute(
-        select(ranked.c.id, ranked.c.version, ranked.c.subtopic_id, ranked.c.repeated, ranked.c.type,
-               ranked.c.time_limit_s)
+        select(ranked.c.id, ranked.c.version, ranked.c.subtopic_id, ranked.c.type, ranked.c.time_limit_s)
         .join(limits, limits.c.sid == ranked.c.subtopic_id)
         .where(ranked.c.rn <= limits.c.n)
         .order_by(ranked.c.subtopic_id, ranked.c.rn)
     ).all()
     order = {sid: i for i, sid in enumerate(plan)}
-    picked = [Picked(r.id, r.version, r.subtopic_id, bool(r.repeated), r.type, r.time_limit_s or DEFAULT_SECONDS)
-              for r in rows]
+    picked = [Picked(r.id, r.version, r.subtopic_id, r.type, r.time_limit_s or DEFAULT_SECONDS) for r in rows]
     return sorted(picked, key=lambda p: order[p.subtopic_id])   # sorted barqaror: kichik mavzu ichidagi tartib saqlanadi
-
-
-def _seen(user_id: int, question_ids: list[int]) -> None:
-    """Savollarni «ko'rilgan» deb belgilaydi. Qayta berilgan savolning sanasi yangilanadi: u navbat oxiriga o'tadi."""
-    if not question_ids:
-        return
-    stmt = insert(UserSeenQuestion).values([{"user_id": user_id, "question_id": q} for q in question_ids])
-    db.session.execute(stmt.on_conflict_do_update(
-        index_elements=[UserSeenQuestion.user_id, UserSeenQuestion.question_id],
-        set_={"seen_on": literal_column("CURRENT_DATE")}))
 
 
 def _insert(user_id: int, kind: str, parts: list[list[Picked]], *, levels=None, topic_id=None, subtopic_id=None,
             seconds=None, client_uuid=None, stage=None, settings=None) -> TestAttempt:
-    """Urinish va savollarini yozadi. Bosqichli testda faqat birinchi bosqich savollari «ko'rilgan» deb belgilanadi."""
+    """Urinish va savollarini yozadi. Bosqichli testda faqat birinchi bosqich savollari «berilgan» deb belgilanadi:
+    keyingilari test yakunlanmaguncha band turadi (seen.is_new), bosqichga yetib borilmasa — bankka qaytadi."""
     now = datetime.now(timezone.utc)
     flat = [p for part in parts for p in part]
-    snap = {**(settings or {}), "repeated": sum(p.repeated for p in flat)}
+    snap = dict(settings or {})
     if levels and levels != [None]:
         stages, start = [], 0
         for level, part in zip(levels, parts):
@@ -116,7 +116,7 @@ def _insert(user_id: int, kind: str, parts: list[list[Picked]], *, levels=None, 
     attempt.items = [AttemptItem(position=i, question_id=p.question_id, question_version=p.version)
                      for i, p in enumerate(flat)]
     db.session.add(attempt)
-    _seen(user_id, [p.question_id for p in (parts[0] if "stages" in snap else flat)])
+    seen.mark(user_id, [p.question_id for p in (parts[0] if "stages" in snap else flat)])
     db.session.commit()
     return attempt
 
@@ -208,13 +208,16 @@ def save_answers(a: TestAttempt, answers: list[dict]) -> list[int]:
 
 def _snapshots(a: TestAttempt) -> dict[int, tuple[dict, int, int]]:
     """{tartib: (savol nusxasi, kichik mavzu, mavzu)} — urinishdagi aniq versiyalar."""
+    items = rows_of(a)
+    if not items:
+        return {}
     rows = db.session.execute(
-        select(AttemptItem.position, QuestionVersion.snapshot, Subtopic.id, Subtopic.topic_id)
-        .join(QuestionVersion, (QuestionVersion.question_id == AttemptItem.question_id)
-              & (QuestionVersion.version == AttemptItem.question_version))
-        .join(Question, Question.id == AttemptItem.question_id).join(Subtopic, Subtopic.id == Question.subtopic_id)
-        .where(AttemptItem.attempt_id == a.id)).all()
-    return {pos: (snap, sid, tid) for pos, snap, sid, tid in rows}
+        select(QuestionVersion.question_id, QuestionVersion.version, QuestionVersion.snapshot, Subtopic.id, Subtopic.topic_id)
+        .join(Question, Question.id == QuestionVersion.question_id).join(Subtopic, Subtopic.id == Question.subtopic_id)
+        .where(tuple_(QuestionVersion.question_id, QuestionVersion.version)
+               .in_([(i.question_id, i.question_version) for i in items]))).all()
+    info = {(qid, ver): (snap, sid, tid) for qid, ver, snap, sid, tid in rows}
+    return {i.position: info[i.question_id, i.question_version] for i in items if (i.question_id, i.question_version) in info}
 
 
 def _stage_verdict(a: TestAttempt, snaps, positions) -> tuple[set[int], dict[str, int]]:
@@ -252,7 +255,9 @@ def finish(a: TestAttempt, stage: int | None = None) -> TestAttempt:
     now_positions = active_positions(a)
     for p in now_positions:
         snap, item = snaps[p][0], by_pos[p]
-        item.score = scoring.grade(snap["type"], snap["answer"], (item.answer or {}).get("v"))
+        v = (item.answer or {}).get("v")
+        item.score = scoring.grade(snap["type"], snap["answer"], v)
+        item.answer = None if v is None else {"v": v}          # `at` faqat sinxronlash paytida kerak edi
 
     if is_staged(a):
         _apply_verdict(a, snaps, now_positions)
@@ -298,7 +303,7 @@ def _next_stage(a: TestAttempt, snaps) -> bool:
             a.settings_snapshot = {**cfg, "skipped": sorted(skipped), "seconds": seconds}
             a.stage = n
             a.deadline_at = datetime.now(timezone.utc) + timedelta(seconds=seconds)
-            _seen(a.user_id, [i.question_id for i in a.items if i.position in left])
+            seen.mark(a.user_id, [i.question_id for i in a.items if i.position in left])
             return True
     a.settings_snapshot = {**cfg, "skipped": sorted(skipped)}
     return False
@@ -316,10 +321,10 @@ def advice(a: TestAttempt) -> dict:
 
 
 def cancel(a: TestAttempt) -> None:
-    """Bekor qilish (faqat ixtiyoriy testlar — ko'rinish tekshiradi): javoblar o'chadi, natijaga kirmaydi."""
+    """Bekor qilish (faqat ixtiyoriy testlar — ko'rinish tekshiradi): qatorlari o'chadi, natijaga kirmaydi.
+    Ko'rsatilgan savollari «berilgan» bo'lib qoladi (bitmap)."""
     a.status, a.finished_at = "abandoned", datetime.now(timezone.utc)
-    for i in a.items:
-        i.answer = i.score = None
+    a.items.clear()
     db.session.commit()
 
 
@@ -354,9 +359,11 @@ def saved_answers(a: TestAttempt) -> dict[int, dict]:
 
 
 def _titles(a: TestAttempt) -> dict[int, str]:
-    return dict(db.session.execute(
-        select(AttemptItem.position, Subtopic.title).join(Question, Question.id == AttemptItem.question_id)
-        .join(Subtopic, Subtopic.id == Question.subtopic_id).where(AttemptItem.attempt_id == a.id)).all())
+    items = rows_of(a)
+    by_q = dict(db.session.execute(
+        select(Question.id, Subtopic.title).join(Subtopic, Subtopic.id == Question.subtopic_id)
+        .where(Question.id.in_([i.question_id for i in items]))).all())
+    return {i.position: by_q[i.question_id] for i in items if i.question_id in by_q}
 
 
 LEVELS = {"easy": _l("Oson"), "medium": _l("O‘rta"), "hard": _l("Qiyin")}
@@ -367,7 +374,7 @@ def review(a: TestAttempt) -> list[dict]:
     snaps, titles = _snapshots(a), _titles(a)
     skipped = set(a.settings_snapshot.get("skipped", []))
     out = []
-    for item in a.items:
+    for item in rows_of(a):
         if item.position in skipped or item.position not in snaps:
             continue
         snap = snaps[item.position][0]
@@ -375,7 +382,8 @@ def review(a: TestAttempt) -> list[dict]:
         r = {"n": len(out) + 1, "pos": item.position, "kind": TYPE_TO_KIND[snap["type"]], "topic": titles[item.position],
              "level": LEVELS.get(snap["difficulty"]), "q": snap["text"], "code": data.get("code"),
              "table": data.get("table"), "image": data.get("image"), "score": item.score or 0,
-             "answered": v not in (None, "", []), "why": snap.get("explanation")}
+             "answered": v not in (None, "", []), "why": snap.get("explanation"), "notes": ans.get("notes"),
+             "computed": bool(data.get("code") or data.get("table")) or snap["type"] == "open"}
         if snap["type"] in ("single", "multiple"):
             r["options"], r["right"] = data["options"], ans["keys"]
             r["mine"] = v if isinstance(v, list) else ([] if v is None else [v])
@@ -395,7 +403,7 @@ def review(a: TestAttempt) -> list[dict]:
 def by_subtopic(a: TestAttempt) -> list[tuple[str, int, str, int]]:
     """[(kichik mavzu, foiz, to'plangan ball, savollar soni)], eng pastidan."""
     titles, acc = _titles(a), {}
-    for i in a.items:
+    for i in rows_of(a):
         acc.setdefault(titles.get(i.position, "—"), []).append(i.score or 0)
     rows = [(name, scoring.percent(s), f"{round(sum(s) / 100, 1):g}", len(s)) for name, s in acc.items()]
     return sorted(rows, key=lambda r: r[1])

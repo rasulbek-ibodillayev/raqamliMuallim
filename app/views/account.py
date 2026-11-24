@@ -51,6 +51,8 @@ def check_current_password(pw: str):
     fails = session.get("pw_fails", 0)
     if fails >= PW_MAX_FAILS:
         return _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring")
+    if not current_user.password_hash:      # Google orqali ro'yxatdan o'tgan
+        return _("Akkauntingizda parol yo‘q. Uni «Parolni tiklash» orqali o‘rnating")
     if not pw:
         return _("Joriy parolni kiriting")
     if not current_user.check_password(pw):

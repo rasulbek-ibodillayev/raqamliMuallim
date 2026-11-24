@@ -3,7 +3,7 @@
   "sections": [
     {"title": "Dasturlash", "topics": [
       {"title": "Python: shart operatorlari", "est_minutes": 12, "subtopics": [
-        {"title": "if operatori", "weight": 2,
+        {"title": "if operatori", "generators": ["py_if", "py_if_open", "py_true"], "weight": 2,
          "blocks": [
            {"kind": "text", "data": {"title": "if operatori", "body": "Shart operatori mantiqiy ifodaning rost yoki yolg‘on ekaniga qarab dasturni turli yo‘nalishga buradi."},
             "audio_text": "Shart operatori mantiqiy ifodaning rost yoki yolg‘on ekaniga qarab dasturni turli yo‘nalishga buradi."},
@@ -22,12 +22,12 @@
             "data": {"code": "x = 4\nif x % 2 == 0:\n    x = x * 3\nprint(x)"}, "answer": {"value": "12"},
             "explanation": "4 juft son, shart rost: x = 4 * 3 = 12."}
          ]},
-        {"title": "if / else", "weight": 1, "questions": [
+        {"title": "if / else", "generators": ["py_ifelse", "py_ifelse_match"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "easy", "text": "Quyidagi kod natijasini aniqlang:",
             "data": {"code": "x = 5\nif x > 3:\n    print(x * 2)\nelse:\n    print(x + 10)", "options": ["5", "10", "15", "Xato beradi"]},
             "answer": {"keys": [1]}}
          ]},
-        {"title": "elif zanjiri", "weight": 1, "questions": [
+        {"title": "elif zanjiri", "generators": ["py_elif", "py_elif_match"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "medium",
             "text": "x = 7 bo‘lsa, «if x > 10: … elif x > 5: … else: …» qaysi tarmoq bajariladi?",
             "data": {"options": ["if", "elif", "else", "Hech biri"]}, "answer": {"keys": [1]}}
@@ -35,22 +35,22 @@
         {"title": "Ichma-ich shartlar", "weight": 0}
       ]},
       {"title": "Sikllar (for, while)", "est_minutes": 15, "subtopics": [
-        {"title": "for sikli", "weight": 1, "questions": [
+        {"title": "for sikli", "generators": ["py_for", "py_for_count", "py_range"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "medium", "text": "Quyidagi Python kodi natijasini aniqlang:",
             "data": {"code": "s = 0\nfor i in range(1, 5):\n    s += i\nprint(s)", "options": ["10", "15", "4", "5"]},
             "answer": {"keys": [0]}, "explanation": "range(1, 5) — 1, 2, 3, 4; yig‘indisi 10."}
          ]},
-        {"title": "while sikli", "weight": 0}
+        {"title": "while sikli", "generators": ["py_while"], "weight": 0}
       ]},
       {"title": "Funksiyalar", "est_minutes": 45, "subtopics": [
-        {"title": "Rekursiya", "weight": 1, "questions": [
+        {"title": "Rekursiya", "generators": ["py_rec", "py_rec_match"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "medium", "text": "Rekursiv funksiyada bazaviy shart bo‘lmasa nima bo‘ladi?",
             "data": {"options": ["Bir marta ishlaydi", "RecursionError (stek to‘lib qoladi)", "None qaytaradi", "Sintaksis xatosi"]},
-            "answer": {"keys": [1]}}
+            "answer": {"keys": [1], "notes": ["Funksiya o‘zini qayta-qayta chaqiradi, bir marta emas.", "Har chaqiruv stekda joy oladi; to‘xtash sharti yo‘q, shuning uchun Python RecursionError beradi.", "Funksiya hech qachon tugamaydi, demak hech narsa qaytarmaydi.", "Kod yozilishi to‘g‘ri, xato faqat bajarilish paytida chiqadi."]}, "explanation": "Bazaviy shart rekursiyani to‘xtatadi. U bo‘lmasa chaqiruvlar cheksiz davom etadi va chaqiruvlar steki to‘ladi."}
          ]}
       ]},
       {"title": "Massivlar va ro‘yxatlar", "est_minutes": 40, "subtopics": [
-        {"title": "Qidiruv algoritmlari", "weight": 1, "questions": [
+        {"title": "Qidiruv algoritmlari", "generators": ["bsearch_steps", "bsearch_mid", "search_true"], "weight": 1, "questions": [
            {"type": "multiple", "difficulty": "hard", "text": "Qaysilari ikkilik qidiruv uchun to‘g‘ri?",
             "data": {"options": ["Massiv saralangan bo‘lishi kerak", "Murakkabligi O(log n)", "Murakkabligi O(n²)", "Har qadamda oraliq ikkiga bo‘linadi"]},
             "answer": {"keys": [0, 1, 3]}}
@@ -59,7 +59,7 @@
     ]},
     {"title": "Axborot va kodlash", "topics": [
       {"title": "Sanoq sistemalari", "est_minutes": 30, "subtopics": [
-        {"title": "Ikkilik va o‘nlik", "weight": 2, "questions": [
+        {"title": "Ikkilik va o‘nlik", "generators": ["bin_dec", "bin_dec_open", "dec_bin", "bin_add", "bin_match"], "weight": 2, "questions": [
            {"type": "open", "difficulty": "medium", "text": "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.",
             "data": {"hint": "Faqat sonni kiriting"}, "answer": {"value": "45"}},
            {"type": "single", "difficulty": "easy", "text": "1101₂ soni o‘nlik sanoq sistemasida nechaga teng?",
@@ -67,7 +67,7 @@
            {"source": "ai", "type": "single", "difficulty": "medium", "text": "1010₂ + 0110₂ yig‘indisi ikkilik sanoq sistemasida nechaga teng?",
             "data": {"options": ["10000", "1111", "10001", "1100"]}, "answer": {"keys": [0]}}
          ]},
-        {"title": "O‘n oltilik", "weight": 1, "questions": [
+        {"title": "O‘n oltilik", "generators": ["hex_dec", "hex_dec_open", "dec_hex", "hex_bin", "hex_match"], "weight": 1, "questions": [
            {"type": "open", "difficulty": "hard", "text": "2F₁₆ sonini o‘nlik sanoq sistemasida yozing.",
             "answer": {"value": "47"}},
            {"source": "ai", "type": "open", "difficulty": "hard", "text": "3A₁₆ sonini o‘nlik sanoq sistemasida yozing.",
@@ -77,7 +77,7 @@
          ]}
       ]},
       {"title": "Axborot hajmi", "est_minutes": 20, "subtopics": [
-        {"title": "Axborot birliklari", "weight": 1, "questions": [
+        {"title": "Axborot birliklari", "generators": ["bits_alphabet", "text_volume", "unit_convert", "unit_match"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "easy",
             "text": "256 xil belgidan iborat alifbodagi bitta belgi necha bit axborot olib keladi?",
             "data": {"options": ["6", "7", "8", "16"]}, "answer": {"keys": [2]},
@@ -98,7 +98,7 @@
         {"title": "Amaliy protokollar", "weight": 2, "questions": [
            {"type": "single", "difficulty": "easy", "text": "DNS serverning asosiy vazifasi qaysi?",
             "data": {"options": ["Fayllarni uzatish", "Domen nomini IP-manzilga o‘girish", "Elektron xat yuborish", "Sahifani shifrlash"]},
-            "answer": {"keys": [1]}},
+            "answer": {"keys": [1], "notes": ["Fayl uzatish — FTP yoki HTTP protokollarining vazifasi.", "DNS (Domain Name System) maktab.uz kabi nomni serverning IP-manziliga o‘giradi.", "Elektron xatni SMTP, IMAP va POP3 protokollari uzatadi.", "Sahifani shifrlash — TLS (HTTPS) vazifasi."]}, "explanation": "Kompyuterlar bir-birini IP-manzil orqali topadi, odamlar esa nomni eslaydi. Brauzer nom kiritilganda avval DNS serverdan uning IP-manzilini so‘raydi."},
            {"type": "matching", "difficulty": "easy", "text": "Atamalarni ta’riflari bilan moslashtiring.",
             "data": {"left": ["HTTP", "DNS", "IP", "FTP"],
                      "right": ["Gipermatn uzatish protokoli", "Domen nomini IP-manzilga o‘giradi", "Qurilmaning tarmoqdagi manzili", "Fayl uzatish protokoli"]},
@@ -111,7 +111,7 @@
     ]},
     {"title": "Mantiq asoslari", "topics": [
       {"title": "Mantiqiy amallar", "est_minutes": 25, "subtopics": [
-        {"title": "Mantiqiy ifodalar", "weight": 2, "questions": [
+        {"title": "Mantiqiy ifodalar", "generators": ["logic_count", "logic_true", "logic_value"], "weight": 2, "questions": [
            {"type": "single", "difficulty": "medium", "text": "(A ∨ B) ∧ ¬(A ∧ B) mantiqiy ifodasi qachon 1 ga teng bo‘ladi?",
             "data": {"options": ["Faqat A va B bir vaqtda rost bo‘lganda", "A va B turli qiymatga ega bo‘lganda", "A va B ikkalasi yolg‘on bo‘lganda", "Har doim"]},
             "answer": {"keys": [1]}},
@@ -120,9 +120,9 @@
                      "options": ["F = (A ∨ B) ∧ ¬(A ∧ B)", "F = (A ∧ B) ∨ ¬(A ∨ B)", "F = ¬(A ∨ B)", "F = A ∧ B"]},
             "answer": {"keys": [0]}}
          ]},
-        {"title": "De Morgan qonunlari", "weight": 1, "questions": [
+        {"title": "De Morgan qonunlari", "generators": ["de_morgan"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "easy", "text": "De Morgan qonuniga ko‘ra ¬(A ∧ B) nimaga teng?",
-            "data": {"options": ["¬A ∧ ¬B", "¬A ∨ ¬B", "A ∨ B", "A ∧ ¬B"]}, "answer": {"keys": [1]}},
+            "data": {"options": ["¬A ∧ ¬B", "¬A ∨ ¬B", "A ∨ B", "A ∧ ¬B"]}, "answer": {"keys": [1], "notes": ["A = 1, B = 0 da ¬(A ∧ B) = 1, bu ifoda esa 0.", "Barcha 4 ta holatda ¬(A ∧ B) bilan bir xil qiymat beradi.", "A = B = 1 da ¬(A ∧ B) = 0, bu ifoda esa 1.", "A = 0, B = 1 da ¬(A ∧ B) = 1, bu ifoda esa 0."]}, "explanation": "Inkor har bir o‘zgaruvchiga o‘tadi va ∧ amali ∨ ga almashadi: ¬(A ∧ B) = ¬A ∨ ¬B."},
            {"source": "ai", "type": "single", "difficulty": "easy", "text": "De Morgan qonuniga ko‘ra ¬(A ∨ B) nimaga teng?",
             "data": {"options": ["¬A ∧ ¬B", "¬A ∨ ¬B", "A ∧ B", "¬A ∧ B"]}, "answer": {"keys": [0]}}
          ]}
@@ -130,7 +130,7 @@
     ]},
     {"title": "Ofis dasturlari", "topics": [
       {"title": "Elektron jadvallar: formulalar", "est_minutes": 20, "subtopics": [
-        {"title": "Shartli yig‘indi", "weight": 1, "questions": [
+        {"title": "Shartli yig‘indi", "generators": ["xl_sumif", "xl_countif", "xl_match"], "weight": 1, "questions": [
            {"type": "single", "difficulty": "medium",
             "text": "Jadvalda C4 katakka =SUMIF(A1:A3;\">1\";B1:B3) formulasi yozildi. C4 qiymati nechaga teng?",
             "data": {"table": {"head": ["", "A", "B", "C"], "rows": [["1", "1", "10", ""], ["2", "2", "20", ""], ["3", "3", "30", ""], ["4", "", "", "?"]]},
@@ -143,7 +143,7 @@
       {"title": "Relyatsion model", "est_minutes": 20, "subtopics": [
         {"title": "Kalitlar", "weight": 1, "questions": [
            {"type": "single", "difficulty": "easy", "text": "Jadvaldagi har bir yozuvni yagona aniqlovchi maydon qanday ataladi?",
-            "data": {"options": ["Tashqi kalit", "Birlamchi kalit", "Indeks", "Atribut"]}, "answer": {"keys": [1]}}
+            "data": {"options": ["Tashqi kalit", "Birlamchi kalit", "Indeks", "Atribut"]}, "answer": {"keys": [1], "notes": ["Tashqi kalit boshqa jadvaldagi yozuvga ishora qiladi va takrorlanishi mumkin.", "Birlamchi kalit takrorlanmaydi va bo‘sh bo‘lmaydi, shuning uchun har bir yozuvni yagona aniqlaydi.", "Indeks qidiruvni tezlashtiradi, yagona bo‘lishi shart emas.", "Atribut — istalgan maydon (ustun)."]}, "explanation": "Yozuvni yagona aniqlash uchun maydon qiymati takrorlanmasligi va bo‘sh bo‘lmasligi kerak — bu birlamchi kalit ta’rifi."}
          ]}
       ]}
     ]}

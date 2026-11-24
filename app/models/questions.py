@@ -1,7 +1,7 @@
 """Savollar banki (TZ 6.1) va ularning versiyalari."""
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, SmallInteger, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, SmallInteger, String, Text, UniqueConstraint, text as sql_text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
@@ -10,7 +10,7 @@ from ._base import JSONB, PK, QID, Timestamps, created_at, one_of, pk, qid_pk
 Q_TYPES = ("single", "multiple", "open", "matching")
 Q_DIFFICULTY = ("easy", "medium", "hard")           # 1, 2, 3-bosqich (chegaralar 90/80/70 — settings'da)
 Q_STATUS = ("draft", "review", "approved", "paused", "archived")
-Q_SOURCE = ("expert", "ai", "import")
+Q_SOURCE = ("expert", "ai", "import", "template")   # template — shablon generator (services/generator.py)
 
 
 class Question(Timestamps, db.Model):
@@ -23,6 +23,8 @@ class Question(Timestamps, db.Model):
         one_of("source", Q_SOURCE),
         # Test yig'ishning asosiy so'rovi: kichik mavzu + qiyinlik + tasdiqlangan
         Index("ix_questions_pick", "subtopic_id", "difficulty", "status"),
+        # Bir xil parametrli shablon savoli bitta; qisman indeks — oddiy savollar unda joy egallamaydi
+        Index("uq_questions_sig", "sig", unique=True, postgresql_where=sql_text("sig IS NOT NULL")),
     )
 
     id: Mapped[int] = qid_pk()
@@ -41,6 +43,7 @@ class Question(Timestamps, db.Model):
     status: Mapped[str] = mapped_column(String(8), default="draft", server_default="draft")
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     time_limit_s: Mapped[int | None] = mapped_column(SmallInteger)
+    sig: Mapped[str | None] = mapped_column(String(120))                 # shablon savoli: "shablon:parametrlar"
     author_id: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))
     reviewer_id: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

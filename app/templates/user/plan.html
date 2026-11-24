@@ -56,8 +56,9 @@
     <a class="btn {{ 'btn-primary' if dec == 'relearn' else 'btn-outline' }} btn-sm u-as-flex-start" href="{{ l.url }}">{{ icon("refresh", "ico-sm") }}{{ _("Darsni qayta o‘zlashtirish") }}</a>
     {% elif st == "current" %}
     <div class="row wrap row-sm">
-      {% if l.has_blocks %}<a class="btn btn-primary btn-sm" href="{{ l.url }}">{{ icon("book", "ico-sm") }}{{ _("Darsni ochish") }}</a>{% endif %}
-      {% if l.test_url %}<a class="btn {{ 'btn-ghost' if l.has_blocks else 'btn-primary' }} btn-sm" href="{{ l.test_url }}">{{ icon("clipboard", "ico-sm") }}{{ _("Dars testini boshlash") }}</a>{% endif %}
+      {# Dars testi dars oxiridan boshlanadi; darsi (bloklari) yo'q bo'lsa testga boshqa yo'l yo'q — faqat shunda tugma chiqadi #}
+      {% if l.has_blocks %}<a class="btn btn-primary btn-sm" href="{{ l.url }}">{{ icon("book", "ico-sm") }}{{ _("Darsni ochish") }}</a>
+      {% elif l.test_url %}<a class="btn btn-primary btn-sm" href="{{ l.test_url }}">{{ icon("clipboard", "ico-sm") }}{{ _("Dars testini boshlash") }}</a>{% endif %}
     </div>
     {% endif %}
   </div>

@@ -294,7 +294,14 @@ def sample_review() -> list[dict]:
     """mock.RESULT_QUESTIONS → services.attempts.review shakli."""
     return [{**q, "kind": "yopiq", "score": 100 if q["mine"] == q["right"] else 0, "answered": q["mine"] is not None,
              "mine": [] if q["mine"] is None else [q["mine"]], "right": [q["right"]], "ref": f"namuna:{q['n']}",
-             "objected": False} for q in m.RESULT_QUESTIONS]
+             "objected": False, "solve": f"natija:{q['n']}"} for q in m.RESULT_QUESTIONS]
+
+
+def sample_solution(kind: str, n: int) -> dict | None:
+    """Namunaviy natija sahifasidagi savol («Yechimini ko'rish» uchun). kind: natija | sinov."""
+    if kind == "natija":
+        return next((q for q in sample_review() if q["n"] == n), None)
+    return next((q for q in _sample_exam_review()[0] if q["pos"] == n), None)
 
 
 @bp.get("/natija")
@@ -361,6 +368,12 @@ def exam_result():
     """Namuna: attestatsiya testi yakuni."""
     if not is_dev():
         return _to_tests()
+    qs, acc = _sample_exam_review()
+    by_topic = sorted(((name, scoring.percent(s), sum(s) // 100, len(s)) for name, s in acc.items()), key=lambda x: x[1])
+    return _render_exam_result(qs, by_topic, 35, scoring.percent([q["score"] for q in qs]))
+
+
+def _sample_exam_review() -> tuple[list[dict], dict]:
     qs, acc = [], {}
     for i in range(35):
         q = _pool_question(i)
@@ -375,6 +388,5 @@ def exam_result():
         score = 100 if mine == [right] else 0
         acc.setdefault(q["topic"], []).append(score)
         qs.append({**q, "n": i + 1, "q": q["text"], "kind": "yopiq", "mine": mine, "right": [right], "score": score,
-                   "answered": bool(mine)})
-    by_topic = sorted(((name, scoring.percent(s), sum(s) // 100, len(s)) for name, s in acc.items()), key=lambda x: x[1])
-    return _render_exam_result(qs, by_topic, 35, scoring.percent([q["score"] for q in qs]))
+                   "answered": bool(mine), "solve": f"sinov:{i}"})
+    return qs, acc

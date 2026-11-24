@@ -20,7 +20,7 @@
   </div>
   <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ icon("telegram") }}{{ _("Telegram orqali davom etish") }}</button>
   <div class="g-12 row"><hr class="grow"><span class="xs faint">{{ _("yoki") }}</span><hr class="grow"></div>
-  {% with label = _("Google orqali ro‘yxatdan o‘tish") %}{% include "partials/google_btn.html" %}{% endwith %}
+  {% with label = _("Google orqali ro‘yxatdan o‘tish"), signup = true %}{% include "partials/google_btn.html" %}{% endwith %}
   <a class="btn btn-outline btn-block" href="{{ url_for('auth.verify_email') }}">{{ icon("mail") }}{{ _("Email orqali ro‘yxatdan o‘tish") }}</a>
   <p class="center small muted">{{ _("Akkauntingiz bormi?") }} <a class="link" href="{{ url_for('auth.login') }}">{{ _("Kirish") }}</a></p>
 </form>

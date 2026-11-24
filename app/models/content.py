@@ -61,6 +61,8 @@ class Subtopic(Timestamps, db.Model):
     title: Mapped[str] = mapped_column(String(200))
     position: Mapped[int] = mapped_column(SmallInteger, default=0, server_default="0")
     weight: Mapped[int] = mapped_column(SmallInteger, default=1, server_default="1")  # testdagi savollar soni
+    # Yangi savol qolmaganda ishlatiladigan shablonlar (services/question_templates.TEMPLATES kalitlari)
+    generators: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")
 
     topic: Mapped[Topic] = relationship(back_populates="subtopics")
 

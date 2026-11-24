@@ -11,6 +11,7 @@ from sqlalchemy import select
 from ..extensions import db
 from ..models import Objection, QuestionVersion, TestAttempt
 from . import attempts as at
+from .archive import rows as rows_of
 from .timefmt import when
 
 
@@ -31,7 +32,7 @@ def _parse(user_id: int, value: str):
         a = None
     if a is None or a.user_id != user_id:
         return None, None
-    return a, next((i for i in a.items if i.position == pos), None)
+    return a, next((i for i in rows_of(a) if i.position == pos), None)
 
 
 def create(user_id: int, question_ref: str, reason: str, note: str, urgent: bool) -> Objection:
@@ -50,7 +51,7 @@ def create(user_id: int, question_ref: str, reason: str, note: str, urgent: bool
 def sent_positions(a: TestAttempt) -> set[int]:
     """Shu urinishda e'tiroz yuborilgan savollar tartibi."""
     qids = set(db.session.scalars(select(Objection.question_id).where(Objection.attempt_id == a.id)))
-    return {i.position for i in a.items if i.question_id in qids}
+    return {i.position for i in rows_of(a) if i.question_id in qids} if qids else set()
 
 
 def mine(user_id: int) -> list[dict]:
