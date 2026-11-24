@@ -19,28 +19,122 @@ def _recommended():
     return rows
 
 
+def _plan_urls(p):
+    """Reja elementlariga havolalar (servis URL bilmaydi)."""
+    for t in p.topics:
+        base = url_for("user.lesson_topic" if t["has_lesson"] else "user.topic", topic_id=t["id"])
+        t["url"], t["test_url"] = base, url_for("test.question", turi="mavzu", mavzu=t["id"])
+        for x in t["lessons"]:
+            x["url"] = f"{base}#k{x['id']}" if x["has_blocks"] else base
+            x["test_url"] = url_for("test.question", turi="dars", dars=x["id"]) if x["testable"] else None
+    from .test import SLUG_OF
+    for i in [*p.items, *p.interims, p.monthly, p.daily, p.final]:
+        if i and i["kind"] == "test":
+            i["url"] = url_for("user.control") if i["type"] == "interim" else url_for("test.question", turi=SLUG_OF[i["type"]])
+    return p
+
+
+def _my_plan():
+    from flask_login import current_user
+
+    from ..services import plan as pl
+    from .test import weekly_open
+    return _plan_urls(pl.build(current_user, sunday=weekly_open()))
+
+
+def _item_url(i) -> str:
+    from .test import SLUG_OF
+    if i.get("rid") and i.get("done"):
+        return url_for("user.result_detail", rid=i["rid"])
+    if i.get("test") == "interim":
+        return url_for("user.control")
+    if i.get("test"):
+        return url_for("test.question", turi=SLUG_OF[i["test"]])
+    if i.get("topic_test"):
+        return i["topic_test"]["test_url"]
+    if i.get("kind") == "topic_test":
+        return i["topic"]["test_url"]
+    if i.get("lesson"):
+        return i["lesson"]["url"] if i["lesson"]["has_blocks"] or not i["lesson"]["test_url"] else i["lesson"]["test_url"]
+    return url_for("user.results")
+
+
+def _sample(*names) -> bool:
+    """/ekranlar namunasi: faqat ishlab chiqishda va shu parametrlardan biri berilganda."""
+    from .test import is_dev
+    return is_dev() and any(n in request.args for n in ("namuna", *names))
+
+
 @bp.get("/")
 def home():
     import random
+
     from flask import session
-    new_user = bool(request.args.get("yangi"))
-    done_steps = request.args.get("qadam", 0, type=int) or 0  # namunada: nechta qadam bajarilgan (noto'g'ri qiymat — 0)
+    from flask_login import current_user
+
+    from ..services import plan as pl
     # Motivatsion so'z har kirishda yangidan tanlanadi (kirishda sessiyadan o'chiriladi)
     if "motto" not in session:
         session["motto"] = random.randrange(len(m.MOTTOS))
     motto = m.MOTTOS[session["motto"] % len(m.MOTTOS)]
-    # Keyingi qadam holati (backendda: oxirgi faollikdan). Namunada ?holat=tugadi | nazorat
-    #  davom — mavzu tugatilmay chiqib ketilgan; tugadi — mavzu yakunlangan; nazorat — majburiy nazorat navbati
+    if _sample("holat", "yangi", "qadam", "dam", "pwa"):
+        return render_template("user/home.html", motto=motto, recommended=_recommended(), **_sample_home())
+    p = _my_plan()
+    nx = pl.next_step(p)
+    nx["url"] = _item_url(nx)
+    today = pl.today_items(p)
+    for i in today:
+        i["url"] = _item_url(i)
+    new_user = not p.has_results and p.current is not None
+    steps, done_steps = _onboarding(p) if new_user else ([], 0)
+    return render_template("user/home.html", motto=motto, r=pl.readiness(current_user, p), rstate=m.READINESS_STATE, nx=nx,
+                           today=today, today_sub=p.current["name"] if p.current else None, onboarding=steps,
+                           done_steps=done_steps, new_user=new_user, recommended=_recommended())
+
+
+def _onboarding(p):
+    """Yangi foydalanuvchi: 3 qadam. Uchinchisi bajarilgach (dars testi) yo'riqnoma o'rniga reja chiqadi."""
+    from flask_login import current_user
+
+    from ..services import attempts as at
+    from ..services import catalog
+    done = 1 if at.finished(current_user.id, "diagnostic", limit=1) else 0
+    lesson = p.current["lessons"][0]
+    minutes = catalog.diagnostic_estimate()[1]
+    return [{"title": _("Diagnostikadan o‘ting"), "url": url_for("user.diagnostic"),
+             "sub": _("≈ %(m)s daqiqa · bilgan mavzularingizni aniqlaymiz", m=minutes)},
+            {"title": _("Birinchi darsni o‘qing"), "url": lesson["url"],
+             "sub": _("≈ %(m)s daqiqa · rejangizdagi birinchi mavzu", m=lesson["min"])},
+            {"title": _("Birinchi dars testini topshiring"), "url": lesson["test_url"] or lesson["url"],
+             "sub": _("≈ 3 daqiqa · 3 savol")}], done
+
+
+def _sample_home():
+    """/ekranlar uchun namunaviy bosh sahifa: ?holat=davom|tugadi|nazorat, ?yangi=1&qadam=n."""
     state = request.args.get("holat", "davom")
-    today = list(m.TODAY) + ([m.TODAY_CONTROL] if state == "nazorat" else [])
-    return render_template("user/home.html", sections=m.SECTIONS, r=m.READINESS, rstate=m.READINESS_STATE,
-                           today=today, onboarding=m.ONBOARDING, new_user=new_user, done_steps=done_steps,
-                           motto=motto, next_state=state, recommended=_recommended())
+    nx = {
+        "davom": (_("Darsni davom ettirish"), "Python: shart operatorlari", "Dasturlash · 2 / 4 dars", 60,
+                  "«elif zanjiri» dars testida natija 40%. Darsni takrorlab, testni qayta topshiring.", url_for("user.lesson"), 12),
+        "tugadi": (_("Keyingi mavzu"), "Python: sikllar (for, while)", "Dasturlash · 0 / 3 dars", 0,
+                   "Yangi mavzu. Birinchi dars — «for sikli».", url_for("user.lesson"), 45),
+        "nazorat": (_("Majburiy nazorat testini boshlash"), "Oraliq sinov testi: 4–6 mavzular", "3 bosqich: oson → o‘rta → qiyin", 0,
+                    "Navbatdagi mavzuga o‘tishdan oldin shu test topshiriladi.", url_for("user.control", namuna=1), 35),
+    }
+    label, title, sub, pct, text, url, mins = nx.get(state, nx["davom"])
+    today = [dict(t, url=url_for(t["endpoint"], **(t.get("args") or {})))
+             for t in list(m.TODAY) + ([m.TODAY_CONTROL] if state == "nazorat" else [])]
+    steps = [dict(x, url=url_for(x["endpoint"], **(x.get("args") or {}))) for x in m.ONBOARDING]
+    return {"r": {**m.READINESS, "pos": 88}, "rstate": m.READINESS_STATE, "today": today, "today_sub": "Python: shart operatorlari",
+            "nx": {"label": label, "title": title, "sub": sub, "pct": pct, "text": text, "url": url, "min": mins,
+                   "alert": state == "nazorat"},
+            "onboarding": steps, "new_user": bool(request.args.get("yangi")),
+            "done_steps": request.args.get("qadam", 0, type=int) or 0}
 
 
 @bp.get("/diagnostika")
 def diagnostic():
-    lessons, minutes = m.diagnostic_estimate()
+    from ..services import catalog
+    lessons, minutes = catalog.diagnostic_estimate()
     return render_template("user/diagnostic.html", lessons=lessons, minutes=minutes)
 
 
@@ -99,19 +193,43 @@ def lesson_topic(topic_id):
     # Har dars testining eng yaxshi natijasi: joriy dars testi ≥ 70% bo'lmaguncha keyingi darslar ko'rsatilmaydi
     scores = catalog.lesson_scores(current_user.id, topic_id)
     pcts = [scores.get(p["id"]) for p in lesson["parts"]]
-    return render_template("user/lesson_topic.html", lesson=lesson, pcts=pcts, open_n=open_lessons(pcts),
-                           all_passed=all(p is not None and p >= m.PASS_MIN for p in pcts))
+    # Savoli yo'q dars testsiz: u keyingi darslarni to'smaydi
+    testable = {x["id"]: x["testable"] for x in catalog.lessons_by_topic(topic_id).get(topic_id, [])}
+    gate = [pct if testable.get(p["id"]) else 100 for p, pct in zip(lesson["parts"], pcts)]
+    return render_template("user/lesson_topic.html", lesson=lesson, pcts=pcts, testable=testable, open_n=open_lessons(gate),
+                           rids=catalog.lesson_result_ids(current_user.id, topic_id),
+                           all_passed=all(p is not None and p >= m.PASS_MIN for p in gate))
 
 
 @bp.get("/reja")
 def plan():
-    plan = list(m.LEARN_PLAN)
+    if _sample("oylik"):
+        return render_template("user/plan.html", **_sample_plan())
+    p = _my_plan()
+    return render_template("user/plan.html", plan=p.items, s=p.summary, excluded=p.excluded, test_types=m.TEST_TYPES,
+                           mandatory=m.MANDATORY_TYPES, decide=m.lesson_decision, pass_min=m.PASS_MIN, solid_min=m.SOLID_MIN)
+
+
+def _sample_plan():
+    """/ekranlar uchun namunaviy reja (mock.LEARN_PLAN), xuddi servis shaklida."""
+    import copy
+    items = copy.deepcopy(m.LEARN_PLAN)
     if request.args.get("oylik"):
-        cur = next(i for i, x in enumerate(plan) if x.get("state") == "current")
-        plan.insert(cur + 1, m.MONTHLY_DUE)
-    return render_template("user/plan.html", plan=plan, s=m.PLAN_SUMMARY, test_types=m.TEST_TYPES,
-                           mandatory=m.MANDATORY_TYPES, decide=m.lesson_decision,
-                           pass_min=m.PASS_MIN, solid_min=m.SOLID_MIN)
+        cur = next(i for i, x in enumerate(items) if x.get("state") == "current")
+        items.insert(cur + 1, dict(m.MONTHLY_DUE))
+    from .test import SLUG_OF
+    for t in items:
+        if t["kind"] == "test":
+            t["url"] = url_for("user.control", namuna=1) if t["type"] == "interim" else url_for("test.question", turi=SLUG_OF[t["type"]])
+            continue
+        t["url"] = url_for("user.lesson", holat="qayta")
+        t["test_url"] = url_for("test.question", turi="mavzu")
+        t["passed"] = sum(1 for x in t["lessons"] if x["pct"] is not None)
+        for x in t["lessons"]:
+            x.update(url=url_for("user.lesson"), test_url=url_for("test.question", turi="dars"), testable=True, has_blocks=True)
+    return {"plan": items, "s": m.PLAN_SUMMARY, "excluded": [{"name": n, "pct": p} for n, p in m.PLAN_EXCLUDED],
+            "test_types": m.TEST_TYPES, "mandatory": m.MANDATORY_TYPES, "decide": m.lesson_decision,
+            "pass_min": m.PASS_MIN, "solid_min": m.SOLID_MIN}
 
 
 def open_lessons(pcts, pass_pct=m.PASS_MIN):
@@ -127,6 +245,12 @@ def open_lessons(pcts, pass_pct=m.PASS_MIN):
 
 @bp.get("/dars")
 def lesson():
+    """Namunaviy dars (/ekranlar). Ishga tushirilganda — joriy mavzu darsiga yo'naltiradi."""
+    from .test import is_dev
+    if not is_dev():
+        from flask import redirect
+        p = _my_plan()
+        return redirect(p.current["url"] if p.current else url_for("user.plan"))
     retry = request.args.get("holat") == "qayta"
     topic = next(t for t in m.LEARN_PLAN if t.get("state") == "current")
     # Qayta o'zlashtirish namunasi — barcha dars testlari topshirilgan mavzu
@@ -138,11 +262,22 @@ def lesson():
 
 @bp.get("/tutor")
 def tutor():
-    return render_template("user/tutor.html", topic=request.args.get("mavzu") or m.CURRENT_TOPIC)
+    from .test import is_dev
+    return render_template("user/tutor.html", topic=request.args.get("mavzu") or _current_topic_name(), sample=is_dev())
+
+
+def _current_topic_name() -> str:
+    from flask_login import current_user
+
+    from ..extensions import db
+    from ..models import Topic
+    from ..services import test_builder as tb
+    tid = tb.current_topic(current_user.id)
+    return db.session.get(Topic, tid).title if tid else _("Umumiy")
 
 
 def _tests_ctx(**extra):
-    """«Testlar» sahifasi: yakunlanmagan urinishlar bazadan; majburiy testlar jadvali hozircha namunaviy (5b)."""
+    """«Testlar» sahifasi: yakunlanmagan urinishlar va majburiy testlar jadvali (o'quv rejadan)."""
     from flask_login import current_user
 
     from ..services import attempts as at
@@ -161,11 +296,17 @@ def _tests_ctx(**extra):
     if is_dev() and request.args.get("oylik"):
         unfinished.insert(0, {**m.UNFINISHED_MONTHLY, "url": url_for("test.question", turi="oylik")})
     from datetime import timedelta
+
+    from ..services import plan as pl
     today = now()
-    sunday = weekly_open() and not (is_dev() and request.args.get("kun") == "boshqa")
+    p = _my_plan()
+    schedule = pl.schedule(p)
+    for i in schedule:
+        i.setdefault("url", url_for("test.question", turi="mavzu", mavzu=i["topic_id"]) if i.get("topic_id") else None)
+    sunday = weekly_open()
     return {"unfinished": unfinished, "test_types": m.TEST_TYPES, "info": m.TEST_TYPE_INFO, "sunday": sunday,
             "next_sunday": day_month(today + timedelta(days=(6 - today.weekday()) % 7 or 7)), "mandatory": tb.MANDATORY,
-            "schedule": m.MANDATORY_SCHEDULE,
+            "schedule": schedule,
             "blocker": next((t for t in unfinished if t["type"] in tb.MANDATORY), None), **extra}
 
 
@@ -203,7 +344,17 @@ def tests_old():
 
 @bp.get("/nazorat")
 def control():
-    return render_template("user/control.html")
+    """Oraliq sinov oldidan: navbati kelgan uch mavzu. Navbat kelmagan bo'lsa — «Testlar»ga."""
+    from flask import flash, redirect
+    if _sample():
+        names = ["Shart operatorlari", "Sikllar (for, while)", "Funksiyalar"]
+    else:
+        it = next((t for t in _my_plan().interims if t["state"] in ("due", "started")), None)
+        if it is None:
+            flash(_("Oraliq sinov navbati hali kelmagan"))
+            return redirect(url_for("user.tests"))
+        names = [t["name"] for t in it["topics"]]
+    return render_template("user/control.html", names=names)
 
 
 @bp.get("/ixtiyoriy-test")
@@ -249,9 +400,10 @@ def result_detail(rid):
                                questions=review_of(a), decision=m.DECISION, test_types=m.TEST_TYPES,
                                staged=at.is_staged(a), retry=retry_url(a), sample=False,
                                advice=at.advice(a) if at.is_staged(a) else None)
-    # O'quv reja va bosh sahifa hali namunaviy (5b): ulardagi natija havolalari (id ≥ m.MOCK_RID) namunani ochadi
+    # /ekranlar namunalaridagi (reja, dars) natija havolalari: id ≥ m.MOCK_RID
+    from .test import is_dev
     r = next((x for x in m.RESULTS if x["id"] == rid), None)
-    if not r:
+    if not r or not is_dev():
         abort(404)
     from .test import SLUG_OF
     retry = url_for("test.exam") if r["type"] == "exam" else url_for("test.question", turi=SLUG_OF.get(r["type"], "mavzu"))
@@ -261,7 +413,11 @@ def result_detail(rid):
 
 @bp.get("/xatolar")
 def errors():
-    return render_template("user/errors.html", recommended=_recommended(), items=m.ERRORS_LIST)
+    from flask_login import current_user
+
+    from ..services import catalog
+    items, total = catalog.error_items(current_user.id)
+    return render_template("user/errors.html", recommended=_recommended(), items=items, total=total)
 
 
 @bp.get("/eslatmalar")
@@ -270,7 +426,7 @@ def notes():
             for i, (t, text, src, when) in enumerate(m.NOTES)]
     from ..services import catalog
     topics = list(dict.fromkeys([n["topic"] for n in seed] + [t["name"] for t in catalog.topic_titles()]))
-    return render_template("user/notes.html", notes=seed, topics=topics, current_topic=m.CURRENT_TOPIC)
+    return render_template("user/notes.html", notes=seed, topics=topics, current_topic=_current_topic_name())
 
 
 @bp.get("/muhokamalar")
@@ -463,5 +619,5 @@ def notes_save():
         "text": (field("text"), lambda v: _("Qaydni yozing") if not v else (None if len(v) <= 5000 else _("Qayd 5000 belgidan oshmasin"))),
         "code": (field("code"), lambda v: None if len(v) <= 5000 else _("Kod 5000 belgidan oshmasin")),
     })
-    return respond(errors=errors, template="user/notes.html", notes=[], topics=[], current_topic=m.CURRENT_TOPIC,
+    return respond(errors=errors, template="user/notes.html", notes=[], topics=[], current_topic=_current_topic_name(),
                    redirect_to=url_for("user.notes"), message=_("Eslatma saqlandi"))

@@ -55,3 +55,5 @@ def test_next_lessons_hidden_until_lesson_test_passed(client):
     assert "data-end-gate" not in html                     # mavzu testi — barcha dars testlaridan keyin
     html = client.get("/app/dars?holat=qayta").get_data(as_text=True)
     assert 'id="nested"' in html and "data-end-gate" in html and "Keyingi darslar yopiq" not in html
+    assert "Yechimli masala" not in html and "Oxirgi testda xato qilgan" not in html      # Tuzatish 24.11
+    assert '<a class="lesson-test is-done' in html and "/app/natijalar/900029" in html

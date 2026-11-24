@@ -24,7 +24,7 @@ from flask_babel import gettext as _
 from sqlalchemy import func, select
 
 from ..extensions import db
-from ..models import (ContentBlock, ErrorItem, Question, Section, Subtopic, TestAttempt, Topic, UserTopicProgress)
+from ..models import (ErrorItem, Question, Section, Subtopic, TestAttempt, Topic, UserTopicProgress)
 from . import attempts as at
 from .scoring import PASS_MIN
 
@@ -99,7 +99,7 @@ def weak_subtopics(user_id: int, topic_id: int | None = None) -> list[int]:
 
 
 def current_topic(user_id: int) -> int | None:
-    """Rejada hali o'zlashtirilmagan birinchi mavzu (savoli bor). O'quv reja bazaga o'tguncha (5b) shu ishlatiladi."""
+    """Rejada hali o'zlashtirilmagan birinchi mavzu (savoli bor)."""
     return db.session.scalar(
         select(Topic.id).join(Section, Section.id == Topic.section_id)
         .outerjoin(UserTopicProgress, (UserTopicProgress.topic_id == Topic.id) & (UserTopicProgress.user_id == user_id))
@@ -111,16 +111,13 @@ def current_topic(user_id: int) -> int | None:
 
 
 def current_lesson(user_id: int) -> int | None:
-    """Joriy mavzudagi dars testi hali topshirilmagan (< 70%) birinchi kichik mavzu."""
-    from .catalog import lesson_scores
+    """Joriy mavzudagi dars testi hali topshirilmagan (< 70%) birinchi dars."""
+    from .catalog import lesson_scores, lessons_by_topic
     tid = current_topic(user_id)
     if tid is None:
         return None
     scores = lesson_scores(user_id, tid)
-    subs = db.session.scalars(
-        select(Subtopic.id).where(Subtopic.topic_id == tid, select(Question.id).where(
-            Question.subtopic_id == Subtopic.id, Question.status == "approved").exists())
-        .order_by(Subtopic.position, Subtopic.id)).all()
+    subs = [x["id"] for x in lessons_by_topic(tid).get(tid, []) if x["testable"]]
     return next((s for s in subs if scores.get(s, 0) < PASS_MIN), subs[0] if subs else None)
 
 
@@ -157,22 +154,23 @@ def _lesson(user_id: int, sid: int) -> list[at.Picked]:
 def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: int | None = None,
           topic_ids: list[int] | None = None, n: int | None = None) -> Spec:
     """Testni tuzadi (bazaga yozmaydi). Tuzib bo'lmasa — Unavailable."""
+    all_done = _("Barcha mavzular o‘zlashtirilgan — yangi dars yoki mavzu testi yo‘q")
     no_questions = _("Bu test uchun hali tasdiqlangan savollar yetarli emas")
     if kind == "lesson":
         sid = subtopic_id or current_lesson(user_id)
         sub = db.session.get(Subtopic, sid) if sid else None
         if sub is None or not sub.topic.is_published:
-            raise Unavailable(_("Dars topilmadi"))
+            raise Unavailable(_("Dars topilmadi") if subtopic_id else all_done)
         spec = Spec(kind, [_lesson(user_id, sub.id)], topic_id=sub.topic_id, subtopic_id=sub.id)
     elif kind == "topic":
         tid = topic_id or current_topic(user_id)
         topic = db.session.get(Topic, tid) if tid else None
         if topic is None or not topic.is_published:
-            raise Unavailable(_("Mavzu topilmadi"))
+            raise Unavailable(_("Mavzu topilmadi") if topic_id else all_done)
         mine = _subtopics_of([tid])
         avail = {s: c for s, c in _available().items() if s in mine}
-        lessons = db.session.scalar(select(func.count(func.distinct(ContentBlock.subtopic_id)))
-                                    .where(ContentBlock.subtopic_id.in_(mine), ContentBlock.is_active.is_(True)))
+        from .catalog import lessons_by_topic
+        lessons = len(lessons_by_topic(tid).get(tid, []))
         weak = [s for s in weak_subtopics(user_id, tid) if s in avail]
         order = weak + [s for s in avail if s not in weak]
         plan = allocate(2 * (lessons or len(avail)), order, avail)
@@ -200,7 +198,11 @@ def build(user_id: int, kind: str, *, topic_id: int | None = None, subtopic_id: 
     elif kind in STAGED:
         subs = None
         if kind in ("interim", "weekly", "monthly"):
-            topics = _mastered(user_id, 3 if kind == "interim" else None)
+            topics = None
+            if kind == "interim":
+                from .plan import interim_topics
+                topics = interim_topics(user_id)          # rejadagi navbatdagi uchlik; navbat kelmagan bo'lsa — oxirgi 3 ta
+            topics = topics or _mastered(user_id, 3 if kind == "interim" else None)
             if not topics:
                 raise Unavailable(_("Hali o‘zlashtirilgan mavzu yo‘q — bu test o‘zlashtirilgan mavzulardan tuziladi"))
             subs = _subtopics_of(topics)

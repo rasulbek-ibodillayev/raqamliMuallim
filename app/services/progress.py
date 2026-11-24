@@ -10,11 +10,11 @@
 """
 from datetime import datetime, timezone
 
-from sqlalchemy import func, literal_column, select
+from sqlalchemy import literal_column
 from sqlalchemy.dialects.postgresql import insert
 
 from ..extensions import db
-from ..models import ErrorItem, Subtopic, TestAttempt, UserTopicProgress
+from ..models import ErrorItem, TestAttempt, UserTopicProgress
 from . import scoring
 
 
@@ -60,14 +60,15 @@ def _topic_result(p: UserTopicProgress, pct: int) -> None:
 
 
 def _lesson(a: TestAttempt) -> None:
-    from .catalog import lesson_scores
+    from .catalog import lesson_scores, lessons_by_topic
     db.session.flush()                                   # shu urinish natijasi ham hisobga olinsin
     p = _row(a.user_id, a.topic_id)
     if p.status == "none":
         p.status = "learn"
     scores = lesson_scores(a.user_id, a.topic_id)
-    total = db.session.scalar(select(func.count()).select_from(Subtopic).where(Subtopic.topic_id == a.topic_id))
-    p.lesson_pct = round(100 * sum(1 for s in scores.values() if s >= scoring.PASS_MIN) / total) if total else 0
+    lessons = lessons_by_topic(a.topic_id).get(a.topic_id, [])
+    ok = sum(1 for x in lessons if not x["testable"] or scores.get(x["id"], 0) >= scoring.PASS_MIN)
+    p.lesson_pct = round(100 * ok / len(lessons)) if lessons else 0
 
 
 def _errors(a: TestAttempt, snaps: dict) -> None:

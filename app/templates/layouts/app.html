@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block layout_js %}{# O'qituvchi qobig'i: oflayn javoblar sinxroni (player.js) har sahifada ishlaydi #}
+{% include "layouts/_learner_meta.html" %}
 <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/learner.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/particles.js') }}"></script>
@@ -35,7 +36,7 @@
     <div class="sidebar-foot">
       <a class="me" href="{{ url_for('user.profile') }}">
         <span class="avatar">{{ me.initials }}</span>
-        <span class="grow"><span class="d-block strong small">{{ me.first }} {{ me.last }}</span><span class="xs muted">{{ _("Attestatsiyagacha") }} {{ me.days_left }} {{ _("kun") }}</span></span>
+        <span class="grow"><span class="d-block strong small">{{ me.first }} {{ me.last }}</span><span class="xs muted">{% if me.days_left is not none %}{{ _("Attestatsiyagacha") }} {{ me.days_left }} {{ _("kun") }}{% else %}{{ _("Attestatsiya sanasi belgilanmagan") }}{% endif %}</span></span>
         {{ icon("settings", "ico-sm faint") }}
       </a>
     </div>

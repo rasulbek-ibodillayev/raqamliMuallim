@@ -5,7 +5,8 @@ Ko'rinishlar shablonlarga oddiy dict'lar beradi (ORM obyektlari emas): shablon b
 from sqlalchemy import func, select
 
 from ..extensions import db
-from ..models import (AttemptItem, ContentBlock, Question, Section, Subtopic, TestAttempt, Topic, UserTopicProgress)
+from ..models import (AttemptItem, ContentBlock, ErrorItem, Question, Section, Subtopic, TestAttempt, Topic,
+                      UserTopicProgress)
 from .timefmt import when
 
 SOLID_MIN = 90
@@ -23,6 +24,44 @@ def topic_titles() -> list[dict]:
     return [{"id": tid, "name": name, "section": sec} for tid, name, sec in rows]
 
 
+def lessons_by_topic(topic_id: int | None = None) -> dict[int, list[dict]]:
+    """{mavzu: [{"id", "name", "has_blocks", "testable"}]} — mavzuning darslari tartib bilan.
+
+    Dars — bloklari bor kichik mavzu; mavzuda bloklar umuman bo'lmasa — savollari bor kichik mavzular.
+    testable — tasdiqlangan savoli bor (dars testini topshirish mumkin)."""
+    blocks = select(ContentBlock.id).where(ContentBlock.subtopic_id == Subtopic.id, ContentBlock.is_active.is_(True),
+                                           ContentBlock.kind != "example").exists()
+    asks = select(Question.id).where(Question.subtopic_id == Subtopic.id, Question.status == "approved").exists()
+    q = select(Subtopic.topic_id, Subtopic.id, Subtopic.title, blocks, asks).order_by(Subtopic.position, Subtopic.id)
+    if topic_id is not None:
+        q = q.where(Subtopic.topic_id == topic_id)
+    subs: dict[int, list[dict]] = {}
+    for tid, sid, name, b, a in db.session.execute(q):
+        subs.setdefault(tid, []).append({"id": sid, "name": name, "has_blocks": b, "testable": a})
+    return {tid: ([x for x in xs if x["has_blocks"]] or [x for x in xs if x["testable"]]) for tid, xs in subs.items()}
+
+
+def diagnostic_estimate() -> tuple[int, int]:
+    """(to'liq rejadagi darslar soni, diagnostika daqiqasi): har darsga 60 soniya (TZ; Tuzatish 4–5)."""
+    published = set(db.session.scalars(select(Topic.id).where(Topic.is_published.is_(True))))
+    n = sum(len(xs) for tid, xs in lessons_by_topic().items() if tid in published)
+    return n, n
+
+
+def error_items(user_id: int, limit: int = 50) -> tuple[list[dict], int]:
+    """Tuzatilmagan xatolar, yangisi birinchi: ([{"q", "section", "meta", "rep", "rid"}], jami soni)."""
+    base = select(ErrorItem).where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
+    total = db.session.scalar(select(func.count()).select_from(base.subquery()))
+    rows = db.session.execute(
+        select(Question.text, Subtopic.title, Topic.title, ErrorItem.wrong_count, ErrorItem.last_wrong_at, ErrorItem.last_attempt_id)
+        .join(Question, Question.id == ErrorItem.question_id).join(Subtopic, Subtopic.id == ErrorItem.subtopic_id)
+        .join(Topic, Topic.id == Subtopic.topic_id)
+        .where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
+        .order_by(ErrorItem.last_wrong_at.desc(), ErrorItem.id.desc()).limit(limit)).all()
+    return [{"q": text, "section": f"{top} · {sub}", "rep": n > 1, "when": when(at_), "wrong": n, "rid": rid}
+            for text, sub, top, n, at_, rid in rows], total
+
+
 def lesson_scores(user_id: int, topic_id: int) -> dict[int, int]:
     """{kichik mavzu: dars testining eng yaxshi foizi}. Keyingi dars shunga qarab ochiladi; qayta o'zlashtirib
     ≥ 90% qilinsa, dars tavsiya ro'yxatidan chiqadi."""
@@ -32,6 +71,17 @@ def lesson_scores(user_id: int, topic_id: int) -> dict[int, int]:
                TestAttempt.status == "submitted", TestAttempt.subtopic_id.is_not(None))
         .group_by(TestAttempt.subtopic_id)).all()
     return {sid: int(pct) for sid, pct in rows}
+
+
+def lesson_result_ids(user_id: int, topic_id: int) -> dict[int, int]:
+    """{kichik mavzu: eng yaxshi dars testi urinishining id'si} — dars sahifasidagi natija havolasi uchun."""
+    rows = db.session.execute(
+        select(TestAttempt.subtopic_id, TestAttempt.id)
+        .where(TestAttempt.user_id == user_id, TestAttempt.topic_id == topic_id, TestAttempt.kind == "lesson",
+               TestAttempt.status == "submitted", TestAttempt.subtopic_id.is_not(None))
+        .distinct(TestAttempt.subtopic_id)
+        .order_by(TestAttempt.subtopic_id, TestAttempt.score_pct.desc(), TestAttempt.id.desc())).all()
+    return dict(tuple(r) for r in rows)
 
 
 def recommended_lessons(user_id: int) -> list[dict]:
@@ -156,7 +206,7 @@ def lesson_view(topic_id: int) -> dict | None:
     blocks = db.session.execute(
         select(Subtopic.id, Subtopic.title, ContentBlock.id, ContentBlock.kind, ContentBlock.data, ContentBlock.audio_text)
         .join(ContentBlock, ContentBlock.subtopic_id == Subtopic.id)
-        .where(Subtopic.topic_id == topic_id, ContentBlock.is_active.is_(True))
+        .where(Subtopic.topic_id == topic_id, ContentBlock.is_active.is_(True), ContentBlock.kind != "example")
         .order_by(Subtopic.position, Subtopic.id, ContentBlock.position, ContentBlock.id)
     ).all()
     parts: dict[int, dict] = {}

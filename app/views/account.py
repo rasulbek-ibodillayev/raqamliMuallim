@@ -29,12 +29,14 @@ def mask_phone(p: str | None) -> str:
 
 
 def with_user(base: dict) -> dict:
-    """Namunaviy profil (mock) ustiga kirgan foydalanuvchining haqiqiy ma'lumotlari. Imtihon sanasi va kunlar
-    hali mock'dan olinadi (users.exam_date bilan keyingi bosqichda ulanadi)."""
+    """Namunaviy profil (mock) ustiga kirgan foydalanuvchining haqiqiy ma'lumotlari."""
+    from ..services.timefmt import day_month, now
     u = current_user
     if not u.is_authenticated:
         return base
-    return {**base, "first": u.first_name, "last": u.last_name,
+    exam = u.exam_date
+    return {**base, "exam_date": f"{day_month(exam)} {exam.year}" if exam else None,
+            "days_left": max(0, (exam - now().date()).days) if exam else None, "first": u.first_name, "last": u.last_name,
             "initials": (u.first_name[:1] + u.last_name[:1]).upper(),
             "phone": mask_phone(u.phone), "phone_raw": u.phone or "", "email": u.email or ""}
 

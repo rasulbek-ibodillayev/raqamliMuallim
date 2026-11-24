@@ -116,7 +116,15 @@ def create_app(config: dict | None = None) -> Flask:
         from .views.test import TYPE_SLUGS
         # me / staff_of — kirgan foydalanuvchining ismi va aloqasi, qolgani hozircha mock'dan
         return {"errors": {}, "form": {}, "me": with_user(mock.ME), "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
-                "search_index": _search_index, "staff_of": lambda r: with_user(mock.STAFF.get(r, {})), **ui}
+                "search_index": _search_index, "staff_of": lambda r: with_user(mock.STAFF.get(r, {})), "learner_meta": _learner_meta, **ui}
+
+    def _learner_meta():
+        """O'qituvchi sahifalari uchun: foydalanuvchi va joriy mavzu id'si (0 — hamma mavzu o'zlashtirilgan)."""
+        from flask_login import current_user
+        if not current_user.is_authenticated or current_user.role != "user":
+            return None
+        from .services.test_builder import current_topic
+        return {"uid": current_user.id, "topic": current_topic(current_user.id) or 0}
 
     def _search_index():
         """Tezkor qidiruv (Ctrl+K) uchun sahifalar va mavzular ro'yxati."""

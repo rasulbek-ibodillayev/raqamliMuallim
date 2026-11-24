@@ -10,7 +10,7 @@
 <div class="stack stack-xl">
   <section class="stack stack-lg pt-24 home-hero">
     <div class="stack stack-sm">
-      <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}{{ _("Attestatsiya") }} {{ r.exam }} · {{ r.days_left }} {{ _("kun qoldi") }}</p>
+      <p class="muted row row-sm">{{ icon("calendar", "ico-sm") }}{% if r.exam %}{{ _("Attestatsiya") }} {{ r.exam }} · {{ r.days_left }} {{ _("kun qoldi") }}{% else %}{{ _("Attestatsiya sanasi hali belgilanmagan") }}{% endif %}</p>
       {# Har kirishda boshqa qisqa motivatsion so'z (user.home: session["motto"]) #}
       <h1 class="text-display">{{ _("Salom,") }} {{ me.first }}. <span class="muted fw-500 motto">{{ motto }}</span></h1>
     </div>
@@ -35,7 +35,7 @@
       <li class="ob-step {{ st }}">
         <span class="ob-mark">{% if st == "done" %}{{ icon("check", "ico-sm") }}{% else %}{{ loop.index }}{% endif %}</span>
         <div class="grow"><div class="ob-title">{{ s.title }}</div><div class="small muted">{{ s.sub }}</div></div>
-        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ url_for(s.endpoint, **(s.args or {})) }}">{{ _("Boshlash") }}</a>{% endif %}
+        {% if st == "current" %}<a class="btn btn-primary btn-sm" href="{{ s.url }}">{{ _("Boshlash") }}</a>{% endif %}
       </li>
       {% endfor %}
     </ol>
@@ -50,53 +50,46 @@
     <div class="grow stack stack-sm">
       <div class="row row-sm wrap"><h2 id="rd-title" class="text-h3">{{ _("Attestatsiyaga tayyorlik") }}</h2>{{ status_dot(label, color) }}</div>
       <p class="small c-text2">{{ text.format(m=r.margin_days) }}</p>
-      <div class="forecast" role="img" aria-label="Prognoz: {{ r.forecast }}da tayyor bo‘lasiz, attestatsiya {{ r.exam }}">
-        <div class="forecast-bar"><span style="--v: {{ r.pct }}%"></span><i class="forecast-ready"></i></div>
-        <div class="row between xs muted forecast-legend"><span>{{ _("Bugun") }}</span><span>{{ _("Tayyor:") }} <b class="c-text">{{ r.forecast }}</b></span><span>{{ _("Attestatsiya:") }} <b class="c-text">{{ r.exam }}</b></span></div>
+      <div class="forecast" role="img" aria-label="{{ _('Prognoz') }}: {{ r.forecast or '—' }}. {{ _('Attestatsiya:') }} {{ r.exam or '—' }}">
+        <div class="forecast-bar"><span style="--v: {{ r.pct }}%"></span>{% if r.pos is not none %}<i class="forecast-ready" style="left: {{ r.pos }}%"></i>{% endif %}</div>
+        <div class="row between xs muted forecast-legend"><span>{{ _("Bugun") }}</span><span>{{ _("Tayyor:") }} <b class="c-text">{{ r.forecast or "—" }}</b></span><span>{{ _("Attestatsiya:") }} <b class="c-text">{{ r.exam or "—" }}</b></span></div>
       </div>
     </div>
   </section>
 
-  {# ---------- Keyingi qadam ----------
-     Sarlavha holatga qarab: mavzu tugatilmay chiqib ketilgan — «Darsni davom ettirish»;
-     mavzu yakunlangan — «Keyingi mavzu»; majburiy nazorat navbati kelgan — «Majburiy nazorat testini boshlash» #}
-  {% set nx = {
-      "davom": (_("Darsni davom ettirish"), _("Python: shart operatorlari"), _("Dasturlash · 3 / 4 kichik mavzu · 60%% o‘qilgan"), 60, _("Siz «elif zanjiri»da ko‘proq xato qilyapsiz. Darsni shu qismdan davom ettiring, keyin mavzu testini topshiring."), url_for('user.lesson', holat='qayta'), "≈ 12"),
-      "tugadi": (_("Keyingi mavzu"), _("Python: sikllar (for, while)"), _("Dasturlash · 3 kichik mavzu · yangi mavzu"), 0, _("«Shart operatorlari» mavzusi 92%% bilan o‘zlashtirildi. Endi sikllarga o‘tamiz: for va while farqidan boshlang."), url_for('user.lesson'), "≈ 45"),
-      "nazorat": (_("Majburiy nazorat testini boshlash"), _("Oraliq sinov testi: 4–6 mavzular"), _("3 ta mavzu · 3 bosqich · 30 savol"), 0, _("Navbatdagi mavzuga o‘tishdan oldin oxirgi 3 ta mavzu bo‘yicha majburiy nazorat topshiriladi."), url_for('user.control'), "≈ 35"),
-  } %}
-  {% set nx_label, nx_title, nx_sub, nx_pct, nx_ai, nx_url, nx_min = nx.get(next_state, nx["davom"]) %}
+  {# ---------- Keyingi qadam (services/plan.next_step) ---------- #}
   <section class="card" aria-labelledby="next-title">
     <div class="card-pad stack">
       <div class="row between wrap">
-        <span class="eyebrow {{ 't-red' if next_state == 'nazorat' }}">{{ nx_label }}</span>
-        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}{{ nx_min }} {{ _("daqiqa") }}</span>
+        <span class="eyebrow {{ 't-red' if nx.alert }}">{{ nx.label }}</span>
+        <span class="small muted row row-sm">{{ icon("clock", "ico-sm") }}≈ {{ nx.min }} {{ _("daqiqa") }}</span>
       </div>
       <div class="stack stack-sm">
-        <h2 id="next-title" class="text-h2l">{{ nx_title }}</h2>
-        <p class="muted small">{{ nx_sub }}</p>
+        <h2 id="next-title" class="text-h2l">{{ nx.title }}</h2>
+        {% if nx.sub %}<p class="muted small">{{ nx.sub }}</p>{% endif %}
       </div>
-      {% if nx_pct %}{{ progress(nx_pct) }}{% endif %}
+      {% if nx.pct %}{{ progress(nx.pct) }}{% endif %}
       <div class="next-ai row items-start">
         <span class="ai-mark">{{ icon("sparkle") }}</span>
-        <p class="small grow">{{ nx_ai }}</p>
+        <p class="small grow">{{ nx.text }}</p>
       </div>
-      <a class="btn btn-primary btn-lg btn-block" href="{{ nx_url }}">{{ nx_label }}{{ icon("arrow-right") }}</a>
+      <a class="btn btn-primary btn-lg btn-block" href="{{ nx.url }}">{{ nx.label }}{{ icon("arrow-right") }}</a>
     </div>
   </section>
 
   {# ---------- Bugungi reja ---------- #}
+  {% if today %}
   {% set total = today | sum(attribute="min") %}
   {% set done_min = today | selectattr("done") | sum(attribute="min") %}
   <section class="card" aria-labelledby="today-title">
     <div class="card-head">
-      <div><h2 id="today-title" class="text-h3">{{ _("Bugun ·") }} {{ total }} {{ _("daqiqa") }}</h2><div class="xs muted">{{ _("«Python: shart operatorlari» mavzusini tugatish rejasi") }}</div></div>
+      <div><h2 id="today-title" class="text-h3">{{ _("Bugun ·") }} {{ total }} {{ _("daqiqa") }}</h2>{% if today_sub %}<div class="xs muted">{{ _("«%(t)s» mavzusi bo‘yicha reja", t=today_sub) }}</div>{% endif %}</div>
       <span class="small muted num nowrap">{{ done_min }} / {{ total }} {{ _("daq") }}</span>
     </div>
     <div class="today-progress">{{ progress((done_min / total * 100)|round, "green", "thin") }}</div>
     <div class="list">
       {% for t in today %}
-      <a class="list-item today-item {{ 'is-done' if t.done }}" href="{{ url_for(t.endpoint, **(t.args or {})) }}">
+      <a class="list-item today-item {{ 'is-done' if t.done }}" href="{{ t.url }}">
         <span class="list-ico">{% if t.done %}{{ icon("check", "ico-sm") }}{% else %}{{ icon(t.icon, "ico-sm") }}{% endif %}</span>
         <div class="grow"><div class="today-title">{{ t.title }}</div><div class="sub">{{ t.sub }}</div></div>
         <span class="time-chip num">{{ t.min }} {{ _("daq") }}</span>
@@ -104,6 +97,8 @@
       {% endfor %}
     </div>
   </section>
+
+  {% endif %}
 
   {# ---------- Qayta o'zlashtirish tavsiya etilgan darslar (dars testi yoki bosqichli testda 70–89%): «Xatolar analitikasi» bilan bir xil ro'yxat ---------- #}
   {% if recommended %}

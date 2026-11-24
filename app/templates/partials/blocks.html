@@ -1,7 +1,7 @@
 {# Dars bloklarini chizish (content_blocks). Hamma matn avtomatik ekranlanadi: bazadagi HTML bajarilmaydi.
    Sxema (mermaid): oldindan tayyorlangan SVG bo'lsa (data.svg) — <img> orqali (SVG ichidagi skriptlar ishlamaydi),
    aks holda sxema matni kod sifatida. Formula: KaTeX ulanguncha TeX matni. Video: CSP tashqi iframe'ga ruxsat
-   bermaydi, shuning uchun havola. #}
+   bermaydi, shuning uchun havola. «Yechimli masala» (example) darsda ko'rsatilmaydi (Tuzatish 24.11). #}
 {% macro paragraphs(text) %}{% for p in (text or "").split("\n\n") if p.strip() %}<p>{{ p }}</p>{% endfor %}{% endmacro %}
 
 {% macro render_block(b, part_name="") %}
@@ -34,13 +34,5 @@
 <a class="btn btn-outline self-start" href="{{ d.url }}" target="_blank" rel="noopener noreferrer">{{ icon("play") }}{{ d.title or _("Videoni ochish") }}</a>
 {% elif b.kind in ("callout", "quiz") %}
 <section class="alert alert-col">{% if d.title %}<div class="strong">{{ d.title }}</div>{% endif %}{{ paragraphs(d.body or d.text) }}</section>
-{% elif b.kind == "example" %}
-<details class="card">
-  <summary class="card-head pointer summary-plain">
-    <div><div class="eyebrow">{{ _("Yechimli masala") }}</div><div class="strong">{{ d.title or "" }}</div></div>
-    <span class="btn btn-outline btn-sm">{{ _("Yechimni ko‘rish") }}</span>
-  </summary>
-  <div class="pt-0 card-pad stack">{{ paragraphs(d.body) }}{% if d.code %}{{ code(d.code) }}{% endif %}</div>
-</details>
 {% endif %}
 {% endmacro %}

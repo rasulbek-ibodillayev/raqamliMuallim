@@ -39,13 +39,14 @@
     </div>
     {% for b in p.blocks %}{{ render_block(b, p.name) }}{% endfor %}
     {# Dars testi: har dars oxirida 3 savol (natija «Natijalarim»ga tushadi) #}
-    <div class="lesson-test {{ 'is-done' if pct is not none and pct >= 70 else 'is-current' }} no-print">
+    {% set passed = pct is not none and pct >= 70 %}{% set tag = "a" if passed else "div" %}
+    <{{ tag }} class="lesson-test {{ 'is-done' if passed else 'is-current' }} no-print"{% if passed %} href="{{ url_for('user.result_detail', rid=rids[p.id]) }}" aria-label="{{ _('Dars testi') }}: {{ _('natijani ko‘rish') }}"{% endif %}>
       <span class="list-ico">{{ icon("clipboard", "ico-sm") }}</span>
       <div class="grow"><div class="small strong">{{ _("Dars testi") }} · 3 {{ _("savol") }}</div>
-        <div class="xs muted">{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif pct is not none %}{{ _("Oxirgi eng yaxshi natija: %(p)s%%. Darsni takrorlab, qayta topshiring", p=pct) }}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
-      {% if pct is not none and pct >= 70 %}<span class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}">{{ pct }}%</span>
-      {% else %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', dars=p.id) }}">{{ _("Boshlash") if pct is none else _("Qayta topshirish") }}</a>{% endif %}
-    </div>
+        <div class="xs muted">{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif not testable[p.id] %}{{ _("Dars testi tayyorlanmoqda — keyingi darsga o‘tishingiz mumkin") }}{% elif pct is not none %}{{ _("Oxirgi eng yaxshi natija: %(p)s%%. Darsni takrorlab, qayta topshiring", p=pct) }}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
+      {% if passed %}<span class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}">{{ pct }}%</span>{{ icon("chevron-right", "ico-sm chev") }}
+      {% elif not testable[p.id] %}{% else %}{% if pct is not none %}<a class="btn btn-ghost btn-sm" href="{{ url_for('user.result_detail', rid=rids[p.id]) }}">{{ _("Natija") }}</a>{% endif %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', dars=p.id) }}">{{ _("Boshlash") if pct is none else _("Qayta topshirish") }}</a>{% endif %}
+    </{{ tag }}>
   </section>
   {% endfor %}
   {% if not all_passed and open_n < lesson.parts|length %}

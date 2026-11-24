@@ -57,7 +57,7 @@
         {{ badge(_("Istalgan payt"), "blue") }}{{ icon("chevron-right", "ico-sm chev") }}
       </a>
       {% if sunday %}
-      <a class="list-item" href="{{ url_for('test.question', turi='haftalik') }}">
+      <a class="list-item" href="{{ url_for('test.question', turi='haftalik', kun=request.args.get('kun')) }}">
         <span class="list-ico">{{ icon("calendar") }}</span>
         <div class="grow"><div class="strong">{{ _("Haftalik test") }}</div><div class="sub">{{ _("Bugun yakshanba · o‘zlashtirilgan mavzulardan · 3 bosqich") }}</div></div>
         {{ badge(_("Bugun ochiq"), "green") }}{{ icon("chevron-right", "ico-sm chev") }}
@@ -86,13 +86,15 @@
   <section class="stack">
     <div class="row between wrap"><h2 class="eyebrow">{{ _("Majburiy testlar") }}</h2><a class="xs link" href="{{ url_for('user.plan') }}">{{ _("O‘quv rejada ko‘rish") }}</a></div>
     <div class="card list">
+      {% if not schedule %}<div class="card-pad small muted">{{ _("Majburiy testlar reja tuzilgach chiqadi.") }}</div>{% endif %}
       {% for t in schedule %}
       <div class="list-item {{ 'u-op-_6' if t.state == 'locked' }}">
         <span class="list-ico">{{ icon("check" if t.state == "done" else test_types[t.type][1]) }}</span>
         <div class="grow"><div>{{ t.name }}</div>
           <div class="sub">{% if t.state == "locked" %}{{ _("Taxminiy sana:") }} <b>{{ t.date }}</b> · {% endif %}{{ t.note }}
             {% if blocker and t.state == "locked" %}· <span class="t-red">{{ _("avval yakunlanmagan majburiy testni tugating") }}</span>{% endif %}</div></div>
-        {% if t.state == "done" %}{{ status_dot(_("Topshirildi"), "green") }}{% else %}{{ icon("lock", "ico-sm faint") }}{% endif %}
+        {% if t.state == "done" %}{{ status_dot(_("Topshirildi"), "green") }}
+        {% elif t.state in ("due", "started") %}<a class="btn btn-primary btn-sm" href="{{ t.url }}">{{ _("Boshlash") if t.state == "due" else _("Davom ettirish") }}</a>{% else %}{{ icon("lock", "ico-sm faint") }}{% endif %}
       </div>
       {% endfor %}
     </div>

@@ -89,8 +89,10 @@ def question():
 
 
 def weekly_open() -> bool:
+    """Haftalik test faqat yakshanba ochiq. Ishlab chiqishda ?kun=yakshanba / ?kun=boshqa bilan sinash mumkin."""
     from ..services.timefmt import now
-    return now().weekday() == 6
+    day = request.args.get("kun") if is_dev() else None
+    return day == "yakshanba" or (now().weekday() == 6 and day != "boshqa")
 
 
 @bp.get("/urinish/<uuid:attempt_uuid>")
@@ -158,7 +160,23 @@ def review_of(a) -> list[dict]:
 def summary(a) -> dict:
     """Natija sarlavhasi va keyingi qadam."""
     return {"pct": int(a.score_pct), "decision": a.decision, "kind": a.kind, "name": at.names([a], type_names())[a.id],
-            "topic_id": a.topic_id, "total": a.total, "retry": retry_url(a)}
+            "topic_id": a.topic_id, "total": a.total, "retry": retry_url(a), "lesson_url": _lesson_url(a)}
+
+
+def _lesson_url(a) -> str:
+    """Natijadan keyin darsga: yiqilgan bo'lsa — shu darsning o'ziga, aks holda mavzu darsiga (darsi bo'lmasa — mavzuga)."""
+    from ..services import catalog
+    if not a.topic_id:
+        return url_for("user.plan")
+    lesson = catalog.lesson_view(a.topic_id)
+    if not lesson or not lesson["parts"]:
+        return url_for("user.topic", topic_id=a.topic_id)
+    ids = [p["id"] for p in lesson["parts"]]
+    anchor = None
+    if a.subtopic_id in ids:
+        k = ids.index(a.subtopic_id)
+        anchor = f"k{ids[k if a.decision == 'fail' else min(k + 1, len(ids) - 1)]}"
+    return url_for("user.lesson_topic", topic_id=a.topic_id, _anchor=anchor)
 
 
 def retry_url(a) -> str:
@@ -286,7 +304,7 @@ def result():
         return _to_tests()
     failed = request.args.get("holat") == "qaytarildi"
     r = {"pct": 62 if failed else 78, "decision": "fail" if failed else "warn", "kind": "topic", "topic_id": None,
-         "name": "Mavzu testi: Shart operatorlari", "total": 6, "retry": url_for("test.question", turi="mavzu")}
+         "name": "Mavzu testi: Shart operatorlari", "total": 6, "retry": url_for("test.question", turi="mavzu"), "lesson_url": url_for("user.lesson", holat="qayta")}
     return render_template("test/result.html", r=r, questions=sample_review(),
                            by_sub=[("Kompyuter qurilmalari", 65, 1.3, 2), ("Shart operatorlari", 78, 1.6, 2),
                                    ("Sanoq sistemalari", 85, 1.7, 2)])

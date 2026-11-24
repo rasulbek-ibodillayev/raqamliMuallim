@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block layout_js %}{# O'qituvchi qobig'i: oflayn javoblar sinxroni (player.js) har sahifada ishlaydi #}
+{% include "layouts/_learner_meta.html" %}
 <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/learner.js') }}"></script>
 {% endblock %}

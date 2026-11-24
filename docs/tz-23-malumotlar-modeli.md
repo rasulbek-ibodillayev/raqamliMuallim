@@ -63,5 +63,5 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   rad etmaydi; vaqtni pleyer hisoblaydi va tugaganda testni o'zi yakunlaydi.
 - **Oflayn sinxronlash.** `test_attempts.client_uuid`: IndexedDB'dan qayta yuborilgan javoblar ikki marta yozilmaydi.
 - **Attestatsiya sanasi** `users.exam_date`da, uni admin kiritadi.
-- **Vektor o'lchami** 768 (Gemini `text-embedding-004`), `app/models/rag.py`dagi `EMBED_DIM`.
+- **Vektor o'lchami** 768, `app/models/ai.py`dagi `EMBED_DIM`. `text-embedding-004` 2026-01-14 da o'chirilgan: 13-bosqichda `gemini-embedding-2` va `halfvec`ga o'tadi.
 - **Holat/tur maydonlari** Postgres ENUM emas, `String` + `CHECK` cheklovi: qiymat qo'shish oddiy migratsiya bilan bo'ladi.

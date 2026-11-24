@@ -95,7 +95,6 @@ SECTIONS = [
 DISTRIBUTION = [("none", 15), ("learn", 25), ("relearn", 10), ("done", 30), ("solid", 20)]
 
 # Foydalanuvchi hozir o'rganayotgan mavzu (yangi eslatmalar shu mavzuga saqlanadi)
-CURRENT_TOPIC = "Shart operatorlari"
 
 TOPIC = {
     "name": "Python: shart operatorlari",
@@ -268,13 +267,6 @@ RESULT_QUESTIONS = [
 # Majburiy turlar (yakunlanmagan bo'lsa — keyingi mavzu va keyingi majburiy test yopiq), qolganlari ixtiyoriy
 MANDATORY_TYPES = {"lesson", "topic", "daily", "interim", "monthly", "final"}
 # Majburiy testlar jadvali: navbati kelguncha qulflangan (taxminiy sana), kelganda ochiladi va o'quv rejaga qo'shiladi
-MANDATORY_SCHEDULE = [
-    {"type": "daily", "name": "Kunlik 5 ta test", "state": "done", "date": "Bugun", "note": "Bugungisi topshirildi · ertaga 08:00 da yangisi"},
-    {"type": "topic", "name": "Mavzu testi: Python: shart operatorlari", "state": "locked", "date": "23-noyabr", "note": "Mavzu darslari tugagach ochiladi"},
-    {"type": "interim", "name": "Oraliq sinov testi: 4–6 mavzular", "state": "locked", "date": "29-noyabr", "note": "6-mavzudan keyin"},
-    {"type": "monthly", "name": "Oylik test: dekabr", "state": "locked", "date": "8-dekabr", "note": "Har 30 kunda"},
-    {"type": "final", "name": "Yakuniy diagnostika", "state": "locked", "date": "19-dekabr", "note": "Barcha mavzular o‘zlashtirilgach"},
-]
 # Namunada ?oylik=1: oylik test vaqti kelgan va boshlab qo'yilgan (yakunlanmagan majburiy test)
 UNFINISHED_MONTHLY = {"key": "oylik-noyabr", "type": "monthly", "name": "Oylik test: noyabr", "note": "12 / 30 savol · javoblar saqlangan", "pct": 40}
 
@@ -314,12 +306,6 @@ ERRORS_WEAK = [
     ("Ko‘p o‘lchovli ro‘yxatlar", "Ma’lumotlar tuzilmasi", 4),
     ("Murakkab shartli o‘tishlar", "Algoritmlash", 3),
     ("Sanoq sistemalarida arifmetika", "Axborot nazariyasi", 2),
-]
-ERRORS_LIST = [
-    ("(A ∨ B) ∧ ¬(A ∧ B) ifodasining rostlik jadvali…", "Mantiq asoslari", "2 marta xato", True),
-    ("Rekursiyaning bazaviy sharti to‘g‘ri ko‘rsatilgan qator…", "Funksiyalar", "Kecha", False),
-    ("Ikkilik sanoq sistemasida 101101 + 11011 yig‘indisi…", "Axborot nazariyasi", "12-noyabr", False),
-    ("Ikki o‘lchovli massiv diagonali elementlarini topish…", "Ma’lumotlar tuzilmasi", "3 marta xato", True),
 ]
 
 NOTES = [
@@ -361,6 +347,8 @@ READINESS_STATE = {
     "ok":   (_l("Reja bo‘yicha"), "green", _l("Hozirgi sur’atda attestatsiyadan {m} kun oldin tayyor bo‘lasiz.")),
     "risk": (_l("Biroz ortda"), "yellow", _l("Sur’at sekinlashdi: attestatsiyaga zo‘rg‘a ulgurasiz. Kuniga 15 daqiqa qo‘shing.")),
     "late": (_l("Ortda qolmoqda"), "red", _l("Hozirgi sur’atda attestatsiyaga ulgurmaysiz. Rejani tezlashtiring.")),
+    "free": (_l("O‘rganilmoqda"), "blue", _l("Attestatsiya sanasi belgilangach, ulgurish prognozi chiqadi.")),
+    "none": (_l("Ma’lumot yig‘ilmoqda"), "gray", _l("Prognoz uchun so‘nggi 14 kunda kamida bitta mavzu testidan o‘ting.")),
 }
 
 # Bosh sahifa: har kirishda tasodifiy tanlanadigan qisqa motivatsion so'zlar

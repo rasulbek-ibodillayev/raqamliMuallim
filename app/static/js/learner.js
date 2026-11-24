@@ -1,29 +1,47 @@
 /* raqamliMuallim — o'qituvchi qobig'i: menyu va qidiruv, ilovani o'rnatish, dam olish taymeri, joriy mavzu (layouts/app, focus, exam) */
 
-/* AI tutor suhbati qurilmada (localStorage) saqlanadi.
-   Tozalanadi: yangi mavzu boshlanganda (rm-current-topic o'zgarsa) yoki yozilganiga 24 soat bo'lganda. */
+/* AI tutor suhbati faqat qurilmada (localStorage) saqlanadi, serverga yozilmaydi. O'zi o'chadi:
+   - birinchi xabar yozilganiga 24 soat bo'lganda (sahifa ochiq turgan bo'lsa ham);
+   - o'quv rejadagi mavzu almashganda (keyingi mavzuga o'tilganda). Eski mavzu darsini ochib ko'rish suhbatni o'chirmaydi;
+   - shu qurilmada boshqa akkaunt kirganda.
+   <meta name="rm-learner"> — server beradi: foydalanuvchi va joriy mavzu id'si (layouts/_learner_meta.html). */
 window.rmTutorStore = (function () {
   var KEY = "rm-tutor-chat", TTL = 24 * 3600 * 1000;
+  var meta = document.querySelector('meta[name="rm-learner"]');
+  function drop() {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    document.dispatchEvent(new CustomEvent("rm-tutor-cleared"));
+  }
+  function stale(d) {
+    if (!d || !Array.isArray(d.msgs) || !(Date.now() - d.savedAt <= TTL)) return true;
+    if (!meta) return false;
+    if (d.uid !== meta.dataset.uid) return true;
+    // Oflaynda sahifa keshdan ochiladi: undagi mavzu eski bo'lishi mumkin, shuning uchun solishtirilmaydi
+    return navigator.onLine && d.topic !== meta.dataset.topic;
+  }
   function read() {
     try {
-      var d = JSON.parse(localStorage.getItem(KEY) || "null");
-      if (!d || !Array.isArray(d.msgs)) return null;
-      if (Date.now() - d.savedAt > TTL) { localStorage.removeItem(KEY); return null; }   // 24 soat o'tdi
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      var d = null;
+      try { d = JSON.parse(raw); } catch (e) {}
+      if (stale(d)) { drop(); return null; }
       return d;
     } catch (e) { return null; }
   }
+  read();
+  setInterval(read, 60000);
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") read(); });
   return {
-    load: function (topic) {
-      var d = read();
-      if (d && topic && d.topic !== topic) { this.clear(); return null; }                   // boshqa mavzu
-      return d;
+    load: read,
+    /* startedAt — suhbatning birinchi xabari vaqti; muddati o'tgan bo'lsa yozilmaydi (false) */
+    save: function (msgs, startedAt) {
+      if (Date.now() - startedAt > TTL) { drop(); return false; }
+      var d = { uid: meta ? meta.dataset.uid : "", topic: meta ? meta.dataset.topic : "", savedAt: startedAt, msgs: msgs };
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { return false; }
+      return true;
     },
-    save: function (topic, msgs) {
-      // savedAt — birinchi yozilgan vaqt: 24 soat shundan hisoblanadi
-      var d = read(), at = d && d.topic === topic ? d.savedAt : Date.now();
-      try { localStorage.setItem(KEY, JSON.stringify({ topic: topic, savedAt: at, msgs: msgs })); } catch (e) {}
-    },
-    clear: function () { try { localStorage.removeItem(KEY); } catch (e) {} }
+    clear: drop
   };
 })();
 
@@ -114,16 +132,11 @@ window.rmShell = function () {
   "use strict";
 
   // Dars yoki mavzu sahifasi ochilganda shu mavzu «hozir o'rganilayotgan» deb eslab qolinadi
-  // (yangi eslatma shu mavzuga saqlanadi). Yangi mavzu boshlansa — AI tutor suhbati tozalanadi.
+  // (yangi eslatma shu mavzuga saqlanadi).
   (function () {
     var el = document.querySelector("[data-current-topic]");
     if (!el) return;
-    var topic = el.dataset.currentTopic;
-    try {
-      var prev = localStorage.getItem("rm-current-topic");
-      localStorage.setItem("rm-current-topic", topic);
-      if (prev && prev !== topic && window.rmTutorStore) window.rmTutorStore.clear();
-    } catch (e) {}
+    try { localStorage.setItem("rm-current-topic", el.dataset.currentTopic); } catch (e) {}
   })();
 
   // ---------- Dam olish: 45 daqiqadan keyin ko'z uchun tanaffus (partials/rest.html) ----------

@@ -214,7 +214,7 @@ def test_lesson_result_partial_credit_and_progress(app, client):
         assert (a.score_pct, a.decision, a.status) == (89, "warn", "submitted")
         assert catalog.lesson_scores(uid, tid) == {sid: 89}
         p = db.session.get(UserTopicProgress, (uid, tid))
-        assert p.status == "learn" and p.lesson_pct == 25                   # 4 ta darsdan 1 tasi
+        assert p.status == "learn" and p.lesson_pct == 100                  # bloklari bor yagona dars
         err = db.session.scalars(select(ErrorItem)).all()
         assert len(err) == 1 and err[0].resolved_at is None and err[0].subtopic_id == sid
         u, rid = a.client_uuid, a.id
@@ -242,6 +242,31 @@ def test_error_is_resolved_and_best_lesson_result_kept(app):
         _answer(a)
         at.finish(a)
         assert all(e.resolved_at for e in db.session.scalars(select(ErrorItem).execution_options(populate_existing=True)))
+
+
+@pytest.mark.parametrize("good,button", [(False, "Darsni qayta o‘zlashtirish"), (True, "Keyingi dars")])
+def test_lesson_result_button_and_link_from_lesson(app, client, good, button):
+    """Tuzatish 24.11: < 70% — «Darsni qayta o‘zlashtirish»; topshirilgan dars testi kartasi natijani ochadi."""
+    with app.app_context():
+        sid, tid = _sub("if operatori"), _topic()
+        a, _ = tb.get_or_start(_uid(), "lesson", subtopic_id=sid)
+        _answer(a, lambda s: good)
+        at.finish(a)
+        u, rid = a.client_uuid, a.id
+    foot = client.get(f"/test/urinish/{u}/natija").get_data(as_text=True).split('class="focus-foot"', 1)[1]
+    other = "Keyingi dars" if not good else "Darsni qayta o‘zlashtirish"
+    assert button in foot and other not in foot and f"/app/dars/{tid}#k{sid}" in foot
+    html = client.get(f"/app/dars/{tid}").get_data(as_text=True)
+    assert f'href="/app/natijalar/{rid}"' in html and (('<a class="lesson-test is-done' in html) is good)
+
+
+def test_failed_topic_result_button(app, client):
+    with app.app_context():
+        a, _ = tb.get_or_start(_uid(), "topic", topic_id=_topic())
+        at.finish(a)
+        u = a.client_uuid
+    foot = client.get(f"/test/urinish/{u}/natija").get_data(as_text=True).split('class="focus-foot"', 1)[1]
+    assert "Mavzuni qayta o‘zlashtirish" in foot and "Keyingi mavzu" not in foot
 
 
 @pytest.mark.parametrize("pct,before,after", [(95, "learn", "solid"), (75, "learn", "done"), (50, "learn", "relearn"),

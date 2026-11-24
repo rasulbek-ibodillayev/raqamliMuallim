@@ -57,13 +57,16 @@
 {% endblock %}
 
 {% block foot %}
+{% set failed = r.decision == "fail" %}{# blok o'zgaruvchilari boshqa blokdan ko'rinmaydi #}
 <footer class="focus-foot">
   <div class="focus-foot-inner">
     <a class="btn btn-outline" href="{{ url_for('user.home') }}">{{ _("Bosh sahifa") }}</a>
-    {% if r.kind == "lesson" and r.topic_id %}
-    <a class="btn btn-primary grow" href="{{ url_for('user.lesson_topic', topic_id=r.topic_id) }}">{{ _("Darsga qaytish") if failed else _("Keyingi dars") }}{{ icon("arrow-right") }}</a>
+    {% if r.kind == "lesson" and failed %}
+    <a class="btn btn-primary grow" href="{{ r.lesson_url }}">{{ _("Darsni qayta o‘zlashtirish") }}</a>
+    {% elif r.kind == "lesson" %}
+    <a class="btn btn-primary grow" href="{{ r.lesson_url }}">{{ _("Keyingi dars") }}{{ icon("arrow-right") }}</a>
     {% elif r.kind == "topic" and failed %}
-    <a class="btn btn-primary grow" href="{{ url_for('user.topic', topic_id=r.topic_id) if r.topic_id else url_for('user.lesson', holat='qayta') }}">{{ _("Darsga qaytish") }}</a>
+    <a class="btn btn-primary grow" href="{{ r.lesson_url }}">{{ _("Mavzuni qayta o‘zlashtirish") }}</a>
     {% elif r.kind == "topic" %}
     <a class="btn btn-primary grow" href="{{ url_for('user.plan') }}">{{ _("Keyingi mavzu") }}{{ icon("arrow-right") }}</a>
     {% else %}

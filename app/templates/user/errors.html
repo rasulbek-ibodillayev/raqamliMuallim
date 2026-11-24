@@ -36,7 +36,7 @@
      Darsni qayta o'zlashtirib, dars testini ≥ 90% bajarsa — dars bu ro'yxatdan chiqadi va o'quv rejadagi foiz yangilanadi. #}
   <section class="stack" aria-labelledby="rec-title">
     <div class="row between wrap"><h2 id="rec-title" class="eyebrow">{{ _("Qayta o‘zlashtirish tavsiya etilgan darslar") }}</h2>
-      <span class="xs muted">{{ _("Natija 70–89%%") }}</span></div>
+      <span class="xs muted">{{ _("Natija 90%% dan past") }}</span></div>
     {% if recommended %}
     <div class="card list">
       {% for r in recommended %}
@@ -61,16 +61,18 @@
 
   <section class="stack" x-data="{ f: 'all' }">
     <div class="row between wrap">
-      <h2 class="eyebrow">{{ _("Xato qilingan savollar · 21") }}</h2>
+      <h2 class="eyebrow">{{ _("Xato qilingan savollar") }} · {{ total }}</h2>
       <div class="seg"><button type="button" :class="f === 'all' && 'active'" @click="f = 'all'">{{ _("Hammasi") }}</button><button type="button" :class="f === 'rep' && 'active'" @click="f = 'rep'">{{ _("Qayta xato") }}</button></div>
     </div>
     <div class="card list">
-      {% for q, sec, meta, rep in items %}
-      <a class="list-item" href="{{ url_for('test.result') }}" {% if not rep %}x-show="f === 'all'"{% endif %}>
+      {% for e in items %}
+      <a class="list-item" href="{{ url_for('user.result_detail', rid=e.rid) if e.rid else url_for('user.results') }}" {% if not e.rep %}x-show="f === 'all'"{% endif %}>
         <span class="t-red">{{ icon("x-circle") }}</span>
-        <div class="grow"><div class="truncate">{{ q }}</div><div class="sub">{{ sec }} · <span class="{{ 't-red' if rep }}">{{ meta }}</span></div></div>
+        <div class="grow"><div class="truncate">{{ e.q }}</div><div class="sub">{{ e.section }} · <span class="{{ 't-red' if e.rep }}">{{ _("%(n)s marta xato", n=e.wrong) if e.rep else e.when }}</span></div></div>
         {{ icon("chevron-right", "ico-sm chev") }}
       </a>
+      {% else %}
+      <div class="card-pad small muted">{{ _("Tuzatilmagan xato yo‘q.") }}</div>
       {% endfor %}
     </div>
   </section>

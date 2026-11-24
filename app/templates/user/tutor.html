@@ -12,12 +12,11 @@
   </a>
 </div>
 {#
-  Suhbat qurilmaning localStorage'ida saqlanadi (rmTutorStore, static/js/learner.js):
-  yangi mavzu boshlanganda yoki yozilganiga 24 soat bo'lganda avtomatik tozalanadi.
-  Quyidagi yashirin blok — namunaviy boshlang'ich suhbat (saqlangan suhbat bo'lmasa ko'rsatiladi).
+  Suhbat faqat qurilmaning localStorage'ida saqlanadi (rmTutorStore, static/js/learner.js): keyingi mavzuga o'tilganda yoki
+  yozilganiga 24 soat bo'lganda o'zi o'chadi. Quyidagi yashirin blok — namunaviy suhbat (faqat ishlab chiqishda).
 #}
-<div class="stack u-minh-4fcf5" x-data="rmTutor({{ topic|tojson|forceescape }})" x-init="init()" @submit.prevent="send($event)">
-  <div hidden x-ref="seed">
+<div class="stack u-minh-4fcf5" x-data="rmTutor()" @submit.prevent="send($event)">
+  <div hidden x-ref="seed">{% if sample %}
     <div data-role="user">{{ _("elif bilan else farqi nima?") }}</div>
     <div data-role="ai">
       <p><code>elif</code> {{ _("(else if)") }} <b>{{ _("yangi shartni") }}</b> {{ _("tekshiradi va faqat oldingi shartlar yolg‘on bo‘lganda ishlaydi.") }} <code>else</code> {{ _("esa") }} <b>{{ _("shartsiz") }}</b> {{ _("yakuniy blok: yuqoridagi shartlarning hech biri bajarilmasa ishga tushadi.") }}</p>
@@ -37,11 +36,11 @@
       {{ code('ball = 85\nif ball >= 90:\n    print("A’lo")\nelif ball >= 70:\n    print("Yaxshi")   # shu bajariladi\nelse:\n    print("Qoniqarsiz")') }}
       <p>{{ _("O‘zingiz sinab ko‘ring:") }} <code>ball = 65</code> {{ _("bo‘lsa nima chiqadi?") }}</p>
     </div>
-  </div>
+  {% endif %}</div>
 
   <div class="pt-16 thread grow">
     <div class="row between wrap xs muted tutor-meta">
-      <span class="row row-sm">{{ icon("info", "ico-sm") }}<span x-text="restored ? {{ _('Avvalgi suhbat tiklandi')|tojson|forceescape }} : {{ _('Suhbat 24 soat saqlanadi')|tojson|forceescape }}">{{ _("Suhbat 24 soat saqlanadi") }}</span></span>
+      <span class="row row-sm">{{ icon("info", "ico-sm") }}<span x-text="restored ? {{ _('Avvalgi suhbat tiklandi')|tojson|forceescape }} : {{ _('Suhbat faqat shu qurilmada, 24 soat yoki keyingi mavzugacha saqlanadi')|tojson|forceescape }}">{{ _("Suhbat faqat shu qurilmada, 24 soat yoki keyingi mavzugacha saqlanadi") }}</span></span>
       <button class="link btn-reset xs" type="button" x-show="msgs.length" @click="if (confirm({{ _('Suhbat tozalansinmi?')|tojson|forceescape }})) reset()">{{ _("Suhbatni tozalash") }}</button>
     </div>
 
@@ -61,6 +60,7 @@
       </div>
     </template>
 
+    <p class="muted center" x-show="!msgs.length" x-cloak>{{ _("Mavzu bo‘yicha savolingizni yozing.") }}</p>
     <div class="msg-ai" aria-live="polite" x-show="typing" x-cloak>
       <span class="ai-mark">{{ icon("sparkle") }}</span>
       <div class="body"><div class="typing" aria-label="{{ _('AI javob yozmoqda') }}"><span></span><span></span><span></span></div></div>
