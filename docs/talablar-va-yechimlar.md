@@ -15,7 +15,7 @@ yaratiladi va xeshi bo'yicha qayta ishlatiladi.
 |---|---|---|---|
 | Ko'rilgan savollar ✅ | Avval: har juftlikka qator | Foydalanuvchiga bitta bitmap (`bytea`, bit = savol id) | 72 → 1,44 MB (50 baravar; kodda o'lchandi) |
 | Javoblar ✅ | `{"v":…, "at":…}` | Test yakunlangach faqat `v` qoladi (`at` faqat sinxronlash paytida kerak) | 139 → 114 MB (−18%) |
-| Eski urinishlar ✅ | Ustun bor, kod yo'q | 12 oydan eskisi `items_archive`ga siqiladi (zlib) | 20 savol ≈ 204 bayt; 1 mln javob 139 → ≈ 11 MB |
+| Eski urinishlar ✅ | Ustun bor, kod yo'q | 7 kundan eskisi `items_archive`ga siqiladi (avval 12 oy, zlib edi) | 20 savol ≈ 124 bayt; 1 mln javob 139 → ≈ 11 MB |
 | RAG vektorlari | `vector(768)`, 4 bayt/o'lcham | `halfvec(768)`, 2 bayt/o'lcham | vektor hajmi 2 baravar kam |
 | Navbat va cheklovlar | Reja: Redis + RQ | PostgreSQL `jobs` jadvali (`SKIP LOCKED`) va bitta worker | Redis jarayoni umuman kerak emas |
 | Sertifikat PDF | Reja: WeasyPrint serverda | Brauzerning «PDF'ga chop etish»i (sahifa tayyor) | Server kutubxonalari va PDF fayllar yo'q |
@@ -26,8 +26,34 @@ Bitmap faqat «takrorlanmasin» qoidasi uchun yetadi: savol endi hech qachon qay
 7c bajarildi (2026-11-24). Kodda o'lchandi (20 000 savol, 500 foydalanuvchi × 2000): bitta kichik mavzudan tanlash 4,7 ms,
 butun bank bo'yicha hisob 17 ms, 35 savollik attestatsiya testini tuzish 58 ms, diagnostika 122 ms, shablondan 3 ta savol 8 ms.
 
-Savol matni ikki joyda (`questions` va `question_versions`) turadi: o'rtacha 311 + 366 bayt. 20 000 savolda bu ≈ 14 MB, shuning
-uchun hozircha o'zgartirilmaydi.
+### Saqlash texnologiyalari (2026-11-24, qaror)
+
+Asosiy va yagona baza — **PostgreSQL**. Bir xil ma'lumot (1 mln javob = 50 000 test × 20 savol) har birida o'lchandi:
+
+| Texnologiya | Disk | RAM | Qaror |
+|---|---|---|---|
+| PostgreSQL, oddiy qatorlar | 110 MB | — | Yakunlanmagan va oxirgi 7 kunlik testlar |
+| PostgreSQL + o'z ikkilik arxivimiz | ≈ 6 MB | — | **Tanlandi**: 7 kundan keyin |
+| DuckDB | 10 MB | +32 MB | Yo'q: kattaroq va har worker'da RAM; statistikaga PostgreSQL yetadi |
+| SQLite | 20 MB | +2 MB | Yo'q: bir vaqtda bitta yozuvchi, vektor qidiruv yo'q |
+| CSV | 28 MB | — | Faqat eksport/import |
+| JSON | — | — | JSONB maydonlar va kontent fayli |
+| TinyDB | 31 MB | butun fayl RAM'da | Yo'q: bir vaqtda yozishda buziladi |
+| MessagePack | 20 savol 133 bayt (zlib bilan) | +0,7 MB | Yo'q: o'z formatimiz 124 bayt, kutubxonasiz, 0,015 ms/test |
+| LMDB, RocksDB / LevelDB | — | — | Yo'q: kesh uchun ikkinchi baza (alohida zaxira, tranzaksiya yo'q); Windows va Python 3.15 da tayyor paketi ishlamadi, o'lchanmadi |
+
+Kiritilgan o'zgarishlar va natija (20 000 savol, 500 foydalanuvchi, 1 mln javob, indekslar bilan):
+
+| Jadval | Avval | Keyin | Nima qilindi |
+|---|---|---|---|
+| attempt_items + test_attempts | 123 MB | 25 MB | 7 kundan keyin ikkilik arxiv (20 savol ≈ 124 bayt), 2 ta ortiqcha indeks olindi |
+| error_items | 23 MB | 5 MB | Tuzatilgan xato o'chadi, 3 indeks o'rniga 1 ta |
+| audit_log | 13 MB | 3,3 MB | Savolning to'liq nusxalari o'rniga o'zgargan maydonlar nomi |
+| question_versions | 9,8 MB | 1,9 MB | Joriy versiya matni takrorlanmaydi |
+| **Jami** | **177 MB** | **44 MB** | 4 baravar kam |
+
+Worker RAM: 106 → 91 MB (Alembic faqat `flask` buyruqlarida, numpy'siz `halfvec` turi). Sifat: hamma natija saqlanadi, sahifalar
+bir xil; natija tahlili arxivdan 4,6 ms, jadvaldan 4,1 ms.
 
 ## 2. AI tutor: RAG va bepul AI
 

@@ -6,10 +6,10 @@ e'tiroz bildira oladi. Bitta urinishdagi bitta savolga bitta e'tiroz. Ko'rib chi
 import uuid as uuidlib
 
 from flask_babel import gettext as _
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from ..extensions import db
-from ..models import Objection, QuestionVersion, TestAttempt
+from ..models import Objection, Question, QuestionVersion, TestAttempt
 from . import attempts as at
 from .archive import rows as rows_of
 from .timefmt import when
@@ -56,7 +56,8 @@ def sent_positions(a: TestAttempt) -> set[int]:
 
 def mine(user_id: int) -> list[dict]:
     rows = db.session.execute(
-        select(Objection, QuestionVersion.snapshot["text"].as_string())
+        select(Objection, func.coalesce(QuestionVersion.snapshot["text"].as_string(), Question.text))
+        .join(Question, Question.id == Objection.question_id)
         .outerjoin(QuestionVersion, (QuestionVersion.question_id == Objection.question_id)
                    & (QuestionVersion.version == Objection.question_version))
         .where(Objection.user_id == user_id).order_by(Objection.created_at.desc(), Objection.id.desc())).all()

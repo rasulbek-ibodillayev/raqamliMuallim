@@ -1,14 +1,14 @@
 """AI: javoblar keshi, sarf hisobi, audio va RAG."""
 from datetime import datetime
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, Numeric, SmallInteger, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
 from ._base import JSONB, PK, created_at, pk
+from ._vector import HalfVec
 
-EMBED_DIM = 768   # Gemini text-embedding-004. O'zgartirilsa — yangi migratsiya va qayta indekslash
+EMBED_DIM = 768   # gemini-embedding-2. O'zgartirilsa — yangi migratsiya va qayta indekslash
 
 
 class AICache(db.Model):
@@ -80,7 +80,7 @@ class RagChunk(db.Model):
     __table_args__ = (
         Index("ix_rag_chunks_embedding", "embedding", postgresql_using="hnsw",
               postgresql_with={"m": 16, "ef_construction": 64},
-              postgresql_ops={"embedding": "vector_cosine_ops"}),
+              postgresql_ops={"embedding": "halfvec_cosine_ops"}),
     )
 
     id: Mapped[int] = pk()
@@ -89,6 +89,6 @@ class RagChunk(db.Model):
     text: Mapped[str] = mapped_column(Text)
     token_count: Mapped[int | None] = mapped_column(SmallInteger)
     meta: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
-    embedding = mapped_column(Vector(EMBED_DIM))
+    embedding: Mapped[list[float] | None] = mapped_column(HalfVec(EMBED_DIM))
 
     source: Mapped[RagSource] = relationship(back_populates="chunks")

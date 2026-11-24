@@ -15,6 +15,7 @@ from app.services import attempts as at
 from app.services import google_auth
 from app.services import question_bank as qb
 from app.services import test_builder as tb
+from app.services import versions
 from app.services.content_import import check_question
 from tests.conftest import JSON
 
@@ -111,7 +112,7 @@ def test_solution_text_is_escaped(app, client):
         q = db.session.get(Question, a.items[0].question_id)
         v = next(x for x in q.versions if x.version == q.version)
         old = v.snapshot
-        v.snapshot = {**old, "explanation": "<img src=x onerror=alert(1)>", "text": "<script>1</script>"}
+        v.snapshot = {**versions.of(q), "explanation": "<img src=x onerror=alert(1)>", "text": "<script>1</script>"}
         db.session.commit()
         u = a.client_uuid
         vid = v.id

@@ -266,15 +266,15 @@ def test_error_is_resolved_by_other_question_of_same_subtopic(app):
     with app.app_context():
         _load({"A": {"questions": [_q(f"a{i}") for i in range(9)]}, "B": {"questions": [_q(f"b{i}") for i in range(9)]}})
         opened = lambda t: db.session.scalar(select(func.count()).select_from(ErrorItem).where(      # noqa: E731
-            ErrorItem.subtopic_id == _sub(t), ErrorItem.resolved_at.is_(None)))
+            ErrorItem.subtopic_id == _sub(t)))
         _run("lesson", good=False, subtopic_id=_sub("A"))
         _run("lesson", good=False, subtopic_id=_sub("A"))
         _run("lesson", good=False, subtopic_id=_sub("B"))
         assert (opened("A"), opened("B")) == (6, 3)
-        oldest = db.session.scalars(select(ErrorItem.id).order_by(ErrorItem.id).limit(3)).all()
+        oldest = db.session.scalars(select(ErrorItem.question_id).order_by(ErrorItem.last_wrong_at, ErrorItem.question_id).limit(3)).all()
         _run("lesson", subtopic_id=_sub("A"))                        # 3 ta to'g'ri javob — 3 ta eng eski xato
         assert (opened("A"), opened("B")) == (3, 3)
-        assert sorted(db.session.scalars(select(ErrorItem.id).where(ErrorItem.resolved_at.is_not(None)))) == sorted(oldest)
+        assert not set(oldest) & set(db.session.scalars(select(ErrorItem.question_id)))
 
 
 # ---------------- Javobni ixchamlash va arxiv ----------------
@@ -300,17 +300,17 @@ def test_old_attempts_are_compressed_and_still_readable(app, as_role):
         before = {a.id: (at.review(a), at.by_subtopic(a), catalog.attempt_by_section(a)) for a in (old, mid, fresh)}
         scores = catalog.subtopic_scores(uid, tid)
         for a in (old, mid):
-            a.finished_at -= timedelta(days=366)
+            a.finished_at -= timedelta(days=8)
         db.session.commit()
         left = fresh.total
 
         assert archive.compress_old() == 2 and archive.compress_old() == 0
         assert db.session.scalar(select(func.count()).select_from(AttemptItem)) == left
-        assert old.items == [] and len(old.items_archive) < 250 and fresh.items_archive is None
+        assert old.items == [] and len(old.items_archive) < 30 and fresh.items_archive is None
         for a in (old, mid, fresh):
             assert (at.review(a), at.by_subtopic(a), catalog.attempt_by_section(a)) == before[a.id]
         assert catalog.subtopic_scores(uid, tid) == scores
-        assert archive.rows(old)[0].time_ms == 1500
+        assert archive.rows(old)[0].time_ms == 2000                  # 1500 ms: arxivda soniyagacha yaxlitlanadi
         given = archive.rows(old)[0].question_id
         assert seen.ever_given(given)                                # arxivlangach ham savol «berilgan»
         assert given not in {p.question_id for p in at.pick_from_bank(uid, {sid: 99})}
@@ -326,6 +326,35 @@ def test_old_attempts_are_compressed_and_still_readable(app, as_role):
     with app.app_context():
         a = db.session.scalar(select(TestAttempt).where(TestAttempt.client_uuid == u))
         assert objections.sent_positions(a) == {0}
+
+
+def test_archive_format_round_trip():
+    from types import SimpleNamespace as N
+    answers = [None, 0, 25, 99, [], [0, None, 3], "qirq besh “x”", "", list(range(300)), 100, -1, 1.5, True, {"a": 1}]
+    items = [N(position=n, question_id=q, question_version=v, time_ms=ms, score=sc, answer=None if a is None else {"v": a})
+             for n, (a, q, v, ms, sc) in enumerate(zip(answers, [1, 127, 128, 20000, 2**31 - 1] * 3, [1, 2, 300] * 5,
+                                                       [None, 0, 999, 61400, 86_400_000] * 3, [None, 0, 100] * 5))]
+    back = archive.unpack(archive.pack(items))
+    assert [(i.position, i.question_id, i.question_version, i.score, (i.answer or {}).get("v")) for i in back] ==         [(i.position, i.question_id, i.question_version, i.score, (i.answer or {}).get("v")) for i in items]
+    assert [i.time_ms for i in back][:5] == [None, 0, 1000, 61000, 86_400_000]          # soniyagacha yaxlitlanadi
+    assert archive.unpack(b"") == []
+    with pytest.raises(ValueError):
+        archive.pack([N(position=1, question_id=1, question_version=1, time_ms=None, score=0, answer=None)])
+
+
+def test_next_test_compresses_users_old_attempts(app):
+    with app.app_context():
+        sid = _sub("if operatori")
+        old = _run("lesson", subtopic_id=sid)
+        old.finished_at -= timedelta(days=8)
+        db.session.commit()
+        new, _ = tb.get_or_start(_uid(), "lesson", subtopic_id=sid)
+        assert old.items_archive is not None and old.items == [] and len(new.items) == 3
+        # Arxivdagi savolni qidirish sharti
+        qid = archive.rows(old)[0].question_id
+        found = select(TestAttempt.id).where(archive.may_have(qid))
+        assert list(db.session.scalars(found)) == [old.id]
+        assert list(db.session.scalars(select(TestAttempt.id).where(archive.may_have(2_000_000_000)))) == []
 
 
 def test_compress_command_and_unfinished_attempts(app):

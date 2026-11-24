@@ -4,7 +4,7 @@ AI savollari navbati (tasdiqlash/rad etish), «savollar yetarli emas» ogohlanti
 Ekspert panelidagi atamalar: «Mavzu» = sections, «Dars» = topics, «Kichik mavzu» = subtopics.
 
 Qoidalar:
-- Tahrir savolni joyida o'zgartiradi va versiyani oshiradi; eski holat question_versions'da qoladi —
+- Tahrir savolni joyida o'zgartiradi va versiyani oshiradi; eski holat question_versions'da qoladi (services/versions.py) —
   avvalgi test urinishlari o'z versiyasiga havola qilgani uchun natijalar buzilmaydi.
 - «O'chirish» — arxivlash (status=archived): savol testlarga tushmaydi, lekin tarix saqlanadi.
 - AI savolini rad etish: hech kimga berilmagan bo'lsa butunlay o'chiriladi, aks holda arxivlanadi.
@@ -12,7 +12,7 @@ Qoidalar:
 from dataclasses import dataclass
 
 from flask import has_request_context, request
-from sqlalchemy import func, select, true
+from sqlalchemy import func, select, true, update
 
 from ..extensions import db
 from ..models import AuditLog, Question, QuestionVersion, Section, Subtopic, Topic
@@ -193,14 +193,18 @@ def save(payload: dict, actor_id: int, question_id: int | None = None, status: s
         if _snapshot(q) == before and q.status == status:
             return q
         q.status = status
-        if _snapshot(q) != before:
+        if _snapshot(q) != before:                      # avvalgi versiyaga nusxasi yoziladi, yangisiniki — questions'ning o'zi
+            db.session.execute(update(QuestionVersion).where(QuestionVersion.question_id == q.id, QuestionVersion.version == q.version)
+                               .values(snapshot=before))
             q.version += 1
         action = "update"
     if not db.session.scalar(select(QuestionVersion.id).where(QuestionVersion.question_id == q.id,
                                                               QuestionVersion.version == q.version)):
-        db.session.add(QuestionVersion(question_id=q.id, version=q.version, snapshot=_snapshot(q), changed_by=actor_id,
-                                       change_note=action))
-    audit(actor_id, action, q.id, {"before": before, "after": _snapshot(q), "status": q.status})
+        db.session.add(QuestionVersion(question_id=q.id, version=q.version, changed_by=actor_id, change_note=action))
+    # Mazmuni versiyalarda: jurnalga faqat nima o'zgargani yoziladi
+    now = _snapshot(q)
+    audit(actor_id, action, q.id, {"version": q.version, "status": q.status,
+                                   **({"changed": [k for k in now if now[k] != before[k]]} if before else {})})
     if commit:
         db.session.commit()
     return q

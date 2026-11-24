@@ -222,7 +222,7 @@ def test_lesson_result_partial_credit_and_progress(app, client):
         p = db.session.get(UserTopicProgress, (uid, tid))
         assert p.status == "learn" and p.lesson_pct == 100                  # bloklari bor yagona dars
         err = db.session.scalars(select(ErrorItem)).all()
-        assert len(err) == 1 and err[0].resolved_at is None and err[0].subtopic_id == sid
+        assert len(err) == 1 and err[0].subtopic_id == sid
         u, rid = a.client_uuid, a.id
     html = client.get(f"/test/urinish/{u}/natija").get_data(as_text=True)
     assert "89%" in html and "Keyingi darsga o‘tishingiz mumkin" in html and "Qisman: 67%" in html
@@ -243,11 +243,11 @@ def test_error_is_resolved_and_best_lesson_result_kept(app):
             at.finish(a)
             assert a.score_pct == pct
         assert catalog.lesson_scores(uid, tid) == {sid: 100}             # eng yaxshisi: ochilgan dars qayta yopilmaydi
-        assert all(e.resolved_at is None for e in db.session.scalars(select(ErrorItem)))
+        assert db.session.scalar(select(func.count()).select_from(ErrorItem)) == 3
         a, _ = tb.get_or_start(uid, "lesson", subtopic_id=sid)
         _answer(a)
         at.finish(a)
-        assert all(e.resolved_at for e in db.session.scalars(select(ErrorItem).execution_options(populate_existing=True)))
+        assert db.session.scalar(select(func.count()).select_from(ErrorItem)) == 0
 
 
 @pytest.mark.parametrize("good,button", [(False, "Darsni qayta o‘zlashtirish"), (True, "Keyingi dars")])

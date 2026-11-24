@@ -12,7 +12,7 @@
 from collections import Counter
 from datetime import datetime, timezone
 
-from sqlalchemy import literal_column, select
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from ..extensions import db
@@ -117,11 +117,10 @@ def _errors(a: TestAttempt, snaps: dict) -> None:
                                          for i in wrong])
         db.session.execute(stmt.on_conflict_do_update(
             index_elements=[ErrorItem.user_id, ErrorItem.question_id],
-            set_={"wrong_count": literal_column("error_items.wrong_count + 1"), "last_attempt_id": a.id,
-                  "last_wrong_at": now, "resolved_at": None}))
+            set_={"last_attempt_id": a.id, "last_wrong_at": now}))
     for sid, n in right.items():
-        oldest = (select(ErrorItem.id).where(ErrorItem.user_id == a.user_id, ErrorItem.subtopic_id == sid,
-                                             ErrorItem.resolved_at.is_(None), ErrorItem.last_attempt_id.is_distinct_from(a.id))
-                  .order_by(ErrorItem.last_wrong_at, ErrorItem.id).limit(n))
-        db.session.execute(db.update(ErrorItem).where(ErrorItem.id.in_(oldest)).values(resolved_at=now)
+        oldest = (select(ErrorItem.question_id).where(ErrorItem.user_id == a.user_id, ErrorItem.subtopic_id == sid,
+                                                      ErrorItem.last_attempt_id.is_distinct_from(a.id))
+                  .order_by(ErrorItem.last_wrong_at, ErrorItem.question_id).limit(n))
+        db.session.execute(db.delete(ErrorItem).where(ErrorItem.user_id == a.user_id, ErrorItem.question_id.in_(oldest))
                            .execution_options(synchronize_session=False))

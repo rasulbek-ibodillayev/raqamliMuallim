@@ -25,11 +25,13 @@ def create_app(config: dict | None = None) -> Flask:
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
     app.config.update(config or {})
 
-    from .extensions import db, login_manager, migrate
+    from .extensions import db, login_manager
     from . import models  # noqa: F401 — Alembic barcha jadvallarni ko'rishi uchun
 
     db.init_app(app)
-    migrate.init_app(app, db, compare_type=True)
+    if os.environ.get("FLASK_RUN_FROM_CLI") == "true":      # `flask db …`; server worker'iga kerak emas (12 MB RAM)
+        from flask_migrate import Migrate
+        Migrate(app, db, compare_type=True)
 
     login_manager.init_app(app)
     # "basic": telefonda IP tez-tez almashadi, "strong" esa bunda foydalanuvchini chiqarib yuborardi

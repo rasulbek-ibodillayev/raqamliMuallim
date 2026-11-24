@@ -73,7 +73,7 @@ def init_app(app):
 
     @app.cli.command("eski-testlarni-siqish")
     def compress_attempts():
-        """12 oydan eski yakunlangan testlarni siqadi: natijalar saqlanadi, joy kamayadi. Takroriy ishga tushirish xavfsiz."""
+        """7 kundan eski yakunlangan testlarni siqadi: natijalar saqlanadi, joy kamayadi. Takroriy ishga tushirish xavfsiz."""
         from .services.archive import compress_old
         click.echo(f"Siqilgan urinishlar: {compress_old()}")
 

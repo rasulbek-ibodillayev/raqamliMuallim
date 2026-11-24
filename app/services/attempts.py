@@ -6,7 +6,7 @@ Qoidalar:
 - Bitta foydalanuvchiga bitta savol ikki marta berilmaydi (seen.py). Yangi savol yetmasa — shablon generator (generator.py),
   u ham yetmasa test qisqaroq bo'ladi.
 - Faqat tasdiqlangan (approved) savollar olinadi.
-- Test (bosqich) tugagach javobdan faqat qiymati qoladi; 12 oydan eski urinish siqiladi (archive.py), shuning uchun
+- Test (bosqich) tugagach javobdan faqat qiymati qoladi; 7 kundan eski urinish siqiladi (archive.py), shuning uchun
   yakunlangan urinish qatorlari archive.rows(a) orqali o'qiladi.
 
 Bankdagi savollar bitta SQL so'rov bilan tanlanadi: har bir kichik mavzudan rejadagi sonicha, tasodifiy tartibda.
@@ -22,7 +22,7 @@ from sqlalchemy import func, select, tuple_
 
 from ..extensions import db
 from ..models import AttemptItem, Question, QuestionVersion, Subtopic, TestAttempt, Topic
-from . import generator, progress, scoring, seen
+from . import archive, generator, progress, scoring, seen, versions
 from .archive import rows as rows_of
 
 PARTIAL_TYPES = ("multiple", "matching")      # qisman ball beriladigan turlar
@@ -97,6 +97,7 @@ def _insert(user_id: int, kind: str, parts: list[list[Picked]], *, levels=None, 
             seconds=None, client_uuid=None, stage=None, settings=None) -> TestAttempt:
     """Urinish va savollarini yozadi. Bosqichli testda faqat birinchi bosqich savollari «berilgan» deb belgilanadi:
     keyingilari test yakunlanmaguncha band turadi (seen.is_new), bosqichga yetib borilmasa — bankka qaytadi."""
+    archive.compress_user(user_id)
     now = datetime.now(timezone.utc)
     flat = [p for part in parts for p in part]
     snap = dict(settings or {})
@@ -217,11 +218,11 @@ def _snapshots(a: TestAttempt, items: list | None = None) -> dict[int, tuple[dic
     if not items:
         return {}
     rows = db.session.execute(
-        select(QuestionVersion.question_id, QuestionVersion.version, QuestionVersion.snapshot, Subtopic.id, Subtopic.topic_id)
+        select(QuestionVersion.question_id, QuestionVersion.version, Subtopic.id, Subtopic.topic_id, *versions.columns())
         .join(Question, Question.id == QuestionVersion.question_id).join(Subtopic, Subtopic.id == Question.subtopic_id)
         .where(tuple_(QuestionVersion.question_id, QuestionVersion.version)
                .in_([(i.question_id, i.question_version) for i in items]))).all()
-    info = {(qid, ver): (snap, sid, tid) for qid, ver, snap, sid, tid in rows}
+    info = {(qid, ver): (versions.read(values), sid, tid) for qid, ver, sid, tid, *values in rows}
     return {i.position: info[i.question_id, i.question_version] for i in items if (i.question_id, i.question_version) in info}
 
 

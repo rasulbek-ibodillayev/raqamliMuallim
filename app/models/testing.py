@@ -32,9 +32,9 @@ class TestAttempt(db.Model):
     client_uuid: Mapped[uuid.UUID] = mapped_column(Uuid, unique=True, default=uuid.uuid4)
     kind: Mapped[str] = mapped_column(String(10))
     status: Mapped[str] = mapped_column(String(11), default="in_progress", server_default="in_progress")
-    topic_id: Mapped[int | None] = mapped_column(PK, ForeignKey("topics.id", ondelete="SET NULL"), index=True)
+    topic_id: Mapped[int | None] = mapped_column(PK, ForeignKey("topics.id", ondelete="SET NULL"))
     # Dars testi (kind=lesson) qaysi kichik mavzudan
-    subtopic_id: Mapped[int | None] = mapped_column(PK, ForeignKey("subtopics.id", ondelete="SET NULL"), index=True)
+    subtopic_id: Mapped[int | None] = mapped_column(PK, ForeignKey("subtopics.id", ondelete="SET NULL"))
     # Bosqichli testda joriy bosqich (settings_snapshot["stages"] ro'yxatidagi tartib, 1 dan)
     stage: Mapped[int | None] = mapped_column(SmallInteger)
     total: Mapped[int] = mapped_column(SmallInteger, default=0, server_default="0")
@@ -46,7 +46,7 @@ class TestAttempt(db.Model):
     started_at: Mapped[datetime] = created_at()
     deadline_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    # 12 oydan eski urinishlar: attempt_items o'chiriladi, bu yerda zlib(JSON) ko'rinishida qoladi (services/archive.py)
+    # 7 kundan eski urinishlar: attempt_items o'chiriladi, bu yerda ixcham ikkilik ko'rinishda qoladi (services/archive.py)
     items_archive: Mapped[bytes | None] = mapped_column(LargeBinary)
 
     items: Mapped[list["AttemptItem"]] = relationship(back_populates="attempt", order_by="AttemptItem.position",

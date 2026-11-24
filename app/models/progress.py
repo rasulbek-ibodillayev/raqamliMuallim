@@ -32,21 +32,15 @@ class UserTopicProgress(db.Model):
 
 
 class ErrorItem(db.Model):
-    """Xatolar ro'yxati: foydalanuvchi + savol bo'yicha bitta qator, analitika kichik mavzu darajasida."""
+    """Tuzatilmagan xatolar: foydalanuvchi + savol bo'yicha bitta qator; tuzatilganda o'chadi (javobning o'zi urinishda qoladi).
+    Analitika kichik mavzu darajasida. Ustunlar tartibi tekislashga mos (8 → 4 bayt)."""
     __tablename__ = "error_items"
-    __table_args__ = (
-        UniqueConstraint("user_id", "question_id"),
-        Index("ix_error_items_user_subtopic", "user_id", "subtopic_id"),
-    )
 
-    id: Mapped[int] = pk()
-    user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     subtopic_id: Mapped[int] = mapped_column(PK, ForeignKey("subtopics.id", ondelete="CASCADE"))
-    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"))
+    question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"), primary_key=True)
     last_attempt_id: Mapped[int | None] = mapped_column(PK, ForeignKey("test_attempts.id", ondelete="SET NULL"))
-    wrong_count: Mapped[int] = mapped_column(SmallInteger, default=1, server_default="1")
     last_wrong_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # keyin to'g'ri javob berilgan
 
 
 class ReviewSchedule(db.Model):

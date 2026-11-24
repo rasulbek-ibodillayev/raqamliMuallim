@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 
 from app.extensions import db
 from app.models import AttemptItem, AuditLog, Question, QuestionVersion, Section, Subtopic, Topic, User
-from app.services import attempts
+from app.services import attempts, versions
 from tests.conftest import JSON
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\0" * 64
@@ -121,7 +121,10 @@ def test_edit_bumps_version_and_keeps_history(app, expert):
         assert q2.version == 2 and q2.text == "Tahrirlangan savol?"
         snaps = db.session.scalars(select(QuestionVersion.snapshot).where(QuestionVersion.question_id == q.id)
                                    .order_by(QuestionVersion.version)).all()
-        assert [s["text"] for s in snaps] == ["Yangi savol?", "Tahrirlangan savol?"]
+        assert snaps[0]["text"] == "Yangi savol?" and snaps[1] is None       # joriy versiya matni takrorlanmaydi
+        assert [s["text"] for _v, s in sorted(versions.all_of(q.id).items())] == ["Yangi savol?", "Tahrirlangan savol?"]
+        log = db.session.scalar(select(AuditLog.data).where(AuditLog.action == "update", AuditLog.entity_id == str(q.id)))
+        assert log == {"version": 2, "status": "approved", "changed": ["text"]}
     # O'zgarishsiz saqlash versiyani oshirmaydi
     expert.post("/ekspert/savol", headers=JSON, data=_form(app, id=str(q.id), text="Tahrirlangan savol?"))
     with app.app_context():

@@ -17,8 +17,8 @@ from flask_babel import gettext as _
 from sqlalchemy import func, select
 
 from ..extensions import db
-from ..models import AttemptItem, Objection, Question, QuestionVersion, Subtopic, TestAttempt, Topic, User
-from . import notify, recalc, seen
+from ..models import AttemptItem, Objection, Question, Subtopic, TestAttempt, Topic, User
+from . import archive, notify, recalc, seen, versions
 from . import question_bank as qb
 from .timefmt import when
 
@@ -51,17 +51,18 @@ def queue(areas: set[int] | None = None) -> list[dict]:
 
 def _answers(q: Question) -> Counter:
     """Shu variantli versiyalarga berilgan javoblar: {variant indeksi yoki matn: soni}."""
-    versions = [v for v, s in db.session.execute(select(QuestionVersion.version, QuestionVersion.snapshot)
-                                                 .where(QuestionVersion.question_id == q.id))
-                if (s.get("data") or {}).get("options") == (q.data or {}).get("options")]
+    same = [v for v, s in versions.all_of(q.id).items() if (s.get("data") or {}).get("options") == (q.data or {}).get("options")]
     v = AttemptItem.answer["v"].label("v")
     rows = db.session.execute(
         select(v, func.count()).join(TestAttempt, TestAttempt.id == AttemptItem.attempt_id)
-        .where(AttemptItem.question_id == q.id, AttemptItem.question_version.in_(versions),
+        .where(AttemptItem.question_id == q.id, AttemptItem.question_version.in_(same),
                TestAttempt.user_id.in_(seen.given_to(q.id)), TestAttempt.status == "submitted", AttemptItem.answer.is_not(None))
         .group_by(v)).all()
     out: Counter = Counter()
-    for value, n in rows:
+    old = [(v, 1) for blob in db.session.scalars(
+        select(TestAttempt.items_archive).where(TestAttempt.user_id.in_(seen.given_to(q.id)), archive.may_have(q.id)))
+        for qid, ver, _sec, _score, v in archive.scan(blob) if qid == q.id and ver in same and v is not None]
+    for value, n in [*rows, *old]:
         for x in (value if isinstance(value, list) else [value]):
             out[x] += n
     return out

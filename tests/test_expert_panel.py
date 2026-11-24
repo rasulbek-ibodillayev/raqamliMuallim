@@ -114,7 +114,7 @@ def test_key_change_recalculates_everyone_upwards_only(lesson3):
     assert next(r for r in at.review(mine) if r["q"] == "q1")["right"] == [1]
     assert next(r for r in at.review(good) if r["q"] == "q1")["right"] == [0]
     # Xato yopildi, dars o'tgan hisoblanadi
-    assert db.session.scalar(select(ErrorItem.resolved_at).where(ErrorItem.user_id == _uid())) is not None
+    assert db.session.scalar(select(func.count()).select_from(ErrorItem).where(ErrorItem.user_id == _uid())) == 0
     assert catalog.lesson_scores(_uid(), _topic()) == {sid: 100}
     assert db.session.get(UserTopicProgress, (_uid(), _topic())).lesson_pct == 100
     assert [(n.user_id, n.kind, n.old_pct, n.new_pct) for n in _notes()] == [
@@ -188,7 +188,7 @@ def test_drop_excludes_question_and_pauses_it(lesson3):
     assert r["dropped"] and r["score"] == 0
     assert at.by_subtopic(a)[0][1:] == (100, "2", 2)
     assert catalog.subtopic_scores(_uid(), _topic()) == {_sub("D"): 100}
-    assert db.session.scalar(select(ErrorItem.resolved_at)) is not None
+    assert db.session.scalar(select(func.count()).select_from(ErrorItem)) == 0
 
 
 def test_drop_keeps_right_answers_and_last_question(lesson3):

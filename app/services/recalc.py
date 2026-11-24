@@ -10,13 +10,12 @@
 - Arxivlangan urinishlar ham qayta hisoblanadi.
 """
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import delete, or_, select
 
 from ..extensions import db
-from ..models import AttemptItem, ErrorItem, QuestionVersion, TestAttempt
-from . import archive, progress, scoring, seen
+from ..models import AttemptItem, ErrorItem, TestAttempt
+from . import archive, progress, scoring, seen, versions
 from . import attempts as at
 
 
@@ -35,7 +34,7 @@ def _attempts(question_id: int) -> list[TestAttempt]:
         select(TestAttempt).where(or_(
             (TestAttempt.status == "in_progress") & has,
             (TestAttempt.status == "submitted") & TestAttempt.user_id.in_(seen.given_to(question_id))
-            & or_(TestAttempt.items_archive.is_not(None), has)))
+            & or_(archive.may_have(question_id), has)))
         .order_by(TestAttempt.id).with_for_update().execution_options(populate_existing=True)))
 
 
@@ -51,8 +50,7 @@ def _walk(question_id: int):
 def regrade(question_id: int, answer: dict, qtype: str, data: dict, version: int | None = None) -> list[Change]:
     """answer — yangi kalit; data — variantlar (boshqa variantli versiyalarga tegilmaydi); version — yangi versiya raqami.
     Commit qilmaydi."""
-    old = {v: s for v, s in db.session.execute(select(QuestionVersion.version, QuestionVersion.snapshot)
-                                               .where(QuestionVersion.question_id == question_id))}
+    old = versions.all_of(question_id)
     keys = ("options", "left", "right")
     same = {v for v, s in old.items() if s.get("type") == qtype
             and all((s.get("data") or {}).get(k) == (data or {}).get(k) for k in keys)}
@@ -110,9 +108,8 @@ def _apply(a: TestAttempt, items: list, out: list[Change], resolved: int | None)
     if a.items_archive is not None:
         a.items_archive = archive.pack(items)
     if resolved:
-        db.session.execute(update(ErrorItem).where(ErrorItem.user_id == a.user_id, ErrorItem.question_id == resolved,
-                                                   ErrorItem.resolved_at.is_(None))
-                           .values(resolved_at=datetime.now(timezone.utc)).execution_options(synchronize_session=False))
+        db.session.execute(delete(ErrorItem).where(ErrorItem.user_id == a.user_id, ErrorItem.question_id == resolved)
+                           .execution_options(synchronize_session=False))
     db.session.flush()
     progress.upgrade(a, items, snaps, old)
     out.append(Change(a.id, a.user_id, old, a.score_pct))

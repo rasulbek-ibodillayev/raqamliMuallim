@@ -38,8 +38,8 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   matn, `data` JSONB (variantlar, kod, rasm, jadval, juftliklar), `answer` JSONB, izoh, manba
   (`expert`/`import`/`ai`/`template`), holat (`draft`, `review`, `approved`, `paused`, `archived`), versiya.
   6.1 kelgach moslashtiriladi.
-- **Versiyalar.** `questions` joriy holatni saqlaydi, har tahrir `question_versions`ga to'liq
-  nusxa (JSONB) sifatida yoziladi. `attempt_items` va `objections` savolning aniq versiyasiga ishora qiladi.
+- **Versiyalar.** `questions` joriy holatni saqlaydi; joriy versiyaning `question_versions.snapshot`i NULL, tahrirda avvalgi
+  holat to'liq nusxa (JSONB) bo'lib yoziladi (`app/services/versions.py`). `attempt_items` va `objections` savolning aniq versiyasiga ishora qiladi.
 - **attempt_items ixcham.** Bu eng katta jadval bo'ladi, shuning uchun:
   - alohida `id` yo'q: kalit `(attempt_id, position)`;
   - savol matni nusxalanmaydi, faqat `(question_id, question_version)` havolasi saqlanadi;
@@ -48,8 +48,8 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   - ball `smallint` turida, 0–100 foiz (`float8` o'rniga);
   - `question_id` bo'yicha alohida indeks yo'q.
 
-  Test (bosqich) tugagach javobda faqat `v` qoladi. 12 oydan eski urinish qatorlari `test_attempts.items_archive`ga
-  (zlib + JSON) siqiladi: `flask eski-testlarni-siqish`. Natija sahifasi, e'tiroz va foizlar arxivdan ham o'qiydi
+  Test (bosqich) tugagach javobda faqat `v` qoladi. 7 kundan eski urinish qatorlari `test_attempts.items_archive`ga
+  (ixcham ikkilik format) o'tadi: foydalanuvchi yangi test boshlaganda yoki `flask eski-testlarni-siqish`. Natija sahifasi, e'tiroz va foizlar arxivdan ham o'qiydi
   (`app/services/archive.py`, `rows`). Bekor qilingan test qatorlari darhol o'chadi.
 - **Savol identifikatorlari 4 baytli.** `questions.id` va unga havola qiluvchi barcha ustunlar `integer`
   (`question_versions`, `attempt_items`, `objections`, `discussions`, `error_items`).
@@ -80,5 +80,5 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   rad etmaydi; vaqtni pleyer hisoblaydi va tugaganda testni o'zi yakunlaydi.
 - **Oflayn sinxronlash.** `test_attempts.client_uuid`: IndexedDB'dan qayta yuborilgan javoblar ikki marta yozilmaydi.
 - **Attestatsiya sanasi** `users.exam_date`da, uni admin kiritadi.
-- **Vektor o'lchami** 768, `app/models/ai.py`dagi `EMBED_DIM`. `text-embedding-004` 2026-01-14 da o'chirilgan: 13-bosqichda `gemini-embedding-2` va `halfvec`ga o'tadi.
+- **Vektor** `halfvec(768)` (`app/models/_vector.py`, numpy'siz), `gemini-embedding-2`. `text-embedding-004` 2026-01-14 da o'chirilgan.
 - **Holat/tur maydonlari** Postgres ENUM emas, `String` + `CHECK` cheklovi: qiymat qo'shish oddiy migratsiya bilan bo'ladi.

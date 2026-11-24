@@ -70,7 +70,6 @@ def make(subtopic_id: int, n: int, difficulty: str | None = None, types=None) ->
             break
     db.session.add_all(made)
     db.session.flush()
-    db.session.add_all([QuestionVersion(question_id=q.id, version=1, change_note="template", snapshot={
-        k: getattr(q, k) for k in ("type", "difficulty", "text", "data", "answer", "explanation")}) for q in made])
+    db.session.add_all([QuestionVersion(question_id=q.id, version=1, change_note="template") for q in made])
     db.session.flush()
     return made

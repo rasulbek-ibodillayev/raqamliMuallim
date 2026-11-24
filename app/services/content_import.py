@@ -229,6 +229,5 @@ def _load_questions(sub: Subtopic, questions: list, status: str, report: Report)
                        status="review" if source == "ai" else status, time_limit_s=q.get("time_limit_s"))
         db.session.add(row)
         db.session.flush()
-        snapshot = {k: getattr(row, k) for k in ("type", "difficulty", "text", "data", "answer", "explanation")}
-        db.session.add(QuestionVersion(question_id=row.id, version=1, snapshot=snapshot, change_note="import"))
+        db.session.add(QuestionVersion(question_id=row.id, version=1, change_note="import"))
         report.created["questions"] += 1

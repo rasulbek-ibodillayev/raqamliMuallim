@@ -65,7 +65,8 @@ class QuestionVersion(db.Model):
     id: Mapped[int] = pk()
     question_id: Mapped[int] = mapped_column(QID, ForeignKey("questions.id", ondelete="CASCADE"))
     version: Mapped[int] = mapped_column(Integer)
-    snapshot: Mapped[dict] = mapped_column(JSONB)       # type, difficulty, text, data, answer, explanation
+    # Eski versiyalarning nusxasi; joriy versiyada NULL — questions qatorining o'zi (services/versions.py)
+    snapshot: Mapped[dict | None] = mapped_column(JSONB(none_as_null=True))
     changed_by: Mapped[int | None] = mapped_column(PK, ForeignKey("users.id", ondelete="SET NULL"))
     change_note: Mapped[str | None] = mapped_column(String(300))
     created_at: Mapped[datetime] = created_at()

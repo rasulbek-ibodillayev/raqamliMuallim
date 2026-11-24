@@ -97,8 +97,8 @@ def _mastered(user_id: int, limit: int | None = None) -> list[int]:
 
 def weak_subtopics(user_id: int, topic_id: int | None = None) -> list[int]:
     """Tuzatilmagan xatolari bor kichik mavzular, eng ko'p xatodan boshlab."""
-    q = (select(ErrorItem.subtopic_id).where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
-         .group_by(ErrorItem.subtopic_id).order_by(func.sum(ErrorItem.wrong_count).desc(), ErrorItem.subtopic_id))
+    q = (select(ErrorItem.subtopic_id).where(ErrorItem.user_id == user_id)
+         .group_by(ErrorItem.subtopic_id).order_by(func.count().desc(), ErrorItem.subtopic_id))
     if topic_id:
         q = q.join(Subtopic, Subtopic.id == ErrorItem.subtopic_id).where(Subtopic.topic_id == topic_id)
     return list(db.session.scalars(q))

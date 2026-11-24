@@ -8,7 +8,7 @@ from ..extensions import db
 from ..models import (AttemptItem, ContentBlock, ErrorItem, Question, Section, Subtopic, TestAttempt, Topic,
                       UserTopicProgress)
 from .archive import rows as rows_of
-from .archive import unpack
+from .archive import scan
 from .timefmt import when
 
 SOLID_MIN = 90
@@ -52,19 +52,18 @@ def diagnostic_estimate() -> tuple[int, int]:
 
 def error_items(user_id: int, limit: int = 50) -> tuple[list[dict], int]:
     """Tuzatilmagan xatolar, yangisi birinchi: ([{"q", "section", "meta", "rep", "rid"}], jami soni)."""
-    base = select(ErrorItem).where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
-    total = db.session.scalar(select(func.count()).select_from(base.subquery()))
+    total = db.session.scalar(select(func.count()).select_from(ErrorItem).where(ErrorItem.user_id == user_id))
     # «Qayta xato»: savol takrorlanmaydi, shuning uchun shu kichik mavzuda nechta testda xato qilingani sanaladi
     times = (select(ErrorItem.subtopic_id, func.count(ErrorItem.last_attempt_id.distinct()).label("n"))
-             .where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None)).group_by(ErrorItem.subtopic_id).subquery())
+             .where(ErrorItem.user_id == user_id).group_by(ErrorItem.subtopic_id).subquery())
     rows = db.session.execute(
         select(Question.text, Subtopic.title, Topic.title, func.greatest(times.c.n, 1), ErrorItem.last_wrong_at,
                ErrorItem.last_attempt_id)
         .join(times, times.c.subtopic_id == ErrorItem.subtopic_id)
         .join(Question, Question.id == ErrorItem.question_id).join(Subtopic, Subtopic.id == ErrorItem.subtopic_id)
         .join(Topic, Topic.id == Subtopic.topic_id)
-        .where(ErrorItem.user_id == user_id, ErrorItem.resolved_at.is_(None))
-        .order_by(ErrorItem.last_wrong_at.desc(), ErrorItem.id.desc()).limit(limit)).all()
+        .where(ErrorItem.user_id == user_id)
+        .order_by(ErrorItem.last_wrong_at.desc(), ErrorItem.question_id.desc()).limit(limit)).all()
     return [{"q": text, "section": f"{top} · {sub}", "rep": n > 1, "when": when(at_), "wrong": n, "rid": rid}
             for text, sub, top, n, at_, rid in rows], total
 
@@ -140,10 +139,10 @@ def subtopic_scores(user_id: int, topic_id: int) -> dict[int, int]:
     if old:
         sub_of = dict(db.session.execute(select(Question.id, Question.subtopic_id).join(Subtopic)
                                          .where(Subtopic.topic_id == topic_id)).all())
-        for i in (i for blob in old for i in unpack(blob)):
-            if i.score is not None and i.question_id in sub_of:
-                s = acc.setdefault(sub_of[i.question_id], [0, 0])
-                s[0] += i.score
+        for qid, _ver, _sec, score, _v in (x for blob in old for x in scan(blob)):
+            if score is not None and qid in sub_of:
+                s = acc.setdefault(sub_of[qid], [0, 0])
+                s[0] += score
                 s[1] += 1
     return {sid: round(total / n) for sid, (total, n) in acc.items()}
 
