@@ -32,9 +32,14 @@ def is_new(user_id: int):
     return unseen & Question.id.not_in(reserved)
 
 
+def given_to(question_id: int):
+    """Savol berilgan foydalanuvchilar (SELECT). attempt_items'da question_id indeksi yo'q — qidiruv shu bilan torayadi."""
+    return select(UserSeen.user_id).where(
+        case((func.length(UserSeen.bits) * 8 > question_id, func.get_bit(UserSeen.bits, question_id) == 1), else_=False))
+
+
 def ever_given(question_id: int) -> bool:
     """Savol birorta foydalanuvchiga berilganmi (arxivlangan urinishlar ham hisobga olinadi)."""
-    given = case((func.length(UserSeen.bits) * 8 > question_id, func.get_bit(UserSeen.bits, question_id) == 1), else_=False)
     item = select(AttemptItem.attempt_id).where(AttemptItem.question_id == question_id).limit(1)
     return (db.session.scalar(item) is not None
-            or db.session.scalar(select(UserSeen.user_id).where(given).limit(1)) is not None)
+            or db.session.scalar(given_to(question_id).limit(1)) is not None)

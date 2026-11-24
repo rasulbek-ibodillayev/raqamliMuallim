@@ -35,7 +35,8 @@
         subtopic: {{ (i.subtopic or '')|string|tojson|forceescape }},
         level: {{ (i.level or 'O‘rta')|tojson|forceescape }}, kind: {{ (i.kind or 'yopiq')|tojson|forceescape }},
         fmt: {{ (i.fmt or 'matn')|tojson|forceescape }}, text: {{ (i.text or '')|tojson|forceescape }},
-        opts: {{ (i.opts or ['', '', '', ''])|tojson|forceescape }}, right: {{ (i.right or [0])|tojson|forceescape }},
+        opts: {{ (i.opts or ['', '', '', ''])|tojson|forceescape }}, notes: {{ (i.notes or ['', '', '', ''])|tojson|forceescape }},
+        withNotes: {{ 'true' if i.notes and i.notes|select|list else 'false' }}, right: {{ (i.right or [0])|tojson|forceescape }},
         pairs: {{ (i.pairs or [['', ''], ['', ''], ['', '']])|tojson|forceescape }},
         rows: {{ (i.table|length if i.table else 3) }}, cols: {{ (i.table[0]|length if i.table else 3) }},
         cells: {{ (i.table or [])|tojson|forceescape }}, img: {{ (url_for('static', filename=i.image) if i.image else '')|tojson|forceescape }},
@@ -94,6 +95,8 @@
         <div class="field"><label class="label" for="e-text">{{ _("Savol matni") }}</label>
           <textarea class="textarea" id="e-text" name="text" x-model="text" maxlength="3000" aria-describedby="text-err" @input="clear('text')" placeholder="{{ _('Masalan: 101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.') }}"></textarea>
           {{ field_error("text", errors) }}</div>
+        <details class="field" {{ 'open' if i.code }}><summary class="label pointer">{{ _("Kod (ixtiyoriy)") }}</summary>
+          <textarea class="textarea textarea-code" name="code" maxlength="5000" spellcheck="false" aria-label="{{ _('Kod') }}" placeholder="x = 5">{{ i.code or '' }}</textarea></details>
 
         <div class="field" x-show="fmt === 'rasm'" x-cloak><label class="label" for="e-img">{{ _("Rasm") }}</label>
           <input class="input" id="e-img" name="image" type="file" accept="image/*" @change="preview($event)">
@@ -107,8 +110,9 @@
 
         <div class="field" x-show="fmt === 'jadval'" x-cloak><span class="label">{{ _("Jadval") }}</span>
           <div class="row row-sm small">
-            <label>{{ _("Qator") }} <input class="input-num input num" type="number" min="1" max="10" x-model.number="rows" name="rows"></label>
+            <label>{{ _("Qator") }} <input class="input-num input num" type="number" min="1" max="12" x-model.number="rows" name="rows"></label>
             <label>{{ _("Ustun") }} <input class="input-num input num" type="number" min="1" max="8" x-model.number="cols" name="cols"></label>
+            <label class="check"><input type="checkbox" name="table_head" value="1" {{ 'checked' if i.table_head }}><span>{{ _("Birinchi qator — sarlavha") }}</span></label>
           </div>
           <div class="table-wrap"><table class="table q-grid"><tbody>
             <template x-for="r in rows" :key="r"><tr><template x-for="c in cols" :key="c"><td><input class="input" :name="'cell_' + r + '_' + c" :value="cell(r, c)" :aria-label="r + '-qator, ' + c + '-ustun'"></td></template></tr></template>
@@ -120,17 +124,19 @@
         <template x-if="kind === 'yopiq' || kind === 'kop'"><div class="stack stack-sm">
           <span class="label" x-text="kind === 'kop' ? {{ _('Javob variantlari · to‘g‘rilarini belgilang (bir nechta)')|tojson|forceescape }} : {{ _('Javob variantlari · to‘g‘risini belgilang (bitta)')|tojson|forceescape }}"></span>
           <template x-for="(o, i) in opts" :key="i">
-            <div class="row row-sm">
+            <div class="row row-sm opt-row">
               <label class="opt-mark" :class="right.includes(i) && 'on'">
                 <input class="sr-only" :type="kind === 'kop' ? 'checkbox' : 'radio'" name="right" :value="i" :checked="right.includes(i)" @change="mark(i); clear('opt')">
                 <svg class="ico"><use :href="right.includes(i) ? '#i-check-circle' : '#i-target'"/></svg>
               </label>
               <span class="strong small u-w-16" x-text="'ABCDEF'[i]"></span>
               <input class="input grow" name="opt" x-model="opts[i]" :aria-label="'Variant ' + 'ABCDEF'[i]" @input="clear('opt')">
-              <button class="icon-btn" type="button" x-show="opts.length > 2" @click="opts.splice(i, 1); right = right.filter(x => x !== i).map(x => x > i ? x - 1 : x)" aria-label="{{ _('Variantni o‘chirish') }}">{{ icon("x", "ico-sm") }}</button>
+              <input class="input grow opt-note" name="opt_note" x-show="withNotes" x-model="notes[i]" maxlength="500" placeholder="{{ _('Izoh: nega to‘g‘ri yoki noto‘g‘ri') }}" :aria-label="'Izoh ' + 'ABCDEF'[i]">
+              <button class="icon-btn" type="button" x-show="opts.length > 2" @click="opts.splice(i, 1); notes.splice(i, 1); right = right.filter(x => x !== i).map(x => x > i ? x - 1 : x)" aria-label="{{ _('Variantni o‘chirish') }}">{{ icon("x", "ico-sm") }}</button>
             </div>
           </template>
-          <button class="self-start btn btn-ghost btn-sm" type="button" x-show="opts.length < 6" @click="opts.push('')">{{ icon("plus", "ico-sm") }}{{ _("Variant qo‘shish") }}</button>
+          <button class="self-start btn btn-ghost btn-sm" type="button" x-show="opts.length < 6" @click="opts.push(''); notes.push('')">{{ icon("plus", "ico-sm") }}{{ _("Variant qo‘shish") }}</button>
+          <label class="check small"><input type="checkbox" x-model="withNotes"><span>{{ _("Har bir variantga izoh yozish (testdan keyin «Yechimini ko‘rish»da chiqadi)") }}</span></label>
         </div></template>
 
         <template x-if="kind === 'moslash'"><div class="stack stack-sm">

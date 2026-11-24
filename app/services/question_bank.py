@@ -12,11 +12,11 @@ Qoidalar:
 from dataclasses import dataclass
 
 from flask import has_request_context, request
-from sqlalchemy import func, select
+from sqlalchemy import func, select, true
 
 from ..extensions import db
 from ..models import AuditLog, Question, QuestionVersion, Section, Subtopic, Topic
-from . import seen
+from . import notify, recalc, seen
 from .content_import import check_question
 
 PAGE = 20
@@ -43,7 +43,7 @@ def _snapshot(q: Question) -> dict:
 
 # ---------------- Kontent daraxti ----------------
 
-def content_tree() -> list[dict]:
+def content_tree(areas: set[int] | None = None) -> list[dict]:
     """[{"id", "name", "lessons": [{"id", "name", "questions", "subtopics": [{"id", "name"}]}]}] — tanlovlar uchun."""
     counts = dict(db.session.execute(
         select(Subtopic.topic_id, func.count(Question.id)).join(Question, Question.subtopic_id == Subtopic.id)
@@ -51,6 +51,7 @@ def content_tree() -> list[dict]:
     rows = db.session.execute(
         select(Section.id, Section.title, Topic.id, Topic.title, Subtopic.id, Subtopic.title)
         .join(Topic, Topic.section_id == Section.id).join(Subtopic, Subtopic.topic_id == Topic.id)
+        .where(Section.id.in_(areas) if areas is not None else true())
         .order_by(Section.position, Section.id, Topic.position, Topic.id, Subtopic.position, Subtopic.id)).all()
     tree: dict[int, dict] = {}
     for sid, sname, tid, tname, uid, uname in rows:
@@ -94,12 +95,15 @@ def _apply(stmt, f: Filters):
     return stmt
 
 
-def list_questions(f: Filters, page: int = 1, *, source: str | None = None, status: str | None = None):
+def list_questions(f: Filters, page: int = 1, *, source: str | None = None, status: str | None = None,
+                   areas: set[int] | None = None):
     """→ (sahifadagi qatorlar, topilganlar soni, sahifalar soni). Arxivlangan savollar faqat holat=archived filtrida."""
     base = (select(Question, Subtopic.title, Topic.title, Section.title)
             .join(Subtopic, Question.subtopic_id == Subtopic.id).join(Topic, Subtopic.topic_id == Topic.id)
             .join(Section, Topic.section_id == Section.id))
     base = _apply(base, f)
+    if areas is not None:
+        base = base.where(Section.id.in_(areas))
     st = status or (f.holat if f.holat in STATUSES else None)
     base = base.where(Question.status == st) if st else base.where(Question.status != "archived")
     if source:
@@ -134,7 +138,7 @@ def _options(q: Question) -> dict:
             "right": list(range(len(left)))}
 
 
-def shortage() -> list[dict]:
+def shortage(areas: set[int] | None = None) -> list[dict]:
     """Tasdiqlangan savollari yetarli bo'lmagan kichik mavzular: har bir daraja bo'yicha < MIN_RATIO × weight."""
     approved = select(Question.subtopic_id, Question.difficulty, func.count().label("n")) \
         .where(Question.status == "approved").group_by(Question.subtopic_id, Question.difficulty).subquery()
@@ -143,7 +147,8 @@ def shortage() -> list[dict]:
                func.coalesce(func.min(approved.c.n), 0), func.count(approved.c.difficulty))
         .join(Topic, Subtopic.topic_id == Topic.id)
         .outerjoin(approved, approved.c.subtopic_id == Subtopic.id)
-        .where(Subtopic.weight > 0, Topic.is_published.is_(True))
+        .where(Subtopic.weight > 0, Topic.is_published.is_(True),
+               Topic.section_id.in_(areas) if areas is not None else true())
         .group_by(Subtopic.id, Subtopic.title, Topic.title, Subtopic.weight)).all()
     need = len(LEVEL_TO_DIFF)
     return [{"id": sid, "name": name, "topic": topic, "need": MIN_RATIO * w}
@@ -158,7 +163,8 @@ class FormError(ValueError):
         self.errors = errors
 
 
-def save(payload: dict, actor_id: int, question_id: int | None = None, status: str = "approved") -> Question:
+def save(payload: dict, actor_id: int, question_id: int | None = None, status: str = "approved", *,
+         commit: bool = True) -> Question:
     """payload: subtopic_id, type, difficulty, text, data, answer, explanation, time_limit_s. Tekshiradi va yozadi.
     Yangi savol — 1-versiya; tahrir — o'zgargan bo'lsa versiya +1."""
     errs = check_question(payload)
@@ -195,7 +201,8 @@ def save(payload: dict, actor_id: int, question_id: int | None = None, status: s
         db.session.add(QuestionVersion(question_id=q.id, version=q.version, snapshot=_snapshot(q), changed_by=actor_id,
                                        change_note=action))
     audit(actor_id, action, q.id, {"before": before, "after": _snapshot(q), "status": q.status})
-    db.session.commit()
+    if commit:
+        db.session.commit()
     return q
 
 
@@ -210,7 +217,8 @@ def archive(question_id: int, actor_id: int) -> bool:
 
 
 def reject(question_id: int, actor_id: int) -> bool:
-    """AI savolini rad etish: hech kimga berilmagan bo'lsa o'chiriladi, berilgan bo'lsa arxivlanadi."""
+    """AI savolini rad etish: hech kimga berilmagan bo'lsa o'chiriladi; berilgan bo'lsa arxivlanadi, natijalardan
+    chiqariladi va savol berilgan foydalanuvchilarga bildirishnoma boradi (eski va yangi foiz bilan)."""
     q = db.session.get(Question, question_id)
     if q is None or q.source != "ai" or q.status != "review":
         return False
@@ -218,6 +226,8 @@ def reject(question_id: int, actor_id: int) -> bool:
     audit(actor_id, "reject", q.id, {"before": _snapshot(q)})
     if used:
         q.status = "archived"
+        for c in recalc.drop(q.id):
+            notify.add(c.user_id, notify.DROPPED, c.attempt_id, c.old, c.new)
     else:
         db.session.delete(q)   # question_versions ON DELETE CASCADE
     db.session.commit()
@@ -234,10 +244,13 @@ def get(question_id: int) -> Question | None:
 #   ko'p javobli — A..F variantlar, «To'g'ri javob»: harflar vergul bilan (A, C);
 #   moslashtirish — A..F kataklarda «atama = ta'rif» juftliklari, «To'g'ri javob» bo'sh;
 #   ochiq — variantlar bo'sh, «To'g'ri javob»: javob; boshqa yozilishlari «;» bilan (45; qirq besh).
+# «Qo'shimcha» — eksportda kod, jadval yoki rasm borligini bildiradi: bunday qatorlar importda o'tkazib yuboriladi (Excel'da
+# to'liq ifodalanmaydi). Bazada aynan bor savol ham o'tkaziladi: eksport qilingan faylni qayta yuklash takrorlamaydi.
 # Fayl to'liq tekshiriladi: bitta qatorda xato bo'lsa ham hech narsa yozilmaydi.
 EXCEL_HEAD = ["Mavzu", "Dars", "Kichik mavzu", "Qiyinlik", "Savol turi", "Savol matni",
-              "A", "B", "C", "D", "E", "F", "To‘g‘ri javob", "Vaqt (soniya)", "Izoh"]
-EXCEL_WIDTHS = [22, 24, 22, 10, 16, 48, 18, 18, 18, 18, 12, 12, 14, 12, 36]
+              "A", "B", "C", "D", "E", "F", "To‘g‘ri javob", "Vaqt (soniya)", "Izoh", "Qo‘shimcha"]
+EXCEL_WIDTHS = [22, 24, 22, 10, 16, 48, 18, 18, 18, 18, 12, 12, 14, 12, 36, 16]
+EXPORT_MAX = 5000
 _LETTERS = "ABCDEF"
 
 
@@ -271,15 +284,17 @@ def excel_sample() -> bytes:
     return xlsx.write(rows, widths=EXCEL_WIDTHS)
 
 
-def _subtopic_index() -> dict[tuple[str, str, str], int]:
+def _subtopic_index(areas: set[int] | None = None) -> dict[tuple[str, str, str], int]:
     return {(_norm(s["name"]), _norm(l["name"]), _norm(u["name"])): u["id"]
-            for s in content_tree() for l in s["lessons"] for u in l["subtopics"]}
+            for s in content_tree(areas) for l in s["lessons"] for u in l["subtopics"]}
 
 
 def _excel_payload(row: list[str], subs: dict) -> tuple[dict | None, str | None]:
     row = (row + [""] * len(EXCEL_HEAD))[:len(EXCEL_HEAD)]
     sec, les, sub, level, kind, text = row[:6]
-    opts, right, time_s, why = row[6:12], row[12], row[13], row[14]
+    opts, right, time_s, why, extra = row[6:12], row[12], row[13], row[14], row[15]
+    if extra:
+        return None, None
     sid = subs.get((_norm(sec), _norm(les), _norm(sub)))
     if sid is None:
         return None, "mavzu, dars yoki kichik mavzu bazada topilmadi"
@@ -328,8 +343,54 @@ def _excel_payload(row: list[str], subs: dict) -> tuple[dict | None, str | None]
     return (None, errs[0]) if errs else (payload, None)
 
 
-def import_excel(data: bytes, actor_id: int) -> tuple[int, list[str]]:
-    """Excel fayldagi savollarni bankka qo'shadi. Natija: (qo'shilganlar soni, xatolar). Xato bo'lsa hech narsa yozilmaydi."""
+def _identity(type_: str, data: dict, answer: dict):
+    """Savolni bir xil deb hisoblash uchun: turi, variantlari yoki juftliklari (o'ng ustun tartibi ahamiyatsiz), kodi, jadvali."""
+    d = data or {}
+    pairs = sorted((x, d["right"][r]) for x, r in zip(d.get("left", []), answer.get("pairs", []))) if type_ == "matching" else None
+    return type_, d.get("options"), pairs, *(d.get(k) for k in ("code", "table", "image", "diagram"))
+
+
+def _exists(p: dict) -> bool:
+    new = _identity(p["type"], p["data"], p["answer"])
+    return any(_identity(t, d, a) == new for t, d, a in db.session.execute(
+        select(Question.type, Question.data, Question.answer).where(
+            Question.subtopic_id == p["subtopic_id"], Question.text == p["text"], Question.status != "archived")))
+
+
+def export_excel(f: Filters, areas: set[int] | None = None) -> bytes:
+    """Filtrdagi savollar, import formatida (EXPORT_MAX tagacha)."""
+    from . import xlsx
+    q = (select(Question, Subtopic.title, Topic.title, Section.title)
+         .join(Subtopic, Question.subtopic_id == Subtopic.id).join(Topic, Subtopic.topic_id == Topic.id)
+         .join(Section, Topic.section_id == Section.id))
+    q = _apply(q, f).where(Question.status == f.holat if f.holat in STATUSES else Question.status != "archived")
+    if areas is not None:
+        q = q.where(Section.id.in_(areas))
+    q = q.order_by(Section.position, Section.id, Topic.position, Topic.id, Subtopic.position, Subtopic.id, Question.id)
+    names = {"yopiq": "yopiq", "kop": "ko‘p javobli", "moslash": "moslashtirish", "ochiq": "ochiq"}
+    rows = [EXCEL_HEAD]
+    for x, sub, top, sec in db.session.execute(q.limit(EXPORT_MAX)):
+        d, a = x.data or {}, x.answer or {}
+        kind, opts, right = TYPE_TO_KIND[x.type], [], ""
+        if kind in ("yopiq", "kop"):
+            opts = d.get("options", [])
+            right = ", ".join(_LETTERS[i] if i < len(_LETTERS) else str(i + 1) for i in a.get("keys", []))
+        elif kind == "moslash":
+            opts = [f"{left} = {d['right'][r]}" for left, r in zip(d.get("left", []), a.get("pairs", []))]
+        else:
+            right = "; ".join([a.get("value", ""), *a.get("accept", [])])
+        extra = [label for key, label in (("code", "kod"), ("table", "jadval"), ("image", "rasm"), ("diagram", "chizma")) if d.get(key)]
+        if len(opts) > len(_LETTERS):
+            extra.append("6 tadan ko‘p variant")
+        opts = (opts + [""] * len(_LETTERS))[:len(_LETTERS)]
+        rows.append([sec, top, sub, DIFF_TO_LEVEL[x.difficulty], names[kind], x.text, *opts, right,
+                     str(x.time_limit_s or 60), x.explanation or "", ", ".join(extra)])
+    return xlsx.write(rows, widths=EXCEL_WIDTHS)
+
+
+def import_excel(data: bytes, actor_id: int, areas: set[int] | None = None) -> tuple[int, list[str]]:
+    """Excel fayldagi savollarni bankka qo'shadi. Natija: (qo'shilganlar soni, xatolar). Xato bo'lsa hech narsa yozilmaydi.
+    Bazada bor savollar o'tkazib yuboriladi."""
     from . import xlsx
     try:
         rows = xlsx.read_rows(data)
@@ -340,13 +401,13 @@ def import_excel(data: bytes, actor_id: int) -> tuple[int, list[str]]:
     numbered = [(n, r) for n, r in enumerate(rows, start=2) if any(c for c in r)]
     if not numbered:
         return 0, ["Faylda savol topilmadi"]
-    subs = _subtopic_index()
+    subs = _subtopic_index(areas)
     payloads, errors = [], []
     for n, row in numbered:
         p, err = _excel_payload(row, subs)
         if err:
             errors.append(f"{n}-qator: {err}")
-        else:
+        elif p is not None and not _exists(p):
             payloads.append(p)
     if errors:
         return 0, errors[:20] + ([f"… yana {len(errors) - 20} ta xato"] if len(errors) > 20 else [])

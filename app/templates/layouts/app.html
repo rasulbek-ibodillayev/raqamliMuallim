@@ -7,7 +7,8 @@
 {% endblock %}
 {% from "_ui.html" import icon %}
 {% set ep = request.endpoint %}
-{% set unread = notifications | selectattr("unread") | list | length %}
+{% set notes_list = notifications() %}
+{% set unread = notes_list | selectattr("unread") | list | length %}
 {% block body %}
 <canvas class="ai-bg" data-density=".6" aria-hidden="true"></canvas>
 <script nonce="{{ csp_nonce }}">window.RM_SEARCH = {{ search_index()|tojson }};</script>
@@ -74,10 +75,11 @@
   <div id="notif-pop" class="notif-pop" x-show="notif" x-cloak x-transition.origin.top.right @click.outside="notif = false" role="dialog" aria-label="{{ _('Bildirishnomalar') }}">
     <div class="row between u-p-14-16-12">
       <span class="strong">{{ _("Bildirishnomalar") }}</span>
-      <button class="link small u-bg-none u-b-0 u-cur-pointer" type="button" @click="seen = true">{{ _("Hammasini o‘qilgan deb belgilash") }}</button>
+      <button class="link small u-bg-none u-b-0 u-cur-pointer" type="button" x-show="{{ 'true' if unread else 'false' }} && !seen" @click="seen = true; rmMarkSeen({{ url_for('user.notifications_seen')|tojson|forceescape }})">{{ _("Hammasini o‘qilgan deb belgilash") }}</button>
     </div>
-    {% for n in notifications %}
-    <a class="notif {{ 'unread' if n.unread }}" :class="seen && 'read'" href="{{ url_for(n.endpoint) }}">
+    {% if not notes_list %}<p class="small muted center u-p-12">{{ _("Yangi bildirishnoma yo‘q") }}</p>{% endif %}
+    {% for n in notes_list %}
+    <a class="notif {{ 'unread' if n.unread }}" :class="seen && 'read'" href="{{ n.url }}">
       <span class="list-ico">{{ icon(n.icon, "ico-sm") }}</span>
       <span class="grow"><span class="d-block strong small">{{ n.title }}</span><span class="d-block small muted">{{ n.text }}</span><span class="when">{{ n.when }}</span></span>
       {% if n.unread %}<span class="mt-6 dot dot-blue" x-show="!seen"></span>{% endif %}

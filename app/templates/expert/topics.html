@@ -1,15 +1,14 @@
 {% extends "layouts/panel.html" %}
 {% block title %}{{ _("Mavzular va darslar") }}{% endblock %}
 {% block heading %}{{ _("Mavzular va darslar") }}{% endblock %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/content-editor.js') }}"></script>{% endblock %}
 {% block content %}
 {#
-  Ekspert avval mavzu yaratadi, so'ng mavzuni tanlab, uning ichida istalgancha dars yaratadi.
-  Dars: matn, rasm, jadval, video va chizma bloklari + qo'shimcha havolalar. Mavzu, dars va bloklarni tahrirlash/o'chirish.
-  Yaratilgan mavzu va darslar savollar bankidagi filtrlarga avtomatik qo'shiladi.
-  Namunada o'zgarishlar brauzerda saqlanadi (rm-expert-content); backendda /api/kontent ga yoziladi.
+  Mavzu (sections) → dars (topics) → kichik mavzu (subtopics) → bloklar. Servis: services/content_editor.py.
+  Dars butunlay saqlanadi; boshqa ekspert orada saqlagan bo'lsa, xabar chiqadi va hech narsa bosilib ketmaydi.
 #}
-<script nonce="{{ csp_nonce }}">window.RM_CONTENT = {{ content|tojson }}; window.RM_BLOCKS = {{ block_kinds|tojson }};</script>
-<div x-data="rmContentEditor(window.RM_CONTENT)" x-init="init()">
+<script nonce="{{ csp_nonce }}">window.RM_EDITOR = {{ cfg|tojson }};</script>
+<div x-data="rmContentEditor(window.RM_EDITOR)">
   {% call page_head(_("Mavzular va darslar"), _("Avval mavzu yarating, so‘ng uning ichida darslar qo‘shing")) %}
   <button class="btn btn-primary btn-sm" type="button" @click="open('topic-new')" :aria-expanded="mode === 'topic-new'">{{ icon("plus", "ico-sm") }}{{ _("Mavzu yaratish") }}</button>
   {% endcall %}
@@ -21,7 +20,7 @@
            :aria-invalid="!!err" aria-describedby="new-topic-err" @input="err = ''" @keydown.escape="close()">
     <p class="field-error" id="new-topic-err" x-show="err" x-text="err" role="alert"></p>
     <div class="row justify-end"><button class="btn btn-ghost" type="button" @click="close()">{{ _("Bekor qilish") }}</button>
-      <button class="btn btn-primary" type="submit">{{ _("Saqlash") }}</button></div>
+      <button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
   </form>
 
   <div class="split">
@@ -30,7 +29,7 @@
       <div class="input-group"><span class="addon-plain addon">{{ icon("search", "ico-sm") }}</span><input class="input u-minh-40" x-model="q" placeholder="{{ _('Mavzu yoki dars qidirish') }}" aria-label="{{ _('Qidirish') }}"></div>
       <template x-for="t in filtered()" :key="t.id">
         <div class="tree-topic" :class="t.id === sel && 'active'">
-          <button class="tree-item u-w-100p u-b-0 u-bg-none u-cur-pointer u-ta-left" type="button" @click="sel = t.id; lessonId = null" :aria-current="t.id === sel">
+          <button class="tree-item u-w-100p u-b-0 u-bg-none u-cur-pointer u-ta-left" type="button" @click="pick(t.id)" :aria-current="t.id === sel">
             {{ icon("book", "ico-sm faint") }}<span class="grow strong" x-text="t.name"></span><span class="xs muted num" x-text="t.lessons.length + ' {{ _('dars') }}'"></span>
           </button>
         </div>
@@ -41,10 +40,11 @@
 
     <section class="stack" x-show="topic()">
       {# ---- Tanlangan mavzu ---- #}
-      <div class="card card-pad stack stack-sm">
+      <div class="card card-pad stack stack-sm" x-show="!lesson">
         <div class="row between wrap" x-show="mode !== 'topic-edit'">
           <h2 x-text="topic() && topic().name"></h2>
           <div class="row row-sm">
+            <button class="icon-btn" type="button" @click="move('section', sel, -1)" aria-label="{{ _('Yuqoriga') }}">{{ icon("arrow-up", "ico-sm") }}</button>
             <button class="btn btn-ghost btn-sm" type="button" @click="open('topic-edit', topic().name)">{{ icon("edit", "ico-sm") }}{{ _("Tahrirlash") }}</button>
             <button class="btn btn-ghost btn-sm t-red" type="button" @click="open('topic-delete')">{{ icon("trash", "ico-sm") }}{{ _("O‘chirish") }}</button>
           </div>
@@ -54,98 +54,133 @@
           <input class="input" id="edit-topic" x-ref="editTopic" x-model="value" maxlength="120" :aria-invalid="!!err" @input="err = ''" @keydown.escape="close()">
           <p class="field-error" x-show="err" x-text="err" role="alert"></p>
           <div class="row justify-end"><button class="btn btn-ghost" type="button" @click="close()">{{ _("Bekor qilish") }}</button>
-            <button class="btn btn-primary" type="submit">{{ _("Saqlash") }}</button></div>
+            <button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
         </form>
         <div class="alert alert-red" x-show="mode === 'topic-delete'" x-cloak role="alertdialog">
-          {{ icon("alert") }}<span class="grow">{{ _("Mavzu va uning barcha darslari o‘chirilsinmi?") }}</span>
+          {{ icon("alert") }}<span class="grow"><span x-text="err || {{ _('Mavzu va uning barcha darslari o‘chirilsinmi?')|tojson|forceescape }}"></span></span>
           <button class="btn btn-ghost btn-sm" type="button" @click="close()">{{ _("Bekor qilish") }}</button>
-          <button class="btn btn-danger btn-sm" type="button" @click="deleteTopic()">{{ _("O‘chirish") }}</button>
+          <button class="btn btn-danger btn-sm" type="button" x-show="!err" :disabled="busy" @click="deleteTopic()">{{ _("O‘chirish") }}</button>
         </div>
         <p class="small muted"><span x-text="topic() && topic().lessons.length"></span> {{ _("ta dars · savollar bankiga avtomatik qo‘shilgan") }}</p>
       </div>
 
       {# ---- Darslar ro'yxati ---- #}
-      <div class="card list" x-show="!lesson()">
+      <div class="card list" x-show="!lesson">
         <template x-for="(l, i) in (topic() ? topic().lessons : [])" :key="l.id">
-          <div class="list-item">
-            <span class="list-ico strong" x-text="i + 1"></span>
-            <button class="grow u-b-0 u-bg-none u-ta-left u-cur-pointer u-p-0" type="button" @click="lessonId = l.id">
-              <div x-text="l.name"></div><div class="sub" x-text="l.blocks.length + ' {{ _('blok') }} · ' + l.links.length + ' {{ _('havola') }} · ' + (l.questions || 0) + ' {{ _('savol') }}'"></div>
-            </button>
-            <button class="icon-btn" type="button" @click="lessonId = l.id" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</button>
-            <button class="icon-btn" type="button" @click="open('lesson-delete', l.id)" aria-label="{{ _('O‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
-          </div>
-          <div class="list-item alert-inline" x-show="mode === 'lesson-delete' && target === l.id" x-cloak role="alertdialog">
-            <span class="grow small t-red">{{ _("«") }}<span x-text="l.name"></span>{{ _("» darsi o‘chirilsinmi?") }}</span>
-            <button class="btn btn-ghost btn-sm" type="button" @click="close()">{{ _("Bekor qilish") }}</button>
-            <button class="btn btn-danger btn-sm" type="button" @click="deleteLesson(l)">{{ _("O‘chirish") }}</button>
+          <div>
+            <div class="list-item">
+              <span class="list-ico strong" x-text="i + 1"></span>
+              <button class="grow u-b-0 u-bg-none u-ta-left u-cur-pointer u-p-0" type="button" @click="openLesson(l.id)">
+                <div x-text="l.name"></div><div class="sub"><span x-text="l.subs + ' {{ _('kichik mavzu') }} · ' + l.blocks + ' {{ _('blok') }} · ' + l.questions + ' {{ _('savol') }}'"></span><span class="t-yellow" x-show="!l.published"> · {{ _("nashr qilinmagan") }}</span></div>
+              </button>
+              <button class="icon-btn" type="button" :disabled="i === 0" @click="move('topic', l.id, -1)" aria-label="{{ _('Yuqoriga') }}">{{ icon("arrow-up", "ico-sm") }}</button>
+              <button class="icon-btn" type="button" @click="openLesson(l.id)" aria-label="{{ _('Tahrirlash') }}">{{ icon("edit", "ico-sm") }}</button>
+              <button class="icon-btn" type="button" @click="open('lesson-delete', l.id)" aria-label="{{ _('O‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+            </div>
+            <div class="list-item alert-inline" x-show="mode === 'lesson-delete' && target === l.id" x-cloak role="alertdialog">
+              <span class="grow small t-red"><span x-show="!err">{{ _("«") }}<span x-text="l.name"></span>{{ _("» darsi o‘chirilsinmi?") }}</span><span x-text="err"></span></span>
+              <button class="btn btn-ghost btn-sm" type="button" @click="close()">{{ _("Bekor qilish") }}</button>
+              <button class="btn btn-danger btn-sm" type="button" x-show="!err" :disabled="busy" @click="deleteLesson(l)">{{ _("O‘chirish") }}</button>
+            </div>
           </div>
         </template>
         <div class="list-item stack stack-sm u-ai-stretch">
           <button class="btn btn-outline btn-sm u-as-flex-start" type="button" @click="open('lesson-new')" :aria-expanded="mode === 'lesson-new'">{{ icon("plus", "ico-sm") }}{{ _("Dars qo‘shish") }}</button>
-          <form class="card card-pad stack stack-sm inline-card" x-show="mode === 'lesson-new'" x-cloak x-transition @submit.prevent="saveLesson()">
+          <form class="card card-pad stack stack-sm inline-card" x-show="mode === 'lesson-new'" x-cloak x-transition @submit.prevent="addLesson()">
             <div class="row row-sm small"><span class="pk pk-topic">{{ icon("book", "ico-sm") }}{{ _("Mavzu") }}</span><b x-text="topic() && topic().name"></b></div>
             <label class="label" for="new-lesson">{{ _("Yangi dars nomi") }}</label>
             <input class="input" id="new-lesson" x-ref="newLesson" x-model="value" maxlength="120" placeholder="{{ _('Masalan: for sikli') }}"
                    :aria-invalid="!!err" @input="err = ''" @keydown.escape="close()">
             <p class="field-error" x-show="err" x-text="err" role="alert"></p>
             <div class="row justify-end"><button class="btn btn-ghost" type="button" @click="close()">{{ _("Bekor qilish") }}</button>
-              <button class="btn btn-primary" type="submit">{{ _("Saqlash") }}</button></div>
+              <button class="btn btn-primary" type="submit" :disabled="busy">{{ _("Saqlash") }}</button></div>
           </form>
         </div>
       </div>
 
       {# ---- Dars muharriri ---- #}
-      <template x-if="lesson()"><div class="stack">
+      <template x-if="lesson"><div class="stack">
         <div class="card card-pad stack stack-sm">
-          <button class="self-start btn btn-ghost btn-sm u-pl-0" type="button" @click="lessonId = null">{{ icon("arrow-left", "ico-sm") }}{{ _("Darslar ro‘yxati") }}</button>
+          <button class="self-start btn btn-ghost btn-sm u-pl-0" type="button" @click="closeLesson()">{{ icon("arrow-left", "ico-sm") }}{{ _("Darslar ro‘yxati") }}</button>
           <label class="label" for="l-name">{{ _("Dars nomi") }}</label>
-          <input class="input" id="l-name" x-model="lesson().name" @input="persist()">
+          <input class="input" id="l-name" x-model="lesson.name" maxlength="120">
+          <div class="row wrap">
+            <label class="small row row-sm">{{ _("Taxminiy vaqt (daqiqa)") }} <input class="input-num input num" type="number" min="1" max="600" x-model.number="lesson.minutes"></label>
+            <label class="check"><input type="checkbox" x-model="lesson.published"><span>{{ _("O‘qituvchilarga ko‘rinadi (nashr qilingan)") }}</span></label>
+          </div>
         </div>
 
-        <template x-for="(b, i) in lesson().blocks" :key="i">
-          <div class="p-14 card stack stack-sm">
-            <div class="row">
-              <span class="list-ico u-w-32 u-h-32"><svg class="ico ico-sm"><use :href="'#i-' + blockIcon(b.kind)"/></svg></span>
-              <div class="grow"><div class="xs muted" x-text="blockLabel(b.kind) + ' {{ _('bloki') }}'"></div>
-                <input class="input u-minh-36 strong" x-model="b.title" @input="persist()" placeholder="{{ _('Sarlavha') }}" aria-label="{{ _('Blok sarlavhasi') }}"></div>
-              <button class="icon-btn" type="button" @click="move(i, -1)" :disabled="i === 0" aria-label="{{ _('Yuqoriga') }}">{{ icon("arrow-up", "ico-sm") }}</button>
-              <button class="icon-btn" type="button" @click="lesson().blocks.splice(i, 1); persist()" aria-label="{{ _('Blokni o‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+        <template x-for="(s, si) in lesson.subs" :key="s.key">
+          <div class="card card-pad stack stack-sm">
+            <div class="row row-sm">
+              <button class="icon-btn" type="button" @click="s.open = !s.open" :aria-expanded="s.open" aria-label="{{ _('Ochish yoki yopish') }}">{{ icon("chevron-down", "ico-sm") }}</button>
+              <div class="grow"><div class="xs muted"><span x-text="si + 1"></span>-{{ _("kichik mavzu") }} · <span x-text="s.blocks.length + ' {{ _('blok') }} · ' + s.questions + ' {{ _('savol') }}'"></span></div>
+                <input class="input u-minh-40 strong" x-model="s.name" maxlength="120" placeholder="{{ _('Kichik mavzu nomi') }}" aria-label="{{ _('Kichik mavzu nomi') }}"></div>
+              <button class="icon-btn" type="button" @click="swap(lesson.subs, si, -1)" :disabled="si === 0" aria-label="{{ _('Yuqoriga') }}">{{ icon("arrow-up", "ico-sm") }}</button>
+              <button class="icon-btn" type="button" @click="removeSub(si)" :disabled="lesson.subs.length === 1" aria-label="{{ _('Kichik mavzuni o‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
             </div>
-            <textarea class="textarea" x-show="b.kind === 'matn'" x-model="b.body" @input="persist()" placeholder="{{ _('Dars matni…') }}" aria-label="{{ _('Matn') }}"></textarea>
-            <textarea class="textarea textarea-code" x-show="b.kind === 'chizma'" x-model="b.body" @input="persist()" spellcheck="false" placeholder="flowchart TD; A --> B" aria-label="{{ _('Chizma') }}"></textarea>
-            <div x-show="b.kind === 'jadval'" class="stack stack-sm">
-              <textarea class="textarea textarea-code" x-model="b.body" @input="persist()" placeholder="{{ _('Ustun 1 | Ustun 2 (har qator yangi satrda)') }}" aria-label="{{ _('Jadval') }}"></textarea>
-              <div class="table-wrap" x-show="b.body"><table class="table"><tbody>
-                <template x-for="(r, ri) in b.body.split('\n')" :key="ri"><tr><template x-for="(c, ci) in r.split('|')" :key="ci"><td x-text="c.trim()"></td></template></tr></template>
-              </tbody></table></div>
+            <div class="stack" x-show="s.open">
+              <template x-for="(b, i) in s.blocks" :key="b.key">
+                <div class="p-14 card card-flat stack stack-sm">
+                  <div class="row">
+                    <span class="list-ico u-w-32 u-h-32"><svg class="ico ico-sm" aria-hidden="true"><use :href="'#i-' + icon(b.kind)"/></svg></span>
+                    <div class="grow"><div class="xs muted" x-text="label(b.kind) + ' {{ _('bloki') }}'"></div>
+                      <input class="input u-minh-36 strong" x-show="'title' in b.data && known(b.kind)" x-model="b.data.title" maxlength="200" placeholder="{{ _('Sarlavha') }}" aria-label="{{ _('Blok sarlavhasi') }}"></div>
+                    <button class="icon-btn" type="button" @click="swap(s.blocks, i, -1)" :disabled="i === 0" aria-label="{{ _('Yuqoriga') }}">{{ icon("arrow-up", "ico-sm") }}</button>
+                    <button class="icon-btn" type="button" @click="s.blocks.splice(i, 1)" aria-label="{{ _('Blokni o‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+                  </div>
+                  <template x-if="b.kind === 'text' || b.kind === 'callout'"><textarea class="textarea" x-model="b.data.body" placeholder="{{ _('Dars matni…') }}" aria-label="{{ _('Matn') }}"></textarea></template>
+                  <template x-if="b.kind === 'code'"><div class="stack stack-sm">
+                    <textarea class="textarea textarea-code" x-model="b.data.code" spellcheck="false" placeholder="print('salom')" aria-label="{{ _('Kod') }}"></textarea>
+                    <input class="input" x-model="b.data.lang" maxlength="30" placeholder="{{ _('Til: Python, JavaScript, HTML…') }}" aria-label="{{ _('Dasturlash tili') }}"></div></template>
+                  <template x-if="b.kind === 'mermaid'"><div class="stack stack-sm">
+                    <textarea class="textarea textarea-code" x-model="b.data.code" spellcheck="false" placeholder="flowchart TD; A --> B" aria-label="{{ _('Chizma') }}"></textarea>
+                    <input class="input" x-model="b.data.alt" maxlength="300" placeholder="{{ _('Chizma tavsifi (ko‘zi ojizlar uchun)') }}" aria-label="{{ _('Chizma tavsifi') }}"></div></template>
+                  <template x-if="b.kind === 'formula'"><textarea class="textarea textarea-code" x-model="b.data.tex" spellcheck="false" placeholder="N = 2^i" aria-label="{{ _('Formula') }}"></textarea></template>
+                  <template x-if="b.kind === 'table'"><div class="stack stack-sm">
+                    <textarea class="textarea textarea-code" x-model="b.data.body" placeholder="{{ _('Ustun 1 | Ustun 2 (har qator yangi satrda)') }}" aria-label="{{ _('Jadval') }}"></textarea>
+                    <label class="check small"><input type="checkbox" x-model="b.data.head"><span>{{ _("Birinchi qator — sarlavha") }}</span></label>
+                    <div class="table-wrap" x-show="b.data.body"><table class="table"><tbody>
+                      <template x-for="(r, ri) in rows(b.data.body)" :key="ri"><tr><template x-for="(c, ci) in r" :key="ci"><td :class="b.data.head && ri === 0 && 'strong'" x-text="c"></td></template></tr></template>
+                    </tbody></table></div></div></template>
+                  <template x-if="b.kind === 'image'"><div class="stack stack-sm">
+                    <input class="input" type="file" accept="image/png,image/jpeg,image/webp" @change="upload(b, $event)" aria-label="{{ _('Rasm yuklash') }}">
+                    <template x-if="b.data.src"><img class="q-img-preview" :src="src(b.data.src)" alt=""></template>
+                    <input class="input" x-model="b.data.alt" maxlength="300" placeholder="{{ _('Rasm tavsifi (ko‘zi ojizlar uchun)') }}" aria-label="{{ _('Rasm tavsifi') }}">
+                    <input class="input" x-model="b.data.caption" maxlength="300" placeholder="{{ _('Rasm osti yozuvi (ixtiyoriy)') }}" aria-label="{{ _('Rasm osti yozuvi') }}"></div></template>
+                  <template x-if="b.kind === 'video'"><input class="input" type="url" x-model="b.data.url" placeholder="https://… ({{ _('YouTube yoki video fayl havolasi') }})" aria-label="{{ _('Video havolasi') }}"></template>
+                  <template x-if="b.kind === 'links'"><div class="stack stack-sm">
+                    <template x-for="(h, hi) in b.data.links" :key="hi">
+                      <div class="row wrap row-sm">
+                        <input class="input minw-220 grow" x-model="h.title" maxlength="200" placeholder="{{ _('Nomi') }}" aria-label="{{ _('Havola nomi') }}">
+                        <input class="input minw-220 grow" type="url" x-model="h.url" placeholder="https://" aria-label="{{ _('Havola manzili') }}">
+                        <button class="icon-btn" type="button" @click="b.data.links.splice(hi, 1)" aria-label="{{ _('Havolani o‘chirish') }}">{{ icon("x", "ico-sm") }}</button>
+                      </div>
+                    </template>
+                    <button class="self-start btn btn-ghost btn-sm" type="button" @click="b.data.links.push({ title: '', url: '' })">{{ icon("plus", "ico-sm") }}{{ _("Havola biriktirish") }}</button></div></template>
+                  <p class="xs muted" x-show="!known(b.kind)">{{ _("Bu blok muharrirda tahrirlanmaydi, o‘zgarmay saqlanadi.") }}</p>
+                </div>
+              </template>
+              <div class="justify-center block-edit row wrap">
+                <span class="small muted">{{ _("Blok qo‘shish:") }}</span>
+                <template x-for="k in kinds" :key="k[0]"><button class="chip" type="button" @click="addBlock(s, k[0])"><svg class="ico" aria-hidden="true"><use :href="'#i-' + k[1]"/></svg><span x-text="k[2]"></span></button></template>
+              </div>
+              <details class="card card-flat card-pad stack stack-sm">
+                <summary class="row row-sm pointer summary-plain small strong">{{ icon("zap", "ico-sm") }}<span class="grow">{{ _("Testlar: savollar soni va shablonlar") }}</span><span class="xs muted num" x-text="s.generators.length"></span></summary>
+                <label class="small row row-sm mt-8">{{ _("Mavzu testida savollar soni (0 — olinmaydi)") }} <input class="input-num input num" type="number" min="0" max="50" x-model.number="s.weight"></label>
+                <p class="xs muted">{{ _("Shablonlar foydalanuvchiga yangi savol qolmaganda ishlaydi: sonlar har safar yangi, javobni dastur hisoblaydi.") }}</p>
+                <div class="row wrap g-6">
+                  <template x-for="t in templates" :key="t[0]"><label class="check chip-check"><input type="checkbox" :value="t[0]" x-model="s.generators"><span x-text="t[1]"></span></label></template>
+                </div>
+              </details>
             </div>
-            <template x-if="b.kind === 'rasm'"><div class="stack stack-sm">
-              <input class="input" type="file" accept="image/*" @change="loadImage(b, $event)" aria-label="{{ _('Rasm yuklash') }}">
-              <template x-if="b.body"><img class="q-img-preview" :src="b.body" alt=""></template>
-              <span class="hint">{{ _("Namunada rasm brauzerda saqlanadi (1 MB gacha).") }}</span>
-            </div></template>
-            <input class="input" type="url" x-show="b.kind === 'video'" x-model="b.body" @input="persist()" placeholder="https://… ({{ _('YouTube yoki video fayl havolasi') }})" aria-label="{{ _('Video havolasi') }}">
           </div>
         </template>
 
-        <div class="justify-center block-edit row wrap">
-          <span class="small muted">{{ _("Blok qo‘shish:") }}</span>
-          <template x-for="k in kinds" :key="k[0]"><button class="chip" type="button" @click="addBlock(k[0])"><svg class="ico"><use :href="'#i-' + k[1]"/></svg><span x-text="k[2]"></span></button></template>
-        </div>
-
-        <div class="card card-pad stack stack-sm">
-          <span class="label">{{ _("Qo‘shimcha ma’lumot uchun havolalar") }}</span>
-          <template x-for="(h, i) in lesson().links" :key="i">
-            <div class="row row-sm">
-              <input class="input" x-model="h.title" @input="persist()" placeholder="{{ _('Nomi') }}" aria-label="{{ _('Havola nomi') }}">
-              <input class="input grow" type="url" x-model="h.url" @input="persist()" placeholder="https://" aria-label="{{ _('Havola manzili') }}">
-              <button class="icon-btn" type="button" @click="lesson().links.splice(i, 1); persist()" aria-label="{{ _('Havolani o‘chirish') }}">{{ icon("x", "ico-sm") }}</button>
-            </div>
-          </template>
-          <button class="self-start btn btn-ghost btn-sm" type="button" @click="lesson().links.push({ title: '', url: '' }); persist()">{{ icon("plus", "ico-sm") }}{{ _("Havola biriktirish") }}</button>
-        </div>
-        <div class="row justify-end"><button class="btn btn-primary" type="button" @click="persist(); rmToast({{ _('Dars saqlandi')|tojson|forceescape }})">{{ _("Saqlash") }}</button></div>
+        <button class="btn btn-outline btn-sm self-start" type="button" @click="addSub()">{{ icon("plus", "ico-sm") }}{{ _("Kichik mavzu qo‘shish") }}</button>
+        <div class="alert alert-red" role="alert" x-show="lessonErr" x-cloak>{{ icon("alert") }}<span x-text="lessonErr"></span></div>
+        <div class="row justify-end"><span class="small muted" x-show="dirty()">{{ _("Saqlanmagan o‘zgarishlar bor") }}</span>
+          <button class="btn btn-primary" type="button" :disabled="busy" @click="save()">{{ _("Saqlash") }}</button></div>
       </div></template>
     </section>
 
@@ -156,73 +191,4 @@
     </section>
   </div>
 </div>
-
-<script nonce="{{ csp_nonce }}">
-function rmContentEditor(seed) {
-  var KEY = "rm-expert-content", T = {{ {"empty": _("Nomini kiriting"), "dupTopic": _("Bunday mavzu allaqachon bor"),
-    "dupLesson": _("Bu mavzuda bunday dars allaqachon bor"), "savedTopic": _("Mavzu saqlandi"), "savedLesson": _("Dars qo‘shildi"),
-    "deleted": _("O‘chirildi")}|tojson }};
-  return {
-    topics: [], sel: null, lessonId: null, q: "", kinds: window.RM_BLOCKS,
-    mode: "", value: "", target: null, err: "",
-    init: function () {
-      try { var s = JSON.parse(localStorage.getItem(KEY)); this.topics = Array.isArray(s) ? s : JSON.parse(JSON.stringify(seed)); }
-      catch (e) { this.topics = JSON.parse(JSON.stringify(seed)); }
-      var p = new URLSearchParams(location.search).get("mavzu");
-      var hit = this.topics.find(function (t) { return t.name === p || t.lessons.some(function (l) { return l.name === p; }); });
-      this.sel = hit ? hit.id : (this.topics[0] && this.topics[0].id);
-    },
-    persist: function () { try { localStorage.setItem(KEY, JSON.stringify(this.topics)); } catch (e) {} },
-    filtered: function () {
-      var q = this.q.toLowerCase();
-      return this.topics.filter(function (t) { return !q || (t.name + " " + t.lessons.map(function (l) { return l.name; }).join(" ")).toLowerCase().indexOf(q) !== -1; });
-    },
-    topic: function () { var id = this.sel; return this.topics.find(function (t) { return t.id === id; }); },
-    lesson: function () { var t = this.topic(), id = this.lessonId; return t && t.lessons.find(function (l) { return l.id === id; }); },
-    /* Ichki kartalar: topic-new | topic-edit | topic-delete | lesson-new | lesson-delete */
-    open: function (mode, arg) {
-      var self = this, ref = { "topic-new": "newTopic", "topic-edit": "editTopic", "lesson-new": "newLesson" }[mode];
-      this.mode = mode; this.err = ""; this.target = mode === "lesson-delete" ? arg : null;
-      this.value = mode === "topic-edit" ? arg : "";
-      if (ref) this.$nextTick(function () { self.$refs[ref] && self.$refs[ref].focus(); });
-    },
-    close: function () { this.mode = ""; this.value = ""; this.err = ""; this.target = null; },
-    norm: function (v) { return (v || "").trim().replace(/\s+/g, " "); },
-    saveTopic: function () {
-      var name = this.norm(this.value), editing = this.mode === "topic-edit", cur = this.topic();
-      if (!name) { this.err = T.empty; return; }
-      if (this.topics.some(function (t) { return t.name.toLowerCase() === name.toLowerCase() && !(editing && t === cur); })) { this.err = T.dupTopic; return; }
-      if (editing) cur.name = name;
-      else { var t = { id: Date.now(), name: name, lessons: [] }; this.topics.push(t); this.sel = t.id; this.lessonId = null; }
-      this.persist(); this.close(); rmToast(T.savedTopic);
-    },
-    deleteTopic: function () {
-      var id = this.sel; this.topics = this.topics.filter(function (t) { return t.id !== id; });
-      this.sel = this.topics[0] && this.topics[0].id; this.lessonId = null; this.persist(); this.close(); rmToast(T.deleted);
-    },
-    saveLesson: function () {
-      var name = this.norm(this.value), t = this.topic();
-      if (!name) { this.err = T.empty; return; }
-      if (t.lessons.some(function (l) { return l.name.toLowerCase() === name.toLowerCase(); })) { this.err = T.dupLesson; return; }
-      var l = { id: Date.now(), name: name, questions: 0, blocks: [], links: [] }; t.lessons.push(l);
-      this.persist(); this.close(); this.lessonId = l.id; rmToast(T.savedLesson);
-    },
-    deleteLesson: function (l) {
-      var t = this.topic(); t.lessons = t.lessons.filter(function (x) { return x.id !== l.id; }); this.persist(); this.close(); rmToast(T.deleted);
-    },
-    loadImage: function (b, e) {
-      var self = this, f = e.target.files[0];
-      if (!f) return;
-      if (f.size > 1024 * 1024) { rmToast("Rasm 1 MB dan oshmasin"); e.target.value = ""; return; }
-      var r = new FileReader();
-      r.onload = function () { b.body = r.result; self.persist(); };
-      r.readAsDataURL(f);
-    },
-    addBlock: function (kind) { this.lesson().blocks.push({ kind: kind, title: "", body: "" }); this.persist(); },
-    move: function (i, d) { var b = this.lesson().blocks; b.splice(i + d, 0, b.splice(i, 1)[0]); this.persist(); },
-    blockIcon: function (k) { var x = this.kinds.find(function (y) { return y[0] === k; }); return x ? x[1] : "note"; },
-    blockLabel: function (k) { var x = this.kinds.find(function (y) { return y[0] === k; }); return x ? x[2] : k; }
-  };
-}
-</script>
 {% endblock %}

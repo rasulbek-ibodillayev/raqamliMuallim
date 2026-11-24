@@ -166,7 +166,9 @@ def optional_topics(user_id: int) -> list[dict]:
 
 def attempt_by_section(a: TestAttempt) -> list[dict]:
     """Urinish natijasi bo'limlar bo'yicha: [{"name", "pct", "topics", "known"}] (known — ≥ 90% chiqqan mavzular)."""
-    items = rows_of(a)
+    from .attempts import dropped
+    gone = dropped(a)
+    items = [i for i in rows_of(a) if i.position not in gone]
     where = {qid: (sid, name, tid) for qid, sid, name, tid in db.session.execute(
         select(Question.id, Section.id, Section.title, Topic.id).join(Subtopic, Subtopic.id == Question.subtopic_id)
         .join(Topic, Topic.id == Subtopic.topic_id).join(Section, Section.id == Topic.section_id)

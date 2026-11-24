@@ -277,6 +277,14 @@ def logout():
     return resp
 
 
+def _expert_rights(user: User, data: dict):
+    """Taklifnomadagi huquqlar va yo'nalishlar (mavzu nomi bo'yicha; mosi topilmasa — hamma mavzu)."""
+    from ..models import Section
+    from ..services import experts
+    ids = db.session.scalars(db.select(Section.id).where(Section.title.in_(data["a"]))).all()
+    experts.save(user.id, data["p"], ids)
+
+
 @bp.route("/taklif/<token>", methods=["GET", "POST"])
 def invite(token):
     """Ekspert taklifnomasi: admin yuborgan havola orqali ekspert parolni o'zi o'rnatadi va akkaunt yaratiladi.
@@ -297,7 +305,6 @@ def invite(token):
     if not errors and _taken(data["c"]):
         errors = {"pw": _("Bu telefon/email bilan akkaunt allaqachon bor. Kirish sahifasidan kiring")}
     if not errors:
-        # Yo'nalishlar (areas) va huquqlar (perms) uchun users'da hali ustun yo'q: expert_invites bilan qo'shiladi
         first, last = (data["n"].split(maxsplit=1) + [""])[:2]
         contact = data["c"].lower() if "@" in data["c"] else norm_phone(data["c"])
         user = User(first_name=first, last_name=last, role="expert", consent_at=_now(),
@@ -305,6 +312,8 @@ def invite(token):
         user.set_password(pw)
         user.set_secret(request.form.get("secret", ""))
         db.session.add(user)
+        db.session.flush()
+        _expert_rights(user, data)
         db.session.commit()
         invites.mark_used(token)
         _sign_in(user)

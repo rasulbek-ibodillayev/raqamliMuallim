@@ -99,7 +99,7 @@ Bu misolda HTTP «Gipermatn uzatadi» ga, DNS esa «Domen nomini o‘giradi» ga
 {"kind": "text", "data": {"title": "if operatori", "body": "..."}, "audio_text": "Ovozli o‘qish uchun matn"}
 ```
 
-`kind` qiymatlari: `text`, `code`, `image`, `table`, `mermaid` (`data.code` — sxema matni), `formula`, `video`, `callout`, `example`, `quiz`. `example` (yechimli masala) bazaga yuklanadi, lekin darsda ko'rsatilmaydi.
+`kind` qiymatlari: `text`, `code`, `image`, `table`, `mermaid` (`data.code` — sxema matni), `formula`, `video`, `callout`, `links` (`data.links`: `[{"title", "url"}]`, faqat https), `example`, `quiz`. `example` (yechimli masala) bazaga yuklanadi, lekin darsda ko'rsatilmaydi.
 
 ## Shablonlar
 

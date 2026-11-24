@@ -48,9 +48,9 @@ NAV = {
     ],
     # Ekspert: kontent (mavzular, darslar, savollar) va sifat nazorati
     "expert": [
-        ("expert.questions", _l("Savollar banki"), "database", 23),
+        ("expert.questions", _l("Savollar banki"), "database", None),
         ("expert.topics", _l("Mavzular va darslar"), "book", None),
-        ("expert.objections", _l("E’tirozlar"), "flag", 3),
+        ("expert.objections", _l("E’tirozlar"), "flag", None),
     ],
     # Admin: foydalanuvchilar, ekspertlar, statistika va tizim sozlamalari (kontent bilan ishlamaydi)
     "admin": [
@@ -384,13 +384,6 @@ ONBOARDING = [
     {"title": "Birinchi dars testini topshiring", "sub": "≈ 3 daqiqa · 3 savol", "endpoint": "test.question", "args": {"turi": "dars", "soni": 3}},
 ]
 
-NOTIFICATIONS = [
-    {"icon": "clipboard", "title": "Tugatilmagan testingiz bor", "text": "«Xatolar ustida ishlash» · 6 / 15 savol saqlangan", "when": "10 daqiqa oldin", "endpoint": "user.tests", "unread": True},
-    {"icon": "shield", "title": "E’tirozingizga javob keldi", "text": "Natijangiz 78% → 82% ga qayta hisoblandi", "when": "2 soat oldin", "endpoint": "user.objections", "unread": True},
-    {"icon": "zap", "title": "Kunlik 5 ta test tayyor", "text": "3 daqiqa · ko‘p xato qilayotgan mavzulardan", "when": "Bugun, 08:00", "endpoint": "test.question", "unread": False},
-    {"icon": "calendar", "title": "Attestatsiya sanasi belgilandi", "text": "23-dekabr, 2026 · administrator tomonidan", "when": "Kecha", "endpoint": "user.profile", "unread": False},
-]
-
 DISCUSSIONS = [
     {"n": 14, "topic": "Sanoq sistemalari", "q": "101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?", "count": 4, "last": "Bugun, 10:45", "expert": True, "mine": True},
     {"n": 18, "topic": "Mantiq asoslari", "q": "(A ∨ B) ∧ ¬(A ∧ B) ifodasi qachon 1 ga teng bo‘ladi?", "count": 7, "last": "Kecha, 19:02", "expert": False, "mine": True},
@@ -412,12 +405,6 @@ QUEUE = [
     ("Mantiqiy darvozalarni rostlik jadvali bilan moslang", "Mantiq asoslari", "O‘rta", "Moslashtirish", "Zuhra Qodirova", "expert"),
     ("Rekursiv funksiyada bazaviy shart bo‘lmasa…", "Funksiyalar", "O‘rta", "Yopiq test", "AI generator", "ai"),
 ]
-EXPERT_OBJ = [
-    {"id": "#Q-84920", "q": "101101 ikkilik sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?", "topic": "Sanoq sistemalari", "lvl": "O‘rta", "n": 5, "urgent": True, "ago": "15 daqiqa oldin"},
-    {"id": "#Q-84812", "q": "De Morgan qonunlariga ko‘ra ¬(A ∧ B) ifodasining ekvivalenti qaysi?", "topic": "Mantiq asoslari", "lvl": "Oson", "n": 3, "urgent": False, "ago": "2 soat oldin"},
-    {"id": "#Q-84590", "q": "Ikkilik qidiruv algoritmining vaqt murakkabligi qanday?", "topic": "Algoritmlar", "lvl": "Qiyin", "n": 2, "urgent": False, "ago": "kecha"},
-]
-
 # Ekspert: AI har bir mavzu va dars bo'yicha tuzgan, tekshiruvni kutayotgan savollar.
 # Tasdiqlangani «Savollar banki»ga qo'shiladi, rad etilgani avtomatik o'chiriladi.
 _AI_SEED = [
@@ -438,37 +425,6 @@ AI_QUEUE = [
 Q_KINDS = {"yopiq": _l("Yopiq (bitta javob)"), "kop": _l("Ko‘p javobli"), "moslash": _l("Moslashtirish"), "ochiq": _l("Ochiq javob")}
 Q_FORMATS = {"matn": _l("Matnli"), "chizma": _l("Chizmali"), "jadval": _l("Jadvalli"), "rasm": _l("Rasmli")}
 Q_LEVELS = ["Oson", "O‘rta", "Qiyin"]
-
-# Ekspert: mavzular → darslar → bloklar (matn, rasm, jadval, video, chizma) va qo'shimcha havolalar
-EXPERT_CONTENT = [
-    {"id": 1, "name": "Dasturlash asoslari", "lessons": [
-        {"id": 11, "name": "Python asoslari", "questions": 8, "blocks": [
-            {"kind": "matn", "title": "Kirish", "body": "Python — o‘qish oson, keng tarqalgan dasturlash tili."}], "links": []},
-        {"id": 12, "name": "Python: shart operatorlari", "questions": 14, "blocks": [
-            {"kind": "matn", "title": "if operatori", "body": "Shart operatori mantiqiy ifodaning rost yoki yolg‘on ekaniga qarab dasturni turli yo‘nalishga buradi."},
-            {"kind": "chizma", "title": "Blok-sxema", "body": "flowchart TD; A[Boshlash] --> B{yosh ≥ 18?}"},
-            {"kind": "jadval", "title": "Taqqoslash amallari", "body": "Amal | Ma’nosi\n== | teng\n!= | teng emas\n> | katta"},
-            {"kind": "video", "title": "Video dars", "body": "https://www.youtube.com/watch?v=namuna"}],
-         "links": [{"title": "Python hujjatlari: if", "url": "https://docs.python.org/3/tutorial/controlflow.html"}]},
-        {"id": 13, "name": "Sikllar", "questions": 14, "blocks": [], "links": []},
-        {"id": 14, "name": "Funksiyalar va modullar", "questions": 19, "blocks": [], "links": []}]},
-    {"id": 2, "name": "Algoritmlar va ma’lumotlar tuzilmasi", "lessons": [
-        {"id": 21, "name": "Saralash algoritmlari", "questions": 22, "blocks": [], "links": []},
-        {"id": 22, "name": "Qidiruv algoritmlari", "questions": 9, "blocks": [], "links": []}]},
-    {"id": 3, "name": "Kompyuter tarmoqlari", "lessons": [
-        {"id": 31, "name": "IP-manzillash", "questions": 16, "blocks": [], "links": []},
-        {"id": 32, "name": "Protokollar", "questions": 11, "blocks": [], "links": []}]},
-    {"id": 4, "name": "Ma’lumotlar bazasi va SQL", "lessons": [
-        {"id": 41, "name": "Relyatsion model", "questions": 6, "blocks": [], "links": []}]},
-    {"id": 5, "name": "Sanoq sistemalari", "lessons": [
-        {"id": 51, "name": "Ikkilik va o‘nlik", "questions": 18, "blocks": [], "links": []},
-        {"id": 52, "name": "O‘n oltilik", "questions": 9, "blocks": [], "links": []}]},
-    {"id": 6, "name": "Mantiq asoslari", "lessons": [
-        {"id": 61, "name": "Mantiqiy amallar", "questions": 12, "blocks": [], "links": []},
-        {"id": 62, "name": "De Morgan qonunlari", "questions": 7, "blocks": [], "links": []}]},
-]
-BLOCK_KINDS = [("matn", "note", _l("Matn")), ("rasm", "image", _l("Rasm")), ("jadval", "table", _l("Jadval")),
-               ("video", "play", _l("Video")), ("chizma", "graph", _l("Chizma"))]
 
 # --- Admin ---
 KPI = [

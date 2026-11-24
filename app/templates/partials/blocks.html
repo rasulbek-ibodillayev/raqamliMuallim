@@ -32,6 +32,10 @@
 <div class="stack stack-sm">{% if d.title %}<h3>{{ d.title }}</h3>{% endif %}{{ code(d.tex or "", "TeX") }}</div>
 {% elif b.kind == "video" and d.url and d.url.startswith("https://") %}
 <a class="btn btn-outline self-start" href="{{ d.url }}" target="_blank" rel="noopener noreferrer">{{ icon("play") }}{{ d.title or _("Videoni ochish") }}</a>
+{% elif b.kind == "links" %}
+<section class="stack stack-sm"><h3>{{ _("Qo‘shimcha ma’lumot") }}</h3>
+  <ul class="list-reset stack stack-sm">{% for x in d.links or [] if x.url and x.url.startswith("https://") %}<li><a class="link row row-sm" href="{{ x.url }}" target="_blank" rel="noopener noreferrer">{{ icon("link", "ico-sm") }}{{ x.title or x.url }}</a></li>{% endfor %}</ul>
+</section>
 {% elif b.kind in ("callout", "quiz") %}
 <section class="alert alert-col">{% if d.title %}<div class="strong">{{ d.title }}</div>{% endif %}{{ paragraphs(d.body or d.text) }}</section>
 {% endif %}

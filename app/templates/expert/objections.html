@@ -2,51 +2,106 @@
 {% block title %}{{ _("E’tirozlar") }}{% endblock %}
 {% block heading %}{{ _("E’tirozlar") }}{% endblock %}
 {% block content %}
-{% call page_head(_("E’tirozlar"), _("Har bir e’tirozga 24 soat ichida xulosa beriladi.")) %}{% endcall %}
+{# items — services/objection_review.queue; d — tanlangan savol (detail). Xulosa savolga e'tiroz bildirganlarning hammasiga boradi #}
+{% set reasons = {"wrong_key": _("To‘g‘ri javob noto‘g‘ri ko‘rsatilgan"), "also_correct": _("Mening javobim ham to‘g‘ri"), "unclear": _("Savol tushunarsiz"), "media": _("Rasm yoki jadvalda xato"), "other": _("Boshqa")} %}
+{% call page_head(_("E’tirozlar"), _("Har bir e’tirozga 3 ish kuni ichida xulosa beriladi.")) %}{% endcall %}
+{% if not items %}
+<div class="card empty">
+  <span class="empty-ico">{{ icon("check-circle", "ico-lg") }}</span>
+  <h2>{{ _("Ko‘rib chiqiladigan e’tiroz yo‘q") }}</h2>
+</div>
+{% else %}
 <div class="split">
   <div class="card list">
-    {% set sel = request.args.get('id') or items[0].id %}
     {% for o in items %}
-    <a class="list-item list-item-col {{ 'active' if o.id == sel }}" href="{{ url_for('expert.objections', id=o.id) }}" {{ 'aria-current=page' if o.id == sel }}>
-      <div class="row between"><span class="xs muted num">{{ o.id }}</span>{% if o.urgent %}{{ badge(_("Shoshilinch"), "red") }}{% else %}<span class="xs muted">{{ o.n }} {{ _("ta e’tiroz") }}</span>{% endif %}</div>
+    <a class="list-item list-item-col {{ 'active' if d and o.id == d.id }}" href="{{ url_for('expert.objections', id=o.id) }}" {{ 'aria-current=page' if d and o.id == d.id }}>
+      <div class="row between"><span class="xs muted num">#{{ o.id }}</span>{% if o.urgent %}{{ badge(_("Shoshilinch"), "red") }}{% else %}<span class="xs muted">{{ o.n }} {{ _("ta e’tiroz") }}</span>{% endif %}</div>
       <span class="clamp-2 small strong">{{ o.q }}</span>
       <span class="xs muted">{{ o.topic }} · {{ o.lvl }} · {{ o.ago }}</span>
     </a>
     {% endfor %}
   </div>
 
+  {% if d %}
   <div class="stack stack-lg">
     <div class="card card-pad stack">
-      <div class="row between wrap"><span class="small muted num">{{ _("#Q-84920 · Sanoq sistemalari · O‘rta") }}</span>{{ badge(_("Testlarda vaqtincha to‘xtatilgan"), "yellow") }}</div>
-      <p class="strong">{{ _("101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazganda qanday natija hosil bo‘ladi?") }}</p>
+      <div class="row between wrap"><span class="small muted num">#{{ d.id }} · {{ d.where }} · {{ d.lvl }}</span>
+        {% if d.status == "paused" %}{{ badge(_("Testlarda vaqtincha to‘xtatilgan"), "yellow") }}{% elif d.status != "approved" %}{{ badge(state[d.status][0], state[d.status][1]) }}{% endif %}</div>
+      <p class="strong">{{ d.text }}</p>
+      {% if d.code %}{{ code(d.code, copy=False) }}{% endif %}
+      {% if d.image %}<figure class="q-figure"><img src="{{ url_for('static', filename=d.image.src) }}" alt="{{ d.image.alt }}" loading="lazy"></figure>{% endif %}
+      {% if d.table %}{% with q = {"table": d.table} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
+      {% if d.options %}
       <div class="stack stack-sm">
-        {% for k, v, p in [("A", "43", 12), ("B", "45", 58), ("C", "47", 26), ("D", "53", 4)] %}
+        {% for o in d.options %}
         <div class="g-12 row">
-          <span class="strong small u-w-16">{{ k }}</span>
-          <div class="gap-4 grow stack"><div class="row between small"><span>{{ v }}{% if k == "B" %} <span class="t-green">{{ _("· to‘g‘ri deb belgilangan") }}</span>{% endif %}</span><span class="num muted">{{ p }}%</span></div>{{ progress(p, "green" if k == "B" else "", "thin") }}</div>
+          <span class="strong small u-w-16">{{ "ABCDEFGHIJ"[o.i] }}</span>
+          <div class="gap-4 grow stack"><div class="row between small"><span>{{ o.text }}{% if o.right %} <span class="t-green">· {{ _("to‘g‘ri deb belgilangan") }}</span>{% endif %}</span><span class="num muted">{{ o.pct }}%</span></div>{{ progress(o.pct, "green" if o.right else "", "thin") }}</div>
         </div>
         {% endfor %}
+      </div>
+      {% elif d.pairs %}<ul class="small">{% for p in d.pairs %}<li>{{ p }}</li>{% endfor %}</ul>
+      {% else %}
+      <p class="small"><span class="muted">{{ _("To‘g‘ri javob:") }}</span> <b>{{ d.value }}</b>{% if d.accept %}; {{ d.accept|join(", ") }}{% endif %}</p>
+      {% if d.given %}<p class="small"><span class="muted">{{ _("Berilgan javoblar:") }}</span> {% for v, n in d.given %}{{ v }} ({{ n }}){{ ", " if not loop.last }}{% endfor %}</p>{% endif %}
+      {% endif %}
+      {% if d.why %}<p class="small muted"><b>{{ _("Izoh.") }}</b> {{ d.why }}</p>{% endif %}
+      <div class="row wrap row-sm">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('expert.editor', id=d.id) }}">{{ icon("edit", "ico-sm") }}{{ _("Savolni tahrirlash") }}</a>
+        {% if d.status in ("approved", "paused") %}
+        <form action="{{ url_for('expert.objection_pause', qid=d.id) }}" method="post">{{ csrf() }}
+          <input type="hidden" name="on" value="{{ 1 if d.status == 'approved' else 0 }}">
+          <button class="btn btn-ghost btn-sm" type="submit">{{ icon("pause" if d.status == "approved" else "play", "ico-sm") }}{{ _("Testlardan vaqtincha to‘xtatish") if d.status == "approved" else _("Testlarga qaytarish") }}</button>
+        </form>
+        {% endif %}
       </div>
     </div>
 
     <div class="card">
-      <div class="card-head"><span class="strong">{{ _("5 ta e’tiroz") }}</span><span class="xs muted">{{ _("sabablari") }}</span></div>
+      <div class="card-head"><span class="strong">{{ d.objections|length }} {{ _("ta e’tiroz") }}</span><span class="xs muted">{{ _("sabablari") }}</span></div>
       <div class="list">
-        {% for who, why, note in [("Dilshod K.", "Mening javobim ham to‘g‘ri", "47 ni tanladim, chunki…"), ("Nodira A.", "Savol tushunarsiz", "Qaysi sanoq sistemasidan o‘tkazish aniq emas."), ("Sarvar R.", "To‘g‘ri javob noto‘g‘ri", "")] %}
-        <div class="items-start list-item"><span class="avatar">{{ who[0] }}{{ who.split()[1][0] }}</span><div class="grow"><div class="small"><b>{{ who }}</b> · {{ why }}</div>{% if note %}<div class="sub">{{ note }}</div>{% endif %}</div></div>
+        {% for o in d.objections %}
+        <div class="items-start list-item"><span class="avatar">{{ o.ini }}</span><div class="grow"><div class="small"><b>{{ o.who }}</b> · {{ reasons[o.reason] }}{% if o.urgent %} {{ badge(_("Shoshilinch"), "red") }}{% endif %}</div>{% if o.note %}<div class="sub">{{ o.note }}</div>{% endif %}</div><span class="xs muted nowrap">{{ o.when }}</span></div>
         {% endfor %}
       </div>
     </div>
 
-    <div class="card card-pad stack">
-      <span class="label">{{ _("Ekspert xulosasi") }}</span>
-      <textarea class="textarea" aria-label="{{ _('Ekspert xulosasi') }}" placeholder="{{ _('Xulosa barcha e’tiroz bildirganlarga yuboriladi…') }}"></textarea>
-      <div class="row wrap">
-        <button class="btn btn-primary" type="button">{{ _("E’tiroz o‘rinli · savolni tuzatish") }}</button>
-        <button class="btn btn-outline" type="button">{{ _("O‘rinsiz · rad etish") }}</button>
-      </div>
-      <p class="xs muted">{{ _("O‘rinli deb topilsa, savolning yangi versiyasi yaratiladi va natijalar faqat foydalanuvchi foydasiga qayta hisoblanadi.") }}</p>
-    </div>
+    <form class="card card-pad stack" action="{{ url_for('expert.objection_decide', qid=d.id) }}" method="post" novalidate
+          x-data="rmForm({ action: {{ (form.action or '')|tojson|forceescape }} })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+      {% include "partials/form_open.html" %}
+      <fieldset class="fieldset-reset stack stack-sm" @change="clear('action')">
+        <legend class="label">{{ _("Qaror") }}</legend>
+        {% if d.kind != "moslash" %}
+        <label class="check"><input type="radio" name="action" value="key" x-model="action"><span>{{ _("O‘rinli: to‘g‘ri javob o‘zgaradi") }} <span class="d-block xs muted">{{ _("Barcha natijalar yangi javob bilan qayta hisoblanadi, faqat foydalanuvchi foydasiga.") }}</span></span></label>
+        {% endif %}
+        <label class="check"><input type="radio" name="action" value="drop" x-model="action"><span>{{ _("O‘rinli: savol hisobdan chiqariladi") }} <span class="d-block xs muted">{{ _("Natijalar bu savolsiz qayta hisoblanadi, savol testlardan to‘xtatiladi.") }}</span></span></label>
+        <label class="check"><input type="radio" name="action" value="fix" x-model="action"><span>{{ _("O‘rinli: faqat matni tuzatiladi") }} <span class="d-block xs muted">{{ _("Natijalar o‘zgarmaydi. Keyin savolni tahrirlash sahifasi ochiladi.") }}</span></span></label>
+        <label class="check"><input type="radio" name="action" value="reject" x-model="action"><span>{{ _("O‘rinsiz: rad etiladi") }}</span></label>
+      </fieldset>
+      {{ field_error("action", errors) }}
+
+      {% if d.options %}
+      <fieldset class="fieldset-reset stack stack-sm" x-show="action === 'key'" x-cloak @change="clear('keys')">
+        <legend class="label">{{ _("To‘g‘ri javob(lar)") }}</legend>
+        {% for o in d.options %}<label class="check"><input type="checkbox" name="keys" value="{{ o.i }}" {{ 'checked' if o.right }}><span><b>{{ "ABCDEFGHIJ"[o.i] }}</b> {{ o.text }}</span></label>{% endfor %}
+        {% if d.kind == "yopiq" %}<span class="hint">{{ _("Bir nechta belgilansa, hammasi to‘g‘ri hisoblanadi va savol tuzatilguncha testlardan to‘xtatiladi.") }}</span>{% endif %}
+        {{ field_error("keys", errors) }}
+      </fieldset>
+      {% elif d.kind == "ochiq" %}
+      <div class="field" x-show="action === 'key'" x-cloak><label class="label" for="o-accept">{{ _("Qabul qilinadigan boshqa javoblar (vergul bilan)") }}</label>
+        <input class="input" id="o-accept" name="accept" value="{{ form.accept or '' }}" @input="clear('accept')">
+        {{ field_error("accept", errors) }}</div>
+      {% endif %}
+
+      <div class="field"><label class="label" for="o-verdict">{{ _("Ekspert xulosasi") }}</label>
+        <textarea class="textarea" id="o-verdict" name="verdict" maxlength="2000" @input="clear('verdict')" placeholder="{{ _('Xulosa barcha e’tiroz bildirganlarga yuboriladi…') }}">{{ form.verdict or '' }}</textarea>
+        {{ field_error("verdict", errors) }}</div>
+      <button class="btn btn-primary self-start" type="submit" :disabled="busy || !action">{{ _("Qarorni yuborish") }}</button>
+    </form>
   </div>
+  {% else %}
+  <div class="card empty"><p class="muted">{{ _("Savolni tanlang") }}</p></div>
+  {% endif %}
 </div>
+{% endif %}
 {% endblock %}

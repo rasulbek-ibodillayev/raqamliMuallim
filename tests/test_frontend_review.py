@@ -69,3 +69,10 @@ def test_plan_test_card_wraps_on_phone(as_role):
     html = as_role("user").get("/app/reja?oylik=1").get_data(as_text=True)
     assert "Oylik test" in html and "plan-test-card" in html
     assert ".plan-test-card > .row > .grow { flex: 1 1 220px; }" in _css()
+
+
+def test_form_url_is_read_from_attributes():
+    # submitter.formAction atributsiz tugmada joriy sahifa manzilini, form.action esa name="action" maydonini qaytaradi
+    from pathlib import Path
+    js = (Path(__file__).resolve().parent.parent / "app" / "static" / "js" / "core.js").read_text(encoding="utf8")
+    assert 'getAttribute("formaction")' in js and "ev.submitter.formAction" not in js and "form.action," not in js

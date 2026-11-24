@@ -7,10 +7,11 @@
 <ol class="list-reset stack review-list">
   {% for r in questions %}
   {% set ok = r.score == 100 %}
-  <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else 'is-bad' }}" {% if ok and review_filter %}x-show="{{ review_filter }} === 'all'"{% endif %}>
+  <li class="card card-pad stack stack-sm review-q {{ 'is-ok' if ok else ('' if r.dropped else 'is-bad') }}" {% if ok and review_filter %}x-show="{{ review_filter }} === 'all'"{% endif %}>
     <div class="row between wrap">
       <span class="small muted">{{ r.n }}{{ _("-savol") }} · {{ r.topic }}{% if r.level %} · {{ r.level }}{% endif %}</span>
-      {% if not r.answered %}{{ badge(_("Javobsiz"), "gray") }}
+      {% if r.dropped %}{{ badge(_("Hisobdan chiqarilgan"), "gray") }}
+      {% elif not r.answered %}{{ badge(_("Javobsiz"), "gray") }}
       {% elif ok %}{{ badge(_("To‘g‘ri"), "green", "check") }}
       {% elif r.score %}{{ badge(_("Qisman: %(p)s%%", p=r.score), "yellow") }}
       {% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}

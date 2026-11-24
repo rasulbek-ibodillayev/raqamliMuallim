@@ -17,6 +17,8 @@
 | review_schedule | Takrorlash jadvali (spaced repetition) |
 | method_stats | Tushuntirish usullari samaradorligi (10.3-bo'lim) |
 | objections, discussions | E'tirozlar, muhokama xabarlari, ekspert qarorlari |
+| notifications | Bildirishnomalar: turi, havola, eski va yangi foiz (matnsiz, 30 kun) |
+| expert_profiles | Ekspert huquqlari va mavzulari |
 | notes | Shaxsiy konspekt |
 | certificates | Sertifikatlar va tekshiruv tokenlari |
 | ai_cache, ai_usage | AI javoblari keshi va sarf hisobi |
@@ -60,6 +62,14 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   - Yetmasa shablon generator (`app/services/generator.py`, `subtopics.generators`) yangi savol tuzadi. Javob kod bilan
     hisoblanadi, savol `source=template`, `approved` bo'lib bankka qo'shiladi; `questions.sig` takrorni oldini oladi.
   - U ham yetmasa test qisqaroq bo'ladi, umuman qolmasa test ochilmaydi va sabab ko'rsatiladi.
+- **Natijani qayta hisoblash** (`app/services/recalc.py`). E'tiroz qabul qilinsa yoki AI savoli rad etilsa: ball va foiz faqat
+  oshadi. Kalit o'zgarsa — variantlari bir xil versiyalardagi javoblar qayta baholanadi va yangi versiyaga o'tadi. Savol hisobdan
+  chiqarilsa — `attempt_items.score` NULL, tartibi `settings_snapshot.dropped` da, foiz qolganlaridan. Bosqichli testda endi o'tgan
+  mavzuning berilmagan yuqori bosqich savollari ham chiqariladi. Arxivlangan va yakunlanmagan testlar ham qamrab olinadi.
+- **Bildirishnomalar.** Qatorda matn yo'q (`kind`, `ref_id`, foizlar). O'qilganlik — `users.notif_seen_at`. 30 kundan eskisi
+  ko'rsatilmaydi va shu foydalanuvchiga keyingisi yozilganda o'chadi.
+- **Darsni saqlash.** Dars butunlay bitta so'rovda saqlanadi; `rev` (qatorlar id'si va `updated_at` izi) mos kelmasa — 409, hech narsa
+  yozilmaydi. Savoli bor mavzu, dars va kichik mavzu o'chmaydi — dars nashrdan olinadi.
 - **Xato tuzatilishi.** Savol qaytmagani uchun xato shu kichik mavzudagi boshqa savolga keyingi testdagi to'liq to'g'ri
   javob bilan yopiladi: bitta to'g'ri javob — bitta, eng eski xato. «Qayta xato» — shu kichik mavzuda nechta testda xato
   qilingani.

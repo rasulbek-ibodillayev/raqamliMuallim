@@ -260,6 +260,16 @@ def lesson():
                            all_passed=all(p is not None and p >= m.PASS_MIN for p in pcts))
 
 
+@bp.post("/bildirishnomalar/oqildi")
+def notifications_seen():
+    from flask import jsonify
+    from flask_login import current_user
+
+    from ..services import notify
+    notify.mark_seen(current_user)
+    return jsonify(ok=True)
+
+
 @bp.get("/tutor/yechim/<ref>")
 def tutor_solution(ref):
     """«Yechimini ko'rish»: savol va yechimi AI tutor suhbatiga (JSON). ref — "<urinish uuid>:<tartib>"."""

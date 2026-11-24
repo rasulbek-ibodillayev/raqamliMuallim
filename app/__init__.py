@@ -118,8 +118,14 @@ def create_app(config: dict | None = None) -> Flask:
         from .views.account import with_user
         from .views.test import TYPE_SLUGS
         # me / staff_of — kirgan foydalanuvchining ismi va aloqasi, qolgani hozircha mock'dan
-        return {"errors": {}, "form": {}, "me": with_user(mock.ME), "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": mock.NOTIFICATIONS,
+        return {"errors": {}, "form": {}, "me": with_user(mock.ME), "test_slug": {v: k for k, v in TYPE_SLUGS.items()}, "nav": mock.NAV, "notifications": _notifications,
                 "search_index": _search_index, "staff_of": lambda r: with_user(mock.STAFF.get(r, {})), "learner_meta": _learner_meta, **ui}
+
+    def _notifications():
+        """Qo'ng'iroqcha (faqat o'qituvchi sahifalarida chaqiriladi)."""
+        from flask_login import current_user
+        from .services import notify
+        return notify.list_for(current_user) if current_user.is_authenticated and current_user.role == "user" else []
 
     def _learner_meta():
         """O'qituvchi sahifalari uchun: foydalanuvchi va joriy mavzu id'si (0 — hamma mavzu o'zlashtirilgan)."""

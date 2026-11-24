@@ -1,7 +1,7 @@
 """E'tirozlar, muhokamalar, konspekt, sertifikatlar."""
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Identity, Index, Integer, SmallInteger, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
@@ -33,6 +33,20 @@ class Objection(Timestamps, db.Model):
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     score_before: Mapped[float | None] = mapped_column(Float)        # qayta hisoblash: 78% → 82%
     score_after: Mapped[float | None] = mapped_column(Float)
+
+
+class Notification(db.Model):
+    """Ixcham: matn saqlanmaydi — kind (services/notify.py) va havola id'sidan tuziladi. 30 kundan keyin o'chadi.
+    Kalit (user_id, id): ro'yxat uchun alohida indeks kerak emas."""
+    __tablename__ = "notifications"
+
+    user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    ref_id: Mapped[int | None] = mapped_column(BigInteger)                 # e'tiroz yoki urinish id'si
+    created_at: Mapped[datetime] = created_at()
+    kind: Mapped[int] = mapped_column(SmallInteger)
+    old_pct: Mapped[int | None] = mapped_column(SmallInteger)
+    new_pct: Mapped[int | None] = mapped_column(SmallInteger)
 
 
 class Discussion(db.Model):

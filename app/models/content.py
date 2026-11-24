@@ -6,7 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..extensions import db
 from ._base import JSONB, PK, Timestamps, one_of, pk
 
-BLOCK_KINDS = ("text", "code", "image", "table", "mermaid", "formula", "video", "callout", "example", "quiz")
+BLOCK_KINDS = ("text", "code", "image", "table", "mermaid", "formula", "video", "callout", "example", "quiz",
+               "links")
 
 
 class Course(Timestamps, db.Model):

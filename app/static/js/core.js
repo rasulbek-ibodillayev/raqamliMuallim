@@ -59,7 +59,8 @@ window.rmForm = function (extra, onOk) {
       this.busy = true; this.message = ""; this.ok = false;
       var body = new FormData(form);
       if (ev.submitter && ev.submitter.name) body.append(ev.submitter.name, ev.submitter.value);
-      return fetch(ev.submitter && ev.submitter.formAction ? ev.submitter.formAction : form.action, {
+      // Atributdan olinadi: .formAction atribut bo'lmasa joriy sahifa manzilini, .action esa name="action" maydonini qaytaradi
+      return fetch((ev.submitter && ev.submitter.getAttribute("formaction")) || form.getAttribute("action") || location.href, {
         method: "POST", body: body, credentials: "same-origin",
         headers: { "Accept": "application/json", "X-CSRFToken": (document.querySelector('meta[name="csrf-token"]') || {}).content || "" }
       }).then(function (r) {

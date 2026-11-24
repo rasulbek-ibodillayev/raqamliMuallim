@@ -1,12 +1,12 @@
 """Foydalanuvchilar."""
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, Date, DateTime, Index, String, text, true
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, String, text, true
 from sqlalchemy.orm import Mapped, mapped_column
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..extensions import db
-from ._base import Timestamps, one_of, pk
+from ._base import JSONB, PK, Timestamps, one_of, pk
 
 ROLES = ("user", "expert", "admin")
 
@@ -43,6 +43,7 @@ class User(Timestamps, db.Model):
     exam_date: Mapped[date | None] = mapped_column(Date)                          # attestatsiya sanasi (admin kiritadi)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notif_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # bildirishnomalar shu vaqtgacha o'qilgan
 
     # Flask-Login: sessiyada id saqlanadi; is_active=False bo'lsa kira olmaydi
     def get_id(self) -> str:
@@ -87,3 +88,12 @@ class User(Timestamps, db.Model):
 
     def __repr__(self) -> str:
         return f"<User {self.id} {self.role}>"
+
+
+class ExpertProfile(db.Model):
+    """Ekspert huquqlari. Qator yo'q — hamma huquq; areas bo'sh — hamma mavzu (services/experts.py)."""
+    __tablename__ = "expert_profiles"
+
+    user_id: Mapped[int] = mapped_column(PK, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    perms: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")
+    areas: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")      # sections.id

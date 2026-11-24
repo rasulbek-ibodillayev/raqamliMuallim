@@ -807,6 +807,8 @@ a.notif:hover { background: var(--surface-2); }
 .mb-28 { margin-bottom: 28px; }
 .ml-n10 { margin-left: -10px; }
 .minw-220 { min-width: 220px; }
+/* Savol muharriri: variant izohi telefonda alohida qatorda */
+@media (max-width: 720px) { .opt-row { flex-wrap: wrap; } .opt-row .opt-note { flex: 1 1 100%; order: 9; } }
 .minh-48 { min-height: 48px; }
 .maxw-360 { max-width: 360px; }
 .maxw-720 { max-width: 720px; }

@@ -90,6 +90,12 @@ window.rmInstall = function (opts) {
   };
 };
 
+/* Bildirishnomalar o'qildi (qo'ng'iroqcha) */
+window.rmMarkSeen = function (url) {
+  var m = document.querySelector('meta[name="csrf-token"]');
+  fetch(url, { method: "POST", headers: { Accept: "application/json", "X-CSRFToken": m ? m.content : "" } }).catch(function () {});
+};
+
 /* Ilova qobig'i: chap menyu, tezkor qidiruv (Ctrl+K) va bildirishnomalar */
 window.rmShell = function () {
   function norm(s) { return (s || "").toLowerCase().replace(/[‘’ʻʼ'`]/g, "").trim(); }

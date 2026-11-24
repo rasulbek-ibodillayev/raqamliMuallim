@@ -178,6 +178,11 @@ def stage_range(a: TestAttempt, stage: int | None = None) -> tuple[int, int]:
     return s["from"], s["to"]
 
 
+def dropped(a: TestAttempt) -> set[int]:
+    """Hisobdan chiqarilgan savollar tartibi (services/recalc.py)."""
+    return set(a.settings_snapshot.get("dropped", []))
+
+
 def active_positions(a: TestAttempt) -> list[int]:
     start, end = stage_range(a)
     skipped = set(a.settings_snapshot.get("skipped", []))
@@ -206,9 +211,9 @@ def save_answers(a: TestAttempt, answers: list[dict]) -> list[int]:
     return saved
 
 
-def _snapshots(a: TestAttempt) -> dict[int, tuple[dict, int, int]]:
+def _snapshots(a: TestAttempt, items: list | None = None) -> dict[int, tuple[dict, int, int]]:
     """{tartib: (savol nusxasi, kichik mavzu, mavzu)} — urinishdagi aniq versiyalar."""
-    items = rows_of(a)
+    items = rows_of(a) if items is None else items
     if not items:
         return {}
     rows = db.session.execute(
@@ -220,12 +225,12 @@ def _snapshots(a: TestAttempt) -> dict[int, tuple[dict, int, int]]:
     return {i.position: info[i.question_id, i.question_version] for i in items if (i.question_id, i.question_version) in info}
 
 
-def _stage_verdict(a: TestAttempt, snaps, positions) -> tuple[set[int], dict[str, int]]:
+def _stage_verdict(a: TestAttempt, snaps, positions, by_pos=None) -> tuple[set[int], dict[str, int]]:
     """Bosqich natijasi: (o'tmagan mavzular, tavsiya etilgan darslar {kichik mavzu: foiz}).
 
     Mavzu bo'yicha: < 70 — keyingi bosqichga o'tmaydi; 70–89 — o'tadi, ≥ 90 ga yetmagan darslarini qayta o'zlashtirish
     tavsiya etiladi; ≥ 90 — tavsiyasiz o'tadi."""
-    by_pos = {i.position: i for i in a.items}
+    by_pos = by_pos or {i.position: i for i in a.items}
     topics: dict[int, dict[int, list[int]]] = {}
     for p in positions:
         _snap, sid, tid = snaps[p]
@@ -252,7 +257,8 @@ def finish(a: TestAttempt, stage: int | None = None) -> TestAttempt:
         return a
     snaps = _snapshots(a)
     by_pos = {i.position: i for i in a.items}
-    now_positions = active_positions(a)
+    out = dropped(a)
+    now_positions = [p for p in active_positions(a) if p not in out]
     for p in now_positions:
         snap, item = snaps[p][0], by_pos[p]
         v = (item.answer or {}).get("v")
@@ -266,7 +272,7 @@ def finish(a: TestAttempt, stage: int | None = None) -> TestAttempt:
         return a
 
     # So'ralmagan (yuqori bosqichdagi, mavzusi o'tmagan) savollar 0 ball: test to'liq rejaga nisbatan baholanadi
-    scores = [i.score or 0 for i in a.items]
+    scores = [i.score or 0 for i in a.items if i.position not in out]
     a.score_pct = scoring.percent(scores)
     a.correct = sum(scores) / 100
     a.decision = scoring.decision(int(a.score_pct))
@@ -372,7 +378,7 @@ LEVELS = {"easy": _l("Oson"), "medium": _l("O‘rta"), "hard": _l("Qiyin")}
 def review(a: TestAttempt) -> list[dict]:
     """Yakunlangan urinish tahlili (partials/answer_review.html). So'ralmagan savollar ko'rsatilmaydi."""
     snaps, titles = _snapshots(a), _titles(a)
-    skipped = set(a.settings_snapshot.get("skipped", []))
+    skipped, gone = set(a.settings_snapshot.get("skipped", [])), dropped(a)
     out = []
     for item in rows_of(a):
         if item.position in skipped or item.position not in snaps:
@@ -382,7 +388,7 @@ def review(a: TestAttempt) -> list[dict]:
         r = {"n": len(out) + 1, "pos": item.position, "kind": TYPE_TO_KIND[snap["type"]], "topic": titles[item.position],
              "level": LEVELS.get(snap["difficulty"]), "q": snap["text"], "code": data.get("code"),
              "table": data.get("table"), "image": data.get("image"), "score": item.score or 0,
-             "answered": v not in (None, "", []), "why": snap.get("explanation"), "notes": ans.get("notes"),
+             "dropped": item.position in gone, "answered": v not in (None, "", []), "why": snap.get("explanation"), "notes": ans.get("notes"),
              "computed": bool(data.get("code") or data.get("table")) or snap["type"] == "open"}
         if snap["type"] in ("single", "multiple"):
             r["options"], r["right"] = data["options"], ans["keys"]
@@ -402,8 +408,10 @@ def review(a: TestAttempt) -> list[dict]:
 
 def by_subtopic(a: TestAttempt) -> list[tuple[str, int, str, int]]:
     """[(kichik mavzu, foiz, to'plangan ball, savollar soni)], eng pastidan."""
-    titles, acc = _titles(a), {}
+    titles, acc, gone = _titles(a), {}, dropped(a)
     for i in rows_of(a):
+        if i.position in gone:
+            continue
         acc.setdefault(titles.get(i.position, "—"), []).append(i.score or 0)
     rows = [(name, scoring.percent(s), f"{round(sum(s) / 100, 1):g}", len(s)) for name, s in acc.items()]
     return sorted(rows, key=lambda r: r[1])

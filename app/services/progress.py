@@ -29,16 +29,50 @@ def record(a: TestAttempt, snaps: dict) -> None:
         _topic_result(_row(a.user_id, a.topic_id), int(a.score_pct))
     elif a.kind in ("interim", "diagnostic"):
         scores: dict[int, list[int]] = {}
+        gone = set(a.settings_snapshot.get("dropped", []))
         for i in a.items:
-            scores.setdefault(snaps[i.position][2], []).append(i.score or 0)
+            if i.position not in gone:
+                scores.setdefault(snaps[i.position][2], []).append(i.score or 0)
         for tid, sc in scores.items():
             pct = scoring.percent(sc)
             if a.kind == "interim" and pct < scoring.PASS_MIN:
                 _row(a.user_id, tid).status = "relearn"
             elif a.kind == "diagnostic" and pct >= scoring.SOLID_MIN:
-                p = _row(a.user_id, tid)
-                p.status, p.best_pct = "solid", max(p.best_pct or 0, pct)
-                p.flags = sorted({*(p.flags or []), "diagnostic"})
+                _diagnosed(a.user_id, tid, pct)
+
+
+def upgrade(a: TestAttempt, items: list, snaps: dict, old_pct: float) -> None:
+    """Qayta hisoblashdan keyin (recalc.py): mavzu holati faqat yaxshilanadi. Commit qilmaydi."""
+    if a.kind == "lesson" and a.topic_id:
+        _lesson(a)
+    elif a.kind == "topic" and a.topic_id:
+        p, pct = _row(a.user_id, a.topic_id), int(a.score_pct)
+        p.best_pct = max(p.best_pct or 0, pct)
+        if pct >= scoring.PASS_MIN and (p.status not in ("done", "solid") or (pct >= scoring.SOLID_MIN and p.status == "done")):
+            p.status = "solid" if pct >= scoring.SOLID_MIN else "done"
+            p.fail_streak = 0
+    elif a.kind in ("interim", "diagnostic"):
+        gone = set(a.settings_snapshot.get("dropped", []))
+        scores: dict[int, list[int]] = {}
+        for i in items:
+            if i.position not in gone:
+                scores.setdefault(snaps[i.position][2], []).append(i.score or 0)
+        later = a.kind == "interim" and db.session.scalar(
+            select(TestAttempt.id).where(TestAttempt.user_id == a.user_id, TestAttempt.kind == "interim",
+                                         TestAttempt.status == "submitted", TestAttempt.finished_at > a.finished_at).limit(1))
+        for tid, sc in scores.items():
+            pct, p = scoring.percent(sc), db.session.get(UserTopicProgress, (a.user_id, tid))
+            if a.kind == "diagnostic" and pct >= scoring.SOLID_MIN:
+                _diagnosed(a.user_id, tid, pct)
+            elif a.kind == "interim" and not later and pct >= scoring.PASS_MIN and p is not None \
+                    and p.status == "relearn" and (p.best_pct or 0) >= scoring.PASS_MIN:
+                p.status = "solid" if p.best_pct >= scoring.SOLID_MIN else "done"
+
+
+def _diagnosed(user_id: int, topic_id: int, pct: int) -> None:
+    p = _row(user_id, topic_id)
+    p.status, p.best_pct = "solid", max(p.best_pct or 0, pct)
+    p.flags = sorted({*(p.flags or []), "diagnostic"})
 
 
 def _row(user_id: int, topic_id: int) -> UserTopicProgress:

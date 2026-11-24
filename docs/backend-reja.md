@@ -16,7 +16,7 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 5b | ✅ O'qituvchi ekranlari (2-qism) | O'quv reja, bosh sahifa (tayyorlik, prognoz, keyingi qadam, bugungi reja, 3 qadamli yo'riqnoma), «Xatolar analitikasi», majburiy testlar jadvali, oraliq nazorat sahifasi (`app/services/plan.py`); attestatsiya sanasi `users.exam_date`dan | — |
 | 6 | ✅ Test o'ynatgichi bazada | 11 tur test savollar bankidan (`app/services/test_builder.py`), pleyer, javoblarni saqlash (`/api/urinish`, oflayn qayta yuborish), bosqichlar, baholash (`app/services/scoring.py`), natija va tahlil, xatolar va mavzu holati (`app/services/progress.py`), e'tiroz yuborish/tahrirlash/o'chirish | — |
 | 7 | ✅ Ekspert paneli (1-qism) | Savollar banki bazadan (filtrlar, sahifalash, «savollar yetarli emas»), muharrir: yaratish va tahrirlash (har tahrir yangi versiya, kichik mavzu tanlovi, jadval/chizma/rasm), arxivlash, AI navbati (tahrirlab tasdiqlash, rad etish), `audit_log`, rasm yuklash (PNG/JPEG/WebP, mazmunga qarab tekshiruv) | — |
-| 7b | ⏳ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazaga (bo'lim, mavzu, kichik mavzu, bloklar), Excel import/eksport, ekspert huquqlari (yo'nalishlar, ruxsatlar); e'tirozlarni ko'rib chiqish, rad etilgan AI savolini natijadan chiqarish, natijani qayta hisoblash, bildirishnomalar jadvali | — |
+| 7b | ✅ Ekspert paneli (2-qism) | «Mavzular va darslar» muharriri bazada (mavzu, dars, kichik mavzu, 9 tur blok, shablon tanlash; bir vaqtda tahrirlashdan himoya), e'tirozlarni ko'rib chiqish va natijalarni qayta hisoblash (faqat foydaga), rad etilgan AI savolini natijadan chiqarish, ixcham `notifications`, Excel eksport (import formatida, qayta yuklash takrorlamaydi), variant izohlari va kod maydoni, `expert_profiles` (huquqlar va mavzular; admin oynasi — 8-bosqichda) | — |
 | 7c | ✅ Takrorlanmaslik va xotira | Ko'rilgan savollar bitmapi (`user_seen`), takroriy savol berilmaydi, shablon generator (37 ta shablon, kichik mavzuga `generators` orqali bog'lanadi), xato boshqa savol bilan tuzatiladi, `at` tozalanadi, 12 oydan eski urinishlar siqiladi (`flask eski-testlarni-siqish`; jadval bo'yicha ishga tushirish — 10-bosqichda) | — |
 | 7d | ⏳ Savol formatlari | `lang` (JS, HTML, CSS, LOGO…), Excel panjarasi, Scratch bloklari, LOGO chizmasi, HTML/CSS ko'rinishi, Office ikonkalari | — |
 | 8 | ⏳ Admin paneli | Foydalanuvchilar, sozlamalar (`settings`), imtihon sanasi, `expert_invites` jadvali, `audit_log`, Excel/CSV import va eksport | 5 |
@@ -80,7 +80,7 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
 
 ## Bog'liqliklar qisqacha
 
-- Bloklamaydi, hozirdanoq boshlash mumkin: A7b, A7c, A7d, A8, A9, A10.
+- Bloklamaydi, hozirdanoq boshlash mumkin: A7d, A8, A9, A10.
 - B3/B4 kerak: A11/A12 (bot va email). Ungacha kod `123456` bo'lib qoladi.
 - B5 kerak: A13 (AI).
 - B7 va B8 kerak: A16 (serverga chiqarish).
