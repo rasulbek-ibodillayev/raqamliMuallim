@@ -33,7 +33,7 @@
       <b x-text="mmss">5:00</b>
     </div>
     <div class="alert alert-red" role="alert" x-show="expired" x-cloak>{{ icon("clock") }}<span>{{ _("Kodning amal qilish muddati (5 daqiqa) tugadi. Yangi kod so‘rang.") }}</span></div>
-    <span class="hint" id="otp-hint">{{ _("5 ta urinish bor. Namunada kod: 123456") }}</span>
+    <span class="hint" id="otp-hint">{{ _("5 ta urinish bor. Namunada kod: 123456") if is_dev else _("5 ta urinish bor.") }}</span>
 
     <div class="alert alert-yellow">{{ icon("info") }}<span>{{ _("Telegram boshqa raqamga ulanganmi? Bot sizga") }} <b>{{ _("Telegram’dagi raqam bilan davom etish") }}</b>{{ _("ni taklif qiladi.") }}</span></div>
 

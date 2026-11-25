@@ -1,6 +1,6 @@
 {# Profil → Telefon va email. Almashtirish ikki qadamda: yangi qiymat → shu raqamga (Telegram bot) yoki emailga
    kelgan kod. Kod tasdiqlanmaguncha eski aloqa amalda qoladi. Server: <acct_bp>.contact_code, <acct_bp>.contact_confirm (app/views/account.py). #}
-<div class="bt" x-data="{ method: '{{ cc_method or 'phone' }}', step: {{ 2 if cc_pending else 1 }}, target: '{{ cc_target or '' }}' }">
+<div class="bt" x-data="{ method: '{{ cc_method or 'phone' }}', step: {{ 2 if cc_pending else 1 }}, target: {{ (cc_target or '')|tojson|forceescape }} }">
   <button class="row-btn list-item" type="button" @click="open = open === 'contact' ? '' : 'contact'" :aria-expanded="open === 'contact'">
     <span class="list-ico">{{ icon("phone") }}</span><span class="grow"><span class="d-block">{{ _("Telefon va email") }}</span><span class="sub num">{{ acct.phone }} · {{ acct.email }}</span></span>
     <svg class="ico ico-sm chev" :style="open === 'contact' && 'transform:rotate(90deg)'"><use href="#i-chevron-right"/></svg>
@@ -42,7 +42,7 @@
         </div>
         {{ field_error("pw", errors if open == 'contact' and not cc_pending else {}) }}
         <p class="pw-ok" id="pw-ok" role="status" x-show="pwOk" x-cloak>{{ icon("check-circle", "ico-sm") }}{{ _("Parol to‘g‘ri") }}</p>
-        <span class="hint" id="cc-pw-hint">{{ _("Xavfsizlik uchun: telefon raqam yoki email faqat akkaunt paroli bilan almashtiriladi. Namunada parol: parol1234") }}</span>
+        <span class="hint" id="cc-pw-hint">{{ _("Xavfsizlik uchun: telefon raqam yoki email faqat akkaunt paroli bilan almashtiriladi. Namunada parol: parol1234") if is_dev else _("Xavfsizlik uchun: telefon raqam yoki email faqat akkaunt paroli bilan almashtiriladi.") }}</span>
       </div>
       <div class="justify-end row"><button class="btn btn-ghost" type="button" @click="open = ''">{{ _("Bekor qilish") }}</button><button class="btn btn-primary" type="submit" :disabled="busy || !pwOk" :title="pwOk ? '' : {{ _('Avval joriy parolni tasdiqlang')|tojson|forceescape }}">{{ _("Kod yuborish") }}</button></div>
     </form>
@@ -57,7 +57,7 @@
         <label class="label" for="cc-otp1">{{ _("Tasdiqlash kodi") }}</label>
         <div class="otp" role="group" aria-label="{{ _('6 xonali kod') }}" aria-describedby="otp-err" :class="err('otp') && 'invalid'" @input="clear('otp')">{% for i in range(6) %}<input id="cc-otp{{ loop.index }}" name="otp" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="{{ 'one-time-code' if loop.first }}" aria-label="{{ loop.index }}-raqam">{% endfor %}</div>
         {{ field_error("otp", errors if open == 'contact' and cc_pending else {}) }}
-        <span class="hint">{{ _("Namunada kod: 123456") }}</span>
+        {% if is_dev %}<span class="hint">{{ _("Namunada kod: 123456") }}</span>{% endif %}
       </div>
       <div class="row between wrap">
         <button class="link btn-reset" type="button" @click="step = 1">{{ _("Boshqa qiymat kiritish") }}</button>

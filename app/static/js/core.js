@@ -16,7 +16,7 @@ window.rmT = (function () {
     selection: "Belgilangan matn", toNote: "Eslatmaga saqlash", askAi: "AI’dan so‘rash",
     general: "Umumiy", today: "Bugun", noteSaved: "Eslatmalarga saqlandi",
     explain: "Tushuntirib bering: «{t}»", breakOver: "Tanaffus tugadi. Davom etamiz!",
-    copyManually: "Nusxalab oling:",
+    copyManually: "Nusxalab oling:", bigExcel: "Excel fayl 5 MB dan oshmasin", bigImage: "Rasm 2 MB dan oshmasin",
     unanswered: "{n} ta savolga javob berilmagan (0 ball hisoblanadi). Baribir yakunlaysizmi?"
   };
   var dict = null;
@@ -56,8 +56,15 @@ window.rmForm = function (extra, onOk) {
     submit: function (ev) {
       var self = this, form = ev.target.closest("form");
       if (this.busy) return;
-      this.busy = true; this.message = ""; this.ok = false;
-      var body = new FormData(form);
+      this.message = ""; this.ok = false;
+      var body = new FormData(form), big = null;
+      // Katta fayl serverga yuborilmaydi: server ulanishni uzadi va «internet yo'q» degandek ko'rinardi
+      body.forEach(function (v, k) { if (v instanceof File && v.size > (/\.xlsx$/i.test(v.name) ? 5 : 2) * 1048576) big = [k, v]; });
+      if (big) {
+        this.errors = {}; this.errors[big[0]] = this.message = rmT(/\.xlsx$/i.test(big[1].name) ? "bigExcel" : "bigImage");
+        return Promise.resolve({ ok: false, errors: this.errors, message: this.message });
+      }
+      this.busy = true;
       if (ev.submitter && ev.submitter.name) body.append(ev.submitter.name, ev.submitter.value);
       // Atributdan olinadi: .formAction atribut bo'lmasa joriy sahifa manzilini, .action esa name="action" maydonini qaytaradi
       return fetch((ev.submitter && ev.submitter.getAttribute("formaction")) || form.getAttribute("action") || location.href, {
@@ -92,7 +99,7 @@ window.rmForm = function (extra, onOk) {
 
 /* Telefon/email formatini brauzerda tekshirish (server bilan bir xil qoida: forms.py PHONE_RE, EMAIL_RE).
    «Kod yuborish» tugmasi faqat format to'g'ri bo'lganda faollashadi. only: "phone" | "email" | undefined (ikkalasi) */
-window.rmIsEmail = function (v) { return /^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$/.test((v || "").trim()); };
+window.rmIsEmail = function (v) { return /^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,24}$/.test((v || "").trim()) && v.trim().length <= 254; };
 window.rmIsPhone = function (v) {
   if (/[^\d\s+()\-]/.test(v || "")) return false;
   var d = (v || "").replace(/\D/g, "");

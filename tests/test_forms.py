@@ -2,7 +2,7 @@
 import pytest
 
 from app import create_app
-from tests.conftest import JSON
+from tests.conftest import CONFIG, JSON
 
 CASES = [
     ("user", "/kirish", {"login": "abc", "pw": ""}, {"login", "pw"}),
@@ -56,8 +56,7 @@ def test_registration_flow(guest):
 
 
 def test_csrf_required():
-    app = create_app()
-    app.config.update(TESTING=True)
+    app = create_app({**CONFIG, "WTF_CSRF_ENABLED": True})
     c = app.test_client()
     assert c.post("/kirish", data={"login": "x"}).status_code == 400
     r = c.post("/api/urinish/00000000-0000-4000-8000-000000000000/javoblar", json={})
@@ -89,11 +88,11 @@ def test_recover_locks_after_5_wrong_secrets(client):
     for _ in range(5):
         client.post("/parol-tiklash/maxfiy-soz", data={"who": "+998901234567", "secret": "xato"}, headers=JSON)
     r = client.post("/parol-tiklash/maxfiy-soz", data={"who": "+998901234567", "secret": "informatika"}, headers=JSON)
-    assert r.status_code == 422 and "Urinishlar tugadi" in r.json["errors"]["secret"]
+    assert r.status_code == 429 and "Urinishlar tugadi" in r.json["errors"]["secret"] and int(r.headers["Retry-After"]) > 1700
     # "Boshqa telefon kiritish" (qayta=1) urinishlar sonini nolga tushirmaydi
     client.get("/parol-tiklash/maxfiy-soz?qayta=1")
     r = client.post("/parol-tiklash/maxfiy-soz", data={"who": "+998901234567", "secret": "informatika"}, headers=JSON)
-    assert r.status_code == 422
+    assert r.status_code == 429
 
 
 def test_change_phone_requires_code(client):
@@ -139,7 +138,7 @@ def test_password_locks_after_5_failures(client):
         client.post("/app/profil/parol-tekshirish", data={"pw": "xato"}, headers=JSON)
     # Bloklangandan keyin to'g'ri parol ham qabul qilinmaydi
     r = client.post("/app/profil/aloqa/kod", data={"method": "email", "contact": "a@b.uz", "pw": "parol1234"}, headers=JSON)
-    assert r.status_code == 422 and "5 marta" in r.json["errors"]["pw"]
+    assert r.status_code == 429 and "5 marta" in r.json["errors"]["pw"]
 
 
 def test_contact_form_has_password_gate(client):

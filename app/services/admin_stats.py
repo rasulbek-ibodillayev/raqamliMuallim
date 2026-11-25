@@ -201,7 +201,7 @@ ENTITIES = {"question": _l("Savol"), "user": _l("Foydalanuvchi"), "expert": _l("
 ACTIONS = {"create": _l("yaratildi"), "update": _l("o‘zgartirildi"), "delete": _l("o‘chirildi"), "archive": _l("arxivlandi"),
            "reject": _l("rad etildi"), "pause": _l("to‘xtatildi"), "resume": _l("qaytarildi"), "block": _l("bloklandi"),
            "unblock": _l("blokdan chiqarildi"), "exam_date": _l("attestatsiya sanasi"), "reset_link": _l("parol havolasi berildi"),
-           "reset_used": _l("parol havola orqali yangilandi"), "perms": _l("huquqlari o‘zgardi"), "send": _l("tayyorlandi"), "export": _l("CSV yuklab olindi"),
+           "reset_used": _l("parol havola orqali yangilandi"), "password_reset": _l("parol tiklandi"), "perms": _l("huquqlari o‘zgardi"), "send": _l("tayyorlandi"), "export": _l("CSV yuklab olindi"),
            "resend": _l("qayta yuborildi"), "cancel": _l("bekor qilindi"), "import_excel": _l("Excel’dan yuklandi"),
            "objection_key": _l("e’tiroz: javob o‘zgardi"), "objection_drop": _l("e’tiroz: hisobdan chiqarildi"),
            "objection_fix": _l("e’tiroz: matn tuzatiladi"), "objection_reject": _l("e’tiroz: rad etildi")}

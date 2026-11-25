@@ -18,6 +18,9 @@ def _hash(value: str) -> str:
     return generate_password_hash(value, method=method)
 
 
+_DUMMY: str | None = None
+
+
 class User(Timestamps, db.Model):
     __tablename__ = "users"
     __table_args__ = (
@@ -45,9 +48,26 @@ class User(Timestamps, db.Model):
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     notif_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # bildirishnomalar shu vaqtgacha o'qilgan
 
-    # Flask-Login: sessiyada id saqlanadi; is_active=False bo'lsa kira olmaydi
+    # Flask-Login: sessiyada "<id>.<belgi>" saqlanadi; is_active=False bo'lsa kira olmaydi
     def get_id(self) -> str:
-        return str(self.id)
+        return f"{self.id}.{self.auth_tag()}"
+
+    def auth_tag(self) -> str:
+        """Parolga bog'langan qisqa imzo: parol almashsa boshqa qurilmalardagi sessiya va «eslab qolish» cookie'lari
+        o'z-o'zidan bekor bo'ladi (bazada sessiyalar jadvali kerak emas)."""
+        import hashlib
+        import hmac
+
+        from flask import current_app
+        raw = hmac.new(current_app.config["SECRET_KEY"].encode(), f"session|{self.id}|{self.password_hash or ''}".encode(), hashlib.sha256)
+        return raw.hexdigest()[:20]
+
+    @classmethod
+    def by_session(cls, value: str) -> "User | None":
+        import hmac
+        uid, _sep, tag = value.partition(".")
+        user = db.session.get(cls, int(uid)) if uid.isascii() and uid.isdigit() and len(uid) < 19 else None
+        return user if user is not None and user.is_active and hmac.compare_digest(tag.encode(), user.auth_tag().encode()) else None
 
     @property
     def is_authenticated(self) -> bool:
@@ -62,6 +82,14 @@ class User(Timestamps, db.Model):
 
     def check_password(self, pw: str) -> bool:
         return bool(self.password_hash) and check_password_hash(self.password_hash, pw)
+
+    @staticmethod
+    def spend_hash_time(value: str) -> None:
+        """Akkaunt topilmaganda ham xesh hisoblanadi: javob vaqtidan kimning ro'yxatdan o'tgani bilinmasin."""
+        global _DUMMY
+        if _DUMMY is None:
+            _DUMMY = _hash("-")
+        check_password_hash(_DUMMY, value)
 
     def set_secret(self, secret: str) -> None:
         """Maxfiy so'z normallashtirilgan holda (forms.norm_secret) xeshlanadi."""
@@ -81,6 +109,12 @@ class User(Timestamps, db.Model):
             return None
         q = cls.email == v.lower() if "@" in v else cls.phone == norm_phone(v)
         return db.session.scalar(db.select(cls).where(q))
+
+    @property
+    def remember_for(self):
+        """«Eslab qolish» muddati: o'qituvchi telefonida bir yil, ekspert va adminda 7 kun (huquqi keng)."""
+        from datetime import timedelta
+        return timedelta(days=365 if self.role == "user" else 7)
 
     @property
     def full_name(self) -> str:

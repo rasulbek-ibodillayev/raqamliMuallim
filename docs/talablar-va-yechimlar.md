@@ -209,6 +209,58 @@ Ixcham saqlash (100 000 sertifikatda o'lchangan, indekslar bilan): 1336 → 124 
 | Mavzular nomi va foizi har sertifikatda (JSON) | Nomlar bitta umumiy `certificate_layouts` qatorida; sertifikatda foizlar, har mavzuga 1 bayt |
 | `issued_at` vaqt bilan | Sana, 4 bayt |
 
+## 8. Himoya (9-bosqich, 2026-11-25)
+
+**Urinishlarni cheklash.** PostgreSQL'da bitta `rate_limits` jadvali (`services/limits.py`), Redis'siz. Ilgari hisob sessiyada
+(cookie'da) edi: cookie o'chirilsa yoki eskisi qayta yuborilsa urinishlar qaytadan boshlanardi.
+
+| Nima | Kim bo'yicha | Chegara |
+|---|---|---|
+| Kirish | akkaunt + IP | 15 daqiqada 5 ta xato |
+| Kirish | akkaunt, hamma IP'lardan | 1 soatda 30 ta xato |
+| Kirish | IP | 15 daqiqada 100 ta xato |
+| Kod so'rash | raqam yoki email | 15 daqiqada 5 ta, kuniga 15 ta |
+| Kod so'rash | IP | 1 soatda 200 ta |
+| Kodni tekshirish | raqam yoki email | 5 ta xato, keyin yangi kod |
+| Maxfiy so'z | akkaunt | 30 daqiqada 5 ta xato, kuniga 15 ta |
+| Maxfiy so'z | IP | 30 daqiqada 50 ta xato |
+| Joriy parol (profil) | foydalanuvchi | 15 daqiqada 5 ta xato |
+
+- Urinish tekshiruvdan oldin, bitta atomar so'rovda sanaladi: parallel taxminlar chegaradan o'tmaydi. To'g'ri kirish hisobga yozilmaydi.
+- IP chegarasi ataylab keng: maktab va mobil operator orqasida yuzlab odam bitta IP bilan chiqadi. IPv6'da /64 bo'yicha.
+- Bitta IP akkaunt egasini bloklay olmaydi (4 × 5 < 30); egasi boshqa tarmoqdan kiradi.
+- Xotira: 8 baytli HMAC kalit (telefon, email, IP saqlanmaydi), UNLOGGED (WAL yo'q). O'lchandi: indeks bilan qatoriga 80 bayt,
+  100 000 qatorda 8 MB; muddati o'tgani o'zi tozalanadi. Kirishga 3 ta qoida uchun 3,8 ms qo'shiladi (parol xeshi ≈ 147 ms).
+
+**Topilgan va tuzatilgan:**
+
+| Topilma | Tuzatish |
+|---|---|
+| CSRF token 1 soatda eskirardi: 120 daqiqalik attestatsiya testida javoblar serverga yozilmay qolardi | Token sessiya davomida amal qiladi |
+| Serverda `123456` kodi bilan istalgan akkauntni egallab olish mumkin edi | Kod faqat ishlab chiqishda; yetkazish ulanmaguncha serverda hech qaysi kod o'tmaydi (`services/codes.py`) |
+| `SECRET_KEY` berilmasa ma'lum kalit ishlatilardi | Serverda kalitsiz (yoki 32 belgidan qisqa) ishga tushmaydi |
+| `.env` hech qayerda o'qilmasdi | `run.py` o'qiydi (kutubxonasiz) |
+| Parol almashganda boshqa qurilmalar kirgan holda qolardi | Sessiya va «eslab qolish» parolga bog'langan (`User.auth_tag`), sessiyalar jadvali kerak emas |
+| Tiklash qadami cookie'sini qayta yuborib, parolni yana almashtirish mumkin edi | 15 daqiqa va akkaunt belgisi bilan bir martalik |
+| Cookie'larda `Secure` yo'q, HSTS yo'q | Serverda qo'yiladi |
+| `MAX_CONTENT_LENGTH` yo'q | 512 KB; dars muharriri 2 MB; fayl yuklash 6 MB. Katta fayl brauzerning o'zida to'xtatiladi |
+| Excel'da `ZZZZZZ1` katagi serverni xotirasiz qoldirardi; buzilgan yoki parolli fayl — 500 | Ustunlar 200 tagacha, ochilgan hajm 10 MB, xato matni chiqadi |
+| Boshqa saytdagi havola `/chiqish` ni ochib, eslatmalar va yuborilmagan javoblarni o'chirtira olardi | `Sec-Fetch-Site` tekshiriladi |
+| Akkaunt bor-yo'qligi javob vaqtidan bilinardi | Topilmaganda ham xesh hisoblanadi |
+| Telefon/emailni almashtirishda parolsiz ham «boshqa akkauntga bog'langan» javobi chiqardi | Avval parol tekshiriladi |
+| Email'da `'` va `<` qabul qilinardi va Alpine ifodasiga tushardi | Qoida qattiqlashtirildi, qiymat ekranlanadi |
+| NUL bayt 500 xato berardi (pleyer cheksiz qayta yuborardi) | Olib tashlanadi yoki 422 |
+| Parol tiklanganda egasi bilmasdi | Jurnal va bildirishnoma |
+| Ekspert/admin «eslab qolish» 1 yil | 7 kun (o'qituvchida 1 yil) |
+| Docker'da baza (paroli ma'lum) butun tarmoqqa ochiq edi | Faqat 127.0.0.1 |
+| Kirgan sahifalar umumiy keshga tushishi mumkin edi (Flask 3.0.3, CVE-2026-27205) | `Vary: Cookie`; panel va kirish sahifalari `no-store` |
+
+Kutubxonalar OSV bazasi bilan solishtirildi (31 ta paket): yuqoridagi bitta past darajali zaiflikdan boshqa topilmadi.
+
+**Ataylab qoldirilgan:** ko'p IP'li hujumchi bir akkauntga kirishni 1 soatga yopa oladi (kirgan qurilmalar ishlayveradi, parol
+havolasi bilan tiklanadi); ro'yxatdan o'tish va parol tiklash sahifalari raqam band yoki yo'qligini aytadi (qulaylik uchun, IP bo'yicha
+cheklangan); chiqilgandan keyin ham o'g'irlangan cookie parol almashguncha ishlaydi (sessiyalar jadvali yo'q).
+
 ## Manbalar
 
 - Gemini: [hududlar](https://ai.google.dev/gemini-api/docs/available-regions), [narxlar](https://ai.google.dev/gemini-api/docs/pricing),

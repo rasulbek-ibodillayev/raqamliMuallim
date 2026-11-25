@@ -1,7 +1,7 @@
 """Sozlamalar (barcha chegaralar) va admin harakatlari jurnali."""
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Index, Integer, String, func
+from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Index, Integer, SmallInteger, String, func
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -44,6 +44,16 @@ class DailyStat(db.Model):
     phone: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     tablet: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     pwa: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
+
+class RateLimit(db.Model):
+    """Urinishlar hisobi (services/limits.py). key — HMAC: telefon, email yoki IP saqlanmaydi. UNLOGGED — WAL'siz."""
+    __tablename__ = "rate_limits"
+    __table_args__ = {"prefixes": ["UNLOGGED"]}
+
+    key: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
+    until: Mapped[datetime] = mapped_column(DateTime(timezone=True))      # davr tugashi
+    n: Mapped[int] = mapped_column(SmallInteger)
 
 
 class ExpertInvite(db.Model):

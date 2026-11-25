@@ -66,7 +66,7 @@
       <span class="pw-ok" role="status" x-show="verified" {{ '' if verified else 'x-cloak' }}>{{ icon("check-circle", "ico-sm") }}{{ _("Kod tasdiqlandi") }}</span>
     </div>
     {{ field_error("otp", errors) }}
-    <span class="hint" x-show="!verified">{{ _("Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing. Namunada kod: 123456") }}</span>
+    <span class="hint" x-show="!verified">{{ _("Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing. Namunada kod: 123456") if is_dev else _("Kod 15 daqiqa amal qiladi. Kelmasa, «Qayta yuborish»ni bosing.") }}</span>
   </div>
 
   <!-- 3) Yangi parol: faqat kod to'g'ri bo'lsa -->

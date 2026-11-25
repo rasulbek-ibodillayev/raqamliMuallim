@@ -40,6 +40,10 @@ Namunaviy kontent (mavzular, dars bloklari, savollar). O'z faylingizni yuklash f
 FLASK_APP=run.py .venv/Scripts/flask kontent-yuklash
 ```
 
+Muhit o‘zgaruvchilari `.env` faylidan o‘qiladi (namuna: `.env.example`). Serverda `SECRET_KEY` shart: usiz ilova ishga tushmaydi.
+Nginx ortida `RM_PROXY_HOPS=1` va `RM_HOSTS=<domen>` bering, nginx’da `client_max_body_size 6m`.
+Urinishlar chegarasiga tushib qolgan foydalanuvchi uchun: `FLASK_APP=run.py .venv/Scripts/flask cheklovlarni-tozalash`.
+
 `/ekranlar` va `/_rol/<rol>` faqat debug rejimida (`run.py`) yoki `RM_DEV_TOOLS=1` bilan ochiladi.
 
 Testlar alohida bazada ishlaydi (bir marta yarating):
@@ -116,8 +120,8 @@ docs/usability-test-plan.md  5 nafar o‘qituvchi bilan sinov rejasi (vazifalar,
 ## Keyingi qadamlar
 
 1. ~~SQLAlchemy modellari va Alembic migratsiyalari (TZ 23-bo‘lim).~~ Tayyor; `questions` maydonlari TZ 6.1 bilan solishtirilishi kerak.
-2. ~~Ro‘yxatdan o‘tish va sessiyalar.~~ Flask-Login va `users` jadvali ulandi; Telegram bot va email orqali kod yuborish
-   (hozir kod har doim 123456), kirish urinishlarini cheklash va ekspert taklifnomalari jadvali qoldi.
+2. ~~Ro‘yxatdan o‘tish va sessiyalar.~~ Flask-Login va `users` jadvali ulandi; Telegram bot va email orqali kod yuborish qoldi
+   (hozir kod faqat ishlab chiqishda 123456).
 3. `mock.py` o‘rniga servis qatlami; formalarni HTMX bilan ulash.
 4. ~~Test javoblarini IndexedDB'ga yozib, internet tiklanganda yuborish.~~ Tayyor (`static/js/player.js`, `/api/urinish`); backendda API saqlashni bazaga o‘tkazish qoldi.
 5. Eslatmalar, bildirishnomalar va qidiruvni brauzer xotirasi va namunaviy ma’lumot o‘rniga API'ga ulash.

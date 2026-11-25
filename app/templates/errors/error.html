@@ -4,6 +4,7 @@
   400: ("refresh", _("Sahifa muddati o‘tdi"), _("Xavfsizlik uchun forma eskirdi yoki so‘rov noto‘g‘ri. Sahifani yangilab, qayta yuboring.")),
   404: ("search", _("Sahifa topilmadi"), _("Havola eskirgan yoki manzilda xato bor. Bosh sahifadan kerakli bo‘limni toping.")),
   403: ("lock", _("Bu sahifaga ruxsat yo‘q"), _("Sahifa boshqa rol (ekspert yoki administrator) uchun. Boshqa akkaunt bilan kirib ko‘ring.")),
+  413: ("upload", _("Fayl juda katta"), _("Yuborilgan fayl yoki matn ruxsat etilgan hajmdan oshdi. Kichikroq fayl tanlang.")),
   500: ("alert", _("Nimadir noto‘g‘ri ketdi"), _("Xato bizning tomonda. Javoblaringiz va progress saqlangan. Bir daqiqadan keyin qayta urinib ko‘ring.")),
 } %}
 {% set ico, head, text = E.get(code, E[500]) %}
@@ -19,7 +20,7 @@
     <button class="btn btn-primary" type="button" data-reload>{{ icon("refresh") }}{{ _("Qayta urinish") }}</button>
     {% endif %}
     <a class="btn {{ 'btn-outline' if code >= 500 or code == 400 else 'btn-primary' }}" href="{{ home_url }}">{{ _("Bosh sahifa") }}</a>
-    {% if code == 404 %}<button class="btn btn-ghost" type="button" data-back>{{ icon("arrow-left") }}{{ _("Orqaga") }}</button>{% endif %}
+    {% if code in (404, 413) %}<button class="btn btn-ghost" type="button" data-back>{{ icon("arrow-left") }}{{ _("Orqaga") }}</button>{% endif %}
   </div>
 </div>
 {% endblock %}

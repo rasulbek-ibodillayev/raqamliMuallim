@@ -1,6 +1,6 @@
 # Backend rejasi: kim nima qiladi
 
-Holat: 2026-11-24, `backend` branchi.
+Holat: 2026-11-25, `backend` branchi.
 
 Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qaysi qadamingizga bog'liqligi ko'rsatilgan.
 
@@ -20,7 +20,7 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 7c | ✅ Takrorlanmaslik va xotira | Ko'rilgan savollar bitmapi (`user_seen`), takroriy savol berilmaydi, shablon generator (37 ta shablon, kichik mavzuga `generators` orqali bog'lanadi), xato boshqa savol bilan tuzatiladi, `at` tozalanadi, 7 kundan eski urinishlar siqiladi (`flask eski-testlarni-siqish`; jadval bo'yicha ishga tushirish — 10-bosqichda) | — |
 | 7d | ✅ Savol formatlari | Kod tili (13 ta til, serverda ranglash), HTML/CSS natijasi (skriptsiz oyna), Excel oynasi, Scratch bloklari, LOGO chizmasi, Word/Excel/PowerPoint/Paint tugmalari, variantlar kod/chizma/tugma ko'rinishida; muharrirda jonli ko'rinish; jami 68 ta shablon (`app/services/media.py`, `ui_icons.py`, `highlight.py`) | — |
 | 8 | ✅ Admin paneli | Statistika va CSV hisobot, foydalanuvchilar (filtr, karta, bloklash, parol havolasi, o'chirish, CSV), attestatsiya sanasi va uni Excel'dan yuklash, ekspertlar va taklifnomalar (`expert_invites`, token bazada saqlanmaydi), huquq va mavzular, sozlamalar (`services/settings.py`), amallar jurnali, `daily_stats`, `question_stats`; `last_seen_at` kuniga bir marta yangilanadi | 5 |
-| 9 | ⏳ Himoya | Kirish va kod yuborishni cheklash (IP va login bo'yicha, PostgreSQL'da), `MAX_CONTENT_LENGTH`, xavfsizlik tekshiruvi | — |
+| 9 | ✅ Himoya | Urinishlarni cheklash PostgreSQL'da (`rate_limits`, `services/limits.py`): kirish, kod so'rash va tekshirish, maxfiy so'z, joriy parol; so'rov hajmi (512 KB / 2 MB / 6 MB); parol almashsa boshqa qurilmalar chiqadi; serverda `SECRET_KEY` shart; xavfsizlik tekshiruvi va topilganlar tuzatildi ([talablar-va-yechimlar.md](talablar-va-yechimlar.md), 8-bo'lim) | — |
 | 10 | ⏳ Fon vazifalari | PostgreSQL `jobs` navbati (`SKIP LOCKED`) va bitta worker, Redis'siz: email, audio, savol tayyorlash, statistika | — |
 | 10b | ⏳ Faol bo'lmagan akkauntlar | 6 oy: 14 kun oldin ogohlantirish, o'chirish, fayllarni tozalash; ogohlantirish yuborilmagan bo'lsa o'chirilmaydi | 10, 11 yoki 12 |
 | 10c | ⏳ Oflayn paket | Mavzu darslari va dars testlarini oldindan yuklash (kalitsiz), 30 MB chegara | 7c |
@@ -80,7 +80,7 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
 
 ## Bog'liqliklar qisqacha
 
-- Bloklamaydi, hozirdanoq boshlash mumkin: A9, A10.
-- B3/B4 kerak: A11/A12 (bot va email). Ungacha kod `123456` bo'lib qoladi.
+- Bloklamaydi, hozirdanoq boshlash mumkin: A10, A10c.
+- B3/B4 kerak: A11/A12 (bot va email). Ungacha kod faqat ishlab chiqishda `123456`; serverda kod qabul qilinmaydi (9-bosqich), ya'ni ro'yxatdan o'tish Google orqali yoki bot/email ulangach ishlaydi.
 - B5 kerak: A13 (AI).
 - B7 va B8 kerak: A16 (serverga chiqarish).

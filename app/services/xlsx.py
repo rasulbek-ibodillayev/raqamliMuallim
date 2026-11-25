@@ -8,14 +8,16 @@ from __future__ import annotations
 import io
 import re
 import zipfile
+import zlib
 from xml.etree import ElementTree as ET
 from xml.sax.saxutils import escape
 
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"}
 MAX_BYTES = 5 * 1024 * 1024        # yuklanadigan fayl hajmi
-MAX_UNZIPPED = 50 * 1024 * 1024    # «zip bomba»dan himoya
+MAX_UNZIPPED = 10 * 1024 * 1024    # «zip bomba»dan himoya (XML daraxti xotirada ≈ 10 baravar kattalashadi)
 MAX_ROWS = 2000
+MAX_COLS = 200                     # «ZZZZZZ1» kabi manzil milliardlab bo'sh katak yaratmasin
 
 
 class XlsxError(ValueError):
@@ -24,7 +26,10 @@ class XlsxError(ValueError):
 
 def _col_index(ref: str) -> int:
     """'C7' → 2 (0 dan)."""
-    letters = re.match(r"[A-Z]+", ref).group(0)
+    m = re.match(r"[A-Z]{1,3}(?=\d)", ref)
+    if m is None:
+        raise XlsxError("Excel faylini o‘qib bo‘lmadi")
+    letters = m.group(0)
     n = 0
     for ch in letters:
         n = n * 26 + (ord(ch) - 64)
@@ -59,7 +64,8 @@ def read_rows(data: bytes) -> list[list[str]]:
                 shared.append("".join(t.text or "" for t in si.iter(f"{{{NS['m']}}}t")))
         sheet = _first_sheet(z, names)
         root = ET.fromstring(z.read(sheet))
-    except (KeyError, ET.ParseError):
+    # RuntimeError — parolli, NotImplementedError — noma'lum siqish, zlib/BadZipFile — buzilgan fayl
+    except (KeyError, ET.ParseError, RuntimeError, zlib.error, zipfile.BadZipFile, EOFError):
         raise XlsxError("Excel faylini o‘qib bo‘lmadi") from None
     rows = []
     for row in root.iter(f"{{{NS['m']}}}row"):
@@ -76,6 +82,8 @@ def read_rows(data: bytes) -> list[list[str]]:
                 elif kind is None and re.fullmatch(r"-?\d+\.0+", val):
                     val = val.split(".")[0]     # 45.0 → 45
             idx = _col_index(ref) if ref else len(cells)
+            if idx >= MAX_COLS:
+                continue
             cells[idx] = val.strip()
         if cells:
             width = max(cells) + 1

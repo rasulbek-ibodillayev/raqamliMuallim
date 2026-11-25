@@ -4,22 +4,20 @@ O'qituvchi (user), ekspert va admin profillari bir xil formalardan foydalanadi; 
 blueprint (url'lar /app/profil, /ekspert/profil, /admin/profil). register(bp, ...) shu yo'nalishlarni
 berilgan blueprint'ga qo'shadi. Parolni unutganda — umumiy /parol-tiklash (auth.reset) sahifasi.
 
-Parol, maxfiy so'z, ism va telefon/email users jadvalida (current_user) saqlanadi.
-Tasdiqlash kodi hozircha 123456 (Telegram bot va email ulanmagan). Keyin: audit_log.
+Parol, maxfiy so'z, ism va telefon/email users jadvalida (current_user) saqlanadi. Tasdiqlash kodi — services/codes.py.
+Joriy parol: 15 daqiqada 5 ta xato urinish, hisob bazada (services/limits.py).
 """
-from flask import jsonify, render_template, request, session, url_for
+from flask import current_app, jsonify, render_template, request, session, url_for
 from flask_babel import gettext as _
-from flask_login import current_user
+from flask_login import current_user, login_user
 from sqlalchemy.exc import IntegrityError
 
 from .. import mock as m
 from ..extensions import db
 from ..models.users import User
-from ..forms import (check_email, check_name, check_otp, check_password, check_phone, check_secret, field, fmt_phone,
-                     norm_phone, otp_code, required, respond, validate)
-
-DEMO_OTP = "123456"
-PW_MAX_FAILS = 5
+from ..forms import (check_email, check_name, check_otp, check_password, check_phone, check_secret, error_status, field,
+                     fmt_phone, norm_phone, otp_code, required, respond, validate)
+from ..services import codes, limits
 
 
 def mask_phone(p: str | None) -> str:
@@ -47,21 +45,25 @@ def account_of(role: str) -> dict:
 
 
 def check_current_password(pw: str):
-    """Joriy parolni tekshiradi; 5 ta xato urinishdan keyin bloklanadi (hozircha — sessiya oxirigacha)."""
-    fails = session.get("pw_fails", 0)
-    if fails >= PW_MAX_FAILS:
-        return _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring")
+    """Joriy parolni tekshiradi; 5 ta xato urinishdan keyin 15 daqiqaga yopiladi (hamma qurilmada)."""
     if not current_user.password_hash:      # Google orqali ro'yxatdan o'tgan
         return _("Akkauntingizda parol yo‘q. Uni «Parolni tiklash» orqali o‘rnating")
     if not pw:
         return _("Joriy parolni kiriting")
-    if not current_user.check_password(pw):
-        session["pw_fails"] = fails + 1
-        left = PW_MAX_FAILS - fails - 1
-        return (_("Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=left) if left
-                else _("Parol 5 marta noto‘g‘ri kiritildi. 15 daqiqadan keyin qayta urinib ko‘ring"))
-    session.pop("pw_fails", None)
-    return None
+    key = ("pw", current_user.id)
+    r = limits.take(key)
+    if not r.blocked and current_user.check_password(pw):
+        limits.clear(key)
+        return None
+    return (_("Parol noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=r.left) if r.left
+            else _("Parol 5 marta noto‘g‘ri kiritildi. %(t)s keyin qayta urinib ko‘ring",
+                   t=limits.wait_text(r.wait or limits.RULES["pw"][1])))
+
+
+def renew_session() -> None:
+    """Parol almashgach: boshqa qurilmalar chiqib ketadi (User.auth_tag), shu qurilma kirgan holda qoladi."""
+    remember = current_app.config.get("REMEMBER_COOKIE_NAME", "remember_token") in request.cookies
+    login_user(current_user._get_current_object(), remember=remember, duration=current_user.remember_for)
 
 
 def context(bp_name: str, role: str, **ctx) -> dict:
@@ -89,7 +91,7 @@ def password_check():
     """Telefon/emailni almashtirishdan oldin joriy parolni tekshirish: to'g'ri bo'lsa «Kod yuborish» faollashadi."""
     err = check_current_password(request.form.get("pw", ""))
     if err:
-        return jsonify(ok=False, errors={"pw": err}), 422
+        return jsonify(ok=False, errors={"pw": err}), *error_status()
     return jsonify(ok=True, message=_("Parol to‘g‘ri"))
 
 
@@ -104,11 +106,14 @@ def contact_code(bp_name, role, template, **extra):
     target = norm_phone(value) if method == "phone" else value.lower()
     if not errors and target == current:
         errors = {"contact": _("Bu sizning hozirgi ma’lumotingiz. Boshqasini kiriting")}
-    if not errors and User.by_login(target) is not None:
-        errors = {"contact": _("Bu telefon/email boshqa akkauntga bog‘langan")}
+    # Parol avval: noto'g'ri parol bilan kimning raqami ro'yxatda borligini bilib bo'lmaydi
     pw_error = check_current_password(request.form.get("pw", ""))
     if pw_error:
         errors = {**errors, "pw": pw_error}
+    if not errors:
+        err = codes.lookup() or (_("Bu telefon/email boshqa akkauntga bog‘langan") if User.by_login(target) is not None
+                                 else codes.send(target))
+        errors = {"contact": err} if err else {}
     if not errors:
         session["contact_change"] = {"method": method, "target": target}
     msg = (_("Kod Telegram bot orqali %(c)s raqamiga yuborildi", c=fmt_phone(target)) if method == "phone"
@@ -124,7 +129,13 @@ def contact_confirm(bp_name, role, template, **extra):
     if not cc:
         return respond(errors={"otp": _("Avval yangi telefon yoki emailni kiriting")}, template=template,
                        **context(bp_name, role, open="contact", **extra))
-    errors = validate({"otp": (otp_code(), check_otp, lambda v: None if v == DEMO_OTP else _("Kod noto‘g‘ri. Namunada kod: 123456"))})
+    code = otp_code()
+    errors = validate({"otp": (code, check_otp)})
+    if not errors:
+        err, dead = codes.verify(cc["target"], code)
+        errors = {"otp": err} if err else {}
+        if dead:
+            session.pop("contact_change", None)
     if not errors:
         setattr(current_user, cc["method"], cc["target"])
         try:
@@ -134,7 +145,7 @@ def contact_confirm(bp_name, role, template, **extra):
             errors = {"otp": _("Bu telefon/email boshqa akkauntga bog‘langan")}
     if not errors:
         session.pop("contact_change", None)
-    msg =(_("Telefon raqam yangilandi") if cc["method"] == "phone" else _("Email yangilandi")) if not errors else None
+    msg = (_("Telefon raqam yangilandi") if cc["method"] == "phone" else _("Email yangilandi")) if not errors else None
     return respond(errors=errors, template=template, **context(bp_name, role, open="contact", **extra),
                    redirect_to=url_for(bp_name + ".profile"), message=msg)
 
@@ -162,6 +173,7 @@ def change_password(bp_name, role, template, **extra):
     if not errors:
         current_user.set_password(new)
         db.session.commit()
+        renew_session()
     return respond(errors=errors, template=template, **context(bp_name, role, open="pw", **extra),
                    redirect_to=url_for(bp_name + ".profile"), message=_("Parol o‘zgartirildi"))
 

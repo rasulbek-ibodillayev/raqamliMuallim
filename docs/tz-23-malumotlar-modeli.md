@@ -26,6 +26,7 @@
 | rag_sources, rag_chunks | RAG manbalari va vektorlar |
 | settings, audit_log | Standartdan farqli sozlamalar; admin va ekspert amallari jurnali |
 | expert_invites | Ekspert taklifnomalari (token saqlanmaydi: imzodan hosil bo'ladi) |
+| rate_limits | Urinishlar hisobi (UNLOGGED; kalit — HMAC, shaxsiy ma'lumot yo'q) |
 | daily_stats, question_stats | Kunlik faollik (kuniga bitta qator, shaxssiz); savol javoblari statistikasi |
 
 **Taklif. Xotirani tejash usullari:** test natijalari ixcham jadvalda (savol ID, javob, ball, vaqt);

@@ -29,7 +29,8 @@ def current_role() -> str | None:
 
 def safe_next(url: str | None) -> str | None:
     """Faqat o'z saytimizdagi nisbiy manzil (ochiq yo'naltirishdan himoya)."""
-    return url if url and url.startswith("/") and not url.startswith("//") and "\\" not in url else None
+    # Boshqaruv belgilari ham: brauzer "/<tab>/evil.uz" ni "//evil.uz" deb o'qiydi
+    return url if url and url.startswith("/") and not url.startswith("//") and "\\" not in url and url.isprintable() else None
 
 
 def init_app(app):

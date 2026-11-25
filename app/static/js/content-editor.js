@@ -118,6 +118,7 @@ window.rmContentEditor = function (cfg) {
     upload: function (b, ev) {
       var f = ev.target.files[0], form = new FormData();
       if (!f) return;
+      if (f.size > 2 * 1048576) { rmToast(rmT("bigImage")); ev.target.value = ""; return; }
       form.append("image", f);
       call(cfg.urls.image, form, true).then(function (j) { b.data.src = j.src; }).catch(function (e) { rmToast(e.message); ev.target.value = ""; });
     },

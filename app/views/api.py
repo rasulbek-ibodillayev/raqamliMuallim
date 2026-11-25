@@ -46,7 +46,7 @@ def _valid_value(v) -> bool:
     if isinstance(v, int):
         return 0 <= v < 26
     if isinstance(v, str):
-        return len(v) <= 500
+        return len(v) <= 500 and "\x00" not in v
     if isinstance(v, list):
         return len(v) <= 26 and all(x is None or (isinstance(x, int) and not isinstance(x, bool) and 0 <= x < 26) for x in v)
     return False

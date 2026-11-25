@@ -2,9 +2,11 @@
 
 Foydalanuvchilar users jadvalida (parol va maxfiy so'z — xesh), sessiya — Flask-Login.
 Ro'yxatdan o'tish qadamlari orasidagi ma'lumot (telefon/email, tasdiqlangani) Flask sessiyasida saqlanadi.
-Tasdiqlash kodi hozircha har doim 123456: Telegram bot va email yuborish hali ulanmagan.
+Urinishlar hisobi sessiyada emas, bazada (services/limits.py): cookie'ni o'chirish yoki eskisini qayta yuborish yordam bermaydi.
+Tasdiqlash kodi — services/codes.py (Telegram bot va email hali ulanmagan).
 """
 import secrets
+import time
 from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
@@ -14,14 +16,12 @@ from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..forms import (fmt_phone, REGIONS, check_secret, check_email, check_login, check_name, check_otp, check_password, check_phone,
-                     field, norm_phone, otp_code, required, respond, validate)
+                     field, norm_phone, otp_code, required, respond, validate, wants_json)
 from ..models.users import User
 from ..roles import HOME, safe_next
-from ..services import google_auth
+from ..services import codes, google_auth, limits
 
 bp = Blueprint("auth", __name__)
-
-DEMO_OTP = "123456"
 
 # Kirgandan keyin ?next= faqat o'z bo'limiga olib boradi (boshqa rol bo'limi — 403 bo'lardi)
 _AREA = {"user": ("/app", "/test"), "expert": ("/ekspert",), "admin": ("/admin",)}
@@ -33,7 +33,7 @@ def _now():
 
 def _sign_in(user: User):
     """Kirish: «eslab qolish» bilan (telefonda PWA har safar parol so'ramasin), oxirgi faollik yangilanadi."""
-    login_user(user, remember=True)
+    login_user(user, remember=True, duration=user.remember_for)
     user.last_seen_at = _now()
     db.session.commit()
     session.pop("motto", None)   # bosh sahifadagi motivatsion so'z har kirishda yangilanadi
@@ -43,8 +43,12 @@ def _taken(login: str) -> bool:
     return User.by_login(login) is not None
 
 
-def _otp_matches(code):
-    return None if code == DEMO_OTP else _("Kod noto‘g‘ri. Namunada kod: 123456")
+def _password_changed(user: User, via: str) -> None:
+    """Parol tiklandi: jurnalga yoziladi va egasiga bildirishnoma boradi (o'zi qilmagan bo'lsa bilib qoladi). Commit qilmaydi."""
+    from ..services import admin_users, notify
+    admin_users.log(user.id, "reset_used" if via == "link" else "password_reset", "user", user.id)
+    if user.role == "user":
+        notify.add(user.id, notify.PASSWORD)
 
 
 def _fmt_phone(p):
@@ -66,12 +70,7 @@ def login():
     errors = validate({"login": (login_v, check_login), "pw": (pw, required)})
     user = None
     if not errors:
-        user = User.by_login(login_v)
-        # Qaysi biri xato ekani aytilmaydi: begona odam ro'yxatdan o'tgan raqamlarni bilib olmasin
-        if user is None or not user.check_password(pw):
-            errors = {"pw": _("Telefon/email yoki parol noto‘g‘ri")}
-        elif not user.is_active:
-            errors = {"login": _("Akkaunt bloklangan. Yordam xizmatiga yozing")}
+        user, errors = _authenticate(login_v, pw)
     if errors:
         return respond(errors=errors, template="auth/login.html", next_url=nxt)
     _sign_in(user)
@@ -80,14 +79,39 @@ def login():
     return respond(errors={}, template="auth/login.html", redirect_to=to, message=_("Xush kelibsiz!"))
 
 
+def _authenticate(login_v: str, pw: str) -> tuple[User | None, dict]:
+    who, ip = codes.target(login_v), limits.client_ip()
+    by_ip, by_pair, by_login = ("login_ip", ip), ("login", f"{who}|{ip}"), ("login_all", who)
+    r = limits.take(by_ip, by_pair, by_login)
+    if r.blocked:
+        return None, {"pw": limits.message(r.wait)}
+    user = User.by_login(login_v)
+    if user is None or not user.password_hash:
+        User.spend_hash_time(pw)
+        user = None
+    # Qaysi biri xato ekani aytilmaydi: begona odam ro'yxatdan o'tgan raqamlarni bilib olmasin
+    if user is None or not user.check_password(pw):
+        if not r.left:
+            return None, {"pw": limits.message(limits.RULES["login"][1])}
+        wrong = _("Telefon/email yoki parol noto‘g‘ri")
+        return None, {"pw": _("%(e)s. Yana %(n)s ta urinish qoldi", e=wrong, n=r.left) if r.left <= 2 else wrong}
+    limits.refund(by_ip, by_login)
+    limits.clear(by_pair)
+    if not user.is_active:
+        return None, {"login": _("Akkaunt bloklangan. Yordam xizmatiga yozing")}
+    return user, {}
+
+
 @bp.route("/royxat", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
         return render_template("auth/register.html", reg_step=1)
     phone = field("phone")
     errors = validate({"phone": (phone, required, check_phone)})
-    if not errors and _taken(phone):
-        errors = {"phone": _("Bu raqam bilan ro‘yxatdan o‘tilgan. Kiring yoki parolni tiklang")}
+    if not errors:
+        err = codes.lookup() or (_("Bu raqam bilan ro‘yxatdan o‘tilgan. Kiring yoki parolni tiklang") if _taken(phone)
+                                 else codes.send(phone))
+        errors = {"phone": err} if err else {}
     if not errors:
         session["reg_phone"] = norm_phone(phone)
         session.pop("reg_email", None)
@@ -102,9 +126,11 @@ def verify_telegram():
     if request.method == "GET":
         return render_template("auth/verify_telegram.html", reg_step=2, phone=phone, bot_url=bot)
     code = otp_code()
-    errors = validate({"otp": (code, check_otp, _otp_matches)})
-    if not errors and not session.get("reg_phone"):
-        errors = {"otp": _("Avval telefon raqamingizni kiriting")}
+    errors = validate({"otp": (code, check_otp)})
+    if not errors:
+        err = (codes.verify(session["reg_phone"], code)[0] if session.get("reg_phone")
+               else _("Avval telefon raqamingizni kiriting"))
+        errors = {"otp": err} if err else {}
     if not errors:
         session["reg_verified"] = "phone"
     return respond(errors=errors, template="auth/verify_telegram.html", reg_step=2, phone=phone, bot_url=bot,
@@ -115,8 +141,10 @@ def verify_telegram():
 def send_email_code():
     email = field("email").lower()
     errors = validate({"email": (email, required, check_email)})
-    if not errors and _taken(email):
-        errors = {"email": _("Bu email bilan ro‘yxatdan o‘tilgan. Kiring yoki parolni tiklang")}
+    if not errors:
+        err = codes.lookup() or (_("Bu email bilan ro‘yxatdan o‘tilgan. Kiring yoki parolni tiklang") if _taken(email)
+                                 else codes.send(email))
+        errors = {"email": err} if err else {}
     if not errors:
         session["reg_email"] = email
         session.pop("reg_phone", None)
@@ -131,10 +159,13 @@ def verify_email():
     if request.method == "GET":
         return render_template("auth/verify_email.html", reg_step=2, sent=sent, email=session.get("reg_email", ""))
     email, code = field("email").lower(), otp_code()
-    errors = validate({"email": (email, required, check_email), "otp": (code, check_otp, _otp_matches)})
+    errors = validate({"email": (email, required, check_email), "otp": (code, check_otp)})
     # Kod aynan shu emailga yuborilgan bo'lishi kerak
     if not errors and email != session.get("reg_email"):
         errors = {"email": _("Kod boshqa emailga yuborilgan. Shu email uchun kodni qayta so‘rang")}
+    if not errors:
+        err, _dead = codes.verify(email, code)
+        errors = {"otp": err} if err else {}
     if not errors:
         session["reg_verified"] = "email"
     return respond(errors=errors, template="auth/verify_email.html", reg_step=2, sent=True, email=email,
@@ -266,6 +297,9 @@ def _link_google(user: User):
 
 @bp.get("/chiqish")
 def logout():
+    # Boshqa sayt shu havolani ochtirib, eslatmalar va yuborilmagan javoblarni (brauzer xotirasi) o'chirtira olmasin
+    if request.headers.get("Sec-Fetch-Site") in ("cross-site", "same-site"):
+        return redirect(url_for("auth.guest"))
     # Tartib muhim: logout_user() «eslab qolish» cookie'sini o'chirish belgisini sessiyaga yozadi,
     # undan oldin session.clear() qilinmasa bu belgi o'chib ketadi va cookie foydalanuvchini qayta kiritadi
     session.clear()
@@ -323,7 +357,6 @@ def invite(token):
 def reset_link(token):
     """Admin bergan bir martalik havola: foydalanuvchi parolni o'zi o'rnatadi (24 soat, parol almashgach ishlamaydi)."""
     from .. import invites
-    from ..services import admin_users, notify
     user = invites.read_reset(token)
     if request.method == "GET" or user is None:
         return render_template("auth/reset_link.html", user=user), 200 if user else 410
@@ -332,9 +365,7 @@ def reset_link(token):
                        "p2": (request.form.get("p2", ""), lambda v: None if v == pw else _("Parollar bir xil emas"))})
     if not errors:
         user.set_password(pw)
-        admin_users.log(user.id, "reset_used", "user", user.id)
-        if user.role == "user":
-            notify.add(user.id, notify.PASSWORD)
+        _password_changed(user, "link")
         db.session.commit()
     return respond(errors=errors, template="auth/reset_link.html", user=user, redirect_to=url_for("auth.login"),
                    message=_("Parol yangilandi. Yangi parol bilan kiring"))
@@ -361,15 +392,24 @@ def privacy():
     return render_template("auth/privacy.html")
 
 
-# Parolni tiklash holati sessiyada: reset_who (kod yuborilgan manzil), reset_verified (kod tasdiqlangan),
-# reset_fails (noto'g'ri kod urinishlari). Yangi parol faqat kod tasdiqlangandan keyin so'raladi va qabul qilinadi.
-RESET_MAX_FAILS = 5
+# Parolni tiklash holati sessiyada: reset_who (kod yuborilgan manzil), reset_verified (kod tasdiqlangan vaqt va akkaunt belgisi).
+# Yangi parol faqat kod tasdiqlangandan keyin, 15 daqiqa ichida qabul qilinadi. Sessiya — cookie: eskisini qayta yuborish
+# mumkin, shuning uchun User.auth_tag saqlanadi — parol bir marta almashgach tasdiq o'z-o'zidan bekor bo'ladi.
+STEP_AGE = 15 * 60
 
+
+def _tag(user: User | None) -> str:
+    return user.auth_tag() if user is not None else ""
+
+
+def _reset_verified() -> bool:
+    who, v = session.get("reset_who"), session.get("reset_verified")
+    return bool(who and isinstance(v, list) and time.time() - v[0] < STEP_AGE and v[1] == _tag(User.by_login(who)))
 
 
 def _reset_ctx(**extra):
     who = extra.pop("who", None) or session.get("reset_who", "")
-    return {"sent": bool(session.get("reset_who")), "verified": bool(session.get("reset_who")) and bool(session.get("reset_verified")),
+    return {"sent": bool(session.get("reset_who")), "verified": _reset_verified(),
             "who": who, "via": "email" if "@" in who else ("phone" if who else ""),
             "bot_url": current_app.config.get("TELEGRAM_BOT_URL", "https://t.me/raqamliMuallimBot"), **extra}
 
@@ -380,12 +420,12 @@ def reset():
     if request.method == "GET":
         if not request.args.get("kod"):
             # Sahifaga yangidan kirilganda eski jarayon boshidan boshlanadi
-            for k in ("reset_who", "reset_verified", "reset_fails"):
+            for k in ("reset_who", "reset_verified"):
                 session.pop(k, None)
         return render_template("auth/reset.html", **_reset_ctx())
     # Yakuniy qadam: yangi parol (kod oldinroq tasdiqlangan bo'lishi shart)
     who = session.get("reset_who")
-    if not who or not session.get("reset_verified"):
+    if not _reset_verified():
         return respond(errors={"otp": _("Avval tasdiqlash kodini kiriting")}, template="auth/reset.html", **_reset_ctx())
     if field("who") and field("who") != who:
         return respond(errors={"who": _("Telefon/email o‘zgardi. Yangisiga kodni qayta yuboring")},
@@ -400,8 +440,9 @@ def reset():
         user = User.by_login(who)
         if user is not None:
             user.set_password(pw)
+            _password_changed(user, "code")
             db.session.commit()
-        for k in ("reset_who", "reset_verified", "reset_fails"):
+        for k in ("reset_who", "reset_verified"):
             session.pop(k, None)
     return respond(errors=errors, template="auth/reset.html", **_reset_ctx(),
                    redirect_to=url_for("auth.login"), message=_("Parol yangilandi. Yangi parol bilan kiring"))
@@ -413,12 +454,13 @@ def reset_code():
     who = field("who")
     errors = validate({"who": (who, check_login)})
     # Telegram bot raqamni users.phone bilan solishtiradi: topilmasa kod yuborilmaydi
-    if not errors and "@" not in who and not _taken(who):
-        errors = {"who": _("Bu raqam orqali ro‘yxatdan o‘tilmagan. Raqamni tekshiring yoki email orqali tiklang")}
+    if not errors:
+        err = codes.lookup() or (_("Bu raqam orqali ro‘yxatdan o‘tilmagan. Raqamni tekshiring yoki email orqali tiklang")
+                                 if "@" not in who and not _taken(who) else codes.send(who))
+        errors = {"who": err} if err else {}
     if not errors:
         session["reset_who"] = who
         session.pop("reset_verified", None)
-        session.pop("reset_fails", None)
     msg = (_("Kod %(c)s manziliga yuborildi", c=who) if "@" in who
            else _("Telegram botni oching va raqamingizni ulashing: bot %(c)s raqamini tekshirib, kod yuboradi", c=fmt_phone(norm_phone(who)))) if not errors else None
     return respond(errors=errors, template="auth/reset.html", **_reset_ctx(who=who),
@@ -427,7 +469,8 @@ def reset_code():
 
 @bp.post("/parol-tiklash/kod-tekshirish")
 def reset_verify():
-    """Kodni tekshirish. To'g'ri bo'lsa — yangi parol maydonlari ochiladi. 5 ta xato urinishdan keyin kod bekor qilinadi."""
+    """Kodni tekshirish. To'g'ri bo'lsa — yangi parol maydonlari ochiladi. 5 ta xato urinishdan keyin kod bekor qilinadi
+    (hisob bazada, raqam/email bo'yicha: yangi sessiya ochish urinishlarni tiklamaydi)."""
     who = session.get("reset_who")
     if not who:
         return respond(errors={"who": _("Avval telefon raqam yoki emailga kod yuboring")}, template="auth/reset.html", **_reset_ctx())
@@ -436,16 +479,13 @@ def reset_verify():
                        template="auth/reset.html", **_reset_ctx())
     code = otp_code()
     errors = validate({"otp": (code, check_otp)})
-    if not errors and code != DEMO_OTP:
-        fails = session.get("reset_fails", 0) + 1
-        session["reset_fails"] = fails
-        if fails >= RESET_MAX_FAILS:
-            session.pop("reset_who", None)
-            errors = {"otp": _("Kod 5 marta noto‘g‘ri kiritildi. Yangi kod so‘rang")}
-        else:
-            errors = {"otp": _("Kod noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=RESET_MAX_FAILS - fails)}
     if not errors:
-        session["reset_verified"] = True
+        err, dead = codes.verify(who, code)
+        errors = {"otp": err} if err else {}
+        if dead:
+            session.pop("reset_who", None)
+    if not errors:
+        session["reset_verified"] = [int(time.time()), _tag(User.by_login(who))]
     return respond(errors=errors, template="auth/reset.html", **_reset_ctx(),
                    redirect_to=url_for("auth.reset", kod=1), message=_("Kod tasdiqlandi. Endi yangi parolni kiriting"))
 
@@ -453,70 +493,79 @@ def reset_verify():
 # --- Maxfiy so'z orqali tiklash (2 bosqich) ---
 # 1) eski telefon raqam yoki email + maxfiy so'z (login bazada bo'lsa va maxfiy so'z mos kelsa) →
 # 2) yangi parol (2 marta) → parol o'zgaradi va foydalanuvchi akkauntiga kiradi.
-# Holat sessiyada: recover = {"step": 1|2, "uid", "fails"}. Maxfiy so'z users.secret_hash bilan solishtiriladi.
-# Urinishlar hisobi hozircha sessiyada (keyin audit_log va IP bo'yicha cheklov).
-RECOVER_MAX_FAILS = 5
+# Holat sessiyada: recover = {"uid", "at", "tag"} — 1-bosqich o'tilgan (15 daqiqa, parol almashguncha).
+# Maxfiy so'z users.secret_hash bilan solishtiriladi; urinishlar akkaunt va IP bo'yicha bazada sanaladi.
+
+def _recover_user() -> User | None:
+    rec = session.get("recover") or {}
+    user = db.session.get(User, rec["uid"]) if rec.get("uid") and time.time() - rec.get("at", 0) < STEP_AGE else None
+    return user if user is not None and user.is_active and rec.get("tag") == user.auth_tag() else None
 
 
-def _recover():
-    return session.get("recover") or {"step": 1, "fails": 0}
-
-
-def _recover_ctx(rec, **extra):
-    return {"rstep": rec.get("step", 1), "locked": rec.get("fails", 0) >= RECOVER_MAX_FAILS,
-            "fails_left": RECOVER_MAX_FAILS - rec.get("fails", 0), **extra}
+def _check_secret_word(who: str, secret: str) -> tuple[User | None, dict]:
+    login_id, by_ip = codes.target(who), ("secret_ip", limits.client_ip())
+    r = limits.take(by_ip, ("secret", login_id), ("secret_day", login_id))
+    if not r.blocked:
+        user = User.by_login(who)
+        if user is None or not user.secret_hash:
+            User.spend_hash_time(secret)
+            user = None
+        if user is not None and user.check_secret(secret):
+            limits.refund(by_ip)
+            limits.clear(("secret", login_id), ("secret_day", login_id))
+            if not user.is_active:
+                return None, {"who": _("Akkaunt bloklangan. Yordam xizmatiga yozing")}
+            return user, {}
+        if r.left:
+            return None, {"secret": _("Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=r.left)}
+    wait = limits.wait_text(r.wait or limits.RULES["secret"][1])
+    return None, {"secret": _("Urinishlar tugadi. %(t)s keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing", t=wait)}
 
 
 @bp.route("/parol-tiklash/maxfiy-soz", methods=["GET", "POST"])
 def recover():
-    rec = _recover()
     if request.method == "GET":
         if request.args.get("qayta"):
-            rec = {"step": 1, "fails": rec.get("fails", 0)}
-            session["recover"] = rec
-        return render_template("auth/recover.html", **_recover_ctx(rec))
+            session.pop("recover", None)
+        return render_template("auth/recover.html", rstep=2 if _recover_user() else 1)
 
     # 1-bosqich: eski telefon/email va maxfiy so'z
-    if rec.get("fails", 0) >= RECOVER_MAX_FAILS:
-        return respond(errors={"secret": _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing")},
-                       template="auth/recover.html", **_recover_ctx(rec))
+    session.pop("recover", None)
     who, secret = field("who"), request.form.get("secret", "")
     errors = validate({"who": (who, check_login), "secret": (secret, required)})
-    user = User.by_login(who) if not errors else None
-    if not errors and (user is None or not user.check_secret(secret)):
-        rec["fails"] = rec.get("fails", 0) + 1
-        session["recover"] = rec
-        left = RECOVER_MAX_FAILS - rec["fails"]
-        errors = {"secret": _("Telefon/email yoki maxfiy so‘z noto‘g‘ri. Yana %(n)s ta urinish qoldi", n=left) if left
-                  else _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing")}
     if not errors:
-        session["recover"] = {"step": 2, "fails": 0, "uid": user.id}
-    return respond(errors=errors, template="auth/recover.html", **_recover_ctx(rec),
+        user, errors = _check_secret_word(who, secret)
+        if user:
+            session["recover"] = {"uid": user.id, "at": int(time.time()), "tag": user.auth_tag()}
+    return respond(errors=errors, template="auth/recover.html", rstep=1,
                    redirect_to=url_for("auth.recover"), data={"step": 2})
+
+
+def _recover_expired():
+    """1-bosqich o'tilmagan yoki 15 daqiqa o'tgan: boshidan (JS'da ham xato o'rniga boshlang'ich sahifa ochiladi)."""
+    return redirect(url_for("auth.recover")) if not wants_json() else respond(redirect_to=url_for("auth.recover", qayta=1))
 
 
 @bp.post("/parol-tiklash/maxfiy-soz/parol")
 def recover_confirm():
     """2-bosqich: yangi parol (2 marta) → parol o'zgaradi va foydalanuvchi akkauntiga kiradi."""
-    rec = _recover()
-    if rec.get("step", 1) < 2:
-        return redirect(url_for("auth.recover"))
+    user = _recover_user()
+    if user is None:
+        session.pop("recover", None)
+        return _recover_expired()
     pw = request.form.get("p1", "")
     errors = validate({
         "p1": (pw, check_password),
         "p2": (request.form.get("p2", ""), lambda v: None if v == pw else _("Parollar bir xil emas")),
     })
-    user = db.session.get(User, rec["uid"]) if rec.get("uid") else None
-    if not errors and user is None:
-        session.pop("recover", None)
-        return redirect(url_for("auth.recover"))
     if not errors:
         user.set_password(pw)
+        _password_changed(user, "secret")
         db.session.commit()
         session.pop("recover", None)
         _sign_in(user)
-    return respond(errors=errors, template="auth/recover.html", **_recover_ctx(rec),
-                   redirect_to=url_for("user.home"), message=_("Parol yangilandi, akkauntingizga kirdingiz"))
+    return respond(errors=errors, template="auth/recover.html", rstep=2,
+                   redirect_to=url_for(HOME[user.role]), message=_("Parol yangilandi, akkauntingizga kirdingiz"))
 
 
 # --- Sertifikatni tekshirish (ommaviy, QR-koddan) ---

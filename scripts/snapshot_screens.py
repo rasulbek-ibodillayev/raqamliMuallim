@@ -19,7 +19,7 @@ CSRF_RE = re.compile(r'(name="csrf_token" value="|name="csrf-token" content=")[^
 
 
 def snapshot(out: Path):
-    app = create_app()
+    app = create_app({"DEV_TOOLS": True, "SECRET_KEY": "snapshot"})
     out.mkdir(parents=True, exist_ok=True)
     from flask import url_for
     with app.test_request_context():

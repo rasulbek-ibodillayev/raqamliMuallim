@@ -10,13 +10,14 @@ Backend ulanganda bu yerdagi tekshiruvlar qoladi, faqat "saqlash" qismi servis q
 import re
 from datetime import date
 
-from flask import flash, jsonify, redirect, render_template, request
+from flask import flash, g, jsonify, redirect, render_template, request
 from flask_babel import gettext as _
 
 from .models.community import OBJ_REASONS as OBJECTION_REASONS  # noqa: F401 — ko‘rinishlar shu yerdan oladi
 
 PHONE_RE = re.compile(r"^\+?998\d{9}$")
-EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$")
+EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,24}")      # core.js rmIsEmail bilan bir xil
+EMAIL_MAX, PASSWORD_MAX = 254, 128
 NAME_RE = re.compile(r"^[A-Za-zА-Яа-яЁёЎўҚқҒғҲҳ‘’ʻʼ'`\- ]{2,80}$")
 
 REGIONS = ["Toshkent shahri", "Toshkent viloyati", "Andijon viloyati", "Buxoro viloyati", "Farg‘ona viloyati",
@@ -43,7 +44,7 @@ def fmt_phone(p: str) -> str:
 
 
 def field(name: str, default: str = "") -> str:
-    return (request.form.get(name) or default).strip()
+    return (request.form.get(name) or default).replace("\x00", "").strip()      # PostgreSQL matnda NUL baytni qabul qilmaydi
 
 
 def otp_code(name: str = "otp") -> str:
@@ -63,7 +64,7 @@ def check_phone(v):
 
 
 def check_email(v):
-    return None if EMAIL_RE.match(v or "") else _("Email manzil noto‘g‘ri")
+    return None if EMAIL_RE.fullmatch(v or "") and len(v) <= EMAIL_MAX else _("Email manzil noto‘g‘ri")
 
 
 def check_login(v):
@@ -75,6 +76,8 @@ def check_login(v):
 def check_password(v):
     if len(v or "") < 8:
         return _("Parol kamida 8 ta belgidan iborat bo‘lsin")
+    if len(v) > PASSWORD_MAX:
+        return _("Parol %(n)s belgidan oshmasin", n=PASSWORD_MAX)
     if not (re.search(r"\d", v) and re.search(r"[^\W\d_]", v)):
         return _("Parolda harf ham, raqam ham bo‘lsin")
     return None
@@ -134,12 +137,18 @@ def validate(rules: dict) -> dict:
 
 # ---------- javob ----------
 
+def error_status() -> tuple[int, dict]:
+    wait = g.get("retry_after")                       # services/limits.take
+    return (429, {"Retry-After": str(wait)}) if wait else (422, {})
+
+
 def respond(*, errors=None, message=None, redirect_to=None, template=None, data=None, **ctx):
-    """Forma natijasi. errors bo'lsa — 422; aks holda muvaffaqiyat."""
+    """Forma natijasi. errors bo'lsa — 422 (urinishlar chegarasiga yetgan bo'lsa 429); aks holda muvaffaqiyat."""
     if errors:
+        status = error_status()
         if wants_json():
-            return jsonify(ok=False, errors=errors, message=_("Xatolarni tuzating")), 422
-        return render_template(template, errors=errors, form=request.form, **ctx), 422
+            return jsonify(ok=False, errors=errors, message=_("Xatolarni tuzating")), *status
+        return render_template(template, errors=errors, form=request.form, **ctx), *status
     if wants_json():
         return jsonify(ok=True, message=message, redirect=redirect_to, data=data or {})
     if message:

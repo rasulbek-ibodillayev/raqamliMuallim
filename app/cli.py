@@ -77,6 +77,12 @@ def init_app(app):
         from .services.archive import compress_old
         click.echo(f"Siqilgan urinishlar: {compress_old()}")
 
+    @app.cli.command("cheklovlarni-tozalash")
+    def clear_limits():
+        """Kirish va kod urinishlari hisobini tozalaydi (bloklanib qolgan foydalanuvchi uchun)."""
+        from .services.limits import clear_all
+        click.echo(f"O'chirildi: {clear_all()}")
+
     @app.cli.command("namuna-foydalanuvchilar")
     def seed_demo_users():
         """O'qituvchi, ekspert va admin namunaviy akkauntlarini yaratadi (bor bo'lsa tegmaydi)."""

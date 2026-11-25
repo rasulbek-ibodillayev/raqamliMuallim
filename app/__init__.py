@@ -12,7 +12,6 @@ DEFAULT_DB = "postgresql+psycopg://raqamli:raqamli@localhost:5432/raqamli"  # do
 
 def create_app(config: dict | None = None) -> Flask:
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-change-me")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", DEFAULT_DB)
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
     # /ekranlar va /_rol/<rol> — faqat ishlab chiqishda (debug rejimi yoki RM_DEV_TOOLS=1)
@@ -20,9 +19,8 @@ def create_app(config: dict | None = None) -> Flask:
     # Google orqali kirish (services/google_auth.py); bo'sh bo'lsa — ulanmagan
     app.config["GOOGLE_CLIENT_ID"] = os.environ.get("GOOGLE_CLIENT_ID")
     app.config["GOOGLE_CLIENT_SECRET"] = os.environ.get("GOOGLE_CLIENT_SECRET")
-    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
-    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
+    from . import security
+    security.configure(app, config or {})
     app.config.update(config or {})
 
     from .extensions import db, login_manager
@@ -40,11 +38,12 @@ def create_app(config: dict | None = None) -> Flask:
     @login_manager.user_loader
     def load_user(user_id):
         from .models.users import User
-        user = db.session.get(User, int(user_id)) if user_id.isdigit() and len(user_id) < 19 else None
-        return user if user is not None and user.is_active else None      # bloklangan akkaunt ochiq sessiyada ham chiqadi
+        return User.by_session(user_id)      # bloklangan yoki paroli almashgan akkaunt ochiq sessiyada ham chiqadi
 
     from . import cli
     cli.init_app(app)
+
+    security.init_app(app)
 
     # CSRF: barcha POST so'rovlar (formalar — yashirin maydon, fetch — X-CSRFToken sarlavhasi)
     from flask_wtf.csrf import CSRFProtect
@@ -65,11 +64,17 @@ def create_app(config: dict | None = None) -> Flask:
     def wants_json() -> bool:
         return request.path.startswith("/api/") or request.accept_mimetypes.best == "application/json"
 
+    def too_large() -> str:
+        from flask_babel import gettext
+        from .security import MB
+        return gettext("Yuborilgan ma’lumot juda katta (ko‘pi bilan %(n)s)", n=f"{request.max_content_length // MB} MB"
+                       if request.max_content_length >= MB else f"{request.max_content_length // 1024} KB")
+
     @app.errorhandler(HTTPException)
     def http_error(e):
         if wants_json():
-            return jsonify(ok=False, error=e.description), e.code
-        code = e.code if e.code in (400, 403, 404) else 500
+            return jsonify(ok=False, error=too_large() if e.code == 413 else e.description), e.code
+        code = e.code if e.code in (400, 403, 404, 413) else 500
         return render_template("errors/error.html", code=code), e.code
 
     @app.errorhandler(Exception)
@@ -79,12 +84,6 @@ def create_app(config: dict | None = None) -> Flask:
             return jsonify(ok=False, error="Server xatosi"), 500
         return render_template("errors/error.html", code=500), 500
 
-    # Content-Security-Policy: sahifada faqat o'z fayllarimiz va nonce'li inline skriptlar ishlaydi.
-    # 'unsafe-eval' — Alpine.js ifodalari (x-data, @click) uchun shart; inline onclick/onchange taqiqlangan,
-    # ular o'rniga data-* atributlari ishlatiladi (static/js/core.js). style-src 'unsafe-inline' — style="" atributlari.
-    import secrets
-    from flask import g
-
     @app.before_request
     def daily_activity():
         from flask_login import current_user
@@ -92,27 +91,6 @@ def create_app(config: dict | None = None) -> Flask:
             return
         from .services.activity import touch
         touch(current_user, request.headers.get("User-Agent", ""), request.cookies.get("rm_pwa") == "1")
-
-    @app.before_request
-    def make_nonce():
-        g.csp_nonce = secrets.token_urlsafe(16)
-
-    @app.context_processor
-    def inject_nonce():
-        return {"csp_nonce": g.get("csp_nonce", "")}
-
-    @app.after_request
-    def security_headers(resp):
-        if resp.mimetype == "text/html" and g.get("csp_nonce"):
-            resp.headers["Content-Security-Policy"] = (
-                "default-src 'self'; "
-                f"script-src 'self' 'nonce-{g.csp_nonce}' 'unsafe-eval'; "
-                "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; "
-                "connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; "
-                "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'")
-        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
-        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        return resp
 
     from . import mock
     from .services import settings as conf

@@ -19,7 +19,6 @@
       <h1>{{ _("Maxfiy so‘z orqali tiklash") }}</h1>
       <p class="lead">{{ _("Telefon raqamingiz o‘zgargan yoki emailingizga kira olmasangiz: ro‘yxatdan o‘tishda bergan maxfiy so‘zingizni kiriting.") }}</p>
     </div>
-    {% if locked %}<div class="alert alert-red" role="alert">{{ icon("lock") }}<span>{{ _("Urinishlar tugadi. 30 daqiqadan keyin qayta urinib ko‘ring yoki yordam xizmatiga yozing") }}</span></div>{% endif %}
     {% set e = errors if rstep == 1 else {} %}
     <div class="field"><label class="label" for="rc-who">{{ _("Akkauntdagi eski telefon raqam yoki email") }}</label>
       <input class="input" id="rc-who" name="who" value="{{ form.who }}" placeholder="{{ _('+998 90 123 45 67 yoki email@maktab.uz') }}" autocomplete="username" required
@@ -32,8 +31,8 @@
         {{ eye("show") }}
       </div>
       {{ field_error("secret", e) }}
-      <span class="hint" id="secret-hint">{{ _("Katta-kichik harf farqlanmaydi. 5 ta urinish bor. Namunada: informatika") }}</span></div>
-    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy" {{ 'disabled' if locked }}>{{ _("Davom etish") }}</button>
+      <span class="hint" id="secret-hint">{{ _("Katta-kichik harf farqlanmaydi. 5 ta urinish bor. Namunada: informatika") if is_dev else _("Katta-kichik harf farqlanmaydi. 5 ta urinish bor.") }}</span></div>
+    <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="busy">{{ _("Davom etish") }}</button>
   </form>
 
   <!-- 2-bosqich: yangi parol (2 marta) -->

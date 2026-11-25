@@ -96,13 +96,13 @@ def test_solution_is_private_and_only_after_finish(app, client, as_role):
         other = User(first_name="B", last_name="C", phone="+998900000001", role="user")
         db.session.add(other)
         db.session.commit()
-        oid = other.id
+        sid = other.get_id()
     assert client.get(f"/app/tutor/yechim/{u}:0", headers=JSON).status_code == 200
     for ref in (f"{u}:99", f"{u}:-1", f"{u}:x", f"{uuid.uuid4()}:0", "abc", "natija:99", "sinov:99"):
         assert client.get(f"/app/tutor/yechim/{ref}", headers=JSON).status_code == 404, ref
     with app.test_client() as c2:
         with c2.session_transaction() as s:
-            s["_user_id"], s["_fresh"] = str(oid), True
+            s["_user_id"], s["_fresh"] = sid, True
         assert c2.get(f"/app/tutor/yechim/{u}:0", headers=JSON).status_code == 404
 
 

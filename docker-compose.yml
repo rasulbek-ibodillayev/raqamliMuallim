@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: raqamli
       POSTGRES_DB: raqamli
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"      # faqat shu kompyuterdan: parol ma'lum, tarmoqqa ochilmasin
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -28,7 +28,7 @@ services:
       LT_LOAD_ONLY: "ru,en"
       LT_UPDATE_MODELS: "true"
     ports:
-      - "5050:5000"
+      - "127.0.0.1:5050:5000"
     volumes:
       - lt_models:/home/libretranslate/.local
 
