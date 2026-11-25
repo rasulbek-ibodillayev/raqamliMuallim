@@ -1431,3 +1431,45 @@ body:has(.study-fab-tutor) .page { padding-bottom: calc(var(--tabbar-h) + 32px);
 
 /* Pastki paneldagi uzun matnli tugma tor telefonda ikki qatorga bo'linadi (Tuzatish 24.11) */
 .focus-foot .btn.grow { white-space: normal; line-height: 1.2; min-width: 0; text-align: center; }
+
+/* ================= Savol formatlari (services/media.py) ================= */
+select.w-auto { max-width: 100%; }
+/* Panjara ustuni ichidagi uzun tanlovlar telefonda sahifani kengaytirmasin */
+.u-cols-4a70e > *, .grid-2 > * { min-width: 0; }
+.opt-code { font-family: var(--mono); font-size: .95em; background: var(--surface-2); border-radius: 6px; padding: 2px 6px; overflow-wrap: anywhere; }
+.ui-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface-2); }
+.ui-prog { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 4px; }
+.ui-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+.ui-ico { width: 24px; height: 24px; flex: none; }
+.ui-pick { display: flex; flex-wrap: wrap; gap: 6px; max-height: 260px; overflow: auto; }
+.web-preview { margin: 0; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.web-preview figcaption { padding: 6px 12px; font-size: 12px; color: var(--muted); background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.web-preview iframe { display: block; width: 100%; height: 180px; border: 0; background: #fff; }
+.xl { border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.xl .table-wrap { border: 0; border-radius: 0; margin: 0; }
+.xl-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); font: 14px var(--mono); }
+.xl-cell { min-width: 44px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
+.xl-fx { font-style: italic; color: var(--muted); }
+.xl-formula { overflow-wrap: anywhere; }
+.xl-grid { border-collapse: collapse; width: 100%; font-size: 14px; }
+.xl-grid th, .xl-grid td { border: 1px solid var(--border); padding: 6px 10px; min-width: 56px; height: 34px; text-align: left; }
+.xl-grid th { background: var(--surface-2); color: var(--muted); font-weight: 500; text-align: center; min-width: 36px; }
+.xl-grid th.on { color: var(--green); font-weight: 700; }
+.xl-grid td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.xl-grid td.sel { outline: 2px solid var(--green); outline-offset: -2px; }
+.xl-grid td.ask { background: var(--primary-soft); color: var(--primary); font-weight: 700; text-align: center; }
+.scratch { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; overflow-x: auto; padding: 4px 0; }
+.sb { --c: #4c97ff; color: #fff; font-size: 14px; font-weight: 500; }
+.sb-line { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 7px 12px; border-radius: 8px; background: var(--c); min-height: 36px; }
+.sb-c { border-left: 12px solid var(--c); border-bottom: 10px solid var(--c); border-radius: 8px; padding-right: 8px; }
+.sb-c > .sb-line { margin-left: -12px; }
+.sb-in-list { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 2px 0 4px; min-height: 12px; }
+.sb-in, .sb-rep { background: #fff; color: #2b3442; border-radius: 999px; padding: 1px 10px; min-width: 26px; text-align: center; }
+.sb-rep { background: rgba(255, 255, 255, .28); color: #fff; }
+.sb-bool { background: rgba(0, 0, 0, .22); border-radius: 4px; padding: 1px 10px; }
+.sb-ev { --c: #9a6a00; } .sb-mo { --c: #2f6fd6; } .sb-lo { --c: #7d4fd1; } .sb-so { --c: #a53ba5; } .sb-co { --c: #a85c00; }
+.sb-se { --c: #1f7ea3; } .sb-op { --c: #2e7d32; } .sb-va { --c: #b4521b; } .sb-pe { --c: #0b7a5c; } .sb-my { --c: #b8324f; }
+.logo-fig { margin: 0; display: grid; place-items: center; padding: 12px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); }
+.logo-draw { width: min(220px, 70vw); height: auto; color: var(--primary); }
+.logo-draw.small { width: 84px; display: block; color: currentColor; }
+.ex-media { margin: 8px 0; }

@@ -525,7 +525,7 @@ def test_question_editor_notes_and_code(app, as_role):
         q = db.session.scalar(select(Question).where(Question.text.like("DNS%")))
         qid, sub = q.id, db.session.get(Subtopic, q.subtopic_id)
         base = {"id": str(qid), "topic": sub.topic.section_id, "lesson": sub.topic_id, "subtopic": sub.id, "level": "Oson",
-                "kind": "yopiq", "format": "matn", "time": "60", "text": q.text, "why": q.explanation}
+                "kind": "yopiq", "format": "kod", "lang": "python", "time": "60", "text": q.text, "why": q.explanation}
         old = copy.deepcopy((q.data, q.answer, q.version, q.explanation))
     c = as_role("expert")
     html = c.get(f"/ekspert/savol?id={qid}").get_data(as_text=True)

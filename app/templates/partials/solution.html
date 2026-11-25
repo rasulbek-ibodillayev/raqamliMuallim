@@ -3,7 +3,7 @@
 {% set has_notes = r.notes and r.notes|select|list %}
 <div class="stack solution">
   {% if r.kind in ("yopiq", "kop") %}
-  <p><b>{{ _("To‘g‘ri javob:") }}</b> {% for i in r.right %}{{ letters[i] }}) {{ r.options[i] }}{{ "; " if not loop.last }}{% endfor %}</p>
+  <p><b>{{ _("To‘g‘ri javob:") }}</b> {% for i in r.right %}{{ letters[i] }}) {{ option_text(r.options[i], r.view) }}{{ "; " if not loop.last }}{% endfor %}</p>
   {% elif r.kind == "ochiq" %}
   <p><b>{{ _("To‘g‘ri javob:") }}</b> {{ r.right_text }}</p>
   {% else %}
@@ -19,7 +19,7 @@
     {% set is_right = loop.index0 in r.right %}{% set is_mine = loop.index0 in r.mine %}
     <li class="ans {{ 'ans-right' if is_right else ('ans-wrong' if is_mine) }}">
       <span class="ans-key">{{ letters[loop.index0] }}</span>
-      <span class="grow"><span class="d-block">{{ o }}</span>{% if has_notes and r.notes[loop.index0] %}<span class="small u-c-text2">{{ r.notes[loop.index0] }}</span>{% endif %}</span>
+      <span class="grow"><span class="d-block">{{ option_html(o, r.view) }}{% if r.view == "ui" %} {{ option_text(o, r.view) }}{% endif %}</span>{% if has_notes and r.notes[loop.index0] %}<span class="small u-c-text2">{{ r.notes[loop.index0] }}</span>{% endif %}</span>
       <span class="ans-tag">{{ icon("check" if is_right else "x", "ico-sm") }}{{ _("to‘g‘ri") if is_right else _("noto‘g‘ri") }}{% if is_mine %} · {{ _("sizniki") }}{% endif %}</span>
     </li>
     {% endfor %}

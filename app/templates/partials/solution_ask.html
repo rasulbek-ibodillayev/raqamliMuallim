@@ -2,7 +2,7 @@
 <div class="stack stack-sm">
   <span>{{ _("Shu savolning yechimini tushuntiring:") }}</span>
   <span class="strong">{{ r.q }}</span>
-  {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
+  {{ media_html(r) }}
   {% if r.image %}<figure class="q-figure"><img src="{{ url_for('static', filename=r.image.src) }}" alt="{{ r.image.alt }}" loading="lazy"></figure>{% endif %}
-  {% if r.table %}{% with q = {"table": r.table} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
+  {% if r.table %}{% with q = {"table": r.table, "media": ""} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
 </div>

@@ -16,7 +16,7 @@ from flask_login import current_user
 from .. import mock as m
 from ..services import attempts as at
 from ..services import objections as ob
-from ..services import scoring
+from ..services import media, scoring
 from ..services import settings as conf
 from ..services import test_builder as tb
 
@@ -209,7 +209,8 @@ def _render_exam(qs, state):
     for q in qs:
         img = q.get("image")
         out.append({"pos": q["pos"], "ref": q["ref"], "objected": q.get("objected", False), "topic": q["topic"],
-                    "text": q["text"], "code": q.get("code"), "table": q.get("table"), "options": q["options"],
+                    "text": q["text"], "media": str(media.of(q)), "table": q.get("table"),
+                    "options": [str(media.option(o, q.get("view"))) for o in q["options"]],
                     "image": {**img, "src": url_for("static", filename=img["src"])} if img else None})
     return render_template("test/exam.html", questions=out, state=state)
 

@@ -37,7 +37,7 @@
 {% macro code(src, lang="Python", copy=True) -%}
 <div class="code">
   <div class="code-head"><span>{{ lang }}</span>{% if copy %}<button type="button" data-copy>{{ icon("copy", "ico-sm") }}{{ _("Nusxa") }}</button>{% endif %}</div>
-  <pre data-lang="{{ lang|lower }}"><code>{{ src }}</code></pre>
+  <pre data-lang="{{ hl_lang(lang) }}"><code>{{ hl(src, lang) }}</code></pre>
 </div>
 {%- endmacro %}
 

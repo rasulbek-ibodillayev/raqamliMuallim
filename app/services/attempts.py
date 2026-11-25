@@ -22,7 +22,7 @@ from sqlalchemy import func, select, tuple_
 
 from ..extensions import db
 from ..models import AttemptItem, Question, QuestionVersion, Subtopic, TestAttempt, Topic
-from . import archive, generator, progress, scoring, seen, versions
+from . import archive, generator, media, progress, scoring, seen, versions
 from .archive import rows as rows_of
 
 PARTIAL_TYPES = ("multiple", "matching")      # qisman ball beriladigan turlar
@@ -345,7 +345,7 @@ def play_view(a: TestAttempt) -> list[dict]:
         snap = snaps[p][0]
         data = snap.get("data") or {}
         q = {"pos": p, "kind": TYPE_TO_KIND[snap["type"]], "text": snap["text"], "topic": titles[p],
-             "code": data.get("code"), "image": data.get("image"), "table": data.get("table")}
+             "media": media.render(data), "view": data.get("option_view"), "image": data.get("image"), "table": data.get("table")}
         if snap["type"] in ("single", "multiple"):
             q["options"] = data["options"]
         elif snap["type"] == "matching":
@@ -387,10 +387,10 @@ def review(a: TestAttempt) -> list[dict]:
         snap = snaps[item.position][0]
         data, ans, v = snap.get("data") or {}, snap["answer"], (item.answer or {}).get("v")
         r = {"n": len(out) + 1, "pos": item.position, "kind": TYPE_TO_KIND[snap["type"]], "topic": titles[item.position],
-             "level": LEVELS.get(snap["difficulty"]), "q": snap["text"], "code": data.get("code"),
+             "level": LEVELS.get(snap["difficulty"]), "q": snap["text"], "media": media.render(data), "view": data.get("option_view"),
              "table": data.get("table"), "image": data.get("image"), "score": item.score or 0,
              "dropped": item.position in gone, "answered": v not in (None, "", []), "why": snap.get("explanation"), "notes": ans.get("notes"),
-             "computed": bool(data.get("code") or data.get("table")) or snap["type"] == "open"}
+             "computed": bool(data.get("table") or any(data.get(k) for k in ("code", "sheet", "scratch", "logo"))) or snap["type"] == "open"}
         if snap["type"] in ("single", "multiple"):
             r["options"], r["right"] = data["options"], ans["keys"]
             r["mine"] = v if isinstance(v, list) else ([] if v is None else [v])

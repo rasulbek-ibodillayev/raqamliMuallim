@@ -89,7 +89,17 @@ tartibida. Testdan keyin «Yechimini ko'rish» bosilganda AI tutorda chiqadi. Na
 Bu misolda HTTP «Gipermatn uzatadi» ga, DNS esa «Domen nomini o‘giradi» ga mos keladi.
 
 **Qo'shimcha `data` maydonlari** (har qanday turga qo'shiladi):
-- `"code": "x = 5\nprint(x)"` — kod bo'lagi;
+- `"code": "x = 5\nprint(x)"` — kod bo'lagi; `"lang"` — tili (standart `python`): `python`, `javascript`, `html`, `css`, `sql`, `logo`,
+  `cpp`, `java`, `pascal`, `csharp`, `php`, `bash`, `plain`;
+- `"show": "both"` — `html` va `css` uchun natijani ko'rsatish (`code`, `result`, `both`); CSS uchun `"html": "<p>Matn</p>"`;
+- `"sheet": {"rows": [["4", "5", "?"]], "active": "C1", "formula": "=A1+B1"}` — Excel oynasi (ustun va qator nomlari o'zi chiqadi);
+- `"scratch": "voqea: bayroq bosilganda\nboshqaruv: [4] marta takrorla\n  harakat: [10] qadam yur"` — Scratch bloklari: har qatorda
+  «kategoriya: matn», ichki blok 2 bo'sh joy bilan. `[10]` — maydon, `(x)` — qiymat, `<x > 5>` — shart, `boshqaruv: aks holda`.
+  Kategoriyalar: voqea, harakat, ko'rinish, ovoz, boshqaruv, sensor, amal, o'zgaruvchi, qalam, blok;
+- `"logo": {"src": "repeat 4 [fd 50 rt 90]", "show": "both"}` — LOGO (`drawing`, `code`, `both`). Buyruqlar: fd, bk, rt, lt, pu, pd, home,
+  cs, repeat N [ … ] (yoki oldinga, orqaga, o'ngga, chapga, takrorla);
+- `"ui": ["word.bold"]` — dastur tugmalari (nomi ko'rsatilmaydi); kodlar — `app/services/ui_icons.py`: word, excel, ppt, paint;
+- `"option_view"` — variantlar ko'rinishi: `code` (kod), `logo` (variant — LOGO buyrug'i, chizmasi chiqadi), `ui` (variant — tugma kodi);
 - `"table": {"head": [...], "rows": [[...], ...]}` — jadval;
 - `"image": {"src": "img/fayl.svg", "alt": "Rasm tavsifi", "caption": "1-rasm"}` — rasm. Rasm uchun SVG yoki WebP, `alt` majburiy.
 
@@ -144,3 +154,34 @@ Bu misolda HTTP «Gipermatn uzatadi» ga, DNS esa «Domen nomini o‘giradi» ga
 | `xl_sumif` | SUMIF formulasi | bitta javobli | oson, o'rta, qiyin |
 | `xl_countif` | COUNTIF formulasi | bitta javobli | oson, o'rta, qiyin |
 | `xl_match` | Formulalarni natijasi bilan moslash | moslashtirish | oson, o'rta, qiyin |
+| `xl_ref` | Formuladagi katak havolalari | bitta javobli | oson, o'rta, qiyin |
+| `xl_abs` | Formulani nusxalash: nisbiy va mutlaq havola | bitta javobli | oson, o'rta, qiyin |
+| `xl_if` | IF formulasi | bitta javobli | oson, o'rta, qiyin |
+| `js_loop` | JavaScript: for sikli | bitta javobli | oson, o'rta, qiyin |
+| `js_concat` | JavaScript: qator va son qo‘shish | bitta javobli | oson, o'rta, qiyin |
+| `js_if` | JavaScript: shart | bitta javobli | oson, o'rta, qiyin |
+| `js_match` | JavaScript: ifodalarni natijasi bilan moslash | moslashtirish | o'rta, qiyin |
+| `html_tag` | HTML teglari | bitta javobli | oson, o'rta, qiyin |
+| `html_match` | HTML teglarini moslash | moslashtirish | oson, o'rta, qiyin |
+| `css_prop` | CSS xossalari | bitta javobli | oson, o'rta, qiyin |
+| `css_match` | CSS xossalarini moslash | moslashtirish | oson, o'rta, qiyin |
+| `logo_figure` | LOGO: shaklni aniqlash | bitta javobli | oson, o'rta, qiyin |
+| `logo_pick` | LOGO: chizmani tanlash | bitta javobli | oson, o'rta, qiyin |
+| `logo_perimeter` | LOGO: toshbaqa bosib o‘tgan yo‘l (ochiq) | ochiq | oson, o'rta, qiyin |
+| `logo_match` | LOGO buyruqlarini moslash | moslashtirish | oson, o'rta, qiyin |
+| `scratch_sum` | Scratch: o‘zgaruvchi qiymati | bitta javobli | oson, o'rta, qiyin |
+| `scratch_steps` | Scratch: qadamlar soni | bitta javobli | oson, o'rta, qiyin |
+| `scratch_if` | Scratch: shart | bitta javobli | oson, o'rta, qiyin |
+| `scratch_match` | Scratch bloklarini bo‘limi bilan moslash | moslashtirish | oson, o'rta, qiyin |
+| `word_icon` | Word: tugma vazifasi | bitta javobli | oson, o'rta, qiyin |
+| `word_pick` | Word: tugmani topish | bitta javobli | oson, o'rta, qiyin |
+| `word_match` | Word: tugmalarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `excel_icon` | Excel: tugma vazifasi | bitta javobli | oson, o'rta, qiyin |
+| `excel_pick` | Excel: tugmani topish | bitta javobli | oson, o'rta, qiyin |
+| `excel_match` | Excel: tugmalarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `ppt_icon` | PowerPoint: tugma vazifasi | bitta javobli | oson, o'rta, qiyin |
+| `ppt_pick` | PowerPoint: tugmani topish | bitta javobli | oson, o'rta, qiyin |
+| `ppt_match` | PowerPoint: tugmalarni moslash | moslashtirish | oson, o'rta, qiyin |
+| `paint_icon` | Paint: tugma vazifasi | bitta javobli | oson, o'rta, qiyin |
+| `paint_pick` | Paint: tugmani topish | bitta javobli | oson, o'rta, qiyin |
+| `paint_match` | Paint: tugmalarni moslash | moslashtirish | oson, o'rta, qiyin |

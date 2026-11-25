@@ -251,37 +251,6 @@ window.rmPwGate = function (url) {
     box.dispatchEvent(new Event("input", { bubbles: true }));
   });
 
-  // Python kodini sodda ranglash
-  // Bir o'tishli tokenizator: satr ichidagi «#» izoh deb, izoh/satr ichidagi so'zlar kalit so'z deb bo'yalmaydi
-  var TOKEN = new RegExp([
-    "(\"[^\"\\n]*\"|'[^'\\n]*')",                                                     // 1 — satr
-    "(#[^\\n]*)",                                                                       // 2 — izoh
-    "\\b(if|elif|else|for|while|in|def|return|import|from|as|and|or|not|is|True|False|None|class|try|except|finally|with|lambda|break|continue|pass|yield|global)\\b", // 3
-    "\\b(print|range|len|input|int|str|float|list|dict|set|tuple|sum|min|max|abs|round|sorted|enumerate|zip|type)\\b(?=\\()", // 4
-    "\\b(\\d+(?:\\.\\d+)?)\\b"                                                          // 5 — son
-  ].join("|"), "g");
-  var CLS = [null, "s", "c", "k", "f", "n"];
-  function escHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-  function highlight(src) {
-    var out = "", last = 0;
-    src.replace(TOKEN, function (m) {
-      var off = arguments[arguments.length - 2], g = 1;
-      while (g < 6 && arguments[g] === undefined) g++;
-      out += escHtml(src.slice(last, off)) + '<span class="tok-' + CLS[g] + '">' + escHtml(m) + "</span>";
-      last = off + m.length;
-      return m;
-    });
-    return out + escHtml(src.slice(last));
-  }
-  function run() {
-    document.querySelectorAll('pre[data-lang="python"] code').forEach(function (c) {
-      if (c.dataset.hl) return;
-      c.innerHTML = highlight(c.textContent);
-      c.dataset.hl = "1";
-    });
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run();
-
   // Scroll paytida kartalar va bo'limlarni silliq ko'rsatish
   var REVEAL = [
     ".page .card", ".page .ai-card", ".page .alert", ".page .table-wrap", ".page .chips",

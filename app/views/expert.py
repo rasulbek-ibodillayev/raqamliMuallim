@@ -20,8 +20,11 @@ from . import account
 from ..forms import field, required, respond, validate
 from ..services import content_editor as ce
 from ..services import experts
+from ..services import media
 from ..services import objection_review as rv
 from ..services import question_bank as qb
+from ..services import ui_icons
+from ..services.highlight import LANGS
 from ..services.question_templates import TEMPLATES
 from ..services.uploads import UploadError, save_image
 
@@ -33,7 +36,7 @@ account.register(bp, "expert")
 
 # Amal → kerakli huquq. Bu yerda yo'q sahifalar (savollar banki, profil) hamma ekspertga ochiq
 _NEED = {"queue": "review", "queue_decide": "review", "editor": "questions", "editor_save": "questions",
-         "excel_sample": "questions", "excel_import": "questions", "question_delete": "questions", "topics": "topics",
+         "editor_preview": "questions", "excel_sample": "questions", "excel_import": "questions", "question_delete": "questions", "topics": "topics",
          "topics_api": "topics", "lesson_get": "topics", "lesson_save": "topics", "lesson_image": "topics",
          "objections": "objections", "objection_decide": "objections", "objection_pause": "objections"}
 
@@ -61,7 +64,9 @@ def _nav_counts():
 
 def _ctx(**extra):
     return {"panel": "expert", "kinds": m.Q_KINDS, "formats": m.Q_FORMATS, "levels": m.Q_LEVELS,
-            "content": qb.content_tree(experts.my_areas()), **extra}
+            "content": qb.content_tree(experts.my_areas()), "langs": LANGS,
+            "ui_codes": [(c, f"{ui_icons.program(c)}: {ui_icons.name(c)}", ui_icons.svg(c)) for c in ui_icons.codes()],
+            "scratch_cats": list(media.CATEGORIES), **extra}
 
 
 def _own_question(qid: int | None):
@@ -151,6 +156,9 @@ def queue_decide(qid):
 
 def _format_of(d: dict) -> str:
     """JSON'dan yuklangan savollarda format yozilmagan bo'ladi: qo'shimchasidan aniqlanadi (aks holda tahrirda yo'qolardi)."""
+    for key, fmt in (("sheet", "excel"), ("scratch", "scratch"), ("logo", "logo"), ("ui", "tugma"), ("code", "kod")):
+        if d.get(key):
+            return fmt
     if d.get("table"):
         return "jadval"
     if d.get("diagram"):
@@ -170,7 +178,10 @@ def _init_from_question(q) -> dict:
             "level": qb.DIFF_TO_LEVEL[q.difficulty], "kind": qb.TYPE_TO_KIND[q.type], "fmt": _format_of(d),
             "text": q.text, "why": q.explanation or "", "time": q.time_limit_s or 60,
             "opts": d.get("options") or ["", "", "", ""], "right": a.get("keys") or [0],
-            "notes": a.get("notes") or [""] * len(d.get("options") or [0] * 4), "code": d.get("code", ""),
+            "notes": a.get("notes") or [""] * len(d.get("options") or [0] * 4), "code": d.get("code", ""), "lang": d.get("lang", "python"), "show": d.get("show", "code"), "html": d.get("html", ""),
+            "sheet": "\n".join(" | ".join(r) for r in (d.get("sheet") or {}).get("rows", [])), "sheet_active": (d.get("sheet") or {}).get("active", ""),
+            "sheet_formula": (d.get("sheet") or {}).get("formula", ""), "scratch": d.get("scratch", ""), "logo": (d.get("logo") or {}).get("src", ""),
+            "logo_show": (d.get("logo") or {}).get("show", "both"), "ui": d.get("ui", []), "view": d.get("option_view", ""),
             "pairs": [[l, d.get("right", [])[r]] for l, r in zip(d.get("left", []), a.get("pairs", []))] or [["", ""]] * 3,
             "answer": a.get("value", ""), "answer_alt": ", ".join(a.get("accept", [])),
             "diagram": d.get("diagram", ""), "image": (d.get("image") or {}).get("src", ""),
@@ -187,9 +198,58 @@ def _init_from_form() -> dict:
             "text": field("text"), "why": field("why"), "time": field("time") or 60,
             "opts": g("opt") or ["", "", "", ""], "right": [int(r) for r in g("right") if r.isdigit()] or [0],
             "notes": g("opt_note") or [""] * 4, "code": request.form.get("code", ""),
+            **{k: field(k) for k in ("lang", "show", "sheet_active", "sheet_formula", "logo_show", "view")},
+            **{k: request.form.get(k, "") for k in ("html", "sheet", "scratch", "logo")}, "ui": request.form.getlist("ui"),
             "pairs": [list(p) for p in zip(g("left"), g("right_txt"))] or [["", ""]] * 3,
             "answer": field("answer"), "answer_alt": field("answer_alt"), "diagram": field("diagram"),
             "image": field("image_keep"), "image_alt": field("image_alt"), "table": _table_rows(), "table_head": bool(field("table_head"))}
+
+
+def _raw(name: str, limit: int) -> str:
+    """Ko'p qatorli maydon: boshidagi bo'sh joylar ahamiyatli."""
+    return request.form.get(name, "").replace("\r\n", "\n").strip("\n").rstrip()[:limit]
+
+
+def _media_data(fmt: str) -> tuple[dict, str | None]:
+    """Formatga xos data maydonlari (services/media.py) yoki xato matni."""
+    if fmt == "kod":
+        code, lang, show = _raw("code", media.CODE_MAX), field("lang") or "python", field("show") or "code"
+        if not code.strip():
+            return {}, _("Kodni kiriting")
+        d = {"code": code, "lang": lang}
+        if lang in ("html", "css") and show != "code":
+            d["show"] = show
+            if lang == "css" and _raw("html", media.HTML_MAX).strip():
+                d["html"] = _raw("html", media.HTML_MAX)
+    elif fmt == "excel":
+        rows = [[c.strip()[:100] for c in line.split("|")] for line in _raw("sheet", 8000).split("\n") if line.strip()]
+        if not rows:
+            return {}, _("Excel kataklarini kiriting")
+        sheet = {"rows": rows}
+        if field("sheet_active"):
+            sheet["active"] = field("sheet_active").upper()
+        if field("sheet_formula"):
+            sheet["formula"] = field("sheet_formula")
+        d = {"sheet": sheet}
+    elif fmt == "scratch":
+        d = {"scratch": _raw("scratch", 4000)}
+    elif fmt == "logo":
+        d = {"logo": {"src": " ".join(request.form.get("logo", "").split())[:1000], "show": field("logo_show") or "both"}}
+    elif fmt == "tugma":
+        d = {"ui": request.form.getlist("ui")}
+    else:
+        return {}, None
+    errs = media.check(d)
+    return d, (_("Format xatosi: %(e)s", e=errs[0]) if errs else None)
+
+
+@bp.post("/savol/korinish")
+def editor_preview():
+    """Muharrirda oldindan ko'rish: format va variantlar qanday chiqishi (bazaga yozilmaydi)."""
+    d, err = _media_data(field("format"))
+    view = field("view") if field("view") in media.OPTION_VIEWS else None
+    return jsonify(ok=err is None, error=err, html="" if err else str(media.render(d)),
+                   options=[str(media.option(o.strip(), view)) for o in request.form.getlist("opt")[:10]])
 
 
 def _table_rows() -> list[list[str]]:
@@ -219,9 +279,12 @@ def _payload() -> tuple[dict | None, dict]:
     })
     if errors:
         return None, errors
-    data, answer = {"format": fmt}, {}
-    if field("code"):                                   # boshidagi bo'sh joylar ahamiyatli
-        data["code"] = request.form["code"].replace("\r\n", "\n").strip("\n")[:5000]
+    part, err = _media_data(fmt)
+    if err:
+        return None, {"text": err}
+    data, answer = {"format": fmt, **part}, {}
+    if field("view") and kind in ("yopiq", "kop"):
+        data["option_view"] = field("view")
     g = request.form.getlist
     if kind == "ochiq":
         if not field("answer"):

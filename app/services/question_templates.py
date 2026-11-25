@@ -10,6 +10,8 @@ tanlash — generator.py. Matnlar o'zbekcha kontent (tarjima qilinmaydi), boshqa
 import math
 from dataclasses import dataclass, field
 
+from . import ui_icons
+
 LEVELS = ("easy", "medium", "hard")
 CODE_TEXT = "Quyidagi Python kodi natijasini aniqlang:"
 SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
@@ -602,3 +604,296 @@ def xl_match(r, level):
     return _matching(r, f"{a}{k}".replace(" ", ""), "Formulalarni natijasi bilan moslashtiring.", pairs,
                      "SUM — yig‘indi, MAX — eng katta, MIN — eng kichik, COUNT — sonli kataklar soni, SUMIF — shartga mos kataklar yig‘indisi.",
                      table={"head": ["", "A"], "rows": [[str(i + 1), str(x)] for i, x in enumerate(a)]})
+
+
+# ---------------- Elektron jadval oynasi (data.sheet) ----------------
+
+def _grid(rows, active, formula) -> dict:
+    return {"rows": [[str(c) for c in r] for r in rows], "active": active, "formula": formula}
+
+
+@template("xl_ref", "Formuladagi katak havolalari", seconds=90)
+def xl_ref(r, level):
+    a, b, c = (r.randint(2, 9) for _ in range(3))
+    f, v = {"easy": (("=A1+B1*C1", a + b * c),), "medium": (("=(A1+B1)*C1", (a + b) * c), ("=A1*B1-C1", a * b - c)),
+            "hard": (("=A1^2+B1*C1", a * a + b * c), ("=SUM(A1:C1)*2", (a + b + c) * 2), ("=MAX(A1:C1)-MIN(A1:C1)", max(a, b, c) - min(a, b, c)))}[level][
+        r.randrange({"easy": 1, "medium": 2, "hard": 3}[level])]
+    return _single(r, f"{f}|{a}-{b}-{c}", "D1 katakdagi formula natijasi nechaga teng?", v,
+                   [a + b + c, (a + b) * c, a + b * c, a * b * c, v + 1, v + 2], f"A1 = {a}, B1 = {b}, C1 = {c}: {f} → {v}.",
+                   sheet=_grid([[a, b, c, "?"]], "D1", f))
+
+
+@template("xl_abs", "Formulani nusxalash: nisbiy va mutlaq havola", seconds=90)
+def xl_abs(r, level):
+    col, row, to_row = r.choice("CD"), r.randint(1, 4), r.randint(5, 9)
+    d = to_row - row
+    one = f"$A${row}" if level != "easy" else f"A{row}"
+    two = f"B{row}" if level != "hard" else f"B${row}"
+    moved = {"easy": (f"A{to_row}", f"B{to_row}"), "medium": (f"$A${row}", f"B{to_row}"), "hard": (f"$A${row}", f"B${row}")}[level]
+    op = r.choice("+*-")
+    right = f"={moved[0]}{op}{moved[1]}"
+    wrong = [f"=A{to_row}{op}B{to_row}", f"=$A${to_row}{op}B{to_row}", f"={one}{op}{two}", f"=$A${row}{op}B{to_row}", f"=A{row}{op}B{to_row}",
+             f"=$A${to_row}{op}$B${to_row}"]
+    return _single(r, f"{col}{row}>{to_row}{op}{level[0]}", f"{col}{row} katakdagi ={one}{op}{two} formulasi {col}{to_row} katakka nusxalandi. "
+                   f"{col}{to_row} da qanday formula hosil bo‘ladi?", right, wrong,
+                   f"Nusxa {d} qator pastga: «$» belgisi yo‘q qator raqami {d} ga oshadi, «$» bilan yozilgani o‘zgarmaydi.", option_view="code")
+
+
+@template("xl_if", "IF formulasi", seconds=60)
+def xl_if(r, level):
+    a, k, op = r.randint(1, 20), r.randint(1, 20), r.choice((">", "<", ">=", "<="))
+    ok = OPS[op](a, k)
+    if level == "easy":
+        yes, no, f = "Ha", "Yo‘q", f'=IF(A1{op}{k};"Ha";"Yo‘q")'
+    else:
+        m, n = r.randint(2, 4), r.randint(5, 9)
+        yes, no, f = str(a * m), str(a + n), f"=IF(A1{op}{k};A1*{m};A1+{n})"
+    right = yes if ok else no
+    return _single(r, f"{f}|{a}", "B1 katakda nima chiqadi?", right, [no if ok else yes, str(a), "Xato", "0", "ROST"],
+                   f"A1 = {a}: {a} {op} {k} — {'rost' if ok else 'yolg‘on'}.", sheet=_grid([[a, "?"]], "B1", f))
+
+
+# ---------------- JavaScript ----------------
+
+JS_TEXT = "Quyidagi JavaScript kodi natijasini aniqlang:"
+
+
+@template("js_loop", "JavaScript: for sikli")
+def js_loop(r, level):
+    a, b = r.randint(1, 4), r.randint(5, 9)
+    step = {"easy": 1, "medium": 2, "hard": 3}[level]
+    xs = list(range(a, b + 1, step))
+    total = sum(xs)
+    inc = "i++" if step == 1 else f"i += {step}"
+    return _single(r, f"{a}-{b}-{step}", JS_TEXT, total, [total + b, total - a, len(xs), sum(range(a, b)), total + 1],
+                   " + ".join(map(str, xs)) + f" = {total}", lang="javascript",
+                   code=f"let s = 0;\nfor (let i = {a}; i <= {b}; {inc}) {{\n  s += i;\n}}\nconsole.log(s);")
+
+
+@template("js_concat", "JavaScript: qator va son qo‘shish")
+def js_concat(r, level):
+    a, b, c = r.randint(1, 9), r.randint(1, 9), r.randint(1, 9)
+    expr, res, why = {
+        "easy": (f'"{a}" + {b}', f"{a}{b}", "Qatorga son qo‘shilsa, son qatorga aylanadi va yoniga yoziladi."),
+        "medium": (f'{a} + {b} + "{c}"', f"{a + b}{c}", "Amallar chapdan o‘ngga: avval sonlar qo‘shiladi, keyin natija qatorga ulanadi."),
+        "hard": (f'"{a}" * {b} + {c}', f"{a * b + c}", "«*» amali qatorni songa aylantiradi, keyin sonlar qo‘shiladi.")}[level]
+    return _single(r, expr, JS_TEXT, res, [str(a + b + c), f"{a}{b}{c}", str(a + b), f"{a}{b}", str(a * b), f"{a + b}{c}", "NaN", "undefined"], why,
+                   lang="javascript", code=f"console.log({expr});")
+
+
+@template("js_if", "JavaScript: shart")
+def js_if(r, level):
+    x, k, op = r.randint(1, 20), r.randint(1, 20), r.choice((">", "<", ">=", "<="))
+    ok, a, b = OPS[op](x, k), r.randint(2, 5), r.randint(1, 9)
+    res = x * a if ok else x - b
+    tail = f"x *= {a};" if level == "easy" else f"x = x * {a};"
+    return _single(r, f"{x}{op}{k}|{a}|{b}", JS_TEXT, res, [x, x * a, x - b, x + b, a, b], f"{x} {op} {k} — {'rost' if ok else 'yolg‘on'}, natija {res}.",
+                   lang="javascript", code=f"let x = {x};\nif (x {op} {k}) {{\n  {tail}\n}} else {{\n  x -= {b};\n}}\nconsole.log(x);")
+
+
+@template("js_match", "JavaScript: ifodalarni natijasi bilan moslash", "matching", levels=("medium", "hard"), seconds=120)
+def js_match(r, level):
+    for _ in range(60):
+        a, b = r.randint(2, 9), r.randint(2, 9)
+        pairs = [(f"{a} + {b}", str(a + b)), (f'"{a}" + {b}', f"{a}{b}"), (f'"{a}" * "{b}"', str(a * b)), (f"{a} % {b}", str(a % b))]
+        if level == "hard":
+            pairs.append((f'typeof "{a}"', "string"))
+        if len({v for _e, v in pairs}) == len(pairs):
+            break
+    else:
+        raise ValueError("natijalar takrorlandi")
+    return _matching(r, f"{level[0]}{a}-{b}", "JavaScript ifodalarini natijasi bilan moslashtiring.", pairs,
+                     "«+» qator bilan ishlasa ulaydi, «*» va «%» sonlar ustida bajariladi.")
+
+
+# ---------------- HTML va CSS ----------------
+
+HTML_TAGS = {"<h1>": "eng katta sarlavha", "<p>": "abzas", "<a>": "havola", "<img>": "rasm", "<ul>": "belgili ro‘yxat", "<ol>": "raqamlangan ro‘yxat",
+             "<li>": "ro‘yxat elementi", "<table>": "jadval", "<tr>": "jadval qatori", "<td>": "jadval katagi", "<br>": "yangi qatorga o‘tish",
+             "<hr>": "gorizontal chiziq", "<form>": "forma", "<input>": "kiritish maydoni", "<title>": "brauzer yorlig‘idagi sarlavha",
+             "<strong>": "muhim (qalin) matn", "<em>": "urg‘uli (kursiv) matn"}
+CSS_PROPS = {"color": "matn rangi", "background-color": "fon rangi", "font-size": "shrift o‘lchami", "font-weight": "shrift qalinligi",
+             "text-align": "matnni tekislash", "margin": "tashqi bo‘shliq", "padding": "ichki bo‘shliq", "border": "chegara chizig‘i",
+             "width": "element kengligi", "border-radius": "burchaklarni yumaloqlash", "text-decoration": "matn chizig‘i (masalan, tagiga chiziq)",
+             "line-height": "qatorlar balandligi", "letter-spacing": "harflar orasidagi masofa", "display": "elementning joylashish turi"}
+
+
+def _fact(r, level, facts: dict, ask_name: str, ask_use: str, view: str | None = None):
+    """Nomi → vazifasi yoki vazifasi → nomi."""
+    name = r.choice(list(facts))
+    others = r.sample([k for k in facts if k != name], 5)
+    extra = {"option_view": view} if view else {}
+    if r.random() < 0.5 if level == "medium" else level == "easy":
+        return _single(r, f"n:{name}", ask_use.format(facts[name]), name, others, f"{name} — {facts[name]}.", **extra)
+    return _single(r, f"v:{name}", ask_name.format(name), facts[name], [facts[k] for k in others], f"{name} — {facts[name]}.")
+
+
+def _fact_match(r, level, facts: dict, text: str):
+    names = sorted(r.sample(list(facts), {"easy": 3, "medium": 4, "hard": 5}[level]))
+    return _matching(r, "|".join(names), text, [(n, facts[n]) for n in names], "; ".join(f"{n} — {facts[n]}" for n in names) + ".")
+
+
+@template("html_tag", "HTML teglari")
+def html_tag(r, level):
+    return _fact(r, level, HTML_TAGS, "HTML’da {} tegi nima uchun ishlatiladi?", "HTML’da «{}» uchun qaysi teg ishlatiladi?", "code")
+
+
+@template("html_match", "HTML teglarini moslash", "matching", seconds=120)
+def html_match(r, level):
+    return _fact_match(r, level, HTML_TAGS, "HTML teglarini vazifasi bilan moslashtiring.")
+
+
+@template("css_prop", "CSS xossalari")
+def css_prop(r, level):
+    return _fact(r, level, CSS_PROPS, "CSS’da {} xossasi nimani belgilaydi?", "CSS’da «{}» qaysi xossa bilan belgilanadi?", "code")
+
+
+@template("css_match", "CSS xossalarini moslash", "matching", seconds=120)
+def css_match(r, level):
+    return _fact_match(r, level, CSS_PROPS, "CSS xossalarini vazifasi bilan moslashtiring.")
+
+
+# ---------------- LOGO ----------------
+
+POLYGONS = {3: "Muntazam uchburchak", 4: "Kvadrat", 5: "Muntazam beshburchak", 6: "Muntazam oltiburchak", 8: "Muntazam sakkizburchak",
+            9: "Muntazam to‘qqizburchak", 10: "Muntazam o‘nburchak", 12: "Muntazam o‘n ikki burchak"}
+
+
+def _poly(n: int, a: int) -> str:
+    return f"repeat {n} [fd {a} rt {360 // n}]"
+
+
+@template("logo_figure", "LOGO: shaklni aniqlash")
+def logo_figure(r, level):
+    n, a = r.choice({"easy": (3, 4, 6), "medium": (3, 5, 6, 8), "hard": (5, 8, 9, 10, 12)}[level]), r.randrange(20, 101, 5)
+    return _single(r, f"{n}-{a}", "LOGO buyruqlari bajarilganda qanday shakl chiziladi?", POLYGONS[n], [v for k, v in POLYGONS.items() if k != n],
+                   f"Burilish burchagi {360 // n}°, 360 ÷ {360 // n} = {n} tomon.", logo={"src": _poly(n, a), "show": "code"})
+
+
+@template("logo_pick", "LOGO: chizmani tanlash", seconds=90)
+def logo_pick(r, level):
+    pool = {"easy": (3, 4, 6, 8), "medium": (3, 4, 5, 6, 8), "hard": (5, 6, 8, 9, 10)}[level]
+    n, a = r.choice(pool), r.randrange(20, 101, 5)
+    others = r.sample([k for k in pool if k != n], 3)
+    return _single(r, f"{n}-{a}", f"«{_poly(n, a)}» buyrug‘i bilan qaysi shakl chiziladi?", _poly(n, a), [_poly(k, a) for k in others],
+                   f"360 ÷ {360 // n} = {n} tomonli muntazam ko‘pburchak.", option_view="logo")
+
+
+@template("logo_perimeter", "LOGO: toshbaqa bosib o‘tgan yo‘l (ochiq)", "open", seconds=90)
+def logo_perimeter(r, level):
+    if level == "easy":
+        n, a = r.choice((3, 4, 5, 6)), r.randrange(10, 101, 5)
+        src, v, why = _poly(n, a), n * a, f"{n} · {a} = {n * a}"
+    else:
+        n, a, b = r.choice((2, 3, 4, 5)), r.randrange(10, 61, 5), r.randrange(5, 41, 5)
+        src, v, why = f"repeat {n} [fd {a} bk {b} rt 90]", n * (a + b), f"Har takrorda {a} + {b} qadam: {n} · {a + b} = {n * (a + b)}"
+    return _open(src, "Toshbaqa jami necha qadam yo‘l bosadi (orqaga yurgani ham qo‘shiladi)?", v, why, logo={"src": src, "show": "code"})
+
+
+LOGO_WORDS = {"fd 50": "50 qadam oldinga", "bk 50": "50 qadam orqaga", "rt 90": "90° o‘ngga burilish", "lt 90": "90° chapga burilish",
+              "pu": "qalamni ko‘tarish", "pd": "qalamni tushirish", "home": "boshlang‘ich nuqtaga qaytish", "cs": "ekranni tozalash",
+              "repeat 4 [ ]": "4 marta takrorlash"}
+
+
+@template("logo_match", "LOGO buyruqlarini moslash", "matching", seconds=120)
+def logo_match(r, level):
+    return _fact_match(r, level, LOGO_WORDS, "LOGO buyruqlarini ma’nosi bilan moslashtiring.")
+
+
+# ---------------- Scratch ----------------
+
+@template("scratch_sum", "Scratch: o‘zgaruvchi qiymati", seconds=90)
+def scratch_sum(r, level):
+    x, n, k = r.randint(0, 9), r.randint(2, 6), r.randint(1, 5)
+    lines = ["voqea: bayroq bosilganda", f"o‘zgaruvchi: [x] ni [{x}] ga o‘rnat", f"boshqaruv: [{n}] marta takrorla", f"  o‘zgaruvchi: [x] ni [{k}] ga o‘zgartir"]
+    v = x + n * k
+    why = f"{x} + {n} · {k} = {v}"
+    if level == "hard":
+        m = r.randint(2, 3)
+        lines.append(f"  o‘zgaruvchi: [x] ni [{m}] ga o‘zgartir")
+        v, why = x + n * (k + m), f"{x} + {n} · ({k} + {m}) = {x + n * (k + m)}"
+    elif level == "medium":
+        m = r.randint(1, 4)
+        lines.append(f"o‘zgaruvchi: [x] ni [-{m}] ga o‘zgartir")
+        v, why = v - m, f"{x} + {n} · {k} − {m} = {v - m}"
+    lines.append("ko‘rinish: (x) de")
+    return _single(r, "|".join(lines[1:-1]).replace("o‘zgaruvchi: ", "").replace("boshqaruv: ", ""), "Qahramon nechani aytadi?", v,
+                   [x + k, n * k, v + k, v - k, x + n, v + 1], why, scratch="\n".join(lines))
+
+
+@template("scratch_steps", "Scratch: qadamlar soni")
+def scratch_steps(r, level):
+    n, d = r.randint(2, 10), r.choice((5, 10, 15, 20))
+    lines = ["voqea: bayroq bosilganda", f"boshqaruv: [{n}] marta takrorla", f"  harakat: [{d}] qadam yur"]
+    v, why = n * d, f"{n} · {d} = {n * d}"
+    if level != "easy":
+        e = r.choice((5, 10, 25))
+        lines += [f"harakat: [{e}] qadam yur"]
+        v, why = n * d + e, f"{n} · {d} + {e} = {n * d + e}"
+    if level == "hard":
+        m = r.randint(2, 3)
+        lines = [lines[0], f"boshqaruv: [{m}] marta takrorla", f"  boshqaruv: [{n}] marta takrorla", f"    harakat: [{d}] qadam yur"]
+        v, why = m * n * d, f"{m} · {n} · {d} = {m * n * d}"
+    return _single(r, f"{level[0]}{n}-{d}-{v}", "Qahramon jami necha qadam yuradi?", v, [n + d, n * d, d, v + d, v - d, v * 2], why,
+                   scratch="\n".join(lines))
+
+
+@template("scratch_if", "Scratch: shart", seconds=90)
+def scratch_if(r, level):
+    x, k, op = r.randint(1, 15), r.randint(1, 15), r.choice((">", "<"))
+    ok = OPS[op](x, k)
+    words = ("Salom", "Rahmat")
+    lines = ["voqea: bayroq bosilganda", f"o‘zgaruvchi: [x] ni [{x}] ga o‘rnat", f"boshqaruv: agar <x {op} {k}> bo‘lsa", f"  ko‘rinish: [{words[0]}] de",
+             "boshqaruv: aks holda", f"  ko‘rinish: [{words[1]}] de"]
+    return _single(r, f"{x}{op}{k}", "Qahramon nima deydi?", words[0] if ok else words[1],
+                   [words[1] if ok else words[0], "Hech narsa", "Ikkalasini ham", str(x)], f"{x} {op} {k} — {'rost' if ok else 'yolg‘on'}.",
+                   scratch="\n".join(lines))
+
+
+SCRATCH_GROUPS = {"Harakat": ("10 qadam yur", "o‘ngga 15° bur", "x: 0 y: 0 ga o‘t"), "Ko‘rinish": ("Salom! de", "keyingi libos", "o‘lchamni 10 ga o‘zgartir"),
+                  "Ovoz": ("Miyov ovozini ijro et", "ovoz balandligini 50% qil"), "Voqealar": ("bayroq bosilganda", "bo‘sh joy tugmasi bosilganda"),
+                  "Boshqaruv": ("1 soniya kut", "10 marta takrorla", "agar … bo‘lsa"), "Sensorlar": ("sichqonchaga tegdimi?", "ismingiz nima? so‘ra"),
+                  "Amallar": ("( ) + ( )", "1 dan 10 gacha tasodifiy son")}
+
+
+@template("scratch_match", "Scratch bloklarini bo‘limi bilan moslash", "matching", seconds=120)
+def scratch_match(r, level):
+    groups = sorted(r.sample(list(SCRATCH_GROUPS), {"easy": 3, "medium": 4, "hard": 5}[level]))
+    pairs = [(r.choice(SCRATCH_GROUPS[g]), g) for g in groups]
+    ids = "-".join(f"{g[:3]}{SCRATCH_GROUPS[g].index(b)}" for b, g in pairs)
+    return _matching(r, ids, "Scratch bloklarini bo‘limi bilan moslashtiring.", pairs,
+                     "; ".join(f"«{b}» — {g}" for b, g in pairs) + ".")
+
+
+# ---------------- Word, Excel, PowerPoint, Paint tugmalari ----------------
+
+def _program(prog: str, title: str):
+    codes = [c for c in ui_icons.codes() if c.startswith(prog + ".")]
+
+    def icon(r, level):
+        c = r.choice(codes)
+        use = level != "easy"
+        label = ui_icons.purpose if use else ui_icons.name
+        others = {label(x) for x in codes if x != c and label(x) != label(c)}
+        return _single(r, f"{c}-{int(use)}", f"{title} dasturidagi bu tugma nima uchun xizmat qiladi?" if use else f"{title} dasturidagi bu tugma qanday ataladi?",
+                       label(c), r.sample(sorted(others), 5), f"Bu — «{ui_icons.name(c)}» tugmasi. {ui_icons.purpose(c)}.", ui=[c])
+
+    def pick(r, level):
+        c = r.choice(codes)
+        others = [x for x in codes if ui_icons.name(x) != ui_icons.name(c)]
+        ask = f"«{ui_icons.name(c)}» tugmasini toping." if level == "easy" else f"Qaysi tugma quyidagi amalni bajaradi: {ui_icons.purpose(c)[0].lower()}{ui_icons.purpose(c)[1:]}?"
+        return _single(r, f"{c}-{level[0] == 'e'}", f"{title}: {ask}", c, r.sample(others, 3), f"{ui_icons.name(c)}: {ui_icons.purpose(c)}.", option_view="ui")
+
+    def match(r, level):
+        chosen = sorted(r.sample(codes, {"easy": 3, "medium": 4, "hard": 5}[level]))
+        return _matching(r, "|".join(c.split(".")[1] for c in chosen), f"{title} tugmalarini vazifasi bilan moslashtiring.",
+                         [(ui_icons.name(c), ui_icons.purpose(c)) for c in chosen],
+                         "; ".join(f"{ui_icons.name(c)} — {ui_icons.purpose(c)}" for c in chosen) + ".")
+
+    template(f"{prog}_icon", f"{title}: tugma vazifasi")(icon)
+    template(f"{prog}_pick", f"{title}: tugmani topish")(pick)
+    template(f"{prog}_match", f"{title}: tugmalarni moslash", "matching", seconds=120)(match)
+
+
+for _p, _t in ui_icons.PROGRAMS.items():
+    _program(_p, _t)

@@ -17,9 +17,9 @@
       {% else %}{{ badge(_("Xato"), "red", "x") }}{% endif %}
     </div>
     <p class="strong">{{ r.q }}</p>
-    {% if r.code %}{{ code(r.code, copy=False) }}{% endif %}
+    {{ media_html(r) }}
     {% if r.image %}<figure class="q-figure"><img src="{{ url_for('static', filename=r.image.src) }}" alt="{{ r.image.alt }}" loading="lazy"></figure>{% endif %}
-    {% if r.table %}{% with q = {"table": r.table} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
+    {% if r.table %}{% with q = {"table": r.table, "media": ""} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
 
     {% if r.kind in ("yopiq", "kop") %}
     <ul class="list-reset ans-list">
@@ -27,7 +27,7 @@
       {% set is_right = loop.index0 in r.right %}{% set is_mine = loop.index0 in r.mine %}
       <li class="ans {{ 'ans-right' if is_right }} {{ 'ans-wrong' if is_mine and not is_right }}">
         <span class="ans-key">{{ "ABCDEFGHIJ"[loop.index0] }}</span>
-        <span class="grow">{{ o }}</span>
+        <span class="grow">{{ option_html(o, r.view) }}{% if r.view == "ui" %} <span class="small">{{ option_text(o, r.view) }}</span>{% endif %}</span>
         {% if is_mine and not is_right %}<span class="ans-tag">{{ icon("x", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
         {% elif is_right and is_mine %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("Sizning javobingiz") }}</span>
         {% elif is_right %}<span class="ans-tag">{{ icon("check", "ico-sm") }}{{ _("To‘g‘ri javob") }}</span>{% endif %}

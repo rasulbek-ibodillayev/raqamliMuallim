@@ -18,7 +18,7 @@ from sqlalchemy import func, select
 
 from ..extensions import db
 from ..models import AttemptItem, Objection, Question, Subtopic, TestAttempt, Topic, User
-from . import archive, notify, recalc, seen, versions
+from . import archive, media, notify, recalc, seen, versions
 from . import question_bank as qb
 from .timefmt import when
 
@@ -80,7 +80,7 @@ def detail(question_id: int) -> dict | None:
     rows = db.session.execute(
         select(Objection, User.first_name, User.last_name).join(User, User.id == Objection.user_id)
         .where(Objection.question_id == q.id, Objection.status == "review").order_by(Objection.created_at)).all()
-    return {"id": q.id, "type": q.type, "kind": qb.TYPE_TO_KIND[q.type], "text": q.text, "status": q.status, "code": d.get("code"),
+    return {"id": q.id, "type": q.type, "kind": qb.TYPE_TO_KIND[q.type], "text": q.text, "status": q.status, "media": media.render(d), "view": d.get("option_view"),
             "table": d.get("table"), "image": d.get("image"), "why": q.explanation, "lvl": qb.DIFF_TO_LEVEL[q.difficulty],
             "where": f"{sub.topic.title} · {sub.title}", "section_id": sub.topic.section_id,
             "options": [{"i": i, "text": o, "right": i in right, "pct": round(100 * got[i] / total) if total else 0}

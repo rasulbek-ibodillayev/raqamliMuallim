@@ -17,7 +17,7 @@ from sqlalchemy import func, select, true, update
 
 from ..extensions import db
 from ..models import AuditLog, Question, QuestionStat, QuestionVersion, Section, Subtopic, Topic
-from . import notify, recalc, seen
+from . import media, notify, recalc, seen
 from .content_import import check_question
 
 PAGE = 20
@@ -124,7 +124,7 @@ def _row(q: Question, sub: str, top: str, sec: str, answered: int | None, correc
     doubt = (answered or 0) >= 20 and ((q.difficulty == "easy" and pct < 50) or (q.difficulty == "hard" and pct > 90))
     return {"id": q.id, "text": q.text, "section": sec, "topic": top, "subtopic": sub, "status": q.status,
             "level": DIFF_TO_LEVEL[q.difficulty], "kind": TYPE_TO_KIND[q.type], "pct": pct, "doubt": doubt,
-            "source": q.source, "created": q.created_at, **_options(q)}
+            "source": q.source, "created": q.created_at, "media": media.render(q.data), "view": (q.data or {}).get("option_view"), **_options(q)}
 
 
 def _options(q: Question) -> dict:
@@ -354,7 +354,7 @@ def _identity(type_: str, data: dict, answer: dict):
     """Savolni bir xil deb hisoblash uchun: turi, variantlari yoki juftliklari (o'ng ustun tartibi ahamiyatsiz), kodi, jadvali."""
     d = data or {}
     pairs = sorted((x, d["right"][r]) for x, r in zip(d.get("left", []), answer.get("pairs", []))) if type_ == "matching" else None
-    return type_, d.get("options"), pairs, *(d.get(k) for k in ("code", "table", "image", "diagram"))
+    return type_, d.get("options"), pairs, *(d.get(k) for k in ("table", "image", "diagram", "option_view", *media.KEYS))
 
 
 def _exists(p: dict) -> bool:
@@ -386,7 +386,9 @@ def export_excel(f: Filters, areas: set[int] | None = None) -> bytes:
             opts = [f"{left} = {d['right'][r]}" for left, r in zip(d.get("left", []), a.get("pairs", []))]
         else:
             right = "; ".join([a.get("value", ""), *a.get("accept", [])])
-        extra = [label for key, label in (("code", "kod"), ("table", "jadval"), ("image", "rasm"), ("diagram", "chizma")) if d.get(key)]
+        extra = [label for key, label in (("code", "kod"), ("table", "jadval"), ("image", "rasm"), ("diagram", "chizma"),
+                                                  ("sheet", "Excel oynasi"), ("scratch", "Scratch"), ("logo", "LOGO"), ("ui", "tugmalar"),
+                                                  ("option_view", "variant ko‘rinishi")) if d.get(key)]
         if len(opts) > len(_LETTERS):
             extra.append("6 tadan ko‘p variant")
         opts = (opts + [""] * len(_LETTERS))[:len(_LETTERS)]

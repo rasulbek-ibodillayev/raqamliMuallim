@@ -50,7 +50,7 @@
           <span class="ex-qn" x-text="(cur + 1) + '.'"></span>
           <div class="ex-q-body">
             <p class="ex-q-text" x-text="q().text"></p>
-            <template x-if="q().code"><pre class="ex-code" x-text="q().code"></pre></template>
+            <template x-if="q().media"><div class="ex-media stack" x-html="q().media"></div></template>
             {# Rasmli savol: bosilsa rasm kattalashadi #}
             <template x-if="q().image"><figure class="ex-figure" x-data="{ z: false }">
               <button type="button" class="ex-figure-btn" @click="z = true" aria-label="{{ _('Rasmni kattalashtirish') }}"><img :src="q().image.src" :alt="q().image.alt"></button>
@@ -73,7 +73,7 @@
           <template x-for="(o, i) in q().options" :key="cur + '-' + i">
             <label class="ex-opt" :class="ans[cur] === i && 'is-checked'">
               <input type="radio" :name="'q' + cur" :value="i" :checked="ans[cur] === i" @change="pick(i)">
-              <span x-text="o"></span>
+              <span x-html="o"></span>
             </label>
           </template>
         </fieldset>

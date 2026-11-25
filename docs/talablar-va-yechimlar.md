@@ -131,7 +131,8 @@ bilan kirgandan keyin bog'lanadi: aks holda birovning emailini oldindan ro'yxatd
 
 ## 3. Attestatsiya savollari: dasturlar bo'yicha
 
-Rasm o'rniga tavsif saqlanadi, brauzer chizadi.
+Rasm o'rniga tavsif saqlanadi. **Bajarildi (7d):** server HTML/SVG chizadi (pleyer, attestatsiya, natija, AI tutor va oflaynda bir xil,
+brauzerga kutubxona yuklanmaydi). Tugma ikonkalari — o'zimiz chizgan bitta umumiy to'plam.
 
 | Dastur | Saqlanadigan narsa | Ko'rsatish | ≈ hajm |
 |---|---|---|---|
@@ -157,7 +158,7 @@ Avvalgi qaror («eng eski ko'rilgan savol qaytadi») bekor bo'ladi.
 Holat: 1 va 2 bajarildi (7c), 3 — 13b-bosqichda; ungacha savol ham, shablon ham qolmasa, test qisqaroq bo'ladi yoki ochilmaydi.
 
 1. **Baza:** ko'rilmagan tasdiqlangan savollar.
-2. **Shablon generator** (37 ta shablon, `app/services/question_templates.py`): parametrli savol (Python, sanoq sistemasi, Excel formulasi, LOGO…) yangi sonlar bilan. Javob kod bilan
+2. **Shablon generator** (68 ta shablon, `app/services/question_templates.py`): parametrli savol (Python, sanoq sistemasi, Excel formulasi, LOGO…) yangi sonlar bilan. Javob kod bilan
    hisoblanadi, shuning uchun darhol `approved`; AI va token kerak emas.
 3. **AI tutor:** shu kichik mavzu, daraja va turdagi savol, RAG manbasi bilan. Tekshiruv: format (`check_question`) → o'xshash savol
    yo'qligi (`pg_trgm`) → ikkinchi model kalitni ko'rmasdan yechadi, javob mos kelishi shart. O'tsa — savollar bazasiga yoziladi.

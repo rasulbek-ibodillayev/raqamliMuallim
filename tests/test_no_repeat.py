@@ -138,8 +138,9 @@ def test_template_is_valid_and_key_is_correct(name):
             if t.type == "matching":
                 assert len(set(q.data["right"])) == len(q.data["right"]) >= 3
             # Bir xil kalit — bir xil savol
-            assert keys.setdefault(q.key, (q.text, code, str(q.data.get("table")))) == (q.text, code, str(q.data.get("table")))
-            if not code:
+            same = (q.text, code, *(str(q.data.get(k)) for k in ("table", "sheet", "scratch", "logo", "ui")))
+            assert keys.setdefault(q.key, same) == same
+            if not code or q.data.get("lang", "python") != "python":
                 continue
             # Kodli savol: javob kodni ishga tushirib tekshiriladi
             if t.type == "single":

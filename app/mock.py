@@ -424,7 +424,8 @@ AI_QUEUE = [
     for i, (t, l, lvl, k, q, o, r) in enumerate(_AI_SEED * 3)
 ][:23]
 Q_KINDS = {"yopiq": _l("Yopiq (bitta javob)"), "kop": _l("Ko‘p javobli"), "moslash": _l("Moslashtirish"), "ochiq": _l("Ochiq javob")}
-Q_FORMATS = {"matn": _l("Matnli"), "chizma": _l("Chizmali"), "jadval": _l("Jadvalli"), "rasm": _l("Rasmli")}
+Q_FORMATS = {"matn": _l("Matnli"), "kod": _l("Kodli"), "excel": _l("Excel oynasi"), "scratch": _l("Scratch"), "logo": _l("LOGO"),
+             "tugma": _l("Dastur tugmalari"), "jadval": _l("Jadvalli"), "chizma": _l("Chizmali"), "rasm": _l("Rasmli")}
 Q_LEVELS = ["Oson", "O‘rta", "Qiyin"]
 
 # --- Admin ---

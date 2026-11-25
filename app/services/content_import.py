@@ -27,6 +27,7 @@ from ..extensions import db
 from ..models import ContentBlock, Course, Question, QuestionVersion, Section, Subtopic, Topic
 from ..models.content import BLOCK_KINDS
 from ..models.questions import Q_DIFFICULTY, Q_STATUS, Q_TYPES
+from . import media
 from .question_templates import TEMPLATES
 
 
@@ -72,6 +73,7 @@ def check_question(q) -> list[str]:
         errs.append("source: import yoki ai")
     if not isinstance(data, dict) or not isinstance(ans, dict):
         return errs + ["data va answer obyekt bo'lishi kerak"]
+    errs += media.check(data, t)
     if t in ("single", "multiple"):
         opts, keys = data.get("options"), ans.get("keys")
         if not _str_list(opts, 2):

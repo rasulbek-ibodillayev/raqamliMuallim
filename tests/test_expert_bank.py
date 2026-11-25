@@ -39,7 +39,7 @@ def expert(as_role):
 
 
 def test_bank_lists_database_questions_with_filters(app, expert):
-    html = expert.get("/ekspert/").get_data(as_text=True)
+    html = "".join(expert.get(f"/ekspert/?sahifa={n}").get_data(as_text=True) for n in (1, 2))
     assert "DNS serverning asosiy vazifasi qaysi?" in html
     assert "3A₁₆ sonini" in html                                  # AI savoli ham bankda (tekshiruvda)
     html = expert.get("/ekspert/?turi=moslash").get_data(as_text=True)

@@ -43,6 +43,7 @@
         <p class="strong" x-show="!edit" x-text="text">{{ q.text }}</p>
         <textarea class="textarea" name="text" x-show="edit" x-cloak x-model="text" aria-label="{{ _('Savol matni') }}" aria-describedby="q{{ q.id }}-text-err"></textarea>
         {{ field_error("text", {}, "q" ~ q.id ~ "-") }}
+        {{ q.media }}
         <ul class="list-reset ans-list">
           <template x-for="(o, i) in opts" :key="i">
             <li class="ans" :class="right.includes(i) && 'ans-right'">

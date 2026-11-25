@@ -28,15 +28,15 @@
       <div class="row between wrap"><span class="small muted num">#{{ d.id }} · {{ d.where }} · {{ d.lvl }}</span>
         {% if d.status == "paused" %}{{ badge(_("Testlarda vaqtincha to‘xtatilgan"), "yellow") }}{% elif d.status != "approved" %}{{ badge(state[d.status][0], state[d.status][1]) }}{% endif %}</div>
       <p class="strong">{{ d.text }}</p>
-      {% if d.code %}{{ code(d.code, copy=False) }}{% endif %}
+      {{ media_html(d) }}
       {% if d.image %}<figure class="q-figure"><img src="{{ url_for('static', filename=d.image.src) }}" alt="{{ d.image.alt }}" loading="lazy"></figure>{% endif %}
-      {% if d.table %}{% with q = {"table": d.table} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
+      {% if d.table %}{% with q = {"table": d.table, "media": ""} %}{% include "test/_question_media.html" %}{% endwith %}{% endif %}
       {% if d.options %}
       <div class="stack stack-sm">
         {% for o in d.options %}
         <div class="g-12 row">
           <span class="strong small u-w-16">{{ "ABCDEFGHIJ"[o.i] }}</span>
-          <div class="gap-4 grow stack"><div class="row between small"><span>{{ o.text }}{% if o.right %} <span class="t-green">· {{ _("to‘g‘ri deb belgilangan") }}</span>{% endif %}</span><span class="num muted">{{ o.pct }}%</span></div>{{ progress(o.pct, "green" if o.right else "", "thin") }}</div>
+          <div class="gap-4 grow stack"><div class="row between small"><span>{{ option_html(o.text, d.view) }}{% if o.right %} <span class="t-green">· {{ _("to‘g‘ri deb belgilangan") }}</span>{% endif %}</span><span class="num muted">{{ o.pct }}%</span></div>{{ progress(o.pct, "green" if o.right else "", "thin") }}</div>
         </div>
         {% endfor %}
       </div>
@@ -83,7 +83,7 @@
       {% if d.options %}
       <fieldset class="fieldset-reset stack stack-sm" x-show="action === 'key'" x-cloak @change="clear('keys')">
         <legend class="label">{{ _("To‘g‘ri javob(lar)") }}</legend>
-        {% for o in d.options %}<label class="check"><input type="checkbox" name="keys" value="{{ o.i }}" {{ 'checked' if o.right }}><span><b>{{ "ABCDEFGHIJ"[o.i] }}</b> {{ o.text }}</span></label>{% endfor %}
+        {% for o in d.options %}<label class="check"><input type="checkbox" name="keys" value="{{ o.i }}" {{ 'checked' if o.right }}><span><b>{{ "ABCDEFGHIJ"[o.i] }}</b> {{ option_html(o.text, d.view) }}</span></label>{% endfor %}
         {% if d.kind == "yopiq" %}<span class="hint">{{ _("Bir nechta belgilansa, hammasi to‘g‘ri hisoblanadi va savol tuzatilguncha testlardan to‘xtatiladi.") }}</span>{% endif %}
         {{ field_error("keys", errors) }}
       </fieldset>

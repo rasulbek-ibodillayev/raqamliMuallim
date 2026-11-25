@@ -36,6 +36,12 @@
         level: {{ (i.level or 'O‘rta')|tojson|forceescape }}, kind: {{ (i.kind or 'yopiq')|tojson|forceescape }},
         fmt: {{ (i.fmt or 'matn')|tojson|forceescape }}, text: {{ (i.text or '')|tojson|forceescape }},
         opts: {{ (i.opts or ['', '', '', ''])|tojson|forceescape }}, notes: {{ (i.notes or ['', '', '', ''])|tojson|forceescape }},
+        lang: {{ (i.lang or 'python')|tojson|forceescape }}, show: {{ (i.show or 'code')|tojson|forceescape }}, view: {{ (i.view or '')|tojson|forceescape }},
+        pv: { html: '', options: [], error: '' },
+        async look() {
+          const r = await fetch({{ url_for('expert.editor_preview')|tojson|forceescape }}, { method: 'POST', body: new FormData(this.$root), headers: { Accept: 'application/json', 'X-CSRFToken': document.querySelector('meta[name=csrf-token]').content } }).catch(() => null);
+          if (r && r.ok) this.pv = await r.json();
+        },
         withNotes: {{ 'true' if i.notes and i.notes|select|list else 'false' }}, right: {{ (i.right or [0])|tojson|forceescape }},
         pairs: {{ (i.pairs or [['', ''], ['', ''], ['', '']])|tojson|forceescape }},
         rows: {{ (i.table|length if i.table else 3) }}, cols: {{ (i.table[0]|length if i.table else 3) }},
@@ -50,7 +56,8 @@
         },
         mark(i) { if (this.kind === 'kop') this.right = this.right.includes(i) ? this.right.filter(x => x !== i) : this.right.concat([i]); else this.right = [i]; },
         preview(e) { const f = e.target.files[0]; this.img = f ? URL.createObjectURL(f) : ''; }
-      })" x-init="initForm()" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)">
+      })" x-init="initForm(); $nextTick(() => look())" data-errors="{{ errors|tojson|forceescape }}" @submit.prevent="submit($event)"
+      @input.debounce.500ms="look()" @change.debounce.300ms="look()" x-effect="fmt; view; $nextTick(() => look())">
   {% include "partials/form_open.html" %}
   {% if i.id %}<input type="hidden" name="id" value="{{ i.id }}">{% endif %}
   <div class="grid u-cols-4a70e u-ai-start">
@@ -86,7 +93,7 @@
         </div>
         <div class="field"><span class="label">{{ _("Savol formati") }}</span>
           <input type="hidden" name="format" :value="fmt">
-          <div class="seg seg-wrap" role="radiogroup">{% for k, l in formats.items() %}<button type="button" role="radio" :aria-checked="fmt === '{{ k }}'" :class="fmt === '{{ k }}' && 'active'" @click="fmt = '{{ k }}'">{{ icon({"matn": "note", "chizma": "graph", "jadval": "table", "rasm": "image"}[k], "ico-sm") }}{{ l }}</button>{% endfor %}</div>
+          <div class="seg seg-wrap" role="radiogroup">{% for k, l in formats.items() %}<button type="button" role="radio" :aria-checked="fmt === '{{ k }}'" :class="fmt === '{{ k }}' && 'active'" @click="fmt = '{{ k }}'">{{ icon({"matn": "note", "chizma": "graph", "jadval": "table", "rasm": "image", "kod": "code", "excel": "grid", "scratch": "layers", "logo": "route", "tugma": "bold"}[k], "ico-sm") }}{{ l }}</button>{% endfor %}</div>
         </div>
       </div>
 
@@ -95,8 +102,34 @@
         <div class="field"><label class="label" for="e-text">{{ _("Savol matni") }}</label>
           <textarea class="textarea" id="e-text" name="text" x-model="text" maxlength="3000" aria-describedby="text-err" @input="clear('text')" placeholder="{{ _('Masalan: 101101₂ sonini o‘nlik sanoq sistemasiga o‘tkazing.') }}"></textarea>
           {{ field_error("text", errors) }}</div>
-        <details class="field" {{ 'open' if i.code }}><summary class="label pointer">{{ _("Kod (ixtiyoriy)") }}</summary>
-          <textarea class="textarea textarea-code" name="code" maxlength="5000" spellcheck="false" aria-label="{{ _('Kod') }}" placeholder="x = 5">{{ i.code or '' }}</textarea></details>
+
+        {# ---- Formatlar: rasm emas, tavsif saqlanadi (services/media.py) ---- #}
+        <div class="stack stack-sm" x-show="fmt === 'kod'" x-cloak>
+          <div class="row wrap row-sm">
+            <label class="small row wrap row-sm">{{ _("Til") }} <select class="select w-auto" name="lang" x-model="lang">{% for k, l in langs.items() %}<option value="{{ k }}">{{ l }}</option>{% endfor %}</select></label>
+            <label class="small row row-sm" x-show="lang === 'html' || lang === 'css'">{{ _("Ko‘rsatish") }} <select class="select w-auto" name="show" x-model="show"><option value="code">{{ _("Faqat kod") }}</option><option value="result">{{ _("Faqat natija") }}</option><option value="both">{{ _("Kod va natija") }}</option></select></label>
+          </div>
+          <textarea class="textarea textarea-code" name="code" maxlength="5000" spellcheck="false" aria-label="{{ _('Kod') }}" placeholder="x = 5">{{ i.code or '' }}</textarea>
+          <textarea class="textarea textarea-code u-minh-80" name="html" maxlength="3000" spellcheck="false" x-show="lang === 'css' && show !== 'code'" aria-label="{{ _('CSS qo‘llanadigan HTML') }}" placeholder="<p>Matn</p>">{{ i.html or '' }}</textarea>
+        </div>
+        <div class="stack stack-sm" x-show="fmt === 'excel'" x-cloak>
+          <textarea class="textarea textarea-code" name="sheet" spellcheck="false" aria-label="{{ _('Excel kataklari') }}" placeholder="10 | 20 | ?">{{ i.sheet or '' }}</textarea>
+          <span class="hint">{{ _("Har qator yangi satrda, kataklar «|» bilan. «?» — so‘ralayotgan katak. Ustun va qator nomlari o‘zi chiqadi.") }}</span>
+          <div class="row wrap row-sm"><input class="input w-auto" name="sheet_active" value="{{ i.sheet_active or '' }}" maxlength="4" placeholder="{{ _('Faol katak: C1') }}" aria-label="{{ _('Faol katak') }}">
+            <input class="input grow minw-220" name="sheet_formula" value="{{ i.sheet_formula or '' }}" maxlength="200" placeholder="=SUM(A1:B1)" aria-label="{{ _('Formula qatori') }}"></div>
+        </div>
+        <div class="stack stack-sm" x-show="fmt === 'scratch'" x-cloak>
+          <textarea class="textarea textarea-code" name="scratch" maxlength="4000" spellcheck="false" aria-label="{{ _('Scratch bloklari') }}" placeholder="voqea: bayroq bosilganda&#10;boshqaruv: [4] marta takrorla&#10;  harakat: [10] qadam yur">{{ i.scratch or '' }}</textarea>
+          <span class="hint">{{ _("Har qatorda «kategoriya: matn»; ichki bloklar 2 bo‘sh joy bilan. [10] — maydon, (x) — qiymat, <x > 5> — shart. Kategoriyalar:") }} {{ scratch_cats|join(", ") }}.</span>
+        </div>
+        <div class="stack stack-sm" x-show="fmt === 'logo'" x-cloak>
+          <textarea class="textarea textarea-code u-minh-80" name="logo" maxlength="1000" spellcheck="false" aria-label="{{ _('LOGO buyruqlari') }}" placeholder="repeat 4 [fd 50 rt 90]">{{ i.logo or '' }}</textarea>
+          <label class="small row wrap row-sm">{{ _("Ko‘rsatish") }} <select class="select w-auto" name="logo_show">{% for k, l in [("both", _("Buyruq va chizma")), ("drawing", _("Faqat chizma")), ("code", _("Faqat buyruq"))] %}<option value="{{ k }}" {{ 'selected' if i.logo_show == k }}>{{ l }}</option>{% endfor %}</select></label>
+        </div>
+        <div class="stack stack-sm" x-show="fmt === 'tugma'" x-cloak>
+          <span class="hint">{{ _("Savolda ko‘rsatiladigan tugma(lar). Nomi ko‘rsatilmaydi.") }}</span>
+          <div class="ui-pick">{% for c, title, svg in ui_codes %}<label class="check chip-check" title="{{ title }}"><input type="checkbox" name="ui" value="{{ c }}" {{ 'checked' if c in (i.ui or []) }}>{{ svg }}<span class="xs">{{ title }}</span></label>{% endfor %}</div>
+        </div>
 
         <div class="field" x-show="fmt === 'rasm'" x-cloak><label class="label" for="e-img">{{ _("Rasm") }}</label>
           <input class="input" id="e-img" name="image" type="file" accept="image/*" @change="preview($event)">
@@ -136,6 +169,7 @@
             </div>
           </template>
           <button class="self-start btn btn-ghost btn-sm" type="button" x-show="opts.length < 6" @click="opts.push(''); notes.push('')">{{ icon("plus", "ico-sm") }}{{ _("Variant qo‘shish") }}</button>
+          <label class="small row wrap row-sm">{{ _("Variantlar ko‘rinishi") }} <select class="select w-auto" name="view" x-model="view"><option value="">{{ _("Oddiy matn") }}</option><option value="code">{{ _("Kod") }}</option><option value="logo">{{ _("LOGO chizmasi (variant — buyruq)") }}</option><option value="ui">{{ _("Dastur tugmasi (variant — kod: word.bold)") }}</option></select></label>
           <label class="check small"><input type="checkbox" x-model="withNotes"><span>{{ _("Har bir variantga izoh yozish (testdan keyin «Yechimini ko‘rish»da chiqadi)") }}</span></label>
         </div></template>
 
@@ -170,9 +204,11 @@
         <span class="eyebrow">{{ _("Oldindan ko‘rish") }}</span>
         <p class="xs muted" x-text="where()"></p>
         <p class="strong" x-text="text || {{ _('Savol matni shu yerda ko‘rinadi')|tojson|forceescape }}"></p>
+        <p class="field-error" x-show="pv.error" x-text="pv.error"></p>
+        <div class="stack" x-html="pv.html"></div>
         <template x-if="fmt === 'rasm' && img"><img class="q-img-preview" :src="img" alt=""></template>
         <div class="options" x-show="kind === 'yopiq' || kind === 'kop'">
-          <template x-for="(o, i) in opts" :key="i"><div class="option u-minh-44 u-fs-15" :class="right.includes(i) && 'correct'"><span class="key" x-text="'ABCDEF'[i]"></span><span x-text="o || '…'"></span></div></template>
+          <template x-for="(o, i) in opts" :key="i"><div class="option u-minh-44 u-fs-15" :class="right.includes(i) && 'correct'"><span class="key" x-text="'ABCDEF'[i]"></span><span x-show="!view" x-text="o || '…'"></span><span x-show="view" x-html="pv.options[i] || ''"></span></div></template>
         </div>
         <div class="stack stack-sm small" x-show="kind === 'moslash'"><template x-for="p in pairs"><div class="row row-sm"><b x-text="p[0] || '…'"></b>→<span x-text="p[1] || '…'"></span></div></template></div>
       </div>

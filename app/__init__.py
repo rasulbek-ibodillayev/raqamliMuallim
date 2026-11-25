@@ -166,6 +166,9 @@ def create_app(config: dict | None = None) -> Flask:
 
     import base64
 
+    from .services import highlight, media
+    app.jinja_env.globals.update(media_html=media.of, option_html=media.option, option_text=media.option_text, hl=highlight.highlight, hl_lang=highlight.norm_lang)
+
     @app.template_filter("b64")
     def b64(value: str) -> str:
         """Oldindan tayyorlangan SVG sxemani <img src="data:..."> uchun (partials/blocks.html)."""

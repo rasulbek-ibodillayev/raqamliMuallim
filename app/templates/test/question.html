@@ -48,7 +48,7 @@
     <fieldset class="fieldset-reset options">
       <legend class="sr-only">{{ _("Bitta javobni tanlang") }}</legend>
       {% for o in q.options %}
-      <label class="option"><input type="radio" name="a{{ i }}" value="{{ loop.index0 }}"><span class="key">{{ "ABCDEFGHIJ"[loop.index0] }}</span><span class="grow">{{ o }}</span></label>
+      <label class="option"><input type="radio" name="a{{ i }}" value="{{ loop.index0 }}"><span class="key">{{ "ABCDEFGHIJ"[loop.index0] }}</span><span class="grow">{{ option_html(o, q.view) }}</span></label>
       {% endfor %}
     </fieldset>
 
@@ -56,7 +56,7 @@
     <fieldset class="fieldset-reset options">
       <legend class="mb-10 hint">{{ _("Bir nechta javobni belgilang") }}</legend>
       {% for o in q.options %}
-      <label class="option multi"><input type="checkbox" name="a{{ i }}" value="{{ loop.index0 }}"><span class="key">{{ icon("check", "ico-sm") }}</span><span class="grow">{{ o }}</span></label>
+      <label class="option multi"><input type="checkbox" name="a{{ i }}" value="{{ loop.index0 }}"><span class="key">{{ icon("check", "ico-sm") }}</span><span class="grow">{{ option_html(o, q.view) }}</span></label>
       {% endfor %}
     </fieldset>
 

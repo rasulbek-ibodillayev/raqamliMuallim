@@ -36,7 +36,7 @@ def test_seed_loads_and_is_idempotent(app):
     with app.app_context():
         r = load(copy.deepcopy(SEED), status="approved")
         n = r.created["questions"]
-        assert n >= 15 and r.created["topics"] >= 10 and r.created["blocks"] == 3
+        assert n >= 15 and r.created["topics"] >= 10 and r.created["blocks"] >= 12
         assert _count(QuestionVersion) == n                       # har savolning 1-versiyasi bor
         again = load(copy.deepcopy(SEED), status="approved")
         assert again.created == {"sections": 0, "topics": 0, "subtopics": 0, "blocks": 0, "questions": 0}

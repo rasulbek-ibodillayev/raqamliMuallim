@@ -146,6 +146,420 @@
             "data": {"options": ["Tashqi kalit", "Birlamchi kalit", "Indeks", "Atribut"]}, "answer": {"keys": [1], "notes": ["Tashqi kalit boshqa jadvaldagi yozuvga ishora qiladi va takrorlanishi mumkin.", "Birlamchi kalit takrorlanmaydi va bo‘sh bo‘lmaydi, shuning uchun har bir yozuvni yagona aniqlaydi.", "Indeks qidiruvni tezlashtiradi, yagona bo‘lishi shart emas.", "Atribut — istalgan maydon (ustun)."]}, "explanation": "Yozuvni yagona aniqlash uchun maydon qiymati takrorlanmasligi va bo‘sh bo‘lmasligi kerak — bu birlamchi kalit ta’rifi."}
          ]}
       ]}
-    ]}
+    ]},
+    {
+      "title": "Dasturlar va tillar",
+      "topics": [
+        {
+          "title": "Veb texnologiyalar",
+          "est_minutes": 15,
+          "subtopics": [
+            {
+              "title": "HTML teglari",
+              "weight": 1,
+              "generators": [
+                "html_tag",
+                "html_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "HTML teglari",
+                    "body": "HTML sahifa tuzilishini teglar bilan belgilaydi: <h1> — sarlavha, <p> — abzas, <ul> va <li> — ro‘yxat."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "easy",
+                  "text": "Brauzerda qaysi ko‘rinish hosil bo‘ladi?",
+                  "data": {
+                    "format": "kod",
+                    "lang": "html",
+                    "show": "code",
+                    "code": "<ol>\n  <li>Bir</li>\n  <li>Ikki</li>\n</ol>",
+                    "options": [
+                      "Belgili ro‘yxat",
+                      "Jadval",
+                      "Raqamlangan ro‘yxat",
+                      "Ikkita havola"
+                    ]
+                  },
+                  "answer": {
+                    "keys": [
+                      2
+                    ]
+                  },
+                  "explanation": "<ol> — raqamlangan (ordered) ro‘yxat."
+                }
+              ]
+            },
+            {
+              "title": "CSS xossalari",
+              "weight": 1,
+              "generators": [
+                "css_prop",
+                "css_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "CSS xossalari",
+                    "body": "CSS sahifa ko‘rinishini belgilaydi: rang, shrift, bo‘shliq va joylashuv."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "medium",
+                  "text": "Natijadagi matn ko‘rinishi qaysi qoida bilan hosil qilingan?",
+                  "data": {
+                    "format": "kod",
+                    "lang": "css",
+                    "show": "result",
+                    "code": "p { text-align: center; font-weight: bold; }",
+                    "html": "<p>Informatika</p>",
+                    "options": [
+                      "p { text-align: left; color: red; }",
+                      "p { text-align: center; font-weight: bold; }",
+                      "p { font-style: italic; }",
+                      "p { text-decoration: underline; }"
+                    ],
+                    "option_view": "code"
+                  },
+                  "answer": {
+                    "keys": [
+                      1
+                    ]
+                  },
+                  "explanation": "Matn o‘rtada (text-align: center) va qalin (font-weight: bold)."
+                }
+              ]
+            },
+            {
+              "title": "JavaScript asoslari",
+              "weight": 1,
+              "generators": [
+                "js_loop",
+                "js_concat",
+                "js_if",
+                "js_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "JavaScript asoslari",
+                    "body": "JavaScript sahifaga harakat qo‘shadi. «+» amali qator bilan ishlaganda qiymatlarni ulaydi."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "easy",
+                  "text": "Konsolga nima chiqadi?",
+                  "data": {
+                    "format": "kod",
+                    "lang": "javascript",
+                    "code": "let a = \"2\";\nconsole.log(a + 3);",
+                    "options": [
+                      "5",
+                      "Xato",
+                      "NaN",
+                      "23"
+                    ]
+                  },
+                  "answer": {
+                    "keys": [
+                      3
+                    ]
+                  },
+                  "explanation": "Qatorga son qo‘shilsa, son qatorga aylanadi: \"2\" + 3 = \"23\"."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Scratch va LOGO",
+          "est_minutes": 12,
+          "subtopics": [
+            {
+              "title": "Scratch bloklari",
+              "weight": 1,
+              "generators": [
+                "scratch_sum",
+                "scratch_steps",
+                "scratch_if",
+                "scratch_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "Scratch bloklari",
+                    "body": "Scratch dasturi bloklardan yig‘iladi. Bloklar bo‘limlarga ajratilgan: harakat, ko‘rinish, boshqaruv va boshqalar."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "easy",
+                  "text": "Qahramon bayroq bosilganda jami necha qadam yuradi?",
+                  "data": {
+                    "format": "scratch",
+                    "scratch": "voqea: bayroq bosilganda\nboshqaruv: [4] marta takrorla\n  harakat: [10] qadam yur\n  harakat: o‘ngga [90]° bur",
+                    "options": [
+                      "10",
+                      "90",
+                      "40",
+                      "400"
+                    ]
+                  },
+                  "answer": {
+                    "keys": [
+                      2
+                    ]
+                  },
+                  "explanation": "4 marta 10 qadam: 4 · 10 = 40."
+                }
+              ]
+            },
+            {
+              "title": "LOGO buyruqlari",
+              "weight": 1,
+              "generators": [
+                "logo_figure",
+                "logo_pick",
+                "logo_perimeter",
+                "logo_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "LOGO buyruqlari",
+                    "body": "LOGO’da toshbaqa buyruqlar bilan yurib chizadi: fd — oldinga, rt — o‘ngga burilish, repeat — takrorlash."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "medium",
+                  "text": "Chizma qaysi buyruq bilan hosil qilingan?",
+                  "data": {
+                    "format": "logo",
+                    "logo": {
+                      "src": "repeat 6 [fd 40 rt 60]",
+                      "show": "drawing"
+                    },
+                    "options": [
+                      "repeat 6 [fd 40 rt 60]",
+                      "repeat 4 [fd 40 rt 90]",
+                      "repeat 3 [fd 40 rt 120]",
+                      "repeat 6 [fd 40 rt 90]"
+                    ],
+                    "option_view": "code"
+                  },
+                  "answer": {
+                    "keys": [
+                      0
+                    ]
+                  },
+                  "explanation": "Oltiburchak: 360 ÷ 6 = 60° dan buriladi."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ofis dasturlari oynasi",
+          "est_minutes": 12,
+          "subtopics": [
+            {
+              "title": "Word oynasi",
+              "weight": 1,
+              "generators": [
+                "word_icon",
+                "word_pick",
+                "word_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "Word oynasi",
+                    "body": "Word’da matnni formatlash tugmalari «Bosh sahifa» yorlig‘ida joylashgan."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "multiple",
+                  "difficulty": "easy",
+                  "text": "Qaysi tugmalar matnni tekislash uchun ishlatiladi?",
+                  "data": {
+                    "format": "matn",
+                    "option_view": "ui",
+                    "options": [
+                      "word.align_left",
+                      "word.bold",
+                      "word.align_center",
+                      "word.bullets",
+                      "word.justify"
+                    ]
+                  },
+                  "answer": {
+                    "keys": [
+                      0,
+                      2,
+                      4
+                    ]
+                  },
+                  "explanation": "Chapga, o‘rtaga va ikki tomonga tekislash tugmalari."
+                }
+              ]
+            },
+            {
+              "title": "PowerPoint oynasi",
+              "weight": 1,
+              "generators": [
+                "ppt_icon",
+                "ppt_pick",
+                "ppt_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "PowerPoint oynasi",
+                    "body": "PowerPoint’da slaydlar, animatsiya va o‘tish effektlari bilan ishlanadi."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "easy",
+                  "text": "Bu tugma PowerPoint’da nima qiladi?",
+                  "data": {
+                    "format": "tugma",
+                    "ui": [
+                      "ppt.new_slide"
+                    ],
+                    "options": [
+                      "Slaydni o‘chiradi",
+                      "Namoyishni boshlaydi",
+                      "Rasm qo‘yadi",
+                      "Yangi slayd qo‘shadi"
+                    ]
+                  },
+                  "answer": {
+                    "keys": [
+                      3
+                    ]
+                  },
+                  "explanation": "Yangi slayd tugmasi."
+                }
+              ]
+            },
+            {
+              "title": "Excel oynasi",
+              "weight": 1,
+              "generators": [
+                "xl_ref",
+                "xl_abs",
+                "xl_if",
+                "excel_icon",
+                "excel_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "Excel oynasi",
+                    "body": "Excel’da formula «=» belgisi bilan boshlanadi. $ belgisi havolani mutlaq qiladi."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "open",
+                  "difficulty": "medium",
+                  "text": "D1 katakdagi formula natijasini yozing.",
+                  "data": {
+                    "format": "excel",
+                    "sheet": {
+                      "rows": [
+                        [
+                          "4",
+                          "5",
+                          "2",
+                          "?"
+                        ]
+                      ],
+                      "active": "D1",
+                      "formula": "=(A1+B1)*C1"
+                    }
+                  },
+                  "answer": {
+                    "value": "18"
+                  },
+                  "explanation": "(4 + 5) · 2 = 18."
+                }
+              ]
+            },
+            {
+              "title": "Paint oynasi",
+              "weight": 1,
+              "generators": [
+                "paint_icon",
+                "paint_pick",
+                "paint_match"
+              ],
+              "blocks": [
+                {
+                  "kind": "text",
+                  "data": {
+                    "title": "Paint oynasi",
+                    "body": "Paint’da qalam, mo‘yqalam, rang quyish va shakllar bilan rasm chiziladi."
+                  }
+                }
+              ],
+              "questions": [
+                {
+                  "type": "single",
+                  "difficulty": "easy",
+                  "text": "Yopiq sohani bir bosishda bo‘yaydigan tugmani toping.",
+                  "data": {
+                    "format": "matn",
+                    "option_view": "ui",
+                    "options": [
+                      "paint.pencil",
+                      "paint.bucket",
+                      "paint.eraser",
+                      "paint.select"
+                    ]
+                  },
+                  "answer": {
+                    "keys": [
+                      1
+                    ]
+                  },
+                  "explanation": "Rang quyish tugmasi yopiq sohani to‘ldiradi."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
