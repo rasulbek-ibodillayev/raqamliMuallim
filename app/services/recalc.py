@@ -32,7 +32,7 @@ def _attempts(question_id: int) -> list[TestAttempt]:
     has = TestAttempt.items.any(AttemptItem.question_id == question_id)
     return list(db.session.scalars(
         select(TestAttempt).where(or_(
-            (TestAttempt.status == "in_progress") & has,
+            TestAttempt.status.in_(("in_progress", "offline")) & has,
             (TestAttempt.status == "submitted") & TestAttempt.user_id.in_(seen.given_to(question_id))
             & or_(archive.may_have(question_id), has)))
         .order_by(TestAttempt.id).with_for_update().execution_options(populate_existing=True)))
@@ -59,7 +59,7 @@ def regrade(question_id: int, answer: dict, qtype: str, data: dict, version: int
         if item.question_version not in same:
             continue
         if item.score is None:
-            if version and a.status == "in_progress":
+            if version and a.status in ("in_progress", "offline"):
                 item.question_version = version
             continue
         new = scoring.grade(qtype, answer, (item.answer or {}).get("v"))

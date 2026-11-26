@@ -22,6 +22,8 @@
     </div>
   </section>
 
+  {% if timeout %}<div class="alert" role="status">{{ icon("clock") }}<span>{{ _("Vaqt tugadi: test yakunlandi, javob berilgan savollar tekshirildi. Javobsizlari 0 ball.") }}</span></div>{% endif %}
+
   {# ---------- Mavzular bo'yicha o'zlashtirish ---------- #}
   <section class="card">
     <div class="card-head"><span class="strong">{{ _("Mavzular bo‘yicha o‘zlashtirish") }}</span><span class="xs muted">{{ _("savol tushgan mavzular") }}</span></div>

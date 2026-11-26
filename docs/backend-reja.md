@@ -1,6 +1,6 @@
 # Backend rejasi: kim nima qiladi
 
-Holat: 2026-11-25, `backend` branchi.
+Holat: 2026-11-26, `backend` branchi.
 
 Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qaysi qadamingizga bog'liqligi ko'rsatilgan.
 
@@ -21,9 +21,9 @@ Belgilar: ✅ tayyor, ⏳ navbatda. «Kutadi» ustunida shu bosqich sizning qays
 | 7d | ✅ Savol formatlari | Kod tili (13 ta til, serverda ranglash), HTML/CSS natijasi (skriptsiz oyna), Excel oynasi, Scratch bloklari, LOGO chizmasi, Word/Excel/PowerPoint/Paint tugmalari, variantlar kod/chizma/tugma ko'rinishida; muharrirda jonli ko'rinish; jami 68 ta shablon (`app/services/media.py`, `ui_icons.py`, `highlight.py`) | — |
 | 8 | ✅ Admin paneli | Statistika va CSV hisobot, foydalanuvchilar (filtr, karta, bloklash, parol havolasi, o'chirish, CSV), attestatsiya sanasi va uni Excel'dan yuklash, ekspertlar va taklifnomalar (`expert_invites`, token bazada saqlanmaydi), huquq va mavzular, sozlamalar (`services/settings.py`), amallar jurnali, `daily_stats`, `question_stats`; `last_seen_at` kuniga bir marta yangilanadi | 5 |
 | 9 | ✅ Himoya | Urinishlarni cheklash PostgreSQL'da (`rate_limits`, `services/limits.py`): kirish, kod so'rash va tekshirish, maxfiy so'z, joriy parol; so'rov hajmi (512 KB / 2 MB / 6 MB); parol almashsa boshqa qurilmalar chiqadi; serverda `SECRET_KEY` shart; xavfsizlik tekshiruvi va topilganlar tuzatildi ([talablar-va-yechimlar.md](talablar-va-yechimlar.md), 8-bo'lim) | — |
-| 10 | ⏳ Fon vazifalari | PostgreSQL `jobs` navbati (`SKIP LOCKED`) va bitta worker, Redis'siz: email, audio, savol tayyorlash, statistika | — |
+| 10 | ✅ Fon vazifalari | PostgreSQL `jobs` navbati (`SKIP LOCKED`, `NOTIFY`, ijara, qayta urinish), jadval, ikki yo'lak; worker veb-jarayon ichida (`RM_WORKER=1`, +2 MB) yoki alohida `worker.py`; tungi arxiv, tozalash, keraksiz rasmlar, savoli tugayotgan darslar; admin sahifasi `/admin/vazifalar`. Xat (11, 12), audio (14) va AI savol (13b) shu navbatga qo'shiladi ([talablar-va-yechimlar.md](talablar-va-yechimlar.md), 9-bo'lim) | — |
 | 10b | ⏳ Faol bo'lmagan akkauntlar | 6 oy: 14 kun oldin ogohlantirish, o'chirish, fayllarni tozalash; ogohlantirish yuborilmagan bo'lsa o'chirilmaydi | 10, 11 yoki 12 |
-| 10c | ⏳ Oflayn paket | Mavzu darslari va dars testlarini oldindan yuklash (kalitsiz), 30 MB chegara | 7c |
+| 10c | ✅ Oflayn paket | Mavzu darslari, rasmlari va dars testlari (kalitsiz) bir bosishda qurilmaga yuklanadi (`services/offline.py`, `static/js/offline.js`), oflayn topshirilgan test internet tiklanganda baholanadi; 30 MB, 10 ta mavzu, 30 kun; «Oflayn darslar» sahifasi; ommaviy `/oflayn`. Attestatsiya vaqti serverda (`services/exam_clock.py`): tugagach test yakunlanadi, javob berilganlari tekshiriladi | 7c |
 | 11 | ⏳ Telegram bot | Webhook orqali Flask ichida: `/start`, raqam ulashish, kod yuborish, ekspert taklifnomasi | B3 |
 | 12 | ⏳ Email | Kodlar, taklifnomalar, eslatmalar (SMTP, fon vazifasi orqali) | B4 |
 | 13 | ⏳ AI va RAG | OpenAI formatidagi yagona yengil mijoz va provayderlar zanjiri, `ai_cache`, limitlar; RAG: `pg_trgm` + `gemini-embedding-2` (`halfvec(768)`); bloklar bilan javob (matn, jadval, sxema, rasm), SSE; shaxsiy ma'lumotni olib tashlash | B5, B2 |
@@ -80,7 +80,6 @@ Maxfiy kalitlarni (tokenlar, parollar, API kalitlar) chatga yozmang. Ular server
 
 ## Bog'liqliklar qisqacha
 
-- Bloklamaydi, hozirdanoq boshlash mumkin: A10, A10c.
 - B3/B4 kerak: A11/A12 (bot va email). Ungacha kod faqat ishlab chiqishda `123456`; serverda kod qabul qilinmaydi (9-bosqich), ya'ni ro'yxatdan o'tish Google orqali yoki bot/email ulangach ishlaydi.
 - B5 kerak: A13 (AI).
 - B7 va B8 kerak: A16 (serverga chiqarish).

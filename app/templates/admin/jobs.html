@@ -1,0 +1,45 @@
+{% extends "layouts/panel.html" %}
+{% block title %}{{ _("Fon vazifalari") }}{% endblock %}
+{% block heading %}{{ _("Fon vazifalari") }}{% endblock %}
+{% block content %}
+{% call page_head(_("Fon vazifalari"), _("Jadval bo‘yicha va navbatdagi ishlar: arxiv, tozalash, savol zaxirasi")) %}{% endcall %}
+<div class="stack stack-lg">
+  {% if j.alive %}
+  <div class="alert alert-green" role="status">{{ icon("check-circle") }}<span class="grow">{{ _("Fon jarayoni ishlayapti.") }} {{ _("Navbatda %(n)s ta vazifa.", n=j.waiting) }}</span></div>
+  {% else %}
+  <div class="alert alert-red" role="alert">{{ icon("alert") }}<span class="grow"><b>{{ _("Fon jarayoni ishlamayapti.") }}</b> {{ _("Serverda RM_WORKER=1 berilganini tekshiring. Navbatda %(n)s ta vazifa, ular yo‘qolmaydi.", n=j.waiting) }}</span></div>
+  {% endif %}
+
+  {% if j.dead %}
+  <section class="card">
+    <div class="card-head"><span class="strong">{{ _("To‘xtab qolgan vazifalar") }}</span><span class="xs muted num">{{ j.dead|length }}</span></div>
+    <div class="list">
+      {% for r in j.dead %}
+      <div class="list-item wrap">
+        <div class="grow u-minw-200"><div>{{ r.label }} <span class="num muted">#{{ r.id }}</span></div><div class="small t-red">{{ r.error or "—" }}</div></div>
+        <form class="row row-sm" method="post" action="{{ url_for('admin.jobs') }}">{{ csrf() }}<input type="hidden" name="id" value="{{ r.id }}">
+          <button class="btn btn-outline btn-sm" type="submit" name="action" value="run">{{ icon("refresh", "ico-sm") }}{{ _("Qayta") }}</button>
+          <button class="btn btn-ghost btn-sm t-red" type="submit" name="action" value="delete">{{ icon("trash", "ico-sm") }}{{ _("O‘chirish") }}</button></form>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="card">
+    <div class="card-head"><span class="strong">{{ _("Jadval") }}</span><span class="xs muted">{{ _("Toshkent vaqti") }}</span></div>
+    <div class="list">
+      {% for r in j.cron %}
+      <div class="list-item wrap">
+        <div class="grow u-minw-200"><div>{{ r.label }}</div>
+          <div class="sub">{{ _("Oxirgi:") }} {{ r.done }}{% if r.result %} · {{ r.result }}{% endif %}</div>
+          <div class="sub">{{ _("Keyingi:") }} {{ r.next }}</div>
+          {% if r.error %}<div class="small t-red">{{ _("Oxirgi xato:") }} {{ r.error }}</div>{% endif %}</div>
+        <form method="post" action="{{ url_for('admin.jobs') }}">{{ csrf() }}<input type="hidden" name="id" value="{{ r.id }}">
+          <button class="btn btn-outline btn-sm" type="submit" name="action" value="run">{{ icon("play", "ico-sm") }}{{ _("Hozir bajarish") }}</button></form>
+      </div>
+      {% else %}<p class="card-pad small muted">{{ _("Fon jarayoni hali biror marta ishga tushmagan.") }}</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

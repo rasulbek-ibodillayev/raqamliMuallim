@@ -6,8 +6,8 @@ ham o'qiydi (rows). Savol matni arxivga tushmaydi — u questions / question_ver
 Nega o'z formatimiz (1 mln javob = 50 000 test × 20, o'lchandi): jadvalda 110 MB, shu formatda ≈ 6 MB. Solishtirish: DuckDB
 10 MB (+32 MB RAM), SQLite 20 MB, CSV 28 MB; 20 savollik test JSON + zlib 202, MessagePack + zlib 133, shu format 124 bayt.
 
-Muddat o'tgani foydalanuvchi yangi test boshlaganda siqiladi (compress_user) — fon vazifasi shart emas. Hammasi uchun:
-`flask eski-testlarni-siqish`.
+Muddat o'tgani foydalanuvchi yangi test boshlaganda (compress_user) va har kecha fon vazifasida (services/tasks.py) siqiladi.
+Qo'lda: `flask eski-testlarni-siqish`.
 
 Bayt tartibi: har savol uchun varint savol id, varint versiya, varint (soniya + 1; 0 — noma'lum), ball (255 — NULL), javob.
 Javob: 0–99 — indeks; 100 — yo'q; 101 — ro'yxat (uzunlik, elementlar; 255 — bo'sh); 102 — matn; 103 — boshqa (JSON).

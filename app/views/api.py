@@ -3,6 +3,9 @@
   POST /api/urinish/<uuid>/javoblar   {"kind": "exam", "answers": [{"pos": 0, "v": 1, "t": 4200, "at": 1763300000000}]}
        → 200 {"ok": true, "saved": [0]}       409 — urinish yakunlangan      400/422 — noto'g'ri so'rov
        403 — urinish boshqa foydalanuvchiniki  404 — bunday urinish yo'q
+       so'rovda "now" (qurilma vaqti, ms) bo'lsa, qurilma soatidagi xato hisobga olinadi (attestatsiya vaqti)
+  GET  /api/urinish/<uuid>/vaqt       attestatsiya vaqti → {"left": soniya, "paused": bool} yoki {"closed": true, "result_url"}
+  POST /api/urinish/<uuid>/pauza | /davom
   POST /api/urinish/<uuid>/yakunlash  {"kind": "exam", "stage": 1}
        → 200 {"ok": true, "result_url": "..."}  (takroriy chaqiruv ham 200 — idempotent)
 
@@ -10,14 +13,17 @@ Urinishni server yaratadi (views/test.py), uuid — test_attempts.client_uuid.
 Bir xil (uuid, pos) qayta kelsa, `at` vaqti kattarog'i qoladi: oflayn navbat qayta yuborilganda eski javob yangisini bosmaydi.
 Bosqichli testda `stage` — yakunlanayotgan bosqich: oflayn navbat uni ikki marta yuborsa ham bosqich bir marta o'tadi.
 """
+import time
 import uuid as uuidlib
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, url_for
 from flask_babel import gettext as _
 from flask_login import current_user
 
+from ..extensions import db
 from ..models.testing import ATTEMPT_KINDS
 from ..services import attempts as at
+from ..services import exam_clock, offline
 from ..services.archive import rows as rows_of
 
 bp = Blueprint("api", __name__, url_prefix="/api")
@@ -65,7 +71,34 @@ def _attempt(attempt_uuid, kind):
         return None, _err(403, _("Bu urinish boshqa foydalanuvchiga tegishli"))
     if a.kind != kind:
         return None, _err(422, _("Urinish turi mos kelmaydi"))
-    return a, None
+    return offline.activate(a), None                # oflayn paketdagi test: birinchi javob bilan boshlanadi
+
+
+@bp.get("/token")
+def token():
+    """Yangi CSRF token: keshdan (oflayn) ochilgan sahifadagi token eski sessiyaniki bo'lishi mumkin."""
+    from flask_wtf.csrf import generate_csrf
+    return jsonify(ok=True, token=generate_csrf())
+
+
+@bp.post("/oflayn/<int:topic_id>")
+def offline_pack(topic_id):
+    """Paket tarkibi: yuklanadigan manzillar. Dars testlari shu yerda tayyorlanadi (services/offline.py)."""
+    try:
+        p = offline.build(current_user.id, topic_id)
+    except offline.OfflineError as e:
+        db.session.rollback()
+        return _err(422, str(e))
+    page = url_for("user.lesson_topic", topic_id=topic_id)
+    urls = [page, *(url_for("test.attempt", attempt_uuid=u) for u in p["tests"].values()),
+            *(url_for("static", filename=f) for f in p["images"])]
+    return jsonify(ok=True, topic=topic_id, name=p["name"], page=page, urls=urls, tests=len(p["tests"]), lessons=p["lessons"],
+                   bytes=p["bytes"], limit=offline.MAX_BYTES, days=offline.KEEP_DAYS)
+
+
+@bp.post("/oflayn/<int:topic_id>/ochirish")
+def offline_remove(topic_id):
+    return jsonify(ok=True, n=offline.release(current_user.id, topic_id))
 
 
 @bp.post("/urinish/<attempt_uuid>/javoblar")
@@ -91,9 +124,41 @@ def save_answers(attempt_uuid):
     if err:
         return err
     try:
-        return jsonify(ok=True, saved=at.save_answers(a, items))
+        now = data.get("now")
+        skew = round(time.time() * 1000) - now if _int(now, 1, 1 << 53) else 0
+        return jsonify(ok=True, saved=at.save_answers(a, items, skew))
     except at.Closed:
         return _err(409, _("Urinish yakunlangan, javoblarni o‘zgartirib bo‘lmaydi"))
+
+
+def _clock(attempt_uuid, act=None):
+    if not _valid_uuid(attempt_uuid):
+        return _err(400, _("Urinish identifikatori noto‘g‘ri"))
+    a, err = _attempt(attempt_uuid, "exam")
+    if err:
+        return err
+    exam_clock.close(a)
+    if act:
+        act(a)
+    if a.status != "in_progress":
+        from .test import attempt_url
+        return jsonify(ok=True, closed=True, result_url=attempt_url(a))
+    return jsonify(ok=True, left=exam_clock.left(a), paused=exam_clock.is_paused(a))
+
+
+@bp.get("/urinish/<attempt_uuid>/vaqt")
+def exam_time(attempt_uuid):
+    return _clock(attempt_uuid)
+
+
+@bp.post("/urinish/<attempt_uuid>/pauza")
+def exam_pause(attempt_uuid):
+    return _clock(attempt_uuid, exam_clock.pause)
+
+
+@bp.post("/urinish/<attempt_uuid>/davom")
+def exam_resume(attempt_uuid):
+    return _clock(attempt_uuid, exam_clock.resume)
 
 
 @bp.post("/urinish/<attempt_uuid>/yakunlash")

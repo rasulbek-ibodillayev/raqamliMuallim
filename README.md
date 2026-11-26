@@ -44,6 +44,9 @@ Muhit o‘zgaruvchilari `.env` faylidan o‘qiladi (namuna: `.env.example`). Ser
 Nginx ortida `RM_PROXY_HOPS=1` va `RM_HOSTS=<domen>` bering, nginx’da `client_max_body_size 6m`.
 Urinishlar chegarasiga tushib qolgan foydalanuvchi uchun: `FLASK_APP=run.py .venv/Scripts/flask cheklovlarni-tozalash`.
 
+Fon vazifalari (tungi arxiv, tozalash, savol zaxirasi) `RM_WORKER=1` bilan veb-jarayon ichida ishlaydi (`run.py` da yoqilgan), holati —
+`/admin/vazifalar`. Alohida jarayon kerak bo‘lsa: `.venv/Scripts/python worker.py --dev` (serverda `--dev` siz).
+
 `/ekranlar` va `/_rol/<rol>` faqat debug rejimida (`run.py`) yoki `RM_DEV_TOOLS=1` bilan ochiladi.
 
 Testlar alohida bazada ishlaydi (bir marta yarating):
@@ -92,7 +95,8 @@ Tarjima qilinmagan satr o‘zbekcha ko‘rinadi.
 app/
   __init__.py          Flask ilova fabrikasi
   extensions.py        SQLAlchemy va Flask-Migrate
-  models/              ma’lumotlar modeli, 26 jadval (TZ 23: docs/tz-23-malumotlar-modeli.md)
+  worker.py            fon vazifalarini bajaruvchi (navbat: services/jobs.py, vazifalar: services/tasks.py)
+  models/              ma’lumotlar modeli (TZ 23: docs/tz-23-malumotlar-modeli.md)
   mock.py              namunaviy ma’lumotlar (keyin bazaga almashtiriladi)
   views/               blueprintlar: auth, user, test, expert, admin, meta
   templates/

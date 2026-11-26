@@ -30,6 +30,12 @@
     </a>{% endif %}
   </div>
 
+  {% if low %}
+  <details class="alert alert-yellow alert-col">
+    <summary class="row pointer summary-plain">{{ icon("alert") }}<span class="grow"><b>{{ _("%(n)s ta kichik mavzuda o‘qituvchilarga yangi savol tugayapti.", n=low|length) }}</b> {{ _("Ular qayta test topshira olishi uchun savol qo‘shing.") }}</span><span class="link nowrap">{{ _("Ko‘rish") }}</span></summary>
+    <ul class="list-reset stack stack-sm small">{% for s in low %}<li>{{ s.topic }} · <b>{{ s.name }}</b> — {{ _("%(n)s ta o‘qituvchida kam qoldi", n=s.low) }}{% if s.empty %}, {{ _("%(n)s tasida dars testiga yetmaydi", n=s.empty) }}{% endif %}</li>{% endfor %}</ul>
+  </details>
+  {% endif %}
   {% if short %}
   <details class="alert alert-red alert-col">
     <summary class="row pointer summary-plain">{{ icon("alert") }}<span class="grow"><b>{{ _("%(n)s ta kichik mavzuda savollar yetarli emas.", n=short|length) }}</b> {{ _("Har kichik mavzu va daraja bo‘yicha testdagidan kamida %(k)s baravar ko‘p tasdiqlangan savol bo‘lishi kerak.", k=min_ratio) }}</span><span class="link nowrap">{{ _("Ko‘rish") }}</span></summary>

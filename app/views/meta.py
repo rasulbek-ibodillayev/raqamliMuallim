@@ -131,6 +131,7 @@ SCREENS = [
         ("admin.experts", "Ekspertlar", {}),
         ("admin.settings", "Sozlamalar", {}),
         ("admin.journal", "Amallar jurnali", {}),
+        ("admin.jobs", "Fon vazifalari", {}),
         ("admin.profile", "Admin profili", {}),
     ]),
 ]
@@ -143,6 +144,13 @@ def service_worker():
     resp = send_from_directory(current_app.static_folder, "sw.js", mimetype="application/javascript")
     resp.headers["Cache-Control"] = "no-cache"
     return resp
+
+
+@bp.get("/oflayn")
+def offline():
+    """Internet yo'q paytda Service Worker ko'rsatadigan sahifa. Ommaviy va shaxsiy ma'lumotsiz: kirmasdan ham keshlanadi,
+    yuklab olingan darslar ro'yxatini brauzer o'zi chizadi (static/js/offline.js)."""
+    return render_template("meta/offline.html")
 
 
 @bp.get("/favicon.ico")

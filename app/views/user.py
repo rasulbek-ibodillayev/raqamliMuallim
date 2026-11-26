@@ -196,7 +196,13 @@ def lesson_topic(topic_id):
     # Savoli yo'q dars testsiz: u keyingi darslarni to'smaydi
     testable = {x["id"]: x["testable"] for x in catalog.lessons_by_topic(topic_id).get(topic_id, [])}
     gate = [pct if testable.get(p["id"]) else 100 for p, pct in zip(lesson["parts"], pcts)]
-    return render_template("user/lesson_topic.html", lesson=lesson, pcts=pcts, testable=testable, open_n=open_lessons(gate),
+    # Oflayn paket (static/js/offline.js yuklaydi): hamma dars sahifada, keyingisi qurilmada dars testi yakunlangach ochiladi
+    pack = None
+    if request.headers.get("X-RM-Pack") == "1":
+        from ..services import offline
+        pack = {sid: url_for("test.attempt", attempt_uuid=u) for sid, u in offline.page_tests(current_user.id, topic_id).items()}
+    return render_template("user/lesson_topic.html", lesson=lesson, pcts=pcts, testable=testable, pack=pack,
+                           open_n=len(gate) if pack is not None else open_lessons(gate), gate=gate, pass_min=m.PASS_MIN,
                            rids=catalog.lesson_result_ids(current_user.id, topic_id),
                            all_passed=all(p is not None and p >= m.PASS_MIN for p in gate))
 
@@ -322,6 +328,8 @@ def _tests_ctx(**extra):
     from ..services import test_builder as tb
     from ..services.timefmt import day_month, now
     from .test import attempt_url, is_dev, type_names, weekly_open
+    from .test import close_overdue
+    close_overdue()
     rows = tb.unfinished(current_user.id)
     names = at.names(rows, type_names())
     unfinished = []

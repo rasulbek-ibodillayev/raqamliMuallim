@@ -12,7 +12,7 @@ from ._base import JSONB, PK, QID, created_at, one_of, pk
 # Nomlari mock.TEST_TYPES kalitlari bilan bir xil. control (eski nom) = interim
 ATTEMPT_KINDS = ("diagnostic", "lesson", "topic", "daily", "interim", "weekly", "monthly", "optional", "final", "errors",
                  "exam")
-ATTEMPT_STATUS = ("in_progress", "submitted", "expired", "abandoned")
+ATTEMPT_STATUS = ("in_progress", "submitted", "expired", "abandoned", "offline")      # offline — tayyor test (services/offline.py)
 DECISIONS = ("pass", "warn", "fail")
 
 

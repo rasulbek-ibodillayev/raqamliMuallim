@@ -1,0 +1,15 @@
+{# Yuklab olingan mavzular ro'yxati: brauzer o'zi chizadi (static/js/offline.js), server ma'lumoti yo'q #}
+<section class="stack" x-data="rmPackList()">
+  <div class="row between"><h2 class="eyebrow">{{ _("Yuklab olingan darslar") }}</h2><span class="xs muted num" x-show="items.length" x-cloak x-text="total()"></span></div>
+  <div class="card list" x-show="items.length" x-cloak>
+    <template x-for="p in items" :key="p.id">
+      <div class="list-item wrap">
+        <a class="grow u-minw-200" :href="p.page"><span class="d-block strong" x-text="p.name"></span><span class="sub" x-text="p.info"></span><span class="xs t-yellow d-block" x-show="p.expired">{{ _("Muddati o‘tgan: internet bor paytda yangilang") }}</span></a>
+        <a class="btn btn-primary btn-sm" :href="p.page">{{ icon("book", "ico-sm") }}{{ _("Ochish") }}</a>
+        <button class="icon-btn" type="button" @click="remove(p.id)" aria-label="{{ _('O‘chirish') }}">{{ icon("trash", "ico-sm") }}</button>
+      </div>
+    </template>
+  </div>
+  <p class="small muted" x-show="ok && !items.length">{{ _("Hali dars yuklanmagan. Mavzu sahifasidagi «Yuklab olish» tugmasini bosing.") }}</p>
+  <p class="small muted" x-show="!ok" x-cloak>{{ _("Bu brauzer oflayn saqlashni qo‘llamaydi.") }}</p>
+</section>

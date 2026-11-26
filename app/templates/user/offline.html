@@ -1,13 +1,10 @@
 {% extends "layouts/app.html" %}
-{% block title %}{{ _("Oflayn") }}{% endblock %}
+{% block title %}{{ _("Oflayn darslar") }}{% endblock %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/offline.js') }}"></script>{% endblock %}
 {% block content %}
-<div class="card empty u-mt-32">
-  <span class="empty-ico">{{ icon("wifi-off", "ico-lg") }}</span>
-  <h1 class="u-fs-22">{{ _("Internet yo‘q") }}</h1>
-  <p class="maxw-360 muted">{{ _("Boshlangan test va oxirgi darslaringiz oflayn ochiladi. Javoblaringiz qurilmada saqlanadi va internet tiklanganda yuboriladi.") }}</p>
-  <div class="justify-center row wrap mt-16">
-    <a class="btn btn-primary" href="{{ url_for('user.tests') }}">{{ _("Testni davom ettirish") }}</a>
-    <a class="btn btn-outline" href="{{ url_for('user.notes') }}">{{ _("Eslatmalarni ochish") }}</a>
-  </div>
+<div class="pt-8 stack stack-xl">
+  {% call page_head(_("Oflayn darslar"), _("Mavzu darslari va dars testlarini oldindan yuklab oling: internetsiz ham o‘qiysiz va test topshirasiz.")) %}{% endcall %}
+  {% include "partials/offline_list.html" %}
+  <div class="alert">{{ icon("info") }}<span>{{ _("Oflayn topshirilgan test internet tiklanganda tekshiriladi va natija «Natijalarim»da chiqadi. Paket 30 kun amal qiladi. Akkauntdan chiqsangiz, yuklab olinganlar va yuborilmagan javoblar o‘chadi.") }}</span></div>
 </div>
 {% endblock %}

@@ -1,22 +1,12 @@
 import os
-from pathlib import Path
 
 from app import create_app
+from app.envfile import load_env
 
-
-def load_env(path: Path) -> None:
-    """.env dagi KALIT=qiymat qatorlari (muhitda bor qiymat ustun turadi). Qo'shimcha kutubxona kerak emas."""
-    if not path.exists():
-        return
-    for line in path.read_text(encoding="utf-8-sig").splitlines():
-        key, sep, value = line.strip().partition("=")
-        if sep and key.strip() and not key.startswith("#"):
-            os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
-
-
-load_env(Path(__file__).with_name(".env"))
+load_env()
 if __name__ == "__main__":
     os.environ.setdefault("FLASK_DEBUG", "1")      # ishlab chiqish: SECRET_KEY shart emas, cookie http'da ham ishlaydi
+    os.environ.setdefault("RM_WORKER", "1")        # fon vazifalari shu jarayonda (app/worker.py)
 app = create_app()
 
 if __name__ == "__main__":

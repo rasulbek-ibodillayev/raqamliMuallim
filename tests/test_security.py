@@ -416,18 +416,15 @@ def test_foreign_host_is_rejected(prod_env):
 
 
 def test_env_file_is_read(tmp_path, monkeypatch):
-    from pathlib import Path
-    src = (Path(__file__).resolve().parent.parent / "run.py").read_text(encoding="utf-8").split("load_env(Path(")[0]
-    ns = {}
-    exec(src.replace("from app import create_app", ""), ns)
+    from app.envfile import load_env
     monkeypatch.setenv("RM_T1", "muhit")
     monkeypatch.delenv("RM_T2", raising=False)
     f = tmp_path / ".env"
     f.write_text("# izoh\n\nRM_T1=fayl\nRM_T2 = \"a=b\"\n", encoding="utf-8")
-    ns["load_env"](f)
+    load_env(f)
     import os
     assert os.environ["RM_T1"] == "muhit" and os.environ.pop("RM_T2") == "a=b"
-    ns["load_env"](tmp_path / "yoq")
+    load_env(tmp_path / "yoq")
 
 
 # ---------------- So'rov hajmi ----------------

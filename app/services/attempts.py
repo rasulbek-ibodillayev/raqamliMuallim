@@ -94,7 +94,7 @@ def pick_from_bank(user_id: int, plan: dict[int, int], difficulty: str | None = 
 
 
 def _insert(user_id: int, kind: str, parts: list[list[Picked]], *, levels=None, topic_id=None, subtopic_id=None,
-            seconds=None, client_uuid=None, stage=None, settings=None) -> TestAttempt:
+            seconds=None, client_uuid=None, stage=None, settings=None, status="in_progress") -> TestAttempt:
     """Urinish va savollarini yozadi. Bosqichli testda faqat birinchi bosqich savollari «berilgan» deb belgilanadi:
     keyingilari test yakunlanmaguncha band turadi (seen.is_new), bosqichga yetib borilmasa — bankka qaytadi."""
     archive.compress_user(user_id)
@@ -111,12 +111,19 @@ def _insert(user_id: int, kind: str, parts: list[list[Picked]], *, levels=None, 
     if seconds:
         snap["seconds"] = seconds
     attempt = TestAttempt(
-        user_id=user_id, kind=kind, topic_id=topic_id, subtopic_id=subtopic_id, stage=stage, total=len(flat),
+        user_id=user_id, kind=kind, status=status, topic_id=topic_id, subtopic_id=subtopic_id, stage=stage, total=len(flat),
         client_uuid=client_uuid or uuid.uuid4(), settings_snapshot=snap,
         deadline_at=now + timedelta(seconds=seconds) if seconds else None)
     attempt.items = [AttemptItem(position=i, question_id=p.question_id, question_version=p.version)
                      for i, p in enumerate(flat)]
     db.session.add(attempt)
+    if kind == "exam" and seconds:
+        from . import exam_clock
+        db.session.flush()
+        exam_clock.schedule(attempt)
+    if status == "offline":                             # tayyor test: savollari band, lekin hali berilmagan; commit — paket bilan
+        db.session.flush()
+        return attempt
     seen.mark(user_id, [p.question_id for p in (parts[0] if "stages" in snap else flat)])
     db.session.commit()
     return attempt
@@ -126,10 +133,10 @@ def _seconds(part: list[Picked]) -> int:
     return sum(p.seconds for p in part)
 
 
-def create(user_id: int, spec) -> TestAttempt:
+def create(user_id: int, spec, status: str = "in_progress") -> TestAttempt:
     """test_builder.Spec bo'yicha urinish."""
     return _insert(user_id, spec.kind, spec.parts, levels=spec.levels, topic_id=spec.topic_id,
-                   subtopic_id=spec.subtopic_id, settings=spec.settings,
+                   subtopic_id=spec.subtopic_id, settings=spec.settings, status=status,
                    seconds=spec.seconds or sum(_seconds(p) for p in spec.parts))
 
 
@@ -190,17 +197,22 @@ def active_positions(a: TestAttempt) -> list[int]:
     return [p for p in range(start, end) if p not in skipped]
 
 
-def save_answers(a: TestAttempt, answers: list[dict]) -> list[int]:
+def save_answers(a: TestAttempt, answers: list[dict], skew_ms: int = 0) -> list[int]:
     """Javoblarni yozadi (a — qulflangan qator). Bir savolga ikki marta kelsa, `at` kattarog'i qoladi.
 
-    Faqat joriy bosqich savollari yoziladi: tugagan bosqich javobi keyin o'zgarmaydi."""
+    Faqat joriy bosqich savollari yoziladi: tugagan bosqich javobi keyin o'zgarmaydi. Attestatsiyada vaqt tugagandan keyin
+    belgilangan javob yozilmaydi (exam_clock); skew_ms — server va qurilma soati farqi."""
+    from . import exam_clock
+    saved = [x["pos"] for x in answers]
+    answers = exam_clock.in_time(a, answers, skew_ms)
     if a.status != "in_progress":
-        raise Closed
+        if not exam_clock.accepts_late(a):
+            raise Closed
+        exam_clock.add_late(a, answers)
+        return saved
     items = {i.position: i for i in a.items}
     allowed = set(active_positions(a))
-    saved = []
     for x in answers:
-        saved.append(x["pos"])
         item = items.get(x["pos"])
         if item is None or x["pos"] not in allowed:
             continue
@@ -246,7 +258,7 @@ def _stage_verdict(a: TestAttempt, snaps, positions, by_pos=None) -> tuple[set[i
     return failed, advise
 
 
-def finish(a: TestAttempt, stage: int | None = None) -> TestAttempt:
+def finish(a: TestAttempt, stage: int | None = None, ended: datetime | None = None) -> TestAttempt:
     """Testni (yoki bosqichli testning joriy bosqichini) yakunlaydi: baholaydi, natija va progressni yozadi.
 
     a — qulflangan qator. Takroriy chaqiruv xavfsiz: yakunlangan test yoki o'tib bo'lingan bosqich (stage) qayta
@@ -277,7 +289,7 @@ def finish(a: TestAttempt, stage: int | None = None) -> TestAttempt:
     a.score_pct = scoring.percent(scores)
     a.correct = sum(scores) / 100
     a.decision = scoring.decision(int(a.score_pct))
-    a.status, a.finished_at = "submitted", datetime.now(timezone.utc)
+    a.status, a.finished_at = "submitted", ended or datetime.now(timezone.utc)
     progress.record(a, snaps)
     db.session.commit()
     return a
@@ -378,6 +390,8 @@ LEVELS = {"easy": _l("Oson"), "medium": _l("O‘rta"), "hard": _l("Qiyin")}
 
 def review(a: TestAttempt) -> list[dict]:
     """Yakunlangan urinish tahlili (partials/answer_review.html). So'ralmagan savollar ko'rsatilmaydi."""
+    from . import exam_clock
+    exam_clock.mark_viewed(a)
     snaps, titles = _snapshots(a), _titles(a)
     skipped, gone = set(a.settings_snapshot.get("skipped", [])), dropped(a)
     out = []

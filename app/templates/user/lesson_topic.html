@@ -1,7 +1,7 @@
 {% extends "layouts/focus.html" %}
 {% from "partials/blocks.html" import render_block with context %}
 {# Bazadagi dars: mavzuning kichik mavzulari va ularning bloklari (content_blocks). Namunaviy dars: user/lesson.html #}
-{% block page_js %}<script defer src="{{ url_for('static', filename='js/lesson.js') }}"></script>{% endblock %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/lesson.js') }}"></script><script defer src="{{ url_for('static', filename='js/offline.js') }}"></script>{% endblock %}
 {% block title %}{{ lesson.name }}{% endblock %}
 {% block bar %}
 <a class="icon-btn" href="{{ url_for('user.topic', topic_id=lesson.id) }}" aria-label="{{ _('Mavzuga qaytish') }}">{{ icon("x") }}</a>
@@ -32,7 +32,7 @@
   {# Joriy dars testi muvaffaqiyatli (≥ 70%) topshirilmaguncha keyingi darslar ko'rsatilmaydi #}
   {% for p in lesson.parts[:open_n] %}
   {% set pct = pcts[loop.index0] %}
-  <section id="{{ p.anchor }}" class="stack stack-lg" data-toc-section>
+  <section id="{{ p.anchor }}" class="stack stack-lg" data-toc-section{% if pack is not none %} data-off-part="{{ p.id }}" data-off-ok="{{ '1' if gate[loop.index0] is not none and gate[loop.index0] >= pass_min }}" data-off-test="{{ (pack.get(p.id) or '').rsplit('/', 1)[-1] }}"{% endif %}>
     <div class="prose">
       <span class="eyebrow">{{ _("Kichik mavzu %(n)s", n=loop.index) }}</span>
       {% if loop.first %}<h1 class="lesson-h1">{{ p.name }}</h1>{% else %}<h2>{{ p.name }}</h2>{% endif %}
@@ -43,12 +43,20 @@
     <{{ tag }} class="lesson-test {{ 'is-done' if passed else 'is-current' }} no-print"{% if passed %} href="{{ url_for('user.result_detail', rid=rids[p.id]) }}" aria-label="{{ _('Dars testi') }}: {{ _('natijani ko‘rish') }}"{% endif %}>
       <span class="list-ico">{{ icon("clipboard", "ico-sm") }}</span>
       <div class="grow"><div class="small strong">{{ _("Dars testi") }} · 3 {{ _("savol") }}</div>
-        <div class="xs muted">{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif not testable[p.id] %}{{ _("Dars testi tayyorlanmoqda — keyingi darsga o‘tishingiz mumkin") }}{% elif pct is not none %}{{ _("Oxirgi eng yaxshi natija: %(p)s%%. Darsni takrorlab, qayta topshiring", p=pct) }}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
+        <div class="xs muted"{{ " data-off-start" if pack is not none }}>{% if pct is not none and pct >= 70 %}{{ _("Topshirildi") }}{% if pct < 90 %} · {{ _("qayta o‘zlashtirish tavsiya etiladi") }}{% endif %}{% elif not testable[p.id] %}{{ _("Dars testi tayyorlanmoqda — keyingi darsga o‘tishingiz mumkin") }}{% elif pack is not none and p.id not in pack %}{{ _("Bu dars testi faqat internet bilan ochiladi") }}{% elif pct is not none %}{{ _("Oxirgi eng yaxshi natija: %(p)s%%. Darsni takrorlab, qayta topshiring", p=pct) }}{% else %}{{ _("Darsni o‘qib bo‘lgach topshiring") }}{% endif %}</div></div>
       {% if passed %}<span class="num strong {{ 't-green' if pct >= 90 else 't-yellow' }}">{{ pct }}%</span>{{ icon("chevron-right", "ico-sm chev") }}
-      {% elif not testable[p.id] %}{% else %}{% if pct is not none %}<a class="btn btn-ghost btn-sm" href="{{ url_for('user.result_detail', rid=rids[p.id]) }}">{{ _("Natija") }}</a>{% endif %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', dars=p.id) }}">{{ _("Boshlash") if pct is none else _("Qayta topshirish") }}</a>{% endif %}
+      {% elif not testable[p.id] %}{% elif pack is not none %}{% if p.id in pack %}<a class="btn btn-primary btn-sm" href="{{ pack[p.id] }}" data-off-start>{{ _("Boshlash") }}</a><span class="xs muted" data-off-sent hidden>{{ _("Topshirildi. Natija internet tiklangach chiqadi") }}</span>{% endif %}
+      {% else %}{% if pct is not none %}<a class="btn btn-ghost btn-sm" href="{{ url_for('user.result_detail', rid=rids[p.id]) }}">{{ _("Natija") }}</a>{% endif %}<a class="btn btn-primary btn-sm" href="{{ url_for('test.question', turi='dars', dars=p.id) }}">{{ _("Boshlash") if pct is none else _("Qayta topshirish") }}</a>{% endif %}
     </{{ tag }}>
   </section>
   {% endfor %}
+  {% if pack is not none %}
+  <div class="lesson-locked no-print" role="note" data-off-locked hidden>
+    <span class="list-ico">{{ icon("lock", "ico-sm") }}</span>
+    <div class="grow"><div class="small strong">{{ _("Keyingi darslar yopiq") }} · <span data-off-n></span> {{ _("ta") }}</div>
+      <div class="xs muted">{{ _("Yuqoridagi dars testini topshirsangiz, keyingi dars ochiladi.") }}</div></div>
+  </div>
+  {% endif %}
   {% if not all_passed and open_n < lesson.parts|length %}
   <div class="lesson-locked no-print" role="note">
     <span class="list-ico">{{ icon("lock", "ico-sm") }}</span>
@@ -57,6 +65,7 @@
   </div>
   {% endif %}
 
+  {% if pack is none %}{% with pack_topic = lesson.id %}{% include "partials/offline_pack.html" %}{% endwith %}{% endif %}
   <div class="items-start ai-card row">
     <span class="ai-mark">{{ icon("sparkle") }}</span>
     <p class="grow">{{ _("Tushunmagan joyingiz bormi? Shu mavzu bo‘yicha AI tutordan so‘rang.") }}

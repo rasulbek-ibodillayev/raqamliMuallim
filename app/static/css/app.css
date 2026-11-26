@@ -579,7 +579,7 @@ a.list-item:hover, button.list-item:hover { background: var(--surface-2); }
 @media (min-width: 640px) { .sheet { border-radius: 20px; border: 1px solid var(--border); } }
 .sheet-grip { width: 40px; height: 4px; border-radius: 999px; background: var(--border-strong); margin: 4px auto 16px; }
 @media (min-width: 640px) { .sheet-grip { display: none; } }
-[x-cloak] { display: none !important; }
+[x-cloak], [hidden] { display: none !important; }
 
 /* Chat xabarlari */
 .thread { display: flex; flex-direction: column; gap: 28px; }

@@ -23,6 +23,7 @@ from ..services import experts
 from ..services import media
 from ..services import objection_review as rv
 from ..services import question_bank as qb
+from ..services import stock
 from ..services import ui_icons
 from ..services.highlight import LANGS
 from ..services.question_templates import TEMPLATES
@@ -96,7 +97,7 @@ def questions():
     _, queue_n, _, _ = qb.list_questions(qb.Filters(), 1, source="ai", status="review", areas=areas)
     ctx = _ctx()
     return render_template("expert/questions.html", items=items, found=found, pages=pages, page=page, f=vars(f),
-                           state=m.Q_STATE, queue_n=queue_n, short=qb.shortage(areas), min_ratio=qb.MIN_RATIO,
+                           state=m.Q_STATE, queue_n=queue_n, short=qb.shortage(areas), low=stock.current(areas), min_ratio=qb.MIN_RATIO,
                            lessons=_lessons(ctx["content"], f.mavzu), **ctx)
 
 

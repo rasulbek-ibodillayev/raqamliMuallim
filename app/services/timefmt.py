@@ -17,6 +17,11 @@ def day_month(d) -> str:
     return f"{d.day}-{MONTHS[d.month - 1]}"
 
 
+def moment(dt: datetime | None) -> str:
+    """Kelgusi vaqt: 26-noyabr, 02:30."""
+    return f"{day_month(dt.astimezone(TASHKENT))}, {dt.astimezone(TASHKENT):%H:%M}" if dt else "—"
+
+
 def when(dt: datetime | None) -> str:
     """Bugun, 14:20 · Kecha, 18:45 · 12-noyabr · 12-noyabr 2025."""
     if dt is None:

@@ -37,6 +37,7 @@ NAV = {
         (_l("O‘qish"), [
             ("user.tutor", _l("AI tutor"), "sparkle"),
             ("user.notes", _l("Eslatmalar"), "note"),
+            ("user.offline", _l("Oflayn darslar"), "download"),
             ("user.discussions", _l("Muhokamalar"), "message"),
         ]),
         (_l("Test va natijalar"), [
@@ -59,6 +60,7 @@ NAV = {
         ("admin.experts", _l("Ekspertlar"), "shield", None),
         ("admin.settings", _l("Sozlamalar"), "settings", None),
         ("admin.journal", _l("Jurnal"), "list", None),
+        ("admin.jobs", _l("Fon vazifalari"), "refresh", None),
     ],
 }
 

@@ -16,7 +16,12 @@ window.rmT = (function () {
     selection: "Belgilangan matn", toNote: "Eslatmaga saqlash", askAi: "AI’dan so‘rash",
     general: "Umumiy", today: "Bugun", noteSaved: "Eslatmalarga saqlandi",
     explain: "Tushuntirib bering: «{t}»", breakOver: "Tanaffus tugadi. Davom etamiz!",
-    copyManually: "Nusxalab oling:", bigExcel: "Excel fayl 5 MB dan oshmasin", bigImage: "Rasm 2 MB dan oshmasin",
+    copyManually: "Nusxalab oling:", pauseOffline: "Internet yo‘q: vaqtni to‘xtatib bo‘lmadi", resumeOffline: "Internet yo‘q. Ulanish tiklangach davom ettiring",
+    bigExcel: "Excel fayl 5 MB dan oshmasin", bigImage: "Rasm 2 MB dan oshmasin",
+    packReady: "Oflayn paket tayyor", packFailed: "Yuklab bo‘lmadi. Qayta urinib ko‘ring", packBig: "Paket 30 MB dan katta",
+    packNoSpace: "Qurilmada joy yetarli emas", packUnsupported: "Bu brauzer oflayn saqlashni qo‘llamaydi",
+    packRemove: "Yuklab olingan darslar o‘chirilsinmi?", packInfo: "{size} · {lessons} ta dars · {tests} ta test · {date} gacha",
+    logoutPending: "{n} ta javob hali serverga yuborilmagan. Chiqsangiz, ular yo‘qoladi. Baribir chiqasizmi?",
     unanswered: "{n} ta savolga javob berilmagan (0 ball hisoblanadi). Baribir yakunlaysizmi?"
   };
   var dict = null;

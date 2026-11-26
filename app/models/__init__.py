@@ -2,6 +2,7 @@
 from .ai import EMBED_DIM, AICache, AIUsage, AudioAsset, RagChunk, RagSource
 from .community import Certificate, Discussion, Note, Notification, Objection
 from .content import ContentBlock, Course, Section, Subtopic, Topic, TopicPrerequisite
+from .jobs import Job
 from .progress import ErrorItem, MethodStat, ReviewSchedule, UserTopicProgress
 from .questions import Question, QuestionStat, QuestionVersion
 from .system import AuditLog, DailyStat, ExpertInvite, RateLimit, Setting
@@ -10,7 +11,7 @@ from .users import ExpertProfile, User
 
 __all__ = [
     "EMBED_DIM", "AICache", "AIUsage", "AttemptItem", "AudioAsset", "AuditLog", "Certificate", "ContentBlock",
-    "Course", "DailyStat", "Discussion", "ErrorItem", "ExpertInvite", "ExpertProfile", "MethodStat", "Note", "Notification", "Objection", "Question", "QuestionStat", "QuestionVersion",
+    "Course", "DailyStat", "Discussion", "ErrorItem", "ExpertInvite", "ExpertProfile", "Job", "MethodStat", "Note", "Notification", "Objection", "Question", "QuestionStat", "QuestionVersion",
     "RagChunk", "RagSource", "RateLimit", "ReviewSchedule", "Section", "Setting", "Subtopic", "TestAttempt", "Topic",
     "TopicPrerequisite", "User", "UserSeen", "UserTopicProgress",
 ]

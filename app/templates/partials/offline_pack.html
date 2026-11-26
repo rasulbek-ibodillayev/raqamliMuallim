@@ -1,0 +1,18 @@
+{# Mavzuni oflayn uchun yuklash (static/js/offline.js). Kontekst: pack_topic — mavzu id'si #}
+<section class="card card-pad stack stack-sm no-print" x-data="rmPack({{ pack_topic }})" x-show="ok" x-cloak aria-labelledby="pack-t">
+  <div class="row">
+    <span class="list-ico">{{ icon("download") }}</span>
+    <div class="grow u-minw-0">
+      <h2 class="small strong" id="pack-t">{{ _("Oflayn o‘qish") }}</h2>
+      <p class="xs muted" x-show="!pack">{{ _("Darslar, rasmlar va dars testlari qurilmaga yuklanadi, internetsiz ham ochiladi.") }}</p>
+      <p class="xs muted" x-show="pack" x-cloak x-text="info"></p>
+    </div>
+  </div>
+  <p class="xs t-yellow" x-show="expired" x-cloak>{{ _("Muddati o‘tgan: testlari ishlamasligi mumkin. Yangilang.") }}</p>
+  <div x-show="busy" x-cloak role="status"><div class="progress thin"><span :style="'--v:' + pct + '%'"></span></div><span class="xs muted">{{ _("Yuklanmoqda…") }} <span class="num" x-text="pct + '%'"></span></span></div>
+  <p class="xs t-red" role="alert" x-show="error" x-cloak x-text="error"></p>
+  <div class="row row-sm wrap">
+    <button class="btn btn-outline btn-sm" type="button" @click="download()" :disabled="busy"><span class="row row-sm" x-show="!pack">{{ icon("download", "ico-sm") }}{{ _("Yuklab olish") }}</span><span class="row row-sm" x-show="pack" x-cloak>{{ icon("refresh", "ico-sm") }}{{ _("Yangilash") }}</span></button>
+    <button class="btn btn-ghost btn-sm" type="button" x-show="pack" x-cloak @click="remove()" :disabled="busy">{{ icon("trash", "ico-sm") }}{{ _("O‘chirish") }}</button>
+  </div>
+</section>

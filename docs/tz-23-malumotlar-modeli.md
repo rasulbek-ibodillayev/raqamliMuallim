@@ -26,6 +26,7 @@
 | rag_sources, rag_chunks | RAG manbalari va vektorlar |
 | settings, audit_log | Standartdan farqli sozlamalar; admin va ekspert amallari jurnali |
 | expert_invites | Ekspert taklifnomalari (token saqlanmaydi: imzodan hosil bo'ladi) |
+| jobs | Fon vazifalari navbati va jadvali (bajarilgan bir martalik vazifa o'chadi) |
 | rate_limits | Urinishlar hisobi (UNLOGGED; kalit — HMAC, shaxsiy ma'lumot yo'q) |
 | daily_stats, question_stats | Kunlik faollik (kuniga bitta qator, shaxssiz); savol javoblari statistikasi |
 
@@ -81,6 +82,7 @@ tafsilotlari arxivga siqib o'tkaziladi, umumiy natijalari qoladi.
   mavzular `settings_snapshot` da (`stages`, `failed_topics`, `skipped`).
 - **Vaqt.** `deadline_at` ma'lumot uchun: mashq testlarini to'xtatib turish mumkin, shuning uchun server kech kelgan javobni
   rad etmaydi; vaqtni pleyer hisoblaydi va tugaganda testni o'zi yakunlaydi.
+- **Oflayn paket.** `test_attempts.status = offline` — tayyorlab qo'yilgan dars testi: savollari band, lekin hali berilmagan.
 - **Oflayn sinxronlash.** `test_attempts.client_uuid`: IndexedDB'dan qayta yuborilgan javoblar ikki marta yozilmaydi.
 - **Attestatsiya sanasi** `users.exam_date`da, uni admin kiritadi.
 - **Vektor** `halfvec(768)` (`app/models/_vector.py`, numpy'siz), `gemini-embedding-2`. `text-embedding-004` 2026-01-14 da o'chirilgan.

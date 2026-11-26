@@ -1,0 +1,20 @@
+{% extends "layouts/auth.html" %}
+{# Internet yo'q paytda ochiladigan sahifa (static/sw.js: OFFLINE). Shaxsiy ma'lumotsiz #}
+{% block title %}{{ _("Internet yo‘q") }}{% endblock %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/offline.js') }}"></script>{% endblock %}
+{% block auth_back %}<span class="brand u-p-0"><span class="brand-mark">{{ icon("sparkle") }}</span><span class="brand-text">{{ _("raqamliMuallim") }}</span></span>{% endblock %}
+{% block content %}
+<div class="stack stack-xl">
+  <div class="empty u-p-8-0">
+    <span class="empty-ico">{{ icon("wifi-off", "ico-lg") }}</span>
+    <h1 class="u-fs-22">{{ _("Internet yo‘q") }}</h1>
+    <p class="maxw-360 muted">{{ _("Yuklab olingan darslar, boshlangan test va oxirgi sahifalar ochiladi. Javoblaringiz qurilmada saqlanadi va internet tiklanganda yuboriladi.") }}</p>
+    <div class="justify-center row wrap mt-16">
+      <button class="btn btn-primary" type="button" data-reload>{{ icon("refresh") }}{{ _("Qayta urinish") }}</button>
+      <a class="btn btn-outline" href="{{ url_for('user.tests') }}">{{ _("Testlar") }}</a>
+      <a class="btn btn-outline" href="{{ url_for('user.notes') }}">{{ _("Eslatmalar") }}</a>
+    </div>
+  </div>
+  {% include "partials/offline_list.html" %}
+</div>
+{% endblock %}

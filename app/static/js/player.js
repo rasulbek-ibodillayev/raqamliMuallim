@@ -158,6 +158,12 @@
           });
       });
     },
+    /* Server vaqti (attestatsiya): qolgan soniya va to'xtatilgani */
+    setClock: function (left, paused) {
+      this.d.deadline = Date.now() + left * 1000;
+      this.d.pausedAt = paused ? Date.now() : null;
+      return this.persist();
+    },
     discard: function () { return store.del("sessions", this.d.id); }
   };
 
@@ -166,13 +172,27 @@
     return store.all("outbox").then(function (items) { emit({ pending: items.length }); return items; });
   }
 
-  function post(url, body) {
+  function send(url, body) {
     return fetch(url, {
       method: "POST", credentials: "same-origin",
       headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRFToken": csrf() },
       body: JSON.stringify(body)
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; });
+    });
+  }
+  // 400 — keshdan (oflayn) ochilgan sahifaning tokeni eski sessiyaniki: yangisi olinib, bir marta qayta yuboriladi
+  function post(url, body) {
+    return send(url, body).then(function (r) {
+      if (r.status !== 400) return r;
+      return fetch("/api/token", { credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" } })
+        .then(function (t) { return t.ok ? t.json() : null; }).catch(function () { return null; })
+        .then(function (j) {
+          var m = document.querySelector('meta[name="csrf-token"]');
+          if (!j || !j.token || !m) return r;
+          m.content = j.token;
+          return send(url, body);
+        });
     });
   }
 
@@ -193,7 +213,7 @@
         chain = chain.then(function () {
           if (!g.answers.length) return;
           return post(API + u + "/javoblar", {
-            kind: g.kind, answers: g.answers.map(function (a) { return { pos: a.pos, v: a.v, t: a.t, at: a.at }; })
+            kind: g.kind, now: Date.now(), answers: g.answers.map(function (a) { return { pos: a.pos, v: a.v, t: a.t, at: a.at }; })
           }).then(function (r) {
             // 409 — urinish yakunlangan, 404 — bunday urinish yo'q, 422 — format: qayta yuborishdan foyda yo'q
             if (r.status === 200 || r.status === 409 || r.status === 404 || r.status === 422) {
@@ -255,6 +275,21 @@
         return new Session(d);
       }).then(function (s) { refreshPending().then(function (it) { if (it.length) emit({ state: "local" }); }); return s; });
     },
+    /* Shu qurilmada yakunlanganmi (oflayn paketdagi dars testi) */
+    finishedHere: function (uuid) {
+      return store.ready.catch(function () {}).then(function () { return store.get("sessions", uuid + ":0"); })
+        .then(function (d) { return !!d && d.status !== "in_progress"; }).catch(function () { return false; });
+    },
+    /* Attestatsiya vaqti serverda: op — undefined (holat) | "pauza" | "davom". Internet bo'lmasa rad etiladi */
+    clock: function (uuid, op) {
+      var ctl = window.AbortController ? new AbortController() : null;
+      var t = setTimeout(function () { if (ctl) ctl.abort(); }, 6000);
+      return fetch(API + uuid + "/" + (op || "vaqt"), {
+        method: op ? "POST" : "GET", credentials: "same-origin", signal: ctl ? ctl.signal : undefined,
+        headers: { "Accept": "application/json", "X-CSRFToken": csrf() }
+      }).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)); })
+        .finally(function () { clearTimeout(t); });
+    },
     sync: function () {
       if (running) return running;        // ketayotgan yuborish tugashini kutadi
       running = syncOnce().catch(function () {
@@ -291,6 +326,11 @@
   window.addEventListener("online", function () { emit({ online: true }); RMPlayer.sync(); });
   window.addEventListener("offline", function () { emit({ online: false }); });
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") RMPlayer.sync(); });
+  // Chiqishda brauzer xotirasi tozalanadi: yuborilmagan javoblar bo'lsa ogohlantiriladi
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a[href="/chiqish"]');
+    if (a && status.pending && !confirm(rmT("logoutPending", { n: status.pending }))) e.preventDefault();
+  });
   setInterval(function () { if (status.pending) RMPlayer.sync(); }, 15000);
   // Istalgan sahifa ochilganda navbatda qolgan javoblar yuboriladi
   RMPlayer.sync();

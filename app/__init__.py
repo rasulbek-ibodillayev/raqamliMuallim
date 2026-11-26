@@ -10,10 +10,11 @@ from flask import Flask
 DEFAULT_DB = "postgresql+psycopg://raqamli:raqamli@localhost:5432/raqamli"  # docker-compose.yml dagi db
 
 
-def create_app(config: dict | None = None) -> Flask:
+def _base(config: dict | None) -> Flask:
+    """Sozlamalar, baza va til: veb-ilova va fon jarayoni uchun umumiy."""
     app = Flask(__name__)
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", DEFAULT_DB)
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True, "hide_parameters": True}      # xato matniga email, parol xeshi tushmasin
     # /ekranlar va /_rol/<rol> — faqat ishlab chiqishda (debug rejimi yoki RM_DEV_TOOLS=1)
     app.config["DEV_TOOLS"] = os.environ.get("RM_DEV_TOOLS") == "1"
     # Google orqali kirish (services/google_auth.py); bo'sh bo'lsa — ulanmagan
@@ -23,10 +24,23 @@ def create_app(config: dict | None = None) -> Flask:
     security.configure(app, config or {})
     app.config.update(config or {})
 
-    from .extensions import db, login_manager
-    from . import models  # noqa: F401 — Alembic barcha jadvallarni ko'rishi uchun
+    from .extensions import db
+    from . import i18n, models  # noqa: F401 — Alembic barcha jadvallarni ko'rishi uchun
 
     db.init_app(app)
+    i18n.init_app(app)
+    return app
+
+
+def create_worker_app(config: dict | None = None) -> Flask:
+    """Alohida fon jarayoni (worker.py): sahifalar va kirish tizimi yuklanmaydi."""
+    return _base(config)
+
+
+def create_app(config: dict | None = None) -> Flask:
+    app = _base(config)
+    from . import security
+    from .extensions import db, login_manager
     if os.environ.get("FLASK_RUN_FROM_CLI") == "true":      # `flask db …`; server worker'iga kerak emas (12 MB RAM)
         from flask_migrate import Migrate
         Migrate(app, db, compare_type=True)
@@ -44,13 +58,14 @@ def create_app(config: dict | None = None) -> Flask:
     cli.init_app(app)
 
     security.init_app(app)
+    from . import worker
+    worker.embed(app)
 
     # CSRF: barcha POST so'rovlar (formalar — yashirin maydon, fetch — X-CSRFToken sarlavhasi)
     from flask_wtf.csrf import CSRFProtect
     CSRFProtect(app)
 
-    from . import i18n, roles
-    i18n.init_app(app)
+    from . import roles
     roles.init_app(app)
 
     from .views import auth, user, test, expert, admin, meta, api

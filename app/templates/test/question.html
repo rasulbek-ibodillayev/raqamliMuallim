@@ -110,7 +110,8 @@
     <p class="muted">{{ _("Test yakunlandi, javoblaringiz qurilmada saqlandi. Internet tiklanganda ular yuboriladi va natija ochiladi.") }}</p>
     <div class="row wrap">
       <button class="btn btn-primary grow" type="button" @click="$dispatch('rm-q-retry')">{{ icon("refresh", "ico-sm") }}{{ _("Qayta yuborish") }}</button>
-      <a class="btn btn-outline" href="{{ url_for('user.tests') }}" data-safe-leave>{{ _("Testlarga qaytish") }}</a>
+      {% if cfg.lessonUrl %}<a class="btn btn-outline" href="{{ cfg.lessonUrl }}" data-safe-leave>{{ _("Darsga qaytish") }}</a>
+      {% else %}<a class="btn btn-outline" href="{{ url_for('user.tests') }}" data-safe-leave>{{ _("Testlarga qaytish") }}</a>{% endif %}
     </div>
   </div>
 </div>

@@ -6,6 +6,7 @@
 - Ekspertlar — taklif qilish (app/invites.py), huquq va mavzularini berish, to'xtatish;
 - Sozlamalar — test va reja sonlari (services/settings.py);
 - Jurnal — barcha amallar (audit_log).
+- Fon vazifalari — jadval, natija, to'xtab qolganlari (services/jobs.py).
 Kontent (mavzular, darslar, savollar) — ekspert vazifasi: app/views/expert.py.
 """
 from flask import Blueprint, Response, abort, redirect, render_template, request, session, url_for
@@ -15,13 +16,14 @@ from flask_login import current_user
 from .. import invites
 from .. import mock as m
 from ..extensions import db
-from ..models import ExpertInvite, User
+from ..models import ExpertInvite, Job, User
 from . import account
 from ..forms import (REGIONS, check_date, check_email, check_name, check_phone, field, fmt_phone, norm_phone, required, respond,
                      validate)
 from ..services import admin_stats as st
 from ..services import admin_users as au
 from ..services import experts as ex
+from ..services import jobs as jq
 from ..services import settings as conf
 from ..services.timefmt import when
 
@@ -285,6 +287,24 @@ def settings():
 def journal():
     entity = request.args.get("tur", "")
     return render_template("admin/journal.html", j=st.journal(entity, _page()), entity=entity, entities=st.ENTITIES, panel="admin")
+
+
+@bp.route("/vazifalar", methods=["GET", "POST"])
+def jobs():
+    """Fon vazifalari: oxirgi va keyingi vaqti, natijasi; qo'lda ishga tushirish yoki to'xtab qolganini o'chirish."""
+    if request.method == "GET":
+        return render_template("admin/jobs.html", j=st.job_rows(), panel="admin")
+    action, jid = field("action"), field("id")
+    job = db.session.get(Job, int(jid)) if jid.isdigit() and len(jid) < 19 else None
+    if job is None or action not in ("run", "delete") or (action == "delete" and job.run_at is not None):
+        abort(400)
+    au.log(current_user.id, action, "job", job.kind)
+    if action == "run":
+        jq.run_now(job)
+    else:
+        db.session.delete(job)
+    db.session.commit()
+    return respond(redirect_to=url_for("admin.jobs"), message=_("Vazifa navbatga qo‘yildi") if action == "run" else _("Vazifa o‘chirildi"))
 
 
 @bp.get("/jurnal/")

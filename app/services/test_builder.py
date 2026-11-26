@@ -248,6 +248,13 @@ def get_or_start(user_id: int, kind: str, **params) -> tuple[TestAttempt, bool]:
             return a, False
         if kind in MANDATORY and a.kind in MANDATORY:
             raise Unavailable(_("Avval boshlangan majburiy testni yakunlang"))
+    if kind == "lesson" and params.get("subtopic_id"):
+        from . import offline
+        ready = offline.reserved(user_id, params["subtopic_id"])       # oflayn paketdagi tayyor test
+        if ready is not None:
+            offline.activate(ready)
+            db.session.commit()
+            return ready, True
     spec = build(user_id, kind, **params)
     return at.create(user_id, spec), True
 

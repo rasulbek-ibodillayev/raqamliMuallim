@@ -17,7 +17,7 @@ yaratiladi va xeshi bo'yicha qayta ishlatiladi.
 | Javoblar ✅ | `{"v":…, "at":…}` | Test yakunlangach faqat `v` qoladi (`at` faqat sinxronlash paytida kerak) | 139 → 114 MB (−18%) |
 | Eski urinishlar ✅ | Ustun bor, kod yo'q | 7 kundan eskisi `items_archive`ga siqiladi (avval 12 oy, zlib edi) | 20 savol ≈ 124 bayt; 1 mln javob 139 → ≈ 11 MB |
 | RAG vektorlari | `vector(768)`, 4 bayt/o'lcham | `halfvec(768)`, 2 bayt/o'lcham | vektor hajmi 2 baravar kam |
-| Navbat va cheklovlar | Reja: Redis + RQ | PostgreSQL `jobs` jadvali (`SKIP LOCKED`) va bitta worker | Redis jarayoni umuman kerak emas |
+| Navbat va cheklovlar ✅ | Reja: Redis + RQ | PostgreSQL `jobs` va `rate_limits`; worker veb-jarayon ichida | Redis yo'q; alohida worker ≈ 90 MB o'rniga +2 MB (o'lchandi) |
 | Sertifikat PDF | Reja: WeasyPrint serverda | Brauzerning «PDF'ga chop etish»i (sahifa tayyor) | Server kutubxonalari va PDF fayllar yo'q |
 | Tarjima | LibreTranslate ≈ 200 MB RAM, obraz 2,1 GB | Faqat ishlab chiqishda; serverga chiqarilmaydi | −200 MB RAM |
 
@@ -181,9 +181,30 @@ sertifikat chiqmasin).
 
 ## 6. PWA va oflayn
 
-Bor: o'rnatish, sahifalar keshi, pleyer (javoblar qurilmada, internet tiklanganda yuboriladi). Qo'shiladi: «Oflayn paket» — mavzu
-darslari, rasmlari va oldindan tayyorlangan dars testlari (kalitsiz) bir bosishda yuklanadi. Oflayn topshirilgan test internet
-tiklanganda serverda baholanadi. Paket chegarasi — 30 MB. AI tutor oflaynda faqat avvalgi javoblarni ko'rsatadi.
+Bor: o'rnatish, sahifalar keshi, pleyer (javoblar qurilmada, internet tiklanganda yuboriladi), «Oflayn paket» (10c, 2026-11-26).
+AI tutor oflaynda faqat avvalgi javoblarni ko'rsatadi.
+
+**Oflayn paket** — mavzu darslari, rasmlari va oldindan tayyorlangan dars testlari (kalitsiz) bir bosishda yuklanadi:
+
+- Serverda fayl yo'q: odatdagi sahifalar brauzer keshiga (`rm-pack`) yoziladi. 4 darslik mavzu 3 ta testi bilan — 122 KB (o'lchandi).
+- Tayyor test — `status = offline` urinish. Savollari band (boshqa testga tushmaydi), lekin «yakunlanmagan» va «berilgan» emas; birinchi
+  javob kelganda boshlanadi. Onlayn shu dars testi boshlansa, o'sha test ishlatiladi: savol behuda sarflanmaydi.
+- Internetsiz keyingi dars joriy dars testi topshirilgach ochiladi (natijani server keyin baholaydi; 70% dan past bo'lsa, dars odatdagidek
+  qayta o'zlashtiriladi).
+- Cheklar: paket 30 MB, 10 ta mavzu, 30 kun. Paket o'chirilsa yoki muddati o'tsa, boshlanmagan testlar o'chib, savollari bankka qaytadi.
+- Keshdan ochilgan sahifaning himoya tokeni eskirgan bo'lsa, pleyer yangisini olib qayta yuboradi. Chiqishda yuborilmagan javoblar
+  bo'lsa ogohlantiriladi.
+
+Tuzatildi: internetsiz ochiladigan sahifa kirish talab qilardi va kirmasdan o'rnatilgan ilovada ochilmasdi; endi ommaviy `/oflayn`.
+Mavzu, kunlik va bosqichli testlar paketga kirmaydi (boshlangani keshdan davom etadi).
+
+**Attestatsiya vaqti (qaror, 2026-11-26): vaqt tugagach test yakunlanadi, javob berilgan savollar tekshiriladi, javobsizlari 0 ball.**
+
+- Vaqt serverda: boshqa qurilmada ochilsa ham qolgan vaqt ko'rinadi (ilgari to'liq 120 daqiqa qaytadan boshlanardi).
+- «To'xtatish» qoldi, lekin internet bilan: server vaqtni to'xtatadi. Internetsiz to'xtatib bo'lmaydi.
+- Fon vazifasi vaqt tugaganidan 1 daqiqa keyin yakunlaydi; u ishlamasa — foydalanuvchi test sahifalarini ochganda.
+- Vaqtdan keyin belgilangan javob hisobga olinmaydi (qurilma soati xatosi tuzatiladi). Vaqtida, lekin internetsiz belgilangan javob
+  kech kelsa ham qo'shiladi — natija (kalit) ko'rilmagan bo'lsa.
 
 ## 7. 6 oy kirilmagan akkaunt
 
@@ -260,6 +281,30 @@ Kutubxonalar OSV bazasi bilan solishtirildi (31 ta paket): yuqoridagi bitta past
 **Ataylab qoldirilgan:** ko'p IP'li hujumchi bir akkauntga kirishni 1 soatga yopa oladi (kirgan qurilmalar ishlayveradi, parol
 havolasi bilan tiklanadi); ro'yxatdan o'tish va parol tiklash sahifalari raqam band yoki yo'qligini aytadi (qulaylik uchun, IP bo'yicha
 cheklangan); chiqilgandan keyin ham o'g'irlangan cookie parol almashguncha ishlaydi (sessiyalar jadvali yo'q).
+
+## 9. Fon vazifalari (10-bosqich, 2026-11-25)
+
+**Navbat** (`services/jobs.py`) — bitta `jobs` jadvali, Redis'siz:
+
+- Vazifa uni qo'ygan tranzaksiya bilan birga yoziladi. `NOTIFY` worker'ni darhol uyg'otadi, bo'sh turganda baza so'ralmaydi.
+- Olingan vazifa ijaraga beriladi: worker qulasa, muddat o'tgach boshqasi qaytadan oladi. Parallel worker'lar bir vazifani olmaydi.
+- Xatoda 30 s, 2 daq, 8 daq, 32 daq, 2 soatdan keyin qayta; keyin admin panelida to'xtab turadi. Jadvaldagi vazifa to'xtamaydi.
+- Ikki yo'lak: tez (kod va xabarlar) va sekin (tungi ishlar, AI) — tungi arxiv tasdiqlash kodini kutdirmaydi.
+- Bajarilgan vazifa qatori o'chadi; xato matnida shaxsiy ma'lumot yo'q (`hide_parameters`).
+
+**Worker** (`app/worker.py`) — `RM_WORKER=1` bilan veb-jarayon ichida oqim sifatida. O'lchandi: alohida jarayon 91 MB (shundan 85 MB
+Flask, SQLAlchemy va psycopg'ning o'zi), ichkarida +2 MB. Bir nechta gunicorn worker'dan faqat bittasi faol (advisory lock), u
+to'xtasa boshqasi 30 soniyada davom ettiradi. Yuklama oshsa, kod o'zgarmasdan `python worker.py` ga o'tiladi.
+
+| Vazifa | Vaqti (Toshkent) | Nima qiladi |
+|---|---|---|
+| Eski testlarni siqish | har kuni 02:30 | 7 kundan eski yakunlangan testlar arxivga |
+| Tozalash | har kuni 03:00 | tugagan cheklovlar, 30 kunlik bildirishnomalar, ishlatilgan taklifnomalar, AI keshi |
+| Keraksiz rasmlar | yakshanba 03:30 | hech bir savol, versiya va dars ishlatmaydigan, 7 kundan eski rasmlar (ishlab chiqishda o'chirilmaydi) |
+| Savol zaxirasi | har kuni 04:00 | faol o'qituvchilarga yangi savol 2 ta testga yetmayotgan darslar; ekspert panelida ko'rinadi |
+
+Savol zaxirasi o'lchandi: 10 000 o'qituvchi × 303 kichik mavzu (6900 savol) — 1,5 s. Shabloni bor kichik mavzu kirmaydi: unga savol
+so'ralganda 8 ms da tuziladi, oldindan tayyorlash faqat joy egallardi. Navbat tezligi: kamida 36 vazifa/s (testlar bilan parallel o'lchandi).
 
 ## Manbalar
 

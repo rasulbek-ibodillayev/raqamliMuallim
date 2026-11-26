@@ -47,7 +47,13 @@
     "selection": _("Belgilangan matn"), "toNote": _("Eslatmaga saqlash"), "askAi": _("AI’dan so‘rash"),
     "general": _("Umumiy"), "today": _("Bugun"), "noteSaved": _("Eslatmalarga saqlandi"),
     "explain": _("Tushuntirib bering: «%(t)s»", t="{t}"), "breakOver": _("Tanaffus tugadi. Davom etamiz!"),
-    "copyManually": _("Nusxalab oling:"), "bigExcel": _("Excel fayl 5 MB dan oshmasin"), "bigImage": _("Rasm 2 MB dan oshmasin"),
+    "copyManually": _("Nusxalab oling:"), "pauseOffline": _("Internet yo‘q: vaqtni to‘xtatib bo‘lmadi"), "resumeOffline": _("Internet yo‘q. Ulanish tiklangach davom ettiring"),
+    "bigExcel": _("Excel fayl 5 MB dan oshmasin"), "bigImage": _("Rasm 2 MB dan oshmasin"),
+    "packReady": _("Oflayn paket tayyor"), "packFailed": _("Yuklab bo‘lmadi. Qayta urinib ko‘ring"), "packBig": _("Paket 30 MB dan katta"),
+    "packNoSpace": _("Qurilmada joy yetarli emas"), "packUnsupported": _("Bu brauzer oflayn saqlashni qo‘llamaydi"),
+    "packRemove": _("Yuklab olingan darslar o‘chirilsinmi?"),
+    "packInfo": _("%(s)s · %(l)s ta dars · %(t)s ta test · %(d)s gacha", s="{size}", l="{lessons}", t="{tests}", d="{date}"),
+    "logoutPending": _("%(n)s ta javob hali serverga yuborilmagan. Chiqsangiz, ular yo‘qoladi. Baribir chiqasizmi?", n="{n}"),
     "unanswered": _("%(n)s ta savolga javob berilmagan (0 ball hisoblanadi). Baribir yakunlaysizmi?", n="{n}")
   }|tojson }}</script>
   {% with msgs = get_flashed_messages() %}{% if msgs %}<div hidden data-flash="{{ msgs|tojson|forceescape }}"></div>{% endif %}{% endwith %}

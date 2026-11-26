@@ -28,7 +28,7 @@ def is_new(user_id: int):
     # CASE: bitmap oxiridan keyingi (yangi) savollar uchun get_bit chaqirilmaydi; bitmap yo'q bo'lsa ham ELSE
     unseen = case((Question.id < func.length(bits) * 8, func.get_bit(bits, Question.id) == 0), else_=True)
     reserved = (select(AttemptItem.question_id).join(TestAttempt, TestAttempt.id == AttemptItem.attempt_id)
-                .where(TestAttempt.user_id == user_id, TestAttempt.status == "in_progress"))
+                .where(TestAttempt.user_id == user_id, TestAttempt.status.in_(("in_progress", "offline"))))
     return unseen & Question.id.not_in(reserved)
 
 

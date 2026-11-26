@@ -7,6 +7,7 @@
 - Joyi: app/static/uploads/q/ ; bazaga static'ga nisbatan yo'l yoziladi (masalan "uploads/q/ab12….webp").
 """
 import hashlib
+import os
 from pathlib import Path
 
 from flask import current_app
@@ -42,6 +43,8 @@ def save_image(file) -> str | None:
     folder = Path(current_app.static_folder) / "uploads" / "q"
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / name
-    if not path.exists():
+    if path.exists():
+        os.utime(path)                # qayta yuklandi: tozalash (tasks.orphan_files) hozir o'chirib yubormasin
+    else:
         path.write_bytes(data)
     return f"uploads/q/{name}"

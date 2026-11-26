@@ -186,11 +186,14 @@ function exam() {
         self.cur = S.cur !== null ? S.cur : s.pos;
         self.paused = s.paused;
         self.left = s.remaining();
-        setInterval(function () {
-          self.left = s.remaining();
-          // Vaqt tugasa test avtomatik yakunlanadi
-          if (self.left === 0 && !s.finished && !self.finishing) self.finish();
-        }, 1000);
+        // Vaqtni server yuritadi (boshqa qurilmada to'xtatilgan bo'lishi mumkin); internet yo'q — qurilmadagisi
+        self.askClock().then(function () {
+          setInterval(function () {
+            self.left = s.remaining();
+            // Vaqt tugasa test avtomatik yakunlanadi: javob berilgan savollar tekshiriladi
+            if (self.left === 0 && !s.paused && !s.finished && !self.finishing) self.finish();
+          }, 1000);
+        });
       });
     },
     q: function () { return this.qs[this.cur]; },
@@ -205,8 +208,32 @@ function exam() {
         window.scrollTo({ top: 0 });
       }
     },
-    pause: function () { this.paused = true; if (this.s) this.s.pause(); },
-    resume: function () { this.paused = false; this.shownAt = Date.now(); if (this.s) this.s.resume(); },
+    /* op — undefined | "pauza" | "davom": serverdagi vaqt bilan tenglashadi; true — bajarildi */
+    askClock: function (op) {
+      var self = this;
+      if (S.sample) { if (op) self.s[op === "pauza" ? "pause" : "resume"](); return Promise.resolve(true); }
+      return RMPlayer.clock(S.uuid, op).then(function (j) {
+        if (j.closed) { location.href = j.result_url; return false; }
+        self.left = j.left; self.paused = j.paused;
+        return self.s.setClock(j.left, j.paused).then(function () { return true; });
+      }).catch(function () { return false; });
+    },
+    pause: function () {
+      var self = this;
+      if (!this.s) return;
+      this.askClock("pauza").then(function (ok) {
+        if (ok) self.paused = true;
+        else self.toast = rmT("pauseOffline");
+      });
+    },
+    resume: function () {
+      var self = this;
+      if (!this.s) return;
+      this.askClock("davom").then(function (ok) {
+        if (ok) { self.paused = false; self.shownAt = Date.now(); }
+        else self.toast = rmT("resumeOffline");
+      });
+    },
     finish: function () {
       var self = this;
       if (!this.s || this.finishing) return;

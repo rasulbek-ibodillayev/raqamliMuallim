@@ -2,18 +2,24 @@
    Strategiya: avval tarmoq, bo'lmasa kesh — yangilangan fayllar darhol ko'rinadi, internet yo'q bo'lsa keshdan.
 
    Nima keshlanadi:
+   - PACK: foydalanuvchi yuklab olgan oflayn paketlar (static/js/offline.js yozadi). Versiya almashsa ham o'chmaydi;
+     internet yo'q paytda avval shu yerdan olinadi (darsning to'liq, oflayn ko'rinishi);
    - STATIC: /static/ fayllari (CSS, JS, shrift, ikonkalar) — soni cheklangan, shuning uchun limitsiz;
    - PAGES: faqat o'qituvchi sahifalari (/app/, /test/) — oflayn ochish uchun. Eng ko'pi PAGE_LIMIT ta,
      eskisi o'chiriladi. Ekspert/admin panellari, kirish sahifalari va /api/ javoblari keshlanmaydi
      (shaxsiy yoki tez o'zgaradigan ma'lumot). Chiqishda (/chiqish) server Clear-Site-Data bilan hammasini tozalaydi. */
-var VERSION = "rm-v12";
-var STATIC = VERSION + "-static", PAGES = VERSION + "-pages", PAGE_LIMIT = 50;
+var VERSION = "rm-v13";
+var STATIC = VERSION + "-static", PAGES = VERSION + "-pages", PACK = "rm-pack", PAGE_LIMIT = 50;
 var CORE = [
   "/static/css/app.css",
   "/static/css/utilities.css",
   "/static/js/core.js",
   "/static/js/learner.js",
   "/static/js/player.js",
+  "/static/js/lesson.js",
+  "/static/js/test.js",
+  "/static/js/offline.js",
+  "/static/js/particles.js",
   "/static/vendor/alpine-3.14.1.min.js",
   "/static/fonts/inter-latin-wght.woff2",
   "/static/icon.svg",
@@ -21,7 +27,8 @@ var CORE = [
   "/static/icons/apple-touch-icon.png",
   "/static/manifest.webmanifest"
 ];
-var OFFLINE = "/app/oflayn";
+// Ommaviy sahifa: kirmasdan o'rnatilganda ham keshlanadi (kirish talab qiladigan manzil yo'naltirilgan javob berardi)
+var OFFLINE = "/oflayn";
 
 self.addEventListener("install", function (e) {
   e.waitUntil(Promise.all([
@@ -33,7 +40,7 @@ self.addEventListener("install", function (e) {
 self.addEventListener("activate", function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== STATIC && k !== PAGES; }).map(function (k) { return caches.delete(k); }));
+      return Promise.all(keys.filter(function (k) { return k !== STATIC && k !== PAGES && k !== PACK; }).map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
 });
@@ -70,10 +77,14 @@ self.addEventListener("fetch", function (e) {
       }
       return res;
     }).catch(function () {
-      return caches.match(req).then(function (hit) {
-        if (hit) return hit;
-        if (req.mode === "navigate") return caches.match(OFFLINE);
-        return Response.error();
+      var nav = req.mode === "navigate";
+      return (nav ? caches.open(PACK).then(function (c) { return c.match(url.pathname); }) : Promise.resolve()).then(function (hit) {
+        return hit || caches.match(req);
+      }).then(function (hit) {
+        // PWA bosh ekrandan «/app/?manba=pwa» bilan ochiladi
+        return hit || (nav && url.pathname === "/app/" ? caches.match(req, { ignoreSearch: true }) : undefined);
+      }).then(function (hit) {
+        return hit || (nav ? caches.match(OFFLINE) : Response.error());
       });
     })
   );

@@ -1,5 +1,6 @@
 {% extends "layouts/app.html" %}
 {% block title %}{{ t.name }}{% endblock %}
+{% block page_js %}<script defer src="{{ url_for('static', filename='js/offline.js') }}"></script>{% endblock %}
 {% block heading %}<span class="row row-sm"><a class="ml-n10 icon-btn" href="{{ url_for('user.plan') }}" aria-label="{{ _('Orqaga') }}">{{ icon("arrow-left") }}</a>{{ _("O‘quv reja") }}</span>{% endblock %}
 {% block content %}
 <div class="stack stack-lg">
@@ -38,6 +39,7 @@
   </div>
   {% endif %}
 
+  {% if t.has_blocks %}{% with pack_topic = t.id %}{% include "partials/offline_pack.html" %}{% endwith %}{% endif %}
   <div class="grid-2">
     {% if t.has_blocks %}
     <a class="btn btn-primary btn-block" href="{{ url_for('user.lesson_topic', topic_id=t.id) }}">{{ icon("book") }}{{ _("Darsni ochish") }}</a>

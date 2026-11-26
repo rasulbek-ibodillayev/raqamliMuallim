@@ -9,12 +9,16 @@
 /test/savol?tur=…, /test/sinov?namuna=1, /test/bosqich, /test/natija, /test/sinov/natija — /ekranlar uchun namunaviy
 ekranlar: bazaga tegmaydi va faqat ishlab chiqishda ochiladi (aks holda «Testlar»ga yo'naltiriladi).
 """
+from datetime import timedelta
+
 from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from flask_babel import gettext as _
 from flask_login import current_user
 
 from .. import mock as m
+from ..extensions import db
 from ..services import attempts as at
+from ..services import exam_clock
 from ..services import objections as ob
 from ..services import media, scoring
 from ..services import settings as conf
@@ -57,7 +61,14 @@ def _own(attempt_uuid):
     return a
 
 
+def close_overdue() -> None:
+    """Vaqti tugagan attestatsiya testi shu yerda ham yakunlanadi (fon vazifasi kechiksa)."""
+    if exam_clock.close_all(current_user.id):
+        flash(_("Attestatsiya testi vaqti tugadi. Javob berilgan savollar baholandi, natija «Natijalarim»da"))
+
+
 def _start(kind, **params):
+    close_overdue()
     try:
         a, fresh = tb.get_or_start(current_user.id, kind, **params)
     except tb.Unavailable as e:
@@ -99,7 +110,10 @@ def weekly_open() -> bool:
 @bp.get("/urinish/<uuid:attempt_uuid>")
 def attempt(attempt_uuid):
     a = _own(attempt_uuid)
-    if a.status != "in_progress":
+    if exam_clock.overdue(a):
+        close_overdue()
+        db.session.refresh(a)
+    if a.status not in ("in_progress", "offline"):
         return redirect(attempt_url(a))
     qs = at.play_view(a)
     cfg = {"uuid": str(a.client_uuid), "kind": a.kind, "stage": a.stage, "answers": at.saved_answers(a),
@@ -108,10 +122,12 @@ def attempt(attempt_uuid):
     for q in qs:
         q["ref"], q["objected"] = ob.ref(a, q["pos"]), q["pos"] in sent
     if a.kind == "exam":
-        return _render_exam(qs, {**cfg, "cur": None, "seed": {}, "confirm": False,
+        return _render_exam(qs, {**cfg, "duration": max(1, exam_clock.left(a)), "cur": None, "seed": {}, "confirm": False,
                                  "resultUrl": url_for("test.attempt_result", attempt_uuid=a.client_uuid)})
     stages = at.stages(a)
     label = f"{_('%(n)s-bosqich', n=a.stage)} · {at.LEVELS[stages[a.stage - 1]['level']]}" if stages else ""
+    # Dars testi: internetsiz yakunlanganda darsga qaytish (oflayn paketda dars sahifasi ham bor)
+    cfg["lessonUrl"] = url_for("user.lesson_topic", topic_id=a.topic_id, _anchor=f"k{a.subtopic_id}") if a.kind == "lesson" and a.topic_id else None
     return _render_player(qs, cfg, name=at.names([a], type_names())[a.id], stage_label=label)
 
 
@@ -142,7 +158,7 @@ def attempt_result(attempt_uuid):
         return redirect(url_for("user.diagnostic_result"))
     qs = review_of(a)
     if a.kind == "exam":
-        return _render_exam_result(qs, at.by_subtopic(a), a.total, int(a.score_pct))
+        return _render_exam_result(qs, at.by_subtopic(a), a.total, int(a.score_pct), a.deadline_at is not None and a.finished_at >= a.deadline_at - timedelta(seconds=2))
     return render_template("test/result.html", r=summary(a), questions=qs, by_sub=at.by_subtopic(a),
                            advice=at.advice(a) if at.is_staged(a) else None)
 
@@ -215,10 +231,10 @@ def _render_exam(qs, state):
     return render_template("test/exam.html", questions=out, state=state)
 
 
-def _render_exam_result(qs, by_topic, total, pct):
+def _render_exam_result(qs, by_topic, total, pct, timeout=False):
     correct = sum(1 for q in qs if q["score"] == 100)
     blank = sum(1 for q in qs if not q["answered"])
-    return render_template("test/exam_result.html", questions=qs, correct=correct, blank=blank, total=total, pct=pct,
+    return render_template("test/exam_result.html", questions=qs, correct=correct, blank=blank, total=total, pct=pct, timeout=timeout,
                            by_topic=by_topic, pass_min=m.PASS_MIN, solid_min=m.SOLID_MIN)
 
 

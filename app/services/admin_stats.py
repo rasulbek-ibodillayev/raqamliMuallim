@@ -6,12 +6,13 @@ from flask_babel import lazy_gettext as _l
 from sqlalchemy import Date, cast, func, select
 
 from ..extensions import db
-from ..models import (AuditLog, Certificate, DailyStat, ExpertProfile, Objection, Question, QuestionStat, Section, Subtopic, TestAttempt,
+from ..models import (AuditLog, Certificate, DailyStat, ExpertProfile, Job, Objection, Question, QuestionStat, Section, Subtopic, TestAttempt,
                       Topic, User, UserTopicProgress)
 from . import admin_users as au
 from . import experts as ex
+from . import jobs
 from .test_builder import MASTERED
-from .timefmt import TASHKENT, now, when
+from .timefmt import TASHKENT, moment, now, when
 
 PERIODS = {"7": 7, "30": 30, "90": 90}
 SLOW_HOURS = 72             # e'tirozga javob me'yori: 3 ish kuni
@@ -133,6 +134,12 @@ def _inactive() -> list[tuple]:
 
 def _attention(total: int) -> list[dict]:
     out = []
+    if not jobs.worker_alive():
+        out.append({"url": "admin.jobs", "icon": "alert", "cls": "t-red", "title": _("Fon jarayoni ishlamayapti"),
+                    "sub": _("Tozalash, arxiv va xabarlar navbatda turibdi")})
+    if n := jobs.failed():
+        out.append({"url": "admin.jobs", "icon": "refresh", "cls": "t-red", "title": _("%(n)s ta fon vazifasi xato bilan to‘xtadi", n=n),
+                    "sub": _("Sababini ko‘rib, qayta ishga tushiring")})
     late = db.session.scalar(select(func.count()).select_from(Objection).where(
         Objection.status == "review", Objection.created_at < datetime.now(timezone.utc) - timedelta(hours=SLOW_HOURS)))
     if late:
@@ -193,15 +200,41 @@ def expert_summary() -> dict:
                 func.coalesce(Question.reviewed_at, Question.created_at) >= month))}
 
 
+# ---------------- Fon vazifalari ----------------
+
+def _job_result(r: dict | None) -> str:
+    if not r:
+        return ""
+    parts = [_("%(n)s ta", n=r["n"])] if "n" in r else []
+    if r.get("kb"):
+        parts.append(f"{r['kb']} KB")
+    if "ms" in r:
+        parts.append(_("%(n)s soniya", n=f"{r['ms'] / 1000:.1f}"))
+    return " · ".join(parts)
+
+
+def job_rows() -> dict:
+    """Jadvaldagi vazifalar, to'xtab qolganlari va navbatdagilar soni."""
+    tasks = jobs.load_tasks()
+    rows = list(db.session.scalars(select(Job).where(Job.key.like("cron:%") | Job.run_at.is_(None)).order_by(Job.id)))
+    view = lambda j: {"id": j.id, "label": tasks[j.kind].label if j.kind in tasks else j.kind, "done": when(j.done_at) or "—",   # noqa: E731
+                      "next": moment(j.run_at), "error": j.error, "result": _job_result(j.result), "dead": j.run_at is None}
+    cron = [view(j) for j in rows if j.key and j.key.startswith("cron:") and j.run_at is not None]
+    dead = [view(j) for j in rows if j.run_at is None]
+    waiting = db.session.scalar(select(func.count()).select_from(Job).where(
+        Job.run_at.is_not(None), func.coalesce(Job.key, "").not_like("cron:%")))
+    return {"cron": cron, "dead": dead, "waiting": waiting, "alive": jobs.worker_alive()}
+
+
 # ---------------- Jurnal ----------------
 
 JOURNAL_PAGE = 50
 ENTITIES = {"question": _l("Savol"), "user": _l("Foydalanuvchi"), "expert": _l("Ekspert"), "invite": _l("Taklifnoma"),
-            "setting": _l("Sozlama"), "section": _l("Mavzu"), "topic": _l("Dars")}
+            "setting": _l("Sozlama"), "job": _l("Fon vazifasi"), "section": _l("Mavzu"), "topic": _l("Dars")}
 ACTIONS = {"create": _l("yaratildi"), "update": _l("o‘zgartirildi"), "delete": _l("o‘chirildi"), "archive": _l("arxivlandi"),
            "reject": _l("rad etildi"), "pause": _l("to‘xtatildi"), "resume": _l("qaytarildi"), "block": _l("bloklandi"),
            "unblock": _l("blokdan chiqarildi"), "exam_date": _l("attestatsiya sanasi"), "reset_link": _l("parol havolasi berildi"),
-           "reset_used": _l("parol havola orqali yangilandi"), "password_reset": _l("parol tiklandi"), "perms": _l("huquqlari o‘zgardi"), "send": _l("tayyorlandi"), "export": _l("CSV yuklab olindi"),
+           "reset_used": _l("parol havola orqali yangilandi"), "password_reset": _l("parol tiklandi"), "run": _l("qo‘lda ishga tushirildi"), "perms": _l("huquqlari o‘zgardi"), "send": _l("tayyorlandi"), "export": _l("CSV yuklab olindi"),
            "resend": _l("qayta yuborildi"), "cancel": _l("bekor qilindi"), "import_excel": _l("Excel’dan yuklandi"),
            "objection_key": _l("e’tiroz: javob o‘zgardi"), "objection_drop": _l("e’tiroz: hisobdan chiqarildi"),
            "objection_fix": _l("e’tiroz: matn tuzatiladi"), "objection_reject": _l("e’tiroz: rad etildi")}
